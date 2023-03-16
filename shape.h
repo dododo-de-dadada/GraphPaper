@@ -45,12 +45,14 @@
 //        +-----------------------------------------------+
 //        |                                               |
 // +------+------+                                 +------+------+
-// | ShapeLine   |                                 | ShapeRect*  |
+// | ShapeArrow* |                                 | ShapeRect   |
 // +------+------+                                 +------+------+
 //        |                                               |
-// +------+------+                                        |
-// | ShapePath*  |                                        |
-// +------+------+                                        |
+//        +---------------+                               |
+//        |               |                               |
+// +------+------+ +------+------+                        |
+// | ShapePath*  | | ShapeLine   |                        |
+// +------+------+ +------+------+                        |
 //        |                                               |
 //        +---------------+---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |               |
@@ -58,7 +60,7 @@
 // | ShapePoly   | | ShapeBezier | | ShapeArc    | | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 //
-// * 印つきは抽象クラス.
+// * 印つきは draw=0
 
 namespace winrt::GraphPaper::implementation
 {
@@ -148,18 +150,18 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 矢じるしの大きさ
-	//           |
-	//  +--- @   |   @
-	//  |     \  |  /   
-	// length  \ | /
-	//  |       \|/
-	//  +---     @   ---+
-	//           |      offset
-	//           +   -- +
-	//        |      |
-	//        +------+
-	//          width
 	struct ARROW_SIZE {
+		//           |
+		//  +--- @   |   @
+		//  |     \  |  /   
+		// length  \ | /
+		//  |       \|/
+		//  +---     @   ---+
+		//           |      offset
+		//           +   -- +
+		//        |      |
+		//        +------+
+		//          width
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から付け根までの長さ
 		float m_offset;		// 先端のずらし量
@@ -195,10 +197,10 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 破線の配置
-	union DASH_PATT {
+	union DASH_PAT {
 		float m_[6];
 	};
-	constexpr DASH_PATT DASH_PATT_DEFVAL{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };	// 破線の配置の既定値
+	constexpr DASH_PAT DASH_PAT_DEFVAL{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };	// 破線の配置の既定値
 
 	// 方眼の強調
 	struct GRID_EMPH {
@@ -233,12 +235,13 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{	// 方眼の色の既定値
 		COLOR_ACCENT.r, COLOR_ACCENT.g, COLOR_ACCENT.b, 192.0f / 255.0f };
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
-	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
-	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
+	constexpr float JOIN_MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
+	constexpr D2D1_SIZE_F TEXT_PAD_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// 最大のページ大きさ
 	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0f * 96.0f, 11.0f * 96.0f };	// ページの大きさの既定値 (ピクセル)
 	constexpr float FONT_SIZE_MAX = 512.0f;	// 書体の大きさの最大値
+	constexpr D2D1_LINE_JOIN JOIN_STYLE_DEFVAL = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -252,19 +255,22 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の部位（円形）を表示する.
 	inline void anc_draw_circle(
-		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush);
+		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
+		noexcept;
 	// 図形の部位 (方形) を表示する.
 	inline void anc_draw_square(
 		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush);
+	// 実数 (0.0...1.0) の色成分を整数 (0...255) に変換する.
+	inline uint32_t conv_color_comp(const double c) noexcept;
 	// 単精度浮動小数が同じか判定する.
 	inline bool equal(const float a, const float b) noexcept;
 	// 倍精度浮動小数が同じか判定する.
 	inline bool equal(const double a, const double b) noexcept;
 	// 同値か判定する.
 	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
-	// 矢じるしの寸法が同じか判定する.
+	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
-	// 線の単点が同じか判定する.
+	// 線の端点が同じか判定する.
 	inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept;
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
@@ -279,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の強調が同じか判定する.
 	inline bool equal(const GRID_EMPH& a, const GRID_EMPH& b) noexcept;
 	// 破線の配置が同じか判定する.
-	inline bool equal(const DASH_PATT& a, const DASH_PATT& b) noexcept;
+	inline bool equal(const DASH_PAT& a, const DASH_PAT& b) noexcept;
 	// ワイド文字列が同じか判定する.
 	inline bool equal(const wchar_t* a, const wchar_t* b) noexcept;
 	// winrt 文字列が同じか判定する.
@@ -308,13 +314,13 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F test, const D2D1_POINT_2F a, const double a_len) noexcept;
 	// 位置がだ円に含まれるか判定する.
 	inline bool pt_in_ellipse(
-		const D2D1_POINT_2F test, const D2D1_POINT_2F center, const double rad_x,
+		const D2D1_POINT_2F test, const D2D1_POINT_2F ctr, const double rad_x,
 		const double rad_y, const double rot = 0.0) noexcept;
 	// 位置が円に含まれるか判定する.
 	inline bool pt_in_circle(const D2D1_POINT_2F test, const double radius) noexcept;
 	// 位置が円に含まれるか判定する.
 	inline bool pt_in_circle(
-		const D2D1_POINT_2F test, const D2D1_POINT_2F center, const double radius) noexcept;
+		const D2D1_POINT_2F test, const D2D1_POINT_2F ctr, const double radius) noexcept;
 	// 多角形が位置を含むか判定する.
 	inline bool pt_in_poly(
 		const D2D1_POINT_2F test, const size_t p_cnt, const D2D1_POINT_2F p[]) noexcept;
@@ -350,9 +356,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列 (UTF-32) に変換する. 
-	std::vector<uint32_t> conv_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept;
+	std::vector<uint32_t> text_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept;
 	// 字面を得る.
-	template <typename T> bool get_font_face(
+	template <typename T> bool text_get_font_face(
 		T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
 		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
 		noexcept;
@@ -409,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形のその前の図形を得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept;
 	// データリーダーから図形リストを読み込む.
-	bool slist_read(SHAPE_LIST& slist, const Shape& page, DataReader const& dt_reader);
+	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.
@@ -428,26 +434,28 @@ namespace winrt::GraphPaper::implementation
 	// 図形のひな型
 	//------------------------------
 	struct Shape {
-		static ID2D1RenderTarget* m_d2d_target;
-		static winrt::com_ptr<ID2D1DrawingStateBlock> m_d2d_state_block;
-		static winrt::com_ptr<ID2D1SolidColorBrush> m_d2d_color_brush;
-		static winrt::com_ptr<ID2D1SolidColorBrush> m_d2d_range_brush;
-		static winrt::com_ptr<ID2D1BitmapBrush> m_d2d_bitmap_brush;
+		static winrt::com_ptr<IDWriteFactory> m_dwrite_factory;	// DWrite ファクトリ
+		static ID2D1RenderTarget* m_d2d_target;	// 描画対象
+		static winrt::com_ptr<ID2D1DrawingStateBlock> m_state_block;	// 描画状態を保持するブロック
+		static winrt::com_ptr<ID2D1SolidColorBrush> m_d2d_color_brush;	// 色ブラシ (ターゲット依存)
+		static winrt::com_ptr<ID2D1SolidColorBrush> m_d2d_range_brush;	// 選択された文字色のブラシ (ターゲット依存)
+		static winrt::com_ptr<ID2D1BitmapBrush> m_d2d_bitmap_brush;	// 背景の画像ブラシ (ターゲット依存)
 		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
-		static winrt::com_ptr<IDWriteFactory> m_dwrite_factory;
 		static float m_aux_width;	// 補助線の太さ
 		static bool m_anc_show;	// 図形の部位を表示する.
 		static float m_anc_width;	// 図形の部位の大きさ
-		static float m_anc_square_inner;	// 図形の部位 (正方形) の内側の大きさ
-		static float m_anc_square_outer;	// 図形の部位 (正方形) の外の大きさ
-		static float m_anc_circle_inner;	// 図形の部位 (円形) の内側の大きさ
-		static float m_anc_circle_outer;	// 図形の部位 (円形) の外の大きさ
+		static float m_anc_square_inner;	// 図形の部位 (正方形) の内側の辺の半分の長さ
+		static float m_anc_square_outer;	// 図形の部位 (正方形) の外側の辺の半分の長さ
+		static float m_anc_circle_inner;	// 図形の部位 (円形) の内側の半径
+		static float m_anc_circle_outer;	// 図形の部位 (円形) の外側の半径
+		static float m_anc_rhombus_inner;	// 図形の部位 (ひし型) の中心から内側の頂点までの半分の長さ
+		static float m_anc_rhombus_outer;	// 図形の部位 (ひし型) の中心から外側の頂点までの半分の長さ
 
 		// 描画環境の設定.
 		void begin_draw(ID2D1RenderTarget* const target, const bool anc_show, 
 			IWICFormatConverter* const background, const double scale);
 		// 図形を破棄する.
-		virtual ~Shape(void) noexcept {}	// 派生クラスがあるので必要
+		virtual ~Shape(void) noexcept {}	// 派生クラスのデストラクタを呼ぶために仮想化が必要.
 		// 図形を表示する.
 		virtual void draw(void) = 0;
 		// 円弧の方向を得る
@@ -473,7 +481,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		virtual bool get_dash_cap(D2D1_CAP_STYLE& /*val*/) const noexcept { return false; }
 		// 破線の配置を得る.
-		virtual bool get_dash_patt(DASH_PATT& /*val*/) const noexcept { return false; }
+		virtual bool get_dash_pat(DASH_PAT& /*val*/) const noexcept { return false; }
 		// 破線の形式を得る.
 		virtual bool get_dash_style(D2D1_DASH_STYLE& /*val*/) const noexcept { return false; }
 		// 塗りつぶし色を得る.
@@ -521,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		// ページの色を得る.
 		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// ページの余白を得る.
-		virtual bool get_page_padding(D2D1_RECT_F&/*val*/) const noexcept { return false; }
+		virtual bool get_page_pad(D2D1_RECT_F&/*val*/) const noexcept { return false; }
 		// ページ倍率を得る.
 		virtual bool get_page_scale(float&/*val*/) const noexcept { return false; }
 		// ページの大きさを得る.
@@ -541,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		virtual bool get_text_line_sp(float&/*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_padding(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
+		virtual bool get_text_pad(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
@@ -575,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を破線の端の形式に格納する.
 		virtual bool set_dash_cap(const D2D1_CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を破線の配置に格納する.
-		virtual bool set_dash_patt(const DASH_PATT&/*val*/) noexcept { return false; }
+		virtual bool set_dash_pat(const DASH_PAT&/*val*/) noexcept { return false; }
 		// 値を線枠の形式に格納する.
 		virtual bool set_dash_style(const D2D1_DASH_STYLE/*val*/) noexcept { return false; }
 		// 値を消去されたか判定に格納する.
@@ -620,7 +628,7 @@ namespace winrt::GraphPaper::implementation
 		// 値をページの色に格納する.
 		virtual bool set_page_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// ページの余白に格納する.
-		virtual bool set_page_padding(const D2D1_RECT_F&/*val*/) noexcept { return false; }
+		virtual bool set_page_pad(const D2D1_RECT_F&/*val*/) noexcept { return false; }
 		// 値をページ倍率に格納する.
 		virtual bool set_page_scale(const float/*val*/) noexcept { return false; }
 		// 値をページの大きさに格納する.
@@ -644,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		virtual bool set_text_line_sp(const float/*val*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
-		virtual bool set_text_padding(const D2D1_SIZE_F/*val*/) noexcept { return false; }
+		virtual bool set_text_pad(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字範囲に格納する.
 		virtual bool set_text_selected(const DWRITE_TEXT_RANGE/*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
@@ -653,7 +661,7 @@ namespace winrt::GraphPaper::implementation
 		virtual size_t export_pdf(
 			const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
-		virtual void export_svg(DataWriter const& /*dt_writer*/) {}
+		virtual void export_svg(DataWriter const& /*dt_writer*/) noexcept {}
 	};
 
 	//------------------------------
@@ -666,11 +674,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		virtual void draw(void) = 0;
 		// 消去されたか判定する.
-		bool is_deleted(void) const noexcept final override { return m_is_deleted; }
+		virtual bool is_deleted(void) const noexcept final override { return m_is_deleted; }
 		// 選択されてるか判定する.
-		bool is_selected(void) const noexcept final override { return m_is_selected; }
+		virtual bool is_selected(void) const noexcept final override { return m_is_selected; }
 		// 値を消去されたか判定に格納する.
-		bool set_delete(const bool val) noexcept final override
+		virtual bool set_delete(const bool val) noexcept final override
 		{
 			if (m_is_deleted != val) {
 				m_is_deleted = val; 
@@ -679,7 +687,7 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		// 値を選択されてるか判定に格納する.
-		bool set_select(const bool val) noexcept final override
+		virtual bool set_select(const bool val) noexcept final override
 		{
 			if (m_is_selected != val) {
 				m_is_selected = val;
@@ -690,12 +698,13 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeSelect(void) {};	// 派生クラスがあるので必要
 		// 図形をデータリーダーから読み込む.
-		ShapeSelect(const DataReader& dt_reader) :
-			m_is_deleted(dt_reader.ReadBoolean()),
-			m_is_selected(dt_reader.ReadBoolean())
-			{}
+		ShapeSelect(const DataReader& dt_reader)
+		{
+			m_is_deleted = dt_reader.ReadBoolean();
+			m_is_selected = dt_reader.ReadBoolean();
+		}
 		// 図形をデータライターに書き込む.
-		void write(DataWriter const& dt_writer) const
+		virtual void write(DataWriter const& dt_writer) const
 		{
 			dt_writer.WriteBoolean(m_is_deleted);
 			dt_writer.WriteBoolean(m_is_selected);
@@ -708,12 +717,12 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeImage : ShapeSelect {
 		static winrt::com_ptr<IWICImagingFactory2> wic_factory;	// WIC ファクトリー
 
-		D2D1_POINT_2F	m_start;	// 始点
-		D2D1_SIZE_F	m_view;	// 表示寸法
-		D2D1_RECT_F	m_clip;	// 表示されている矩形
-		D2D1_SIZE_U	m_orig;	// ビットマップの原寸
+		D2D1_POINT_2F m_start;	// 始点
+		D2D1_SIZE_F m_view;	// 表示寸法
+		D2D1_RECT_F m_clip;	// 表示されている矩形
+		D2D1_SIZE_U m_orig;	// ビットマップの原寸
 		uint8_t* m_bgra = nullptr;	// ビットマップのデータ
-		D2D1_SIZE_F	m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
+		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
@@ -740,44 +749,45 @@ namespace winrt::GraphPaper::implementation
 		template <bool CLIP>
 		IAsyncOperation<bool> copy(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
 		// 図形を表示する.
-		void draw(void) final override;
+		virtual void draw(void) final override;
 		// 図形を囲む領域を得る.
-		void get_bound(
+		virtual void get_bound(
 			const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/,
 			D2D1_POINT_2F& /*b_rb*/) const noexcept final override;
 		// 画像の不透明度を得る.
-		bool get_image_opacity(float& /*val*/) const noexcept final override;
+		virtual bool get_image_opacity(float& /*val*/) const noexcept final override;
 		// 画素の色を得る.
 		bool get_pixcel(const D2D1_POINT_2F p, D2D1_COLOR_F& val) const noexcept;
 		// 近傍の頂点を見つける.
-		bool get_pos_nearest(
+		virtual bool get_pos_nearest(
 			const D2D1_POINT_2F /*p*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept final
 			override;
 		// 部位の位置を得る.
-		void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F&/*val*/) const noexcept final override;
+		virtual void get_pos_anc(
+			const uint32_t /*anc*/, D2D1_POINT_2F&/*val*/) const noexcept final override;
 		// 図形を囲む領域の左上位置を得る.
-		void get_bound_lt(D2D1_POINT_2F& /*val*/) const noexcept final override;
+		virtual void get_bound_lt(D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 開始位置を得る.
-		bool get_pos_start(D2D1_POINT_2F& /*val*/) const noexcept final override;
+		virtual bool get_pos_start(D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 頂点を得る.
-		size_t get_verts(D2D1_POINT_2F /*p*/[]) const noexcept final override;
+		virtual size_t get_verts(D2D1_POINT_2F /*p*/[]) const noexcept final override;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F /*test*/) const noexcept final override;
+		virtual uint32_t hit_test(const D2D1_POINT_2F /*test*/) const noexcept final override;
 		// 矩形範囲に含まれるか判定する.
-		bool in_area(
+		virtual bool in_area(
 			const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept final override;
 		// 位置を移動する.
-		bool move(const D2D1_POINT_2F pos) noexcept final override;
+		virtual bool move(const D2D1_POINT_2F pos) noexcept final override;
 		// 原画像に戻す.
 		void revert(void) noexcept;
 		// 値を画像の不透明度に格納する.
-		bool set_image_opacity(const float val) noexcept final override;
+		virtual bool set_image_opacity(const float val) noexcept final override;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anc(
+		virtual bool set_pos_anc(
 			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
 			noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept final override;
+		virtual bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept final override;
 		// 図形を作成する.
 		ShapeImage(
 			const D2D1_POINT_2F p, const D2D1_SIZE_F page_size, const SoftwareBitmap& bitmap,
@@ -785,7 +795,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeImage(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(DataWriter const& dt_writer) const;
+		virtual void write(DataWriter const& dt_writer) const;
 
 		//------------------------------
 		// shape_export.cpp
@@ -807,9 +817,6 @@ namespace winrt::GraphPaper::implementation
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 
-		// 角丸
-		//D2D1_POINT_2F m_corner_radius{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };	// 角丸半径
-
 		// 塗りつぶし
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶし色
 
@@ -823,10 +830,10 @@ namespace winrt::GraphPaper::implementation
 
 		// 線・枠
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
+		DASH_PAT m_dash_pat{ DASH_PAT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合の形式
+		float m_join_miter_limit = JOIN_MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
+		D2D1_LINE_JOIN m_join_style = JOIN_STYLE_DEFVAL;	// 線の結合の形式
 		CAP_STYLE m_stroke_cap{ CAP_STYLE_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
@@ -837,7 +844,7 @@ namespace winrt::GraphPaper::implementation
 			DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = 	// 文字列の揃え
 			DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
-		D2D1_SIZE_F m_text_padding{ TEXT_PADDING_DEFVAL };	// 文字列の左右と上下の余白
+		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の左右と上下の余白
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
@@ -854,7 +861,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
 		float m_page_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
-		D2D1_RECT_F m_page_padding{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
+		D2D1_RECT_F m_page_pad{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
 
 		//------------------------------
 		// shape_page.cpp
@@ -863,33 +870,20 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(void);
 		// 曲線の補助線を表示する.
-		void auxiliary_draw_bezi(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_bezi(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// だ円の補助線を表示する.
-		void auxiliary_draw_elli(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_elli(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 直線の補助線を表示する.
-		void auxiliary_draw_line(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_line(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 方形の補助線を表示する.
-		void auxiliary_draw_rect(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_rect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 多角形の補助線を表示する.
-		void auxiliary_draw_poly(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt);
+		void auxiliary_draw_poly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
+			const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
-		void auxiliary_draw_rrect(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_rrect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 四分円の補助線を表示する.
-		void auxiliary_draw_arc(
-			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, 
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_arc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 矢じるしの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& val) const noexcept final override;
 		// 矢じるしの形式を得る.
@@ -901,7 +895,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& val) const noexcept final override;
 		// 破線の配置を得る.
-		bool get_dash_patt(DASH_PATT& val) const noexcept final override;
+		bool get_dash_pat(DASH_PAT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& val) const noexcept final override;
 		// 塗りつぶし色を得る.
@@ -941,9 +935,9 @@ namespace winrt::GraphPaper::implementation
 		// ページの大きさを得る.
 		bool get_page_size(D2D1_SIZE_F& val) const noexcept final override;
 		// ページの余白を得る.
-		bool get_page_padding(D2D1_RECT_F& val) const noexcept final override
+		bool get_page_pad(D2D1_RECT_F& val) const noexcept final override
 		{
-			val = m_page_padding;
+			val = m_page_pad;
 			return true;
 		}
 		// 線枠の色を得る.
@@ -957,7 +951,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		bool get_text_line_sp(float& val) const noexcept final override;
 		// 文字列の周囲の余白を得る.
-		bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
+		bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
 		// 図形をデータリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 値を矢じるしの寸法に格納する.
@@ -975,7 +969,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& val) noexcept final override;
 		// 値を破線の配置に格納する.
-		bool set_dash_patt(const DASH_PATT& val) noexcept final override;
+		bool set_dash_pat(const DASH_PAT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE val) noexcept final override;
 		// 値を塗りつぶし色に格納する.
@@ -1009,10 +1003,10 @@ namespace winrt::GraphPaper::implementation
 		// 値をページの色に格納する.
 		bool set_page_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値をページの余白に格納する.
-		bool set_page_padding(const D2D1_RECT_F& val) noexcept final override
+		bool set_page_pad(const D2D1_RECT_F& val) noexcept final override
 		{
-			if (!equal(m_page_padding, val)) {
-				m_page_padding = val;
+			if (!equal(m_page_pad, val)) {
+				m_page_pad = val;
 				return true;
 			}
 			return false;
@@ -1032,13 +1026,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
-		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
+		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
 		size_t export_pdf_page(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
 		size_t export_pdf_grid(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
 	//------------------------------
@@ -1094,7 +1088,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 図形をデータリーダーから読み込む.
-		ShapeGroup(const Shape& page, DataReader const& dt_reader);
+		ShapeGroup(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
@@ -1111,10 +1105,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
+		DASH_PAT m_dash_pat{ DASH_PAT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合の尖り制限
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合の形式
+		float m_join_miter_limit = JOIN_MITER_LIMIT_DEFVAL;		// 線の結合の尖り制限
+		D2D1_LINE_JOIN m_join_style = JOIN_STYLE_DEFVAL;	// 線の結合の形式
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
 
@@ -1137,7 +1131,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& val) const noexcept final override;
 		// 破線の配置を得る.
-		bool get_dash_patt(DASH_PATT& val) const noexcept final override;
+		bool get_dash_pat(DASH_PAT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& val) const noexcept final override;
 		// 線の結合の尖り制限を得る.
@@ -1155,7 +1149,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& val) noexcept final override;
 		// 値を破線の配置に格納する.
-		bool set_dash_patt(const DASH_PATT& val) noexcept final override;
+		bool set_dash_pat(const DASH_PAT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE val) noexcept final override;
 		// 値を線の結合の尖り制限に格納する.
@@ -1169,7 +1163,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeStroke(const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeStroke(const Shape& page, DataReader const& dt_reader);
+		ShapeStroke(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1189,7 +1183,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// データリーダーから図形を読み込む.
-		ShapeRect(const Shape& page, DataReader const& dt_reader);
+		ShapeRect(DataReader const& dt_reader);
 		// 図形の部位を表示する.
 		void draw_anc(void);
 		// 図形を表示する.
@@ -1227,7 +1221,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		virtual void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept override;
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
 	};
@@ -1274,11 +1268,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeRuler(const Shape& page, DataReader const& dt_reader);
+		ShapeRuler(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(const DataWriter& dt_writer);
+		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 	};
@@ -1292,8 +1286,8 @@ namespace winrt::GraphPaper::implementation
 			ShapeRect::ShapeRect(start, pos, page)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapeEllipse(const Shape& page, DataReader const& dt_reader) :
-			ShapeRect::ShapeRect(page, dt_reader)
+		ShapeEllipse(DataReader const& dt_reader) :
+			ShapeRect::ShapeRect(dt_reader)
 		{}
 
 		//------------------------------
@@ -1307,7 +1301,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
 	//------------------------------
@@ -1334,43 +1328,33 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeRRect(const Shape& page, DataReader const& dt_reader);
+		ShapeRRect(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
 	//------------------------------
-	// 矢印つき直線
+	// 矢じるし
 	//------------------------------
-	struct ShapeLine : ShapeStroke {
-		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
-		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
+	struct ShapeArrow : ShapeStroke {
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
 
-		// 図形を破棄する.
-		virtual ~ShapeLine(void)
-		{
-			m_d2d_arrow_geom = nullptr;
-			m_d2d_arrow_stroke = nullptr;
-		} // ~ShapeStroke
-
-		//------------------------------
-		// shape_line.cpp
-		//------------------------------
-
 		void create_arrow_stroke(void)
 		{
 			m_d2d_arrow_stroke = nullptr;
-			ID2D1Factory* factory;
+			ID2D1Factory* factory = nullptr;
 			Shape::m_d2d_target->GetFactory(&factory);
+			if (factory == nullptr) {
+				return;
+			}
 			// 矢じるしの破線の形式はかならずソリッドとする.
 			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
 				m_stroke_cap.m_start,	// startCap
@@ -1386,6 +1370,104 @@ namespace winrt::GraphPaper::implementation
 			);
 		}
 
+		// 図形を表示する.
+		virtual void draw(void) = 0;
+
+		virtual bool get_arrow_size(ARROW_SIZE& val) const noexcept final override
+		{
+			val = m_arrow_size;
+			return true;
+		}
+
+		virtual bool get_arrow_style(ARROW_STYLE& val) const noexcept final override
+		{
+			val = m_arrow_style;
+			return true;
+		}
+
+		// 図形を破棄する.
+		virtual ~ShapeArrow(void)
+		{
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_arrow_stroke = nullptr;
+		} // ~ShapeStroke
+
+		// 値を矢じるしの寸法に格納する.
+		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override
+		{
+			if (!equal(m_arrow_size, val)) {
+				m_arrow_size = val;
+				m_d2d_arrow_geom = nullptr;
+				return true;
+			}
+			return false;
+		}
+
+		// 値を矢じるしの形式に格納する.
+		bool set_arrow_style(const ARROW_STYLE val) noexcept override
+		{
+			if (m_arrow_style != val) {
+				m_arrow_style = val;
+				m_d2d_arrow_geom = nullptr;
+				m_d2d_arrow_stroke = nullptr;
+				return true;
+			}
+			return false;
+		}
+
+		ShapeArrow(const Shape* page) :
+			ShapeStroke(page),
+			m_arrow_style([page]() {
+				ARROW_STYLE a_style;
+				page->get_arrow_style(a_style);
+				return a_style;
+				}()),
+			m_arrow_size([page]() {
+				ARROW_SIZE a_size;
+				page->get_arrow_size(a_size);
+				return a_size;
+			}())
+		{}
+
+		ShapeArrow(const DataReader& dt_reader) :
+			ShapeStroke(dt_reader)
+		{
+			m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
+			m_arrow_size = ARROW_SIZE{
+				dt_reader.ReadSingle(),
+				dt_reader.ReadSingle(),
+				dt_reader.ReadSingle()
+			};
+			if (m_arrow_style != ARROW_STYLE::NONE &&
+				m_arrow_style != ARROW_STYLE::OPENED &&
+				m_arrow_style != ARROW_STYLE::FILLED) {
+				m_arrow_style = ARROW_STYLE::NONE;
+			}
+			if (m_arrow_size.m_width < 0.0f ||
+				m_arrow_size.m_length < 0.0f ||
+				m_arrow_size.m_offset < 0.0f) {
+				m_arrow_size = ARROW_SIZE_DEFVAL;
+			}
+		}
+
+		void write(DataWriter const& dt_writer) const
+		{
+			ShapeStroke::write(dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
+			dt_writer.WriteSingle(m_arrow_size.m_width);
+			dt_writer.WriteSingle(m_arrow_size.m_length);
+			dt_writer.WriteSingle(m_arrow_size.m_offset);
+		}
+
+	};
+
+	struct ShapeLine : ShapeArrow {
+		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
+		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
+
+		//------------------------------
+		// shape_line.cpp
+		//------------------------------
 
 		// 矢じるしの先端と返しの位置を求める.
 		static bool line_get_pos_arrow(
@@ -1393,8 +1475,9 @@ namespace winrt::GraphPaper::implementation
 			/*--->*/D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 
 		// 図形を作成する.
+		/*
 		ShapeLine(const Shape* page, const bool e_close) :
-			ShapeStroke(page)
+			ShapeArrow(page)
 		{
 			if (e_close) {
 				m_arrow_style = ARROW_STYLE::NONE;
@@ -1404,16 +1487,18 @@ namespace winrt::GraphPaper::implementation
 			}
 			page->get_arrow_size(m_arrow_size);
 		}
+		*/
+
 		// 図形を作成する.
 		ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// データリーダーから図形を読み込む.
-		ShapeLine(const Shape& page, DataReader const& dt_reader);
+		ShapeLine(DataReader const& dt_reader);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 矢じるしの寸法を得る.
-		bool get_arrow_size(ARROW_SIZE& size) const noexcept final override;
+		//bool get_arrow_size(ARROW_SIZE& size) const noexcept final override;
 		// 矢じるしの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& val) const noexcept final override;
+		//bool get_arrow_style(ARROW_STYLE& val) const noexcept final override;
 		// 図形を囲む領域を得る.
 		virtual void get_bound(
 			const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
@@ -1440,10 +1525,8 @@ namespace winrt::GraphPaper::implementation
 		// 矩形範囲に含まれるか判定する.
 		virtual bool in_area(
 			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
-		// 値を矢じるしの寸法に格納する.
-		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept override;
 		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
+		//virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(
 			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
@@ -1457,7 +1540,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
 		// 値を線の結合の尖り制限に格納する.
@@ -1469,10 +1552,16 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	struct ShapePath : ShapeLine {
+	//struct ShapePath : ShapeLine {
+	struct ShapePath : ShapeArrow {
+		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
+		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
 		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
+
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
+		// 図形を表示する.
+		virtual void draw(void) = 0;
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(
 			const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
@@ -1492,13 +1581,14 @@ namespace winrt::GraphPaper::implementation
 		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
 		ShapePath(const Shape* page, const bool e_closed) :
-			ShapeLine::ShapeLine(page, e_closed)
+			//ShapeLine::ShapeLine(page, e_closed)
+			ShapeArrow::ShapeArrow(page)
 		{
 			page->get_fill_color(m_fill_color);
+			if (e_closed) {
+				set_arrow_style(ARROW_STYLE::NONE);
+			}
 		}
-		// 図形をデータリーダーから読み込む.
-		ShapePath(const Shape& page, const DataReader& dt_reader);
-
 		// 図形を破棄する.
 		virtual ~ShapePath(void)
 		{
@@ -1517,14 +1607,12 @@ namespace winrt::GraphPaper::implementation
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F pos) noexcept final override;
-		// 値を矢じるしの寸法に格納する.
-		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
-		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
+		// 図形をデータリーダーから読み込む.
+		ShapePath(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1572,13 +1660,13 @@ namespace winrt::GraphPaper::implementation
 		ShapePoly(
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
-		ShapePoly(const Shape& page, DataReader const& dt_reader);
+		ShapePoly(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
 	//------------------------------
@@ -1604,11 +1692,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeBezier(const Shape& page, DataReader const& dt_reader);
+		ShapeBezier(DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(const DataWriter& dt_writer);
+		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const final override;
 	};
@@ -1616,34 +1704,34 @@ namespace winrt::GraphPaper::implementation
 	// 円弧
 	struct ShapeArc : ShapePath {
 		// ラディアンなら精度が不足がちになるので度で保持する.
-		D2D1_SIZE_F m_radius{};	// 標準形にしたときの X 軸 Y 軸方向の半径
+		D2D1_SIZE_F m_radius{ 0.0f, 0.0f };	// 標準形にしたときの X 軸 Y 軸方向の半径
 		float m_angle_rot = 0.0f;	// 円弧の傾き (度)
 		float m_angle_start = 0.0f;	// 円弧の始点 (度)
 		float m_angle_end = 0.0f;	// 円弧の終点 (度)
 		D2D1_SWEEP_DIRECTION m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// 円弧の描画方向
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;	// 円弧の大きさ
 
-		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom{ nullptr };
+		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom{ nullptr };	// 塗りつぶしジオメトリ
 
-		bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
+		virtual bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
 		{
 			val = m_sweep_dir;
 			return true;
 		}
 		// 円弧の始点の角度を得る.
-		bool get_arc_start(float& val) const noexcept final override
+		virtual bool get_arc_start(float& val) const noexcept final override
 		{
 			val = m_angle_start;
 			return true;
 		}
 		// 円弧の終点の角度を得る.
-		bool get_arc_end(float& val) const noexcept final override
+		virtual bool get_arc_end(float& val) const noexcept final override
 		{
 			val = m_angle_end;
 			return true;
 		}
 		// 円弧の傾きを得る.
-		bool get_arc_rot(float& val) const noexcept final override
+		virtual bool get_arc_rot(float& val) const noexcept final override
 		{
 			val = m_angle_rot;
 			return true;
@@ -1654,40 +1742,40 @@ namespace winrt::GraphPaper::implementation
 		// 円弧
 		//------------------------------
 
-		void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
+		virtual void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anc(
+		virtual bool set_pos_anc(
 			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
-			noexcept;
+			noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
+		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 値を円弧の始点の角度に格納する.
-		bool set_arc_start(const float val) noexcept final override;
+		virtual bool set_arc_start(const float val) noexcept final override;
 		// 値を円弧の終点の角度に格納する.
-		bool set_arc_end(const float val) noexcept final override;
+		virtual bool set_arc_end(const float val) noexcept final override;
 		// 値を円弧の傾きに格納する.
-		bool set_arc_rot(const float val) noexcept final override;
+		virtual bool set_arc_rot(const float val) noexcept final override;
 		// 値を円弧を描く方向に格納する.
-		bool set_arc_dir(const D2D1_SWEEP_DIRECTION val) noexcept final override;
+		virtual bool set_arc_dir(const D2D1_SWEEP_DIRECTION val) noexcept final override;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
+		virtual uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
 		void alternate_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
 		static bool arc_get_pos_arrow(
-			const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad,
+			const D2D1_POINT_2F vec, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad,
 			const double deg_start, const double deg_end, const double deg_rot,
 			const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く
-		void draw(void) final override;
+		virtual void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(const DataWriter& dt_writer);
+		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
 		// 図形を作成する.
 		ShapeArc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeArc(const Shape& page, const DataReader& dt_reader);
+		ShapeArc(const DataReader& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const final override;
 		// 頂点を得る.
@@ -1712,7 +1800,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
-		D2D1_SIZE_F m_text_padding{ TEXT_PADDING_DEFVAL };	// 文字列の上下と左右の余白
+		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
 		DWRITE_FONT_METRICS m_dwrite_font_metrics{};	// 書体の計量
@@ -1785,7 +1873,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		bool get_text_line_sp(float& val) const noexcept final override;
 		// 文字列の余白を得る.
-		bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
+		bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
 		// 選択された文字範囲を得る.
 		bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
 		// 位置を含むか判定する.
@@ -1821,27 +1909,29 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
-		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
+		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
 		// 値を文字範囲に格納する.
 		bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeText(const Shape& page, DataReader const& dt_reader);
+		ShapeText(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// データライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
-	// 図形の部位（円形）を表示する.
+	// 図形の部位を円形で表示する.
+	// 円形は, 図形の補助的な変形に関わるアンカーを意味する.
 	// p	部位の位置
 	// target	描画ターゲット
 	// brush	色ブラシ
 	inline void anc_draw_circle(
 		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
+		noexcept
 	{
 		const auto c_inner = Shape::m_anc_circle_inner;	// 内側の半径
 		const auto c_outer = Shape::m_anc_circle_outer;	// 外側の半径
@@ -1857,42 +1947,75 @@ namespace winrt::GraphPaper::implementation
 		target->FillEllipse(e_inner, brush);
 	}
 
-	inline uint32_t conv_color_comp(const double c)
+	// 図形の部位をひし型で表示する.
+	// ひし形は, 図形の移動は行なうが, 変形には関わらない補助的な部位を意味する.
+	// p	部位の位置
+	// target	描画ターゲット
+	// brush	色ブラシ
+	inline void anc_draw_rhombus(
+		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
-		return min(static_cast<uint32_t>(floor(c * 256.0)), 255);
+		// パスジオメトリを使わず, 斜めの太い線分で代用する.
+		const double w_outer = 2.0 * Shape::m_anc_square_outer;
+		const double w_inner = 2.0 * Shape::m_anc_square_inner;
+		const double d_outer = Shape::m_anc_rhombus_outer;
+		const double d_inner = Shape::m_anc_rhombus_inner;
+		const D2D1_POINT_2F q_inner{
+			static_cast<FLOAT>(p.x - d_inner), static_cast<FLOAT>(p.y - d_inner)
+		};
+		const D2D1_POINT_2F r_inner{
+			static_cast<FLOAT>(p.x + d_inner), static_cast<FLOAT>(p.y + d_inner)
+		};
+		const D2D1_POINT_2F q_outer{
+			static_cast<FLOAT>(p.x - d_outer), static_cast<FLOAT>(p.y - d_outer)
+		};
+		const D2D1_POINT_2F r_outer{
+			static_cast<FLOAT>(p.x + d_outer), static_cast<FLOAT>(p.y + d_outer)
+		};
+		brush->SetColor(COLOR_WHITE);
+		target->DrawLine(q_outer, r_outer, brush, static_cast<FLOAT>(w_outer));
+		brush->SetColor(COLOR_BLACK);
+		target->DrawLine(q_inner, r_inner, brush, static_cast<FLOAT>(w_inner));
 	}
 
-	// 図形の部位 (正方形) を表示する.
+	// 図形の部位を正方形で表示する.
+	// 正方形は, 図形の変形に関わる, いわゆるアンカーを意味する.
 	// p	部位の位置
 	// target	描画ターゲット
 	// brush	色ブラシ
 	inline void anc_draw_square(
 		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
-		const auto a_inner = Shape::m_anc_square_inner;
-		const auto a_outer = Shape::m_anc_square_outer;
-		const D2D1_RECT_F r_inner{
+		const double a_inner = Shape::m_anc_square_inner;
+		const double a_outer = Shape::m_anc_square_outer;
+		const D2D1_RECT_F s_inner{
 			static_cast<FLOAT>(p.x - a_inner), static_cast<FLOAT>(p.y - a_inner),
 			static_cast<FLOAT>(p.x + a_inner), static_cast<FLOAT>(p.y + a_inner)
 		};
-		const D2D1_RECT_F r_outer{
+		const D2D1_RECT_F s_outer{
 			static_cast<FLOAT>(p.x - a_outer), static_cast<FLOAT>(p.y - a_outer),
 			static_cast<FLOAT>(p.x + a_outer), static_cast<FLOAT>(p.y + a_outer)
 		};
 		brush->SetColor(COLOR_WHITE);
-		target->FillRectangle(r_outer, brush);
+		target->FillRectangle(s_outer, brush);
 		brush->SetColor(COLOR_BLACK);
-		target->FillRectangle(r_inner, brush);
+		target->FillRectangle(s_inner, brush);
 	}
 
-	// 矢じるしの寸法が同じか判定する.
+	// 実数 (0.0...1.0) の色成分を整数 (0...255) に変換する.
+	inline uint32_t conv_color_comp(const double c) noexcept
+	{
+		return min(static_cast<uint32_t>(floor(c * 256.0)), 255);
+	}
+
+	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
 	{
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) &&
 			equal(a.m_offset, b.m_offset);
 	}
 
-	// 端の形式が同じか判定する.
+	// 線の端点が同じか判定する.
 	inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept
 	{
 		return a.m_start == b.m_start && a.m_end == b.m_end;
@@ -1949,7 +2072,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置が同じか判定する.
-	inline bool equal(const DASH_PATT& a, const DASH_PATT& b) noexcept
+	inline bool equal(const DASH_PAT& a, const DASH_PAT& b) noexcept
 	{
 		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) &&
 			equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
@@ -2036,7 +2159,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 2 つの値を位置に足す
-	inline void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& b) noexcept
+	inline void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& b)
+		noexcept
 	{
 		b.x = static_cast<FLOAT>(a.x + x);
 		b.y = static_cast<FLOAT>(a.y + y);
@@ -2061,14 +2185,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置が円に含まれるか判定する.
-	// center	円の中心点
-	// radius	円の半径
+	// ctr	円の中心点
+	// rad	円の半径
 	inline bool pt_in_circle(
-		const D2D1_POINT_2F test, const D2D1_POINT_2F center, const double radius) noexcept
+		const D2D1_POINT_2F test, const D2D1_POINT_2F ctr, const double rad) noexcept
 	{
-		const double dx = static_cast<double>(test.x) - static_cast<double>(center.x);
-		const double dy = static_cast<double>(test.y) - static_cast<double>(center.y);
-		return dx * dx + dy * dy <= radius * radius;
+		const double dx = static_cast<double>(test.x) - static_cast<double>(ctr.x);
+		const double dy = static_cast<double>(test.y) - static_cast<double>(ctr.y);
+		return dx * dx + dy * dy <= rad * rad;
 	}
 
 	// 位置が円に含まれるか判定する.
@@ -2083,19 +2207,19 @@ namespace winrt::GraphPaper::implementation
 
 	// だ円が位置を含むか判定する.
 	// test	判定する位置
-	// center	だ円の中心
+	// ctr	だ円の中心
 	// rad_x	だ円の径
 	// rad_y	だ円の径
 	// rot	だ円の傾き (ラジアン)
 	// 戻り値	含む場合 true
 	inline bool pt_in_ellipse(
-		const D2D1_POINT_2F test, const D2D1_POINT_2F center, const double rad_x,
+		const D2D1_POINT_2F test, const D2D1_POINT_2F ctr, const double rad_x,
 		const double rad_y, const double rot) noexcept
 	{
 		// 標準形のだ円に合致するよう変換した位置を判定する.
 		// だ円の中心を原点とする座標に判定する位置を平行移動.
-		const double dx = static_cast<double>(test.x) - static_cast<double>(center.x);
-		const double dy = static_cast<double>(test.y) - static_cast<double>(center.y);
+		const double dx = static_cast<double>(test.x) - static_cast<double>(ctr.x);
+		const double dy = static_cast<double>(test.y) - static_cast<double>(ctr.y);
 		// だ円の傾きに合わせて判定する位置を回転.
 		const double c = cos(rot);
 		const double s = sin(rot);
@@ -2125,8 +2249,8 @@ namespace winrt::GraphPaper::implementation
 		double py = p[p_cnt - 1].y;
 		i_cnt = 0;
 		for (i = 0; i < p_cnt; i++) {
-			double qx = p[i].x;
-			double qy = p[i].y;
+			const double qx = p[i].x;
+			const double qy = p[i].y;
 			// ルール 1. 上向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、終点は含まない).
 			// ルール 2. 下向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、始点は含まない).
 			if ((py <= ty && qy > ty) || (py > ty && qy <= ty)) {

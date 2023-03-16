@@ -26,13 +26,13 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	static void text_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto padd_w = p_width * 0.125;
-		const auto padd_h = p_height * 0.125;
+		const auto pad_w = p_width * 0.125;
+		const auto pad_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
+			static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) 
+			static_cast<FLOAT>(p_width - 2.0 * pad_w), static_cast<FLOAT>(p_width - 2.0 * pad_h) 
 		};
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「余白」が選択された.
-	IAsyncAction MainPage::text_padding_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::text_pad_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -216,30 +216,30 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_dialog_page.set_attr_to(&m_main_page);
-		D2D1_SIZE_F padding;
-		m_dialog_page.get_text_padding(padding);
+		D2D1_SIZE_F pad;
+		m_dialog_page.get_text_pad(pad);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_0().Value(padding.width);
-		text_slider_set_header<UNDO_ID::TEXT_PADDING, 0>(padding.width);
+		dialog_slider_0().Value(pad.width);
+		text_slider_set_header<UNDO_ID::TEXT_PAD, 0>(pad.width);
 
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_1().Value(padding.height);
-		text_slider_set_header<UNDO_ID::TEXT_PADDING, 1>(padding.height);
+		dialog_slider_1().Value(pad.height);
+		text_slider_set_header<UNDO_ID::TEXT_PAD, 1>(pad.height);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		const auto token0{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 0> })
+				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PAD, 0> })
 		};
 		const auto token1{
 			dialog_slider_1().ValueChanged(
-				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 1> })
+				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PAD, 1> })
 		};
 		text_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -251,8 +251,8 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F samp_val;
-			m_dialog_page.m_shape_list.back()->get_text_padding(samp_val);
-			if (ustack_push_set<UNDO_ID::TEXT_PADDING>(samp_val)) {
+			m_dialog_page.m_shape_list.back()->get_text_pad(samp_val);
+			if (ustack_push_set<UNDO_ID::TEXT_PAD>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -277,7 +277,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring text;
-		if constexpr (U == UNDO_ID::TEXT_PADDING) {
+		if constexpr (U == UNDO_ID::TEXT_PAD) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
@@ -316,23 +316,23 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::TEXT_PADDING && S == 0) {
+		else if constexpr (U == UNDO_ID::TEXT_PAD && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_ID::TEXT_PADDING, 0>(val);
-			D2D1_SIZE_F padding;
-			m_dialog_page.m_shape_list.back()->get_text_padding(padding);
-			padding.width = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_text_padding(padding)) {
+			text_slider_set_header<UNDO_ID::TEXT_PAD, 0>(val);
+			D2D1_SIZE_F pad;
+			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
+			pad.width = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::TEXT_PADDING && S == 1) {
+		else if constexpr (U == UNDO_ID::TEXT_PAD && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_ID::TEXT_PADDING, 1>(val);
-			D2D1_SIZE_F padding;
-			m_dialog_page.m_shape_list.back()->get_text_padding(padding);
-			padding.height = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_text_padding(padding)) {
+			text_slider_set_header<UNDO_ID::TEXT_PAD, 1>(val);
+			D2D1_SIZE_F pad;
+			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
+			pad.height = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
 				dialog_draw();
 			}
 		}

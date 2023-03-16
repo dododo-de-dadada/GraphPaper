@@ -851,7 +851,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「破線の形式」に印をつける.
 		void dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「破線の配列」が選択された.
-		IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction dash_pat_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template<int S> void dash_slider_set_header(const float val);
 		// スライダーの値が変更された.
@@ -953,7 +953,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.
-		IAsyncAction text_padding_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction text_pad_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」が選択された.
 		void text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」が選択された.

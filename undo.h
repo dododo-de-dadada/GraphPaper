@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
-		DASH_PATT,	// 破線の配置の操作
+		DASH_PAT,	// 破線の配置の操作
 		DASH_STYLE,	// 破線の形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作
 		FONT_COLOR,	// 書体の色の操作
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 		SELECT,	// 図形の選択を切り替え
 		PAGE_COLOR,	// ページの色の操作
 		PAGE_SIZE,	// ページの大きさの操作
-		PAGE_PADD,	// ページの内余白の操作
+		PAGE_PAD,	// ページの内余白の操作
 		POLY_CLOSED,	// 多角形の終端の操作
 		ARC_START,	// 円弧の始点の操作
 		ARC_END,	// 円弧の終点の操作
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		TEXT_ALIGN_T,	// 文字列の整列の操作
 		TEXT_CONTENT,	// 文字列の操作
 		TEXT_LINE_SP,	// 行間の操作
-		TEXT_PADDING,	// 文字列の余白の操作
+		TEXT_PAD,	// 文字列の余白の操作
 		TEXT_RANGE,	// 選択された文字範囲の操作
 	};
 
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_ID::ARROW_STYLE> { using type = ARROW_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::DASH_CAP> { using type = D2D1_CAP_STYLE; };
-	template <> struct U_TYPE<UNDO_ID::DASH_PATT> { using type = DASH_PATT; };
+	template <> struct U_TYPE<UNDO_ID::DASH_PAT> { using type = DASH_PAT; };
 	template <> struct U_TYPE<UNDO_ID::DASH_STYLE> { using type = D2D1_DASH_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::FILL_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::FONT_COLOR> { using type = D2D1_COLOR_F; };
@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::MOVE> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_SIZE> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<UNDO_ID::PAGE_PADD> { using type = D2D1_RECT_F; };
+	template <> struct U_TYPE<UNDO_ID::PAGE_PAD> { using type = D2D1_RECT_F; };
 	template <> struct U_TYPE<UNDO_ID::POLY_CLOSED> { using type = bool; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_COLOR> { using type = D2D1_COLOR_F; };
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_ID::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_ID::TEXT_LINE_SP> { using type = float; };
-	template <> struct U_TYPE<UNDO_ID::TEXT_PADDING> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_ID::TEXT_PAD> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_ID::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
 	//------------------------------

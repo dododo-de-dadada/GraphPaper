@@ -514,7 +514,7 @@
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem
-					x:Name="mfi_dash_patt" x:Uid="mfi_dash_patt" Click="dash_patt_click_async"
+					x:Name="mfi_dash_pat" x:Uid="mfi_dash_pat" Click="dash_pat_click_async"
 					IsEnabled="False" Text="Dash Pattern..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
@@ -724,7 +724,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_vert_click" Text="Middle" GroupName="gn_text_align_vert" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
-				<MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
+				<MenuFlyoutItem x:Uid="mfi_text_pad" Click="text_pad_click_async" Text="Margin..." />
 				<MenuFlyoutItem x:Name="mfi_text_fit_frame_to_text" x:Uid="mfi_text_fit_frame_to_text" Click="text_fit_frame_to_text_click" Text="Fit Frame Size to Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
@@ -1105,22 +1105,22 @@
 					PlaceholderText="Must be between 1 and 32767."
 					TextChanged="page_size_text_changed" />
 				<TextBox
-					x:Name="tx_page_padd_left" x:Uid="tx_page_padd_left" Margin="0,0,0,12"
+					x:Name="tx_page_pad_left" x:Uid="tx_page_pad_left" Margin="0,0,0,12"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
 				<TextBox
-					x:Name="tx_page_padd_top" x:Uid="tx_page_padd_top" Margin="0,0,0,12"
+					x:Name="tx_page_pad_top" x:Uid="tx_page_pad_top" Margin="0,0,0,12"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Top Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
 				<TextBox
-					x:Name="tx_page_padd_right" x:Uid="tx_page_padd_right" Margin="0,0,0,12"
+					x:Name="tx_page_pad_right" x:Uid="tx_page_pad_right" Margin="0,0,0,12"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Right Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
 				<TextBox
-					x:Name="tx_page_padd_bottom" x:Uid="tx_page_padd_bottom" Margin="0,0,0,12"
+					x:Name="tx_page_pad_bottom" x:Uid="tx_page_pad_bottom" Margin="0,0,0,12"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />

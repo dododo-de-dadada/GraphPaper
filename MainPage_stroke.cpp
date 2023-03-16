@@ -24,12 +24,12 @@ namespace winrt::GraphPaper::implementation
 	static void stroke_create_sample_shape(
 		const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto padd = p_width * 0.125;
+		const auto pad = p_width * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+			static_cast<FLOAT>(p_width - 2.0 * pad), static_cast<FLOAT>(p_height - 2.0 * pad)
 		};
 		page.m_shape_list.push_back(new ShapeLine(start, pos, &page));
 		page.m_shape_list.back()->set_select(true);

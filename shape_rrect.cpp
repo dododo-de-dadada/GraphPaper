@@ -179,32 +179,32 @@ namespace winrt::GraphPaper::implementation
 		if (test.y > r_rb.y) {
 			return false;
 		}
-		D2D1_POINT_2F center;	// 角丸の中心点
-		pt_add(r_lt, r_rad, center);
-		if (test.x < center.x) {
-			if (test.y < center.y) {
-				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
+		D2D1_POINT_2F ctr;	// 角丸の中心点
+		pt_add(r_lt, r_rad, ctr);
+		if (test.x < ctr.x) {
+			if (test.y < ctr.y) {
+				return pt_in_ellipse(test, ctr, r_rad.x, r_rad.y);
 			}
 		}
-		center.x = r_rb.x - r_rad.x;
-		center.y = r_lt.y + r_rad.y;
-		if (test.x > center.x) {
-			if (test.y < center.y) {
-				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
+		ctr.x = r_rb.x - r_rad.x;
+		ctr.y = r_lt.y + r_rad.y;
+		if (test.x > ctr.x) {
+			if (test.y < ctr.y) {
+				return pt_in_ellipse(test, ctr, r_rad.x, r_rad.y);
 			}
 		}
-		center.x = r_rb.x - r_rad.x;
-		center.y = r_rb.y - r_rad.y;
-		if (test.x > center.x) {
-			if (test.y > center.y) {
-				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
+		ctr.x = r_rb.x - r_rad.x;
+		ctr.y = r_rb.y - r_rad.y;
+		if (test.x > ctr.x) {
+			if (test.y > ctr.y) {
+				return pt_in_ellipse(test, ctr, r_rad.x, r_rad.y);
 			}
 		}
-		center.x = r_lt.x + r_rad.x;
-		center.y = r_rb.y - r_rad.y;
-		if (test.x < center.x) {
-			if (test.y > center.y) {
-				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
+		ctr.x = r_lt.x + r_rad.x;
+		ctr.y = r_rb.y - r_rad.y;
+		if (test.x < ctr.x) {
+			if (test.y > ctr.y) {
+				return pt_in_ellipse(test, ctr, r_rad.x, r_rad.y);
 			}
 		}
 		return true;
@@ -413,13 +413,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRRect::ShapeRRect(const Shape& page, DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(page, dt_reader)
+	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(dt_reader)
 	{
 		m_corner_radius = D2D1_POINT_2F{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
+		if (m_corner_radius.x < 0.0f || m_corner_radius.x > 0.5f * fabs(m_pos.x)) {
+			m_corner_radius.x = 0.0f;
+		}
+		if (m_corner_radius.y < 0.0f || m_corner_radius.y > 0.5f * fabs(m_pos.y)) {
+			m_corner_radius.y = 0.0f;
+		}
 	}
 
 	// 図形をデータライターに書き込む.

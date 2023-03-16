@@ -145,8 +145,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::PAGE_SIZE:
 			u = new UndoValue<UNDO_ID::PAGE_SIZE>(dt_reader);
 			break;
-		case UNDO_ID::PAGE_PADD:
-			u = new UndoValue<UNDO_ID::PAGE_PADD>(dt_reader);
+		case UNDO_ID::PAGE_PAD:
+			u = new UndoValue<UNDO_ID::PAGE_PAD>(dt_reader);
 			break;
 		case UNDO_ID::MOVE:
 			u = new UndoValue<UNDO_ID::MOVE>(dt_reader);
@@ -160,8 +160,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::DASH_CAP:
 			u = new UndoValue<UNDO_ID::DASH_CAP>(dt_reader);
 			break;
-		case UNDO_ID::DASH_PATT:
-			u = new UndoValue<UNDO_ID::DASH_PATT>(dt_reader);
+		case UNDO_ID::DASH_PAT:
+			u = new UndoValue<UNDO_ID::DASH_PAT>(dt_reader);
 			break;
 		case UNDO_ID::DASH_STYLE:
 			u = new UndoValue<UNDO_ID::DASH_STYLE>(dt_reader);
@@ -187,8 +187,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::TEXT_LINE_SP:
 			u = new UndoValue<UNDO_ID::TEXT_LINE_SP>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_PADDING:
-			u = new UndoValue<UNDO_ID::TEXT_PADDING>(dt_reader);
+		case UNDO_ID::TEXT_PAD:
+			u = new UndoValue<UNDO_ID::TEXT_PAD>(dt_reader);
 			break;
 		case UNDO_ID::TEXT_RANGE:
 			u = new UndoValue<UNDO_ID::TEXT_RANGE>(dt_reader);
@@ -595,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_STYLE>(ARROW_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::DASH_CAP>(D2D1_CAP_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::DASH_PATT>(DASH_PATT const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::DASH_PAT>(DASH_PAT const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::DASH_STYLE>(D2D1_DASH_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::FILL_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::FONT_COLOR>(D2D1_COLOR_F const& val);
@@ -612,7 +612,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::PAGE_PADD>(Shape* const s, D2D1_RECT_F const& val);
+	template void MainPage::ustack_push_set<UNDO_ID::PAGE_PAD>(Shape* const s, D2D1_RECT_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_WIDTH>(float const& val);
@@ -620,7 +620,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_LINE_SP>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_PADDING>(D2D1_SIZE_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_PAD>(D2D1_SIZE_F const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::MOVE>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(Shape* const s);
 

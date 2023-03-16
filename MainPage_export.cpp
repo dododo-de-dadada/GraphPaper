@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列を UTF-32 に変換する.
 		std::vector<uint32_t> utf32{
-			conv_utf16_to_utf32(t, t_len)
+			text_utf16_to_utf32(t, t_len)
 		};
 
 		// UTF-32 文字列から重複したコードを削除する.
@@ -702,7 +702,7 @@ namespace winrt::GraphPaper::implementation
 			gmtime_s(&t, &now);
 			swprintf_s(
 				buf,
-				L"%d 0 obj <<\n"
+				L"%zu 0 obj <<\n"
 				L"%% Info Dictionary\n"
 				L"/CreationDate (D:%04u%02u%02u%02u%02u%02u+00)\n"
 				L"/ModDate (D:%04u%02u%02u%02u%02u%02u+00)\n"
@@ -737,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 				L"%% Trailer\n"
 				L"/Size %zu\n"
 				L"/Root 1 0 R\n"
-				L"/Info %d 0 R\n"
+				L"/Info %zu 0 R\n"
 				L">>\n"
 				L"startxref\n"
 				L"%zu\n"
@@ -900,12 +900,12 @@ namespace winrt::GraphPaper::implementation
 				// ビットマップへの描画
 				m_mutex_draw.lock();
 				m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
-				target->SaveDrawingState(Shape::m_d2d_state_block.get());
+				target->SaveDrawingState(Shape::m_state_block.get());
 				target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
 					target->EndDraw());
-				target->RestoreDrawingState(Shape::m_d2d_state_block.get());
+				target->RestoreDrawingState(Shape::m_state_block.get());
 				m_mutex_draw.unlock();
 
 				// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
@@ -1027,8 +1027,8 @@ namespace winrt::GraphPaper::implementation
 					conv_color_comp(m_main_page.m_page_color.g),
 					conv_color_comp(m_main_page.m_page_color.b),
 					m_main_page.m_page_color.a,
-					m_main_page.m_page_padding.left,
-					m_main_page.m_page_padding.top
+					m_main_page.m_page_pad.left,
+					m_main_page.m_page_pad.top
 				);
 				dt_writer.WriteString(buf);
 			}

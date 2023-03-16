@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// •`‰æŠÂ‹«‚ÌÝ’è.
 		m_dialog_page.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_background.get(), 1.0f);
-		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_d2d_state_block.get());
+		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
 		m_dialog_d2d.m_d2d_context->BeginDraw();
 		m_dialog_d2d.m_d2d_context->Clear(m_background_color);
 		const D2D1_RECT_F w_rect{
@@ -106,13 +106,13 @@ namespace winrt::GraphPaper::implementation
 			m_dialog_page.m_page_size.width * 0.5, m_dialog_page.m_grid_base + 1.0));
 		m_dialog_page.m_grid_offset.x = offset;
 		m_dialog_page.m_grid_offset.y = offset;
-		m_dialog_page.m_page_padding.left = 0.0f;
-		m_dialog_page.m_page_padding.top = 0.0f;
-		m_dialog_page.m_page_padding.right = 0.0f;
-		m_dialog_page.m_page_padding.bottom = 0.0f;
+		m_dialog_page.m_page_pad.left = 0.0f;
+		m_dialog_page.m_page_pad.top = 0.0f;
+		m_dialog_page.m_page_pad.right = 0.0f;
+		m_dialog_page.m_page_pad.bottom = 0.0f;
 		m_dialog_page.draw();
 		const auto hr = m_dialog_d2d.m_d2d_context->EndDraw();
-		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_d2d_state_block.get());
+		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
 		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();
 	}

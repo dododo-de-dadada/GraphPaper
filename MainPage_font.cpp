@@ -92,13 +92,13 @@ namespace winrt::GraphPaper::implementation
 	static void font_create_sample_shape(
 		const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto padd_w = p_width * 0.125;
-		const auto padd_h = p_height * 0.125;
+		const auto pad_w = p_width * 0.125;
+		const auto pad_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
+			static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h)
+			static_cast<FLOAT>(p_width - 2.0 * pad_w), static_cast<FLOAT>(p_width - 2.0 * pad_h)
 		};
 		const auto pangram = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;

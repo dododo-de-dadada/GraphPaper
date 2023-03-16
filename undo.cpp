@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::ARROW_SIZE>::UndoValue(Shape* s, const ARROW_SIZE& val);
 	template UndoValue<UNDO_ID::ARROW_STYLE>::UndoValue(Shape* s, const ARROW_STYLE& val);
 	template UndoValue<UNDO_ID::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
-	template UndoValue<UNDO_ID::DASH_PATT>::UndoValue(Shape* s, const DASH_PATT& val);
+	template UndoValue<UNDO_ID::DASH_PAT>::UndoValue(Shape* s, const DASH_PAT& val);
 	template UndoValue<UNDO_ID::DASH_STYLE>::UndoValue(Shape* s, const D2D1_DASH_STYLE& val);
 	template UndoValue<UNDO_ID::FILL_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::FONT_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(Shape* s, const D2D1_POINT_2F& val);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
-	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
+	template UndoValue<UNDO_ID::PAGE_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
 	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::TEXT_ALIGN_T>::UndoValue(Shape* s, const DWRITE_TEXT_ALIGNMENT& val);
 	template UndoValue<UNDO_ID::TEXT_CONTENT>::UndoValue(Shape* s, wchar_t* const& val);
 	template UndoValue<UNDO_ID::TEXT_LINE_SP>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::TEXT_PADDING>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_ID::TEXT_PAD>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_ID::TEXT_RANGE>::UndoValue(Shape* s, const DWRITE_TEXT_RANGE& val);
 
 	template <UNDO_ID U> 
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 		else if constexpr (
 			U == UNDO_ID::MOVE ||
 			U == UNDO_ID::PAGE_SIZE ||
-			U == UNDO_ID::TEXT_PADDING) {
+			U == UNDO_ID::TEXT_PAD) {
 			m_value = U_TYPE<U>::type{
 				dt_reader.ReadSingle(),
 				dt_reader.ReadSingle()
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::GRID_COLOR ||
 			U == UNDO_ID::PAGE_COLOR ||
 			U == UNDO_ID::STROKE_COLOR ||
-			U == UNDO_ID::PAGE_PADD
+			U == UNDO_ID::PAGE_PAD
 			) {
 			m_value = U_TYPE<U>::type{
 				dt_reader.ReadSingle(),
@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 			};
 		}
 		else if constexpr (
-			U == UNDO_ID::DASH_PATT) {
+			U == UNDO_ID::DASH_PAT) {
 			m_value = U_TYPE<U>::type{
 				dt_reader.ReadSingle(),
 				dt_reader.ReadSingle(),
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::ARROW_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARROW_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::DASH_CAP>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::DASH_PATT>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::DASH_PAT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::DASH_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::FILL_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::FONT_COLOR>::UndoValue(DataReader const& dt_reader);
@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::PAGE_PAD>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
@@ -374,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::TEXT_PAR_ALIGN>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::TEXT_CONTENT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::TEXT_LINE_SP>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::TEXT_PADDING>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::TEXT_PAD>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
 
 	// }Œ`‚Ì‘®«’l‚É’l‚ðŠi”[‚·‚é.
@@ -418,9 +418,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_dash_cap(val);
 	}
 
-	void UndoValue<UNDO_ID::DASH_PATT>::SET(Shape* const s, const DASH_PATT& val)
+	void UndoValue<UNDO_ID::DASH_PAT>::SET(Shape* const s, const DASH_PAT& val)
 	{
-		s->set_dash_patt(val);
+		s->set_dash_pat(val);
 	}
 
 	void UndoValue<UNDO_ID::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& val)
@@ -513,9 +513,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_page_size(val);
 	}
 
-	void UndoValue<UNDO_ID::PAGE_PADD>::SET(Shape* const s, const D2D1_RECT_F& val)
+	void UndoValue<UNDO_ID::PAGE_PAD>::SET(Shape* const s, const D2D1_RECT_F& val)
 	{
-		s->set_page_padding(val);
+		s->set_page_pad(val);
 	}
 
 	void UndoValue<UNDO_ID::POLY_CLOSED>::SET(Shape* const s, const bool& val)
@@ -558,9 +558,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_text_line_sp(val);
 	}
 
-	void UndoValue<UNDO_ID::TEXT_PADDING>::SET(Shape* const s, const D2D1_SIZE_F& val)
+	void UndoValue<UNDO_ID::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val)
 	{
-		s->set_text_padding(val);
+		s->set_text_pad(val);
 	}
 
 	void UndoValue<UNDO_ID::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val)
@@ -588,9 +588,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_dash_cap(val);
 	}
 
-	bool UndoValue<UNDO_ID::DASH_PATT>::GET(const Shape* s, DASH_PATT& val) noexcept
+	bool UndoValue<UNDO_ID::DASH_PAT>::GET(const Shape* s, DASH_PAT& val) noexcept
 	{
-		return s->get_dash_patt(val);
+		return s->get_dash_pat(val);
 	}
 
 	bool UndoValue<UNDO_ID::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& val) noexcept
@@ -683,9 +683,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_size(val);
 	}
 
-	bool UndoValue<UNDO_ID::PAGE_PADD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
+	bool UndoValue<UNDO_ID::PAGE_PAD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
 	{
-		return s->get_page_padding(val);
+		return s->get_page_pad(val);
 	}
 
 	bool UndoValue<UNDO_ID::POLY_CLOSED>::GET(const Shape* s, bool& val) noexcept
@@ -748,9 +748,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text_line_sp(val);
 	}
 
-	bool UndoValue<UNDO_ID::TEXT_PADDING>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
+	bool UndoValue<UNDO_ID::TEXT_PAD>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
 	{
-		return s->get_text_padding(val);
+		return s->get_text_pad(val);
 	}
 
 	bool UndoValue<UNDO_ID::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& val) noexcept
@@ -799,13 +799,13 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(static_cast<ARROW_SIZE>(m_value).m_offset);
 		}
 		else if constexpr (
-			U == UNDO_ID::DASH_PATT) {
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[0]);
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[1]);
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[2]);
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[3]);
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[4]);
-			dt_writer.WriteSingle(static_cast<DASH_PATT>(m_value).m_[5]);
+			U == UNDO_ID::DASH_PAT) {
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[0]);
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[1]);
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[2]);
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[3]);
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[4]);
+			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[5]);
 		}
 		else if constexpr (
 			U == UNDO_ID::FILL_COLOR ||
@@ -819,7 +819,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(static_cast<D2D1_COLOR_F>(m_value).b);
 			dt_writer.WriteSingle(static_cast<D2D1_COLOR_F>(m_value).a);
 		}
-		else if constexpr (U == UNDO_ID::PAGE_PADD) {
+		else if constexpr (U == UNDO_ID::PAGE_PAD) {
 			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).left);
 			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).top);
 			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).right);
@@ -859,7 +859,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteBoolean(m_value);
 		}
 		else if constexpr (
-			U == UNDO_ID::TEXT_PADDING ||
+			U == UNDO_ID::TEXT_PAD ||
 			U == UNDO_ID::PAGE_SIZE) {
 			dt_writer.WriteSingle(m_value.width);
 			dt_writer.WriteSingle(m_value.height);

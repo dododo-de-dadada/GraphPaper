@@ -220,8 +220,8 @@ namespace winrt::GraphPaper::implementation
 			// winrt::com_ptr で確保されたオブジェクトは Release するとエラーになる.
 			// 例えば, m_main_page.m_state_block->Release();
 			m_mutex_draw.lock();
-			if (Shape::m_d2d_state_block != nullptr) {
-				Shape::m_d2d_state_block = nullptr;
+			if (Shape::m_state_block != nullptr) {
+				Shape::m_state_block = nullptr;
 			}
 			if (Shape::m_d2d_color_brush != nullptr) {
 				Shape::m_d2d_color_brush = nullptr;
@@ -537,7 +537,7 @@ namespace winrt::GraphPaper::implementation
 				scroll_h = dt_reader.ReadSingle();
 				scroll_v = dt_reader.ReadSingle();
 				// 図形を読み込む.
-				if (slist_read(m_main_page.m_shape_list, m_main_page, dt_reader)) {
+				if (slist_read(m_main_page.m_shape_list, dt_reader)) {
 					// 再開なら,
 					if constexpr (RESUME) {
 						// スタックも読み込む.

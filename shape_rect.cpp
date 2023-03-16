@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	対角点への位置ベクトル
 	// page	属性
 	ShapeRect::ShapeRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeStroke::ShapeStroke(page),
+		ShapeStroke(page),
 		m_start(start),
 		m_pos(pos)
 	{
@@ -574,8 +574,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRect::ShapeRect(const Shape& page, DataReader const& dt_reader) :
-		ShapeStroke::ShapeStroke(page, dt_reader)
+	ShapeRect::ShapeRect(DataReader const& dt_reader) :
+		ShapeStroke(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();

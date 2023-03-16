@@ -165,12 +165,12 @@ namespace winrt::GraphPaper::implementation
 		arrow_slider_set_header<2>(a_size.m_offset);
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
-		const auto padd = samp_w * 0.125;
+		const auto pad = samp_w * 0.125;
 		const D2D1_POINT_2F start{	// 始点
-			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad)
 		};
 		const D2D1_POINT_2F pos{	// 対角点の位置ベクトル
-			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
+			static_cast<FLOAT>(samp_w - 2.0 * pad), static_cast<FLOAT>(samp_h - 2.0 * pad)
 		};
 		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
 #if defined(_DEBUG)

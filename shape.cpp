@@ -37,30 +37,32 @@ namespace winrt::GraphPaper::implementation
 		return dwrite_factory;
 	};
 	ID2D1RenderTarget* Shape::m_d2d_target = nullptr;
-	winrt::com_ptr<ID2D1DrawingStateBlock> Shape::m_d2d_state_block{ nullptr };
-	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style{ nullptr };
-	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_color_brush{ nullptr };
-	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_range_brush{ nullptr };
-	winrt::com_ptr<ID2D1BitmapBrush> Shape::m_d2d_bitmap_brush{ nullptr };
+	winrt::com_ptr<ID2D1DrawingStateBlock> Shape::m_state_block{ nullptr };	// 描画状態を保持するブロック
+	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style{ nullptr };	// 補助線の形式
+	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_color_brush{ nullptr };	// 色ブラシ (ターゲット依存)
+	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_range_brush{ nullptr };	// 選択された文字色のブラシ (ターゲット依存)
+	winrt::com_ptr<ID2D1BitmapBrush> Shape::m_d2d_bitmap_brush{ nullptr };	// 背景の画像ブラシ (ターゲット依存)
 	winrt::com_ptr<IDWriteFactory> Shape::m_dwrite_factory{ create_dwrite_factory() };
-	constexpr double a_len = 6.0;
-	float Shape::m_aux_width = 1.0f;
-	bool Shape::m_anc_show = true;
-	float Shape::m_anc_width = a_len;
-	float Shape::m_anc_square_inner = static_cast<FLOAT>(0.5 * a_len);
-	float Shape::m_anc_square_outer = static_cast<FLOAT>(0.5 * a_len + 2.0);
-	float Shape::m_anc_circle_inner = static_cast<FLOAT>(sqrt(a_len * a_len / M_PI));	// 内側の半径
-	float Shape::m_anc_circle_outer = static_cast<FLOAT>(sqrt(a_len * a_len / M_PI) + 2.0);	// 外側の半径
+	constexpr double ANC_LEN = 6.0;
+	float Shape::m_aux_width = 1.0f;	// 補助線の太さ
+	bool Shape::m_anc_show = true;	// 図形の部位を表示する.
+	float Shape::m_anc_width = ANC_LEN;	// 図形の部位の大きさ
+	float Shape::m_anc_square_inner = static_cast<FLOAT>(0.5 * ANC_LEN);	// 図形の部位 (正方形) の内側の辺の半分の長さ
+	float Shape::m_anc_square_outer = static_cast<FLOAT>(0.5 * (ANC_LEN + 4.0));	// 図形の部位 (正方形) の外側の辺の半分の長さ
+	float Shape::m_anc_circle_inner = static_cast<FLOAT>(sqrt(ANC_LEN * ANC_LEN / M_PI));	// 図形の部位 (円形) の内側の半径
+	float Shape::m_anc_circle_outer = static_cast<FLOAT>(sqrt(ANC_LEN * ANC_LEN / M_PI) + 2.0);	// 図形の部位 (円形) の外側の半径
+	float Shape::m_anc_rhombus_inner = static_cast<FLOAT>(sqrt(ANC_LEN * ANC_LEN * 0.5) * 0.5);	// 図形の部位 (ひし型) の中心から内側の頂点までの半分の長さ
+	float Shape::m_anc_rhombus_outer =	// 図形の部位 (ひし型) の中心から外側の頂点までの半分の長さ
+		static_cast<FLOAT>(sqrt((ANC_LEN + 4.0) * (ANC_LEN + 4.0) * 0.5) * 0.5);
 
 	void Shape::begin_draw(
 		ID2D1RenderTarget* target, const bool anc_show, IWICFormatConverter* const background, 
 		const double scale)
 	{
-		// レンダーターゲットが変わるたびに,
+		// 描画対象が変更されるなら, ターゲット依存の描画オブジェクトを作成する.
 		if (m_d2d_target != target) {
 			m_d2d_target = target;
-			ID2D1Factory* factory;
-			m_d2d_target->GetFactory(&factory);
+
 			// レンダーターゲット依存の色ブラシを作成する.
 			m_d2d_color_brush = nullptr;
 			winrt::check_hresult(
@@ -70,6 +72,7 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				m_d2d_target->CreateSolidColorBrush({}, Shape::m_d2d_range_brush.put())
 			);
+
 			// レンダーターゲット依存の画像ブラシを作成する.
 			m_d2d_bitmap_brush = nullptr;
 			if (background != nullptr) {
@@ -84,25 +87,38 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_bitmap_brush->SetExtendModeX(D2D1_EXTEND_MODE_WRAP);
 				m_d2d_bitmap_brush->SetExtendModeY(D2D1_EXTEND_MODE_WRAP);
 			}
-			// ファクトリー依存の画像ブラシを作成する.
-			m_d2d_state_block = nullptr;
-			static_cast<ID2D1Factory1*>(factory)->CreateDrawingStateBlock(m_d2d_state_block.put());
-			// ファクトリー依存の補助線を作成する.
-			m_aux_style = nullptr;
-			winrt::check_hresult(
-				static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(AUXILIARY_SEG_STYLE,
-					AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, m_aux_style.put())
-			);
-
 		}
+
+		if (m_state_block == nullptr) {
+			ID2D1Factory1* factory = nullptr;
+			m_d2d_target->GetFactory(reinterpret_cast<ID2D1Factory**>(&factory));
+			winrt::check_hresult(
+				factory->CreateDrawingStateBlock(m_state_block.put())
+			);
+		}
+
+		if (m_aux_style == nullptr) {
+			ID2D1Factory1* factory = nullptr;
+			m_d2d_target->GetFactory(reinterpret_cast<ID2D1Factory**>(&factory));
+			winrt::check_hresult(
+				factory->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					m_aux_style.put())
+			);
+		}
+
 		m_anc_show = anc_show;
-		m_aux_width = static_cast<FLOAT>(1.0 / scale);
-		m_anc_width = static_cast<FLOAT>(a_len / scale);
-		m_anc_square_inner = static_cast<FLOAT>(0.5 * a_len / scale);
-		m_anc_square_outer = static_cast<FLOAT>((0.5 * a_len + 2.0) / scale);
-		const auto r = sqrt(a_len * a_len / M_PI);
-		m_anc_circle_inner = static_cast<FLOAT>(r / scale);	// 内側の半径
-		m_anc_circle_outer = static_cast<FLOAT>((r + 2.0) / scale);	// 外側の半径
+		m_aux_width = static_cast<float>(1.0 / scale);
+		const double a_inner = ANC_LEN / scale;
+		const double a_outer = (ANC_LEN + 4.0) / scale;
+		m_anc_width = static_cast<float>(ANC_LEN / scale);
+		m_anc_square_inner = static_cast<float>(0.5 * a_inner);
+		m_anc_square_outer = static_cast<float>(0.5 * a_outer);
+		const auto r = sqrt(ANC_LEN * ANC_LEN / M_PI);
+		m_anc_circle_inner = static_cast<float>(r / scale);
+		m_anc_circle_outer = static_cast<float>((r + 2.0) / scale);
+		m_anc_rhombus_inner = static_cast<float>(sqrt(a_inner * a_inner * 0.5) * 0.5);
+		m_anc_rhombus_outer = static_cast<float>(sqrt(a_outer * a_outer * 0.5) * 0.5);
 	}
 
 }

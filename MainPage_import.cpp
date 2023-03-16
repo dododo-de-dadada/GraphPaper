@@ -67,14 +67,14 @@ namespace winrt::GraphPaper::implementation
 			const double win_h = scp_page_panel().ActualHeight();
 			const double image_w = bitmap.PixelWidth();
 			const double image_h = bitmap.PixelHeight();
-			const D2D1_POINT_2F center_pos{
+			const D2D1_POINT_2F ctr{
 				static_cast<FLOAT>((win_x + (win_w - image_w) * 0.5) / scale),
 				static_cast<FLOAT>((win_y + (win_h - image_h) * 0.5) / scale)
 			};
 			const D2D1_SIZE_F p_size{ 
 				static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h)
 			};
-			ShapeImage* s = new ShapeImage(center_pos, p_size, bitmap, 1.0);
+			ShapeImage* s = new ShapeImage(ctr, p_size, bitmap, 1.0);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif

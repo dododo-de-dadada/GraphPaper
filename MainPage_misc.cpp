@@ -28,9 +28,9 @@ namespace winrt::GraphPaper::implementation
 		constexpr uint32_t misc_min = 3;
 		constexpr uint32_t misc_max = 12;
 		static uint32_t misc_cnt = misc_min;
-		const auto padd = samp_w * 0.125;
+		const auto pad = samp_w * 0.125;
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
+			static_cast<FLOAT>(samp_w - 2.0 * pad), static_cast<FLOAT>(samp_h - 2.0 * pad)
 		};
 		POLY_OPTION p_opt{ m_drawing_poly_opt };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
@@ -200,29 +200,29 @@ namespace winrt::GraphPaper::implementation
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_size_height().Text(buf);
 			}
-			if (swscanf_s(tx_page_padd_left().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_page_pad_left().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_padd_left().Text(buf);
+				tx_page_pad_left().Text(buf);
 			}
-			if (swscanf_s(tx_page_padd_top().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_page_pad_top().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_padd_top().Text(buf);
+				tx_page_pad_top().Text(buf);
 			}
-			if (swscanf_s(tx_page_padd_right().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_page_pad_right().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_padd_right().Text(buf);
+				tx_page_pad_right().Text(buf);
 			}
-			if (swscanf_s(tx_page_padd_bottom().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_page_pad_bottom().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_padd_bottom().Text(buf);
+				tx_page_pad_bottom().Text(buf);
 			}
 		}
 	}

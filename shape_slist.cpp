@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// データリーダーから図形を読み込む.
-	static Shape* slist_read_shape(const Shape& page, DataReader const& dt_reader);
+	static Shape* slist_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
 	template <typename T>
 	static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
@@ -457,10 +457,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから図形リストを読み込む.
-	bool slist_read(SHAPE_LIST& slist, const Shape& page, DataReader const& dt_reader)
+	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader)
 	{
 		Shape* s;
-		while ((s = slist_read_shape(page, dt_reader)) != static_cast<Shape*>(nullptr)) {
+		while ((s = slist_read_shape(dt_reader)) != static_cast<Shape*>(nullptr)) {
 			if (s == reinterpret_cast<Shape*>(-1)) {
 				return false;
 			}
@@ -470,7 +470,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから図形を読み込む.
-	static Shape* slist_read_shape(const Shape& page, DataReader const& dt_reader)
+	static Shape* slist_read_shape(DataReader const& dt_reader)
 	{
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
 			return nullptr;
@@ -480,37 +480,37 @@ namespace winrt::GraphPaper::implementation
 		if (s_type == SHAPE_TYPE::SHAPE_NULL) {
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_BEZIER) {
-			s = new ShapeBezier(page, dt_reader);
+			s = new ShapeBezier(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_IMAGE) {
 			s = new ShapeImage(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_ELLIPSE) {
-			s = new ShapeEllipse(page, dt_reader);
+			s = new ShapeEllipse(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
-			s = new ShapeLine(page, dt_reader);
+			s = new ShapeLine(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
-			s = new ShapePoly(page, dt_reader);
+			s = new ShapePoly(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
-			s = new ShapeRect(page, dt_reader);
+			s = new ShapeRect(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RRECT) {
-			s = new ShapeRRect(page, dt_reader);
+			s = new ShapeRRect(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_TEXT) {
-			s = new ShapeText(page, dt_reader);
+			s = new ShapeText(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_GROUP) {
-			s = new ShapeGroup(page, dt_reader);
+			s = new ShapeGroup(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
-			s = new ShapeRuler(page, dt_reader);
+			s = new ShapeRuler(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_ARC) {
-			s = new ShapeArc(page, dt_reader);
+			s = new ShapeArc(dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);

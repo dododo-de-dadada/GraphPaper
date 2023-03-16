@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 		DataWriter const& dt_writer);
 	static size_t export_pdf_stroke(
 		const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap,
-		const D2D1_DASH_STYLE dash, const DASH_PATT& patt, const D2D1_LINE_JOIN join,
+		const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join,
 		const float miter_limit, const DataWriter& dt_writer);
 
 	//------------------------------
@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	static size_t export_pdf_stroke(
 		const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap,
-		const D2D1_DASH_STYLE dash, const DASH_PATT& patt, const D2D1_LINE_JOIN join,
+		const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join,
 		const float miter_limit, const DataWriter& dt_writer)
 	{
 		size_t len = 0;
@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt,
+			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
 			m_join_style, m_join_miter_limit, dt_writer);
 	
 		swprintf_s(buf, 
@@ -276,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 			L"% Line\n");
 
 		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt,
+			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
 			m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Polyline\n");
 		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt,
+			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
 			m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 			L"% Ellipse\n");
 
 		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt,
+			m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
 			m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
@@ -433,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Rectangle\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -474,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const float ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
@@ -775,14 +775,14 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf,
 				L"1 0 %f 1 %f %f Tm\n",
 				oblique,
-				m_start.x + m_text_padding.width + m_dwrite_test_metrics[i].left,
-				-(m_start.y + m_text_padding.height + m_dwrite_test_metrics[i].top + m_dwrite_line_metrics[0].baseline) + page_size.height);
+				m_start.x + m_text_pad.width + m_dwrite_test_metrics[i].left,
+				-(m_start.y + m_text_pad.height + m_dwrite_test_metrics[i].top + m_dwrite_line_metrics[0].baseline) + page_size.height);
 			len += dt_writer.WriteString(buf);
 
 			// 文字列を書き込む.
 
 			// wchar_t を GID に変換して書き出す.
-			const auto utf32{ conv_utf16_to_utf32(t, t_len) };	// UTF-32 文字列
+			const auto utf32{ text_utf16_to_utf32(t, t_len) };	// UTF-32 文字列
 			const auto u_len = std::size(utf32);	// UTF-32 文字列の長さ
 			std::vector<uint16_t> gid(u_len);	// グリフ識別子
 			face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(u_len), std::data(gid));
@@ -799,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 			/*
 			// wchar_t を UTF-32 に変換して書き出す.
 			len += dt_writer.WriteString(L"% UTF-32\n<");
-			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
+			std::vector<uint32_t> utf32{ text_utf16_to_utf32(t, t_len) };
 			for (int i = 0; i < utf32.size(); i++) {
 				swprintf_s(buf, L"%06x", utf32[i]);
 				len += dt_writer.WriteString(buf);
@@ -810,7 +810,7 @@ namespace winrt::GraphPaper::implementation
 			/*
 			// wchar_t を CID に変換して書き出す.
 			len += dt_writer.WriteString(L"% CID\n<");
-			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
+			std::vector<uint32_t> utf32{ text_utf16_to_utf32(t, t_len) };
 			for (int i = 0; i < utf32.size(); i++) {
 				const auto cid = cmap_getcid(utf32[i]);
 				if (cid != 0) {
@@ -869,7 +869,7 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;
 		IDWriteFontFace3* face;	// 字面
 		get_font_face(face);
-		std::vector utf32{ conv_utf16_to_utf32(D, 10) };	// UINT-32 文字列
+		std::vector utf32{ text_utf16_to_utf32(D, 10) };	// UINT-32 文字列
 		uint16_t gid[10];	// グリフ識別子
 		face->GetGlyphIndices(std::data(utf32), 10, gid);
 		DWRITE_FONT_METRICS f_met;	// 書体の計量
@@ -926,7 +926,7 @@ namespace winrt::GraphPaper::implementation
 				p_align = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 			}
 			*/
-			len += export_pdf_stroke(1.0f, m_stroke_color, CAP_STYLE_FLAT, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
+			len += export_pdf_stroke(1.0f, m_stroke_color, CAP_STYLE_FLAT, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
 
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
@@ -1034,8 +1034,8 @@ namespace winrt::GraphPaper::implementation
 			min(max(page_b, 0.0), 1.0),
 			m_page_size.width,
 			m_page_size.height,
-			m_page_padding.left,
-			-m_page_padding.top
+			m_page_pad.left,
+			-m_page_pad.top
 		);
 		return dt_writer.WriteString(buf);
 	}
@@ -1058,8 +1058,8 @@ namespace winrt::GraphPaper::implementation
 		//const float page_scale = m_page_scale;
 		const D2D1_SIZE_F g_size{	// 方眼を描く領域の大きさ
 			// ページの大きさから内余白の大きさを除く.
-			m_page_size.width - (m_page_padding.left + m_page_padding.right),
-			m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+			m_page_size.width - (m_page_pad.left + m_page_pad.right),
+			m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
 		};
 
 		const FLOAT g_width = 1.0;	// 方眼の太さ
@@ -1079,8 +1079,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F{
 				static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f 
 			},
-			CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
-			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
+			CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
+			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
 
 		// 垂直な方眼を表示する.
 		wchar_t buf[1024];
@@ -1157,9 +1157,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_BEZIER_SEGMENT b_seg1{};
 		alternate_bezier(start1, b_seg1);
 
-		D2D1_POINT_2F center{};
+		D2D1_POINT_2F ctr{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
-			get_pos_anc(ANC_TYPE::ANC_A_CENTER, center);
+			get_pos_anc(ANC_TYPE::ANC_A_CENTER, ctr);
 		}
 
 		size_t len = 0;
@@ -1176,13 +1176,13 @@ namespace winrt::GraphPaper::implementation
 				b_seg1.point1.x, -b_seg1.point1.y + page_size.height,
 				b_seg1.point2.x, -b_seg1.point2.y + page_size.height,
 				b_seg1.point3.x, -b_seg1.point3.y + page_size.height,
-				center.x, -center.y + page_size.height
+				ctr.x, -ctr.y + page_size.height
 			);
 			len += dt_writer.WriteString(buf);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			len += export_pdf_stroke(
-				m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt,
+				m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
 				m_join_style, m_join_miter_limit, dt_writer);
 			// S = パスをストロークで描画
 			// パスは開いたまま.
@@ -1198,7 +1198,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				arc_get_pos_arrow(
-					m_pos[0], center, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_sweep_dir,
+					m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_sweep_dir,
 					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);

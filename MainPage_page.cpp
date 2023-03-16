@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 
 		const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
 		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background.get(), p_scale);
-		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_d2d_state_block.get());
+		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
 
 		// 描画を開始する.
 		m_main_d2d.m_d2d_context->BeginDraw();
@@ -286,7 +286,7 @@ namespace winrt::GraphPaper::implementation
 		// 描画を終了する.
 		const HRESULT hres = m_main_d2d.m_d2d_context->EndDraw();
 		// 保存された描画環境を元に戻す.
-		m_main_d2d.m_d2d_context->RestoreDrawingState(Shape::m_d2d_state_block.get());
+		m_main_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
 		if (hres != S_OK) {
 			// 結果が S_OK でない場合,
 			// 「描画できません」メッセージダイアログを表示する.
@@ -410,20 +410,20 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
-			m_main_page.set_page_padding(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_main_page.set_page_pad(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
 			m_main_page.set_stroke_cap(CAP_STYLE_FLAT);
 			m_main_page.set_stroke_color(COLOR_BLACK);
 			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_main_page.set_dash_patt(DASH_PATT_DEFVAL);
+			m_main_page.set_dash_pat(DASH_PAT_DEFVAL);
 			m_main_page.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_main_page.set_join_miter_limit(MITER_LIMIT_DEFVAL);
+			m_main_page.set_join_miter_limit(JOIN_MITER_LIMIT_DEFVAL);
 			m_main_page.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_main_page.set_stroke_width(1.0);
 			m_main_page.set_text_align_vert(
 				DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_page.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_main_page.set_text_line_sp(0.0);
-			m_main_page.set_text_padding(TEXT_PADDING_DEFVAL);
+			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
 		}
 	}
 
@@ -506,17 +506,17 @@ namespace winrt::GraphPaper::implementation
 			m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
 		tx_page_size_height().Text(buf);
 		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_padding.left, dpi, g_len, buf);
-		tx_page_padd_left().Text(buf);
+			m_len_unit, m_main_page.m_page_pad.left, dpi, g_len, buf);
+		tx_page_pad_left().Text(buf);
 		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_padding.top, dpi, g_len, buf);
-		tx_page_padd_top().Text(buf);
+			m_len_unit, m_main_page.m_page_pad.top, dpi, g_len, buf);
+		tx_page_pad_top().Text(buf);
 		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_padding.right, dpi, g_len, buf);
-		tx_page_padd_right().Text(buf);
+			m_len_unit, m_main_page.m_page_pad.right, dpi, g_len, buf);
+		tx_page_pad_right().Text(buf);
 		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_padding.bottom, dpi, g_len, buf);
-		tx_page_padd_bottom().Text(buf);
+			m_len_unit, m_main_page.m_page_pad.bottom, dpi, g_len, buf);
+		tx_page_pad_bottom().Text(buf);
 
 		if (m_len_unit == LEN_UNIT::GRID) {
 			cb_len_unit().SelectedItem(box_value(cbi_len_unit_grid()));
@@ -559,27 +559,27 @@ namespace winrt::GraphPaper::implementation
 				co_return;
 			}
 			float new_left;
-			if (swscanf_s(tx_page_padd_left().Text().c_str(), L"%f", &new_left) != 1) {
+			if (swscanf_s(tx_page_pad_left().Text().c_str(), L"%f", &new_left) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_padd_left/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_left/Header");
 				co_return;
 			}
 			float new_top;
-			if (swscanf_s(tx_page_padd_top().Text().c_str(), L"%f", &new_top) != 1) {
+			if (swscanf_s(tx_page_pad_top().Text().c_str(), L"%f", &new_top) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_padd_top/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_top/Header");
 				co_return;
 			}
 			float new_right;
-			if (swscanf_s(tx_page_padd_right().Text().c_str(), L"%f", &new_right) != 1) {
+			if (swscanf_s(tx_page_pad_right().Text().c_str(), L"%f", &new_right) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_padd_right/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_right/Header");
 				co_return;
 			}
 			float new_bottom;
-			if (swscanf_s(tx_page_padd_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+			if (swscanf_s(tx_page_pad_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_padd_bottom/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_bottom/Header");
 				co_return;
 			}
 			if (cbi_len_unit_grid().IsSelected()) {
@@ -607,20 +607,20 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
 			};
-			D2D1_RECT_F p_padd{
+			D2D1_RECT_F p_pad{
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
 			};
 			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
-			const bool flag_padd = !equal(p_padd, m_main_page.m_page_padding);
-			if (flag_size || flag_padd) {
+			const bool flag_pad = !equal(p_pad, m_main_page.m_page_pad);
+			if (flag_size || flag_pad) {
 				if (flag_size) {
 					ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
 				}
-				if (flag_padd) {
-					ustack_push_set<UNDO_ID::PAGE_PADD>(&m_main_page, p_padd);
+				if (flag_pad) {
+					ustack_push_set<UNDO_ID::PAGE_PAD>(&m_main_page, p_pad);
 				}
 				ustack_push_null();
 				ustack_is_enable();
@@ -664,8 +664,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F p_max;
 			pt_add(b_rb, b_lt, p_max);
 			D2D1_SIZE_F p_size{
-				m_main_page.m_page_padding.left + p_max.x + m_main_page.m_page_padding.right,
-				m_main_page.m_page_padding.top + p_max.y + m_main_page.m_page_padding.bottom
+				m_main_page.m_page_pad.left + p_max.x + m_main_page.m_page_pad.right,
+				m_main_page.m_page_pad.top + p_max.y + m_main_page.m_page_pad.bottom
 			};
 			if (!equal(m_main_page.m_page_size, p_size)) {
 				ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// テキストボックス「ページの幅」「ページの高さ」の値が変更された.
 	//------------------------------
-	void MainPage::page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
+	void MainPage::page_size_text_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
 		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
 		const auto g_len = m_main_page.m_grid_base + 1.0;
@@ -696,19 +696,19 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		double l;
-		if (swscanf_s(tx_page_padd_left().Text().c_str(), L"%lf", &l) != 1) {
+		if (swscanf_s(tx_page_pad_left().Text().c_str(), L"%lf", &l) != 1) {
 			return;
 		}
 		double t;
-		if (swscanf_s(tx_page_padd_top().Text().c_str(), L"%lf", &t) != 1) {
+		if (swscanf_s(tx_page_pad_top().Text().c_str(), L"%lf", &t) != 1) {
 			return;
 		}
 		double r;
-		if (swscanf_s(tx_page_padd_right().Text().c_str(), L"%lf", &r) != 1) {
+		if (swscanf_s(tx_page_pad_right().Text().c_str(), L"%lf", &r) != 1) {
 			return;
 		}
 		double b;
-		if (swscanf_s(tx_page_padd_bottom().Text().c_str(), L"%lf", &b) != 1) {
+		if (swscanf_s(tx_page_pad_bottom().Text().c_str(), L"%lf", &b) != 1) {
 			return;
 		}
 		LEN_UNIT u;

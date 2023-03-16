@@ -200,12 +200,12 @@ namespace winrt::GraphPaper::implementation
 
 			const auto samp_w = scp_dialog_panel().Width();
 			const auto samp_h = scp_dialog_panel().Height();
-			const auto center = samp_w * 0.5;
-			const auto padd = samp_w * 0.125;
-			const auto rx = (samp_w - padd) * 0.5;
-			const auto ry = (samp_h - padd) * 0.5;
+			const auto ctr = samp_w * 0.5;
+			const auto pad = samp_w * 0.125;
+			const auto rx = (samp_w - pad) * 0.5;
+			const auto ry = (samp_h - pad) * 0.5;
 			const D2D1_POINT_2F start{
-				static_cast<FLOAT>(center), static_cast<FLOAT>(padd)
+				static_cast<FLOAT>(ctr), static_cast<FLOAT>(pad)
 			};
 			const D2D1_POINT_2F pos{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)

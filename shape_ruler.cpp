@@ -305,18 +305,24 @@ namespace winrt::GraphPaper::implementation
 	// 字面を得る (使用後は Release する).
 	bool ShapeRuler::get_font_face(IDWriteFontFace3*& face) const noexcept
 	{
-		return winrt::GraphPaper::implementation::get_font_face<IDWriteTextFormat>(m_dwrite_text_format.get(),
-			m_font_family,
-			DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, face);
+		return text_get_font_face<IDWriteTextFormat>(
+			m_dwrite_text_format.get(), m_font_family, DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, face);
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRuler::ShapeRuler(const Shape& page, DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(page, dt_reader),
+	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
 		m_font_family(dt_read_name(dt_reader)),
 		m_font_size(dt_reader.ReadSingle())
 	{
+		if (m_grid_base < 0.0f) {
+			m_grid_base = GRID_LEN_DEFVAL - 1.0f;
+		}
+		if (m_font_size < 0.0f) {
+			m_font_size = FONT_SIZE_DEFVAL;
+		}
 		ShapeText::is_available_font(m_font_family);
 	}
 

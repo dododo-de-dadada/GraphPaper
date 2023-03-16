@@ -860,8 +860,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
-	ShapePoly::ShapePoly(const Shape& page, DataReader const& dt_reader) :
-		ShapePath::ShapePath(page, dt_reader)
+	ShapePoly::ShapePoly(DataReader const& dt_reader) :
+		ShapePath::ShapePath(dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
 	}

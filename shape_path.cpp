@@ -227,31 +227,11 @@ namespace winrt::GraphPaper::implementation
 	// pos	位置ベクトル
 	bool ShapePath::move(const D2D1_POINT_2F pos) noexcept
 	{
-		if (ShapeLine::move(pos)) {
+		D2D1_POINT_2F start;
+		pt_add(m_start, pos, start);
+		if (set_pos_start(start)) {
+			m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
-			return true;
-		}
-		return false;
-	}
-
-	// 矢じるしの形式に格納する.
-	bool ShapePath::set_arrow_size(const ARROW_SIZE& val) noexcept
-	{
-		if (ShapeLine::set_arrow_size(val)) {
-			m_d2d_path_geom = nullptr;
-			return true;
-		}
-		return false;
-	}
-
-	// 矢じるしの形式に格納する.
-	bool ShapePath::set_arrow_style(const ARROW_STYLE val) noexcept
-	{
-		if (m_arrow_style != val) {
-			m_arrow_style = val;
-			if (m_d2d_path_geom != nullptr) {
-				m_d2d_path_geom = nullptr;
-			}
 			return true;
 		}
 		return false;
@@ -262,8 +242,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_fill_color, val)) {
 			m_fill_color = val;
-			m_d2d_path_geom = nullptr;
-			m_d2d_arrow_geom = nullptr;
 			return true;
 		}
 		return false;
@@ -273,16 +251,28 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	bool ShapePath::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		if (ShapeLine::set_pos_start(val)) {
+		D2D1_POINT_2F p;
+		pt_round(val, PT_ROUND, p);
+		if (!equal(m_start, p)) {
+			m_start = p;
+			m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
 			return true;
 		}
 		return false;
 	}
 
-	ShapePath::ShapePath(const Shape& page, const DataReader& dt_reader) :
-		ShapeLine::ShapeLine(page, dt_reader)
+	ShapePath::ShapePath(const DataReader& dt_reader) :
+		ShapeArrow(dt_reader)
 	{
+		m_start.x = dt_reader.ReadSingle();
+		m_start.y = dt_reader.ReadSingle();
+		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
+		m_pos.resize(vec_cnt);
+		for (size_t i = 0; i < vec_cnt; i++) {
+			m_pos[i].x = dt_reader.ReadSingle();
+			m_pos[i].y = dt_reader.ReadSingle();
+		}
 		const D2D1_COLOR_F fill_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
@@ -298,7 +288,17 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapePath::write(const DataWriter& dt_writer) const
 	{
-		ShapeLine::write(dt_writer);
+		ShapeArrow::write(dt_writer);
+		// 開始位置
+		dt_writer.WriteSingle(m_start.x);
+		dt_writer.WriteSingle(m_start.y);
+		// 次の位置への差分
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
+		for (const D2D1_POINT_2F vec : m_pos) {
+			dt_writer.WriteSingle(vec.x);
+			dt_writer.WriteSingle(vec.y);
+		}
+		// 塗りつぶし色
 		dt_writer.WriteSingle(m_fill_color.r);
 		dt_writer.WriteSingle(m_fill_color.g);
 		dt_writer.WriteSingle(m_fill_color.b);

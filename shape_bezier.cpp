@@ -723,8 +723,8 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	ShapeBezier::ShapeBezier(const Shape& page, DataReader const& dt_reader) :
-		ShapePath::ShapePath(page, dt_reader)
+	ShapeBezier::ShapeBezier(DataReader const& dt_reader) :
+		ShapePath::ShapePath(dt_reader)
 	{}
 
 	void ShapeBezier::write(const DataWriter& dt_writer) const

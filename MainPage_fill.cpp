@@ -66,12 +66,12 @@ namespace winrt::GraphPaper::implementation
 		};
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
-		const auto padd = p_width * 0.125;
+		const auto pad = p_width * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+			static_cast<FLOAT>(p_width - 2.0 * pad), static_cast<FLOAT>(p_height - 2.0 * pad)
 		};
 		m_dialog_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_dialog_page));
 		m_dialog_page.m_shape_list.back()->set_select(true);

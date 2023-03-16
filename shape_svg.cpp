@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 
 	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos);
 	static void export_svg_color(wchar_t* buf, const size_t len, const D2D1_COLOR_F color, const wchar_t* name);
-	static void export_svg_stroke(wchar_t* buf, const size_t len, const float width, const D2D1_COLOR_F& color, const D2D1_DASH_STYLE dash, const DASH_PATT& patt, const CAP_STYLE cap, const D2D1_LINE_JOIN join, const float limit);
+	static void export_svg_stroke(wchar_t* buf, const size_t len, const float width, const D2D1_COLOR_F& color, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const CAP_STYLE cap, const D2D1_LINE_JOIN join, const float limit);
 
 	//------------------------------
 	// バッファに矢じりを SVG タグとして書き込む.
@@ -62,7 +62,9 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const auto len2 = wcslen(buf);
-		export_svg_stroke(buf + len2, len - len2, width, color, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, cap, join, miter_limit);
+		export_svg_stroke(
+			buf + len2, len - len2, width, color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, cap, join,
+			miter_limit);
 
 		const auto len3 = wcslen(buf);
 		wcscpy_s(buf + len3, len - len3, L"/>\n");
@@ -118,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 		const float width, 
 		const D2D1_COLOR_F& color, 
 		const D2D1_DASH_STYLE dash, 
-		const DASH_PATT& patt, 
+		const DASH_PAT& patt, 
 		const CAP_STYLE cap, 
 		const D2D1_LINE_JOIN join, 
 		const float limit
@@ -195,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG として書き込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	void ShapeBezier::export_svg(DataWriter const& dt_writer)
+	void ShapeBezier::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 		pt_add(m_start, m_pos[0], b_seg.point1);
@@ -216,20 +218,24 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
-			export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barbs, barbs[2]);
+			export_svg_arrow(
+				buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
+				m_join_style, m_join_miter_limit, barbs, barbs[2]);
 			dt_writer.WriteString(buf);
 		}
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeEllipse::export_svg(DataWriter const& dt_writer)
+	void ShapeEllipse::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		D2D1_POINT_2F r;
 		pt_mul(m_pos, 0.5, r);
@@ -249,7 +255,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		// 線・枠を出力
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		// だ円を閉じる.
@@ -309,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeLine::export_svg(DataWriter const& dt_writer)
+	void ShapeLine::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も無いなら,
 		if (equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) {
@@ -326,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
 			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
@@ -343,7 +351,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePoly::export_svg(DataWriter const& dt_writer)
+	void ShapePoly::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && 
@@ -372,7 +380,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteString(L"\" ");
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -394,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRect::export_svg(DataWriter const& dt_writer)
+	void ShapeRect::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && 
@@ -416,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
 			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
@@ -424,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRRect::export_svg(DataWriter const& dt_writer)
+	void ShapeRRect::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
@@ -451,14 +461,14 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
 			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
 	}
 
-	void ShapeRuler::export_svg(const DataWriter& dt_writer)
+	void ShapeRuler::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		// 線・枠の色も塗りつぶしの色も透明なら
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) &&
@@ -474,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];
 		IDWriteFontFace3* f_face;	// 字面
 		get_font_face(f_face);
-		std::vector utf32{ conv_utf16_to_utf32(D, 10) };	// UTF-32 文字列
+		std::vector utf32{ text_utf16_to_utf32(D, 10) };	// UTF-32 文字列
 		uint16_t gid[10];	// グリフ識別子
 		f_face->GetGlyphIndices(std::data(utf32), 10, gid);
 		DWRITE_FONT_METRICS f_met;	// 書体の計量
@@ -522,7 +532,8 @@ namespace winrt::GraphPaper::implementation
 
 			dt_writer.WriteString(L"<g ");
 			export_svg_stroke(buf, 1024,
-				1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, CAP_STYLE_FLAT, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
+				1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, CAP_STYLE_FLAT,
+				D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
 			dt_writer.WriteString(buf);
 			swprintf_s(buf,
 				L"font-size=\"%f\" "
@@ -597,7 +608,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeText::export_svg(DataWriter const& dt_writer)
+	void ShapeText::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		static constexpr wchar_t* SVG_STYLE[] = {
 			L"normal", L"oblique", L"italic"
@@ -644,7 +655,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F lt_pos{};	// 左上位置
-		pt_add(m_start, m_text_padding.width, m_text_padding.height, lt_pos);
+		pt_add(m_start, m_text_pad.width, m_text_pad.height, lt_pos);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;
@@ -679,11 +690,11 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"</g>\n");
 	}
 
-	void ShapePage::export_svg(const DataWriter& dt_writer)
+	void ShapePage::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページの内余白の分を除く)
-			m_page_size.width - (m_page_padding.left + m_page_padding.right),
-			m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+			m_page_size.width - (m_page_pad.left + m_page_pad.right),
+			m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
 		};
 
 		const FLOAT g_width = 1.0f;	// 方眼の太さ
@@ -701,8 +712,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"<!-- Grids -->\n");
 		dt_writer.WriteString(L"<g ");
 		export_svg_stroke(
-			buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
-			CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
+			buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
+			CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L">\n");
 
@@ -757,7 +768,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに SVG として書き込む.
-	void ShapeArc::export_svg(const DataWriter& dt_writer)
+	void ShapeArc::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		wchar_t buf[1024];
 		D2D1_POINT_2F p[5]{};
@@ -804,7 +815,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			dt_writer.WriteString(buf);
 			export_svg_stroke(
-				buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+				buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
 				m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");

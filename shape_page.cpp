@@ -276,14 +276,14 @@ namespace winrt::GraphPaper::implementation
 			D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
 		D2D1_MATRIX_3X2_F t{};
 		m_d2d_target->GetTransform(&t);
-		t.dx += m_page_padding.left * m_page_scale;
-		t.dy += m_page_padding.right * m_page_scale;
+		t.dx += m_page_pad.left * m_page_scale;
+		t.dy += m_page_pad.right * m_page_scale;
 		m_d2d_target->SetTransform(&t);
 		// 方眼の表示が最背景に表示なら,
 		if (m_grid_show == GRID_SHOW::BACK) {
 			D2D1_SIZE_F g_size{
-				m_page_size.width - (m_page_padding.left + m_page_padding.right),
-				m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+				m_page_size.width - (m_page_pad.left + m_page_pad.right),
+				m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
 			};
 			// 方眼を表示する.
 			page_draw_grid(
@@ -306,8 +306,8 @@ namespace winrt::GraphPaper::implementation
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
 			D2D1_SIZE_F g_size{
-				m_page_size.width - (m_page_padding.left + m_page_padding.right),
-				m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+				m_page_size.width - (m_page_pad.left + m_page_pad.right),
+				m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
 			};
 			page_draw_grid(
 				m_d2d_target,
@@ -343,35 +343,35 @@ namespace winrt::GraphPaper::implementation
 		h_end.x = g_size.width - 1.0f;
 
 		// 垂直な方眼を表示する.
-		float w;
+		double w;
 		double x;
 		for (uint32_t i = 0; (x = round((g_len * i + g_offset.x) / PT_ROUND) * PT_ROUND) <= page_w; i++) {
 			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
-				w = 2.0f * g_width;
+				w = 2.0 * g_width;
 			}
 			else if (g_emph.m_gauge_1 != 0 && (i % g_emph.m_gauge_1) == 0) {
 				w = g_width;
 			}
 			else {
-				w = 0.5f * g_width;
+				w = 0.5 * g_width;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			target->DrawLine(v_start, v_end, brush, w, nullptr);
+			target->DrawLine(v_start, v_end, brush, static_cast<FLOAT>(w), nullptr);
 		}
 		// 水平な方眼を表示する.
 		double y;
 		for (uint32_t i = 0; (y = round((g_len * i + g_offset.y) / PT_ROUND) * PT_ROUND) <= page_h; i++) {
 			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
-				w = 2.0f * g_width;
+				w = 2.0 * g_width;
 			}
 			else if (g_emph.m_gauge_1 != 0 && (i % g_emph.m_gauge_1) == 0) {
 				w = g_width;
 			}
 			else {
-				w = 0.5f * g_width;
+				w = 0.5 * g_width;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			target->DrawLine(h_start, h_end, brush, w, nullptr);
+			target->DrawLine(h_start, h_end, brush, static_cast<FLOAT>(w), nullptr);
 		}
 
 	}
@@ -524,9 +524,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置を得る.
-	bool ShapePage::get_dash_patt(DASH_PATT& val) const noexcept
+	bool ShapePage::get_dash_pat(DASH_PAT& val) const noexcept
 	{
-		val = m_dash_patt;
+		val = m_dash_pat;
 		return true;
 	}
 
@@ -580,9 +580,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列の余白を得る.
-	bool ShapePage::get_text_padding(D2D1_SIZE_F& val) const noexcept
+	bool ShapePage::get_text_pad(D2D1_SIZE_F& val) const noexcept
 	{
-		val = m_text_padding;
+		val = m_text_pad;
 		return true;
 	}
 
@@ -648,17 +648,17 @@ namespace winrt::GraphPaper::implementation
 			m_page_size = p_size;
 		}
 		// ページの内余白
-		const D2D1_RECT_F p_padd{
+		const D2D1_RECT_F p_pad{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_padd.left >= 0.0f && p_padd.right >= 0.0f && 
-			p_padd.left + p_padd.right < m_page_size.width &&
-			p_padd.top >= 0.0f && p_padd.bottom >= 0.0f &&
-			p_padd.top + p_padd.bottom < m_page_size.height) {
-			m_page_padding = p_padd;
+		if (p_pad.left >= 0.0f && p_pad.right >= 0.0f && 
+			p_pad.left + p_pad.right < m_page_size.width &&
+			p_pad.top >= 0.0f && p_pad.bottom >= 0.0f &&
+			p_pad.top + p_pad.bottom < m_page_size.height) {
+			m_page_pad = p_pad;
 		}
 		// 矢じるしの寸法
 		const ARROW_SIZE a_size{
@@ -714,7 +714,7 @@ namespace winrt::GraphPaper::implementation
 			m_dash_cap = d_cap;
 		}
 		// 破線の配置
-		const DASH_PATT d_patt{
+		const DASH_PAT d_patt{
 			{
 				dt_reader.ReadSingle(), dt_reader.ReadSingle(),
 				dt_reader.ReadSingle(), dt_reader.ReadSingle(),
@@ -723,7 +723,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		if (d_patt.m_[0] >= 0.0f && d_patt.m_[1] >= 0.0f && d_patt.m_[2] >= 0.0f &&
 			d_patt.m_[3] >= 0.0f && d_patt.m_[4] >= 0.0f && d_patt.m_[5] >= 0.0f) {
-			m_dash_patt = d_patt;
+			m_dash_pat = d_patt;
 		}
 		// 破線の形式
 		const D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
@@ -843,13 +843,13 @@ namespace winrt::GraphPaper::implementation
 			m_text_line_sp = t_line_sp;
 		}
 		// 文字列の余白
-		const D2D1_SIZE_F t_padd{
+		const D2D1_SIZE_F t_pad{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (t_padd.width >= 0.0 && t_padd.width <= 127.5 &&
-			t_padd.height >= 0.0 && t_padd.height <= 127.5) {
-			m_text_padding = t_padd;
+		if (t_pad.width >= 0.0 && t_pad.width <= 127.5 &&
+			t_pad.height >= 0.0 && t_pad.height <= 127.5) {
+			m_text_pad = t_pad;
 		}
 		// 画像の不透明率
 		const float i_opac = dt_reader.ReadSingle();
@@ -1067,10 +1067,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置に格納する.
-	bool ShapePage::set_dash_patt(const DASH_PATT& val) noexcept
+	bool ShapePage::set_dash_pat(const DASH_PAT& val) noexcept
 	{
-		if (!equal(m_dash_patt, val)) {
-			m_dash_patt = val;
+		if (!equal(m_dash_pat, val)) {
+			m_dash_pat = val;
 			return true;
 		}
 		return false;
@@ -1135,10 +1135,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列の余白に格納する.
-	bool ShapePage::set_text_padding(const D2D1_SIZE_F val) noexcept
+	bool ShapePage::set_text_pad(const D2D1_SIZE_F val) noexcept
 	{
-		if (!equal(m_text_padding, val)) {
-			m_text_padding = val;
+		if (!equal(m_text_pad, val)) {
+			m_text_pad = val;
 			return true;
 		}
 		return false;
@@ -1151,7 +1151,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
 		s->get_dash_cap(m_dash_cap);
-		s->get_dash_patt(m_dash_patt);
+		s->get_dash_pat(m_dash_pat);
 		s->get_dash_style(m_dash_style);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
@@ -1169,14 +1169,14 @@ namespace winrt::GraphPaper::implementation
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
 		s->get_page_color(m_page_color);
-		s->get_page_padding(m_page_padding);
+		s->get_page_pad(m_page_pad);
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_align_horz(m_text_align_horz);
 		s->get_text_align_vert(m_text_align_vert);
 		s->get_text_line_sp(m_text_line_sp);
-		s->get_text_padding(m_text_padding);
+		s->get_text_pad(m_text_pad);
 	}
 
 	// データリーダーに書き込む.
@@ -1208,10 +1208,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_page_size.width);
 		dt_writer.WriteSingle(m_page_size.height);
 		// ページの内余白
-		dt_writer.WriteSingle(m_page_padding.left);
-		dt_writer.WriteSingle(m_page_padding.top);
-		dt_writer.WriteSingle(m_page_padding.right);
-		dt_writer.WriteSingle(m_page_padding.bottom);
+		dt_writer.WriteSingle(m_page_pad.left);
+		dt_writer.WriteSingle(m_page_pad.top);
+		dt_writer.WriteSingle(m_page_pad.right);
+		dt_writer.WriteSingle(m_page_pad.bottom);
 		// 矢じるしの大きさ
 		dt_writer.WriteSingle(m_arrow_size.m_width);
 		dt_writer.WriteSingle(m_arrow_size.m_length);
@@ -1234,12 +1234,12 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式
 		dt_writer.WriteUInt32(m_dash_cap);
 		// 破線の配置
-		dt_writer.WriteSingle(m_dash_patt.m_[0]);
-		dt_writer.WriteSingle(m_dash_patt.m_[1]);
-		dt_writer.WriteSingle(m_dash_patt.m_[2]);
-		dt_writer.WriteSingle(m_dash_patt.m_[3]);
-		dt_writer.WriteSingle(m_dash_patt.m_[4]);
-		dt_writer.WriteSingle(m_dash_patt.m_[5]);
+		dt_writer.WriteSingle(m_dash_pat.m_[0]);
+		dt_writer.WriteSingle(m_dash_pat.m_[1]);
+		dt_writer.WriteSingle(m_dash_pat.m_[2]);
+		dt_writer.WriteSingle(m_dash_pat.m_[3]);
+		dt_writer.WriteSingle(m_dash_pat.m_[4]);
+		dt_writer.WriteSingle(m_dash_pat.m_[5]);
 		// 破線の形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
 		// 線分の結合
@@ -1276,8 +1276,8 @@ namespace winrt::GraphPaper::implementation
 		// 行間
 		dt_writer.WriteSingle(m_text_line_sp);
 		// 文字列の余白
-		dt_writer.WriteSingle(m_text_padding.width);
-		dt_writer.WriteSingle(m_text_padding.height);
+		dt_writer.WriteSingle(m_text_pad.width);
+		dt_writer.WriteSingle(m_text_pad.height);
 		// 画像の不透明率
 		dt_writer.WriteSingle(m_image_opac);
 	}

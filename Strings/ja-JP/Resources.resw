@@ -481,7 +481,7 @@
     <value>線枠の色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_dash_patt.Text" xml:space="preserve">
+  <data name="mfi_dash_pat.Text" xml:space="preserve">
     <value>破線の配置...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -501,7 +501,7 @@
     <value>行間...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_padding.Text" xml:space="preserve">
+  <data name="mfi_text_pad.Text" xml:space="preserve">
     <value>余白...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -874,7 +874,7 @@
     <value>線枠の色</value>
     <comment>String</comment>
   </data>
-  <data name="str_dash_pattern" xml:space="preserve">
+  <data name="str_dash_patern" xml:space="preserve">
     <value>破線の配置</value>
     <comment>String</comment>
   </data>
@@ -958,19 +958,19 @@
     <value>幅</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_padd_left.Header" xml:space="preserve">
+  <data name="tx_page_pad_left.Header" xml:space="preserve">
     <value>左余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_padd_top.Header" xml:space="preserve">
+  <data name="tx_page_pad_top.Header" xml:space="preserve">
     <value>上余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_padd_right.Header" xml:space="preserve">
+  <data name="tx_page_pad_right.Header" xml:space="preserve">
     <value>右余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_padd_bottom.Header" xml:space="preserve">
+  <data name="tx_page_pad_bottom.Header" xml:space="preserve">
     <value>下余白</value>
     <comment>TextBox</comment>
   </data>

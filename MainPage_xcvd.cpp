@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_foreground(Dispatcher());
 				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
 				SHAPE_LIST slist_pasted;	// 貼り付けリスト
-				if (slist_read(slist_pasted, m_main_page, dt_reader) && !slist_pasted.empty()) {
+				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
 					m_mutex_draw.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
 					unselect_all();
