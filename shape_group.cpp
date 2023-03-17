@@ -133,8 +133,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 位置を含むか判定する.
-	// test	判定する位置
+	// 図形が点を含むか判定する.
+	// test	判定される点
 	// 戻り値	位置を含む図形の部位
 	//------------------------------
 	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F test) const noexcept

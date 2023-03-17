@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 多角形の角が位置を含むか判定する (面取り)
+	// 多角形の角が図形が点を含むか判定する (面取り)
 	// e_side	太さ分拡張された辺の配列
 	static bool poly_test_join_bevel(
 		const D2D1_POINT_2F test,
@@ -172,8 +172,8 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 多角形の角が位置を含むか判定する.
-	// t_pos	判定する位置
+	// 多角形の角が図形が点を含むか判定する.
+	// t_pos	判定される点
 	// s_cnt	辺の数
 	// e_close	辺が閉じているか判定
 	// e_width	辺の太さの半分.
@@ -295,13 +295,13 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 多角形の角が位置を含むか判定する (丸まった角)
+	// 多角形の角が図形が点を含むか判定する (丸まった角)
 	// e_width	辺の半分の太さ
 	static bool poly_test_join_round(
-		const D2D1_POINT_2F& test, const size_t s_cnt, const D2D1_POINT_2F s[], const double e_width)
+		const D2D1_POINT_2F& t, const size_t s_cnt, const D2D1_POINT_2F s[], const double e_width)
 	{
 		for (size_t i = 0; i < s_cnt; i++) {
-			if (pt_in_circle(test, s[i], e_width)) {
+			if (pt_in_circle(t, s[i], e_width)) {
 				return true;
 			}
 		}
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置が, 線分に含まれるか判定する.
-	// test	判定する位置 (線分の始点を原点とする)
+	// t	判定される点 (線分の始点を原点とする)
 	// p_cnt	始点を除く位置ベクトルの数
 	// p	始点を除く位置ベクトルの配列
 	// s_opaque	線が不透明か判定
@@ -319,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 	// s_limit	尖り制限
 	// f_opa	塗りつぶしが不透明か判定
 	static uint32_t poly_hit_test(
-		const D2D1_POINT_2F test, const size_t p_cnt, const D2D1_POINT_2F p[], const bool s_opaque,
+		const D2D1_POINT_2F t, const size_t p_cnt, const D2D1_POINT_2F p[], const bool s_opaque,
 		const double s_width, const bool e_closed, const CAP_STYLE& s_cap,
 		const D2D1_LINE_JOIN s_join, const double s_limit, const bool f_opaque, const double a_len)
 	{
@@ -328,8 +328,8 @@ namespace winrt::GraphPaper::implementation
 		size_t n_cnt = 0;	// 長さのある辺の数
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < p_cnt; i++) {
-			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (pt_in_anc(test, q[i], a_len)) {
+			// 判定される点が, 頂点の部位に含まれるか判定する.
+			if (pt_in_anc(t, q[i], a_len)) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -341,8 +341,8 @@ namespace winrt::GraphPaper::implementation
 			// 頂点に辺ベクトルを加え, 次の頂点を求める.
 			pt_add(q[i], p[i], q[i + 1]);
 		}
-		// 判定する位置が, 終点の部位に含まれるか判定する.
-		if (pt_in_anc(test, q[p_cnt], a_len)) {
+		// 判定される点が, 終点の部位に含まれるか判定する.
+		if (pt_in_anc(t, q[p_cnt], a_len)) {
 			k = p_cnt;
 		}
 		// 頂点が見つかったか判定する.
@@ -355,8 +355,8 @@ namespace winrt::GraphPaper::implementation
 			const auto e_width = max(max(static_cast<double>(s_width), a_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (n_cnt == 0) {
-				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
-				if (pt_in_circle(test, e_width)) {
+				// ゼロならば, 判定される点が, 拡張する幅を半径とする円に含まれるか判定する.
+				if (pt_in_circle(t.x, t.y, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 				return ANC_TYPE::ANC_PAGE;
@@ -368,19 +368,20 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 閉じてないなら, 端の形式が円形か判定する.
 			else if (equal(s_cap, CAP_STYLE_ROUND)) {
-				if (pt_in_circle(test, e_width) || pt_in_circle(test, q[p_cnt], e_width)) {
+				if (pt_in_circle(t.x, t.y, e_width) ||
+					pt_in_circle(t, q[p_cnt], e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, CAP_STYLE_SQUARE)) {
-				if (poly_test_cap_square(test, q[p_cnt], p_cnt, p, s_len, e_width)) {
+				if (poly_test_cap_square(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, CAP_STYLE_TRIANGLE)) {
-				if (poly_test_cap_triangle(test, q[p_cnt], p_cnt, p, s_len, e_width)) {
+				if (poly_test_cap_triangle(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
@@ -474,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 					s[s_cnt][4] = q[i];
 				}
 				// 調べる位置が, 拡張された辺に含まれるか判定する.
-				if (pt_in_poly(test, 4, s[s_cnt++])) {
+				if (pt_in_poly(t, 4, s[s_cnt++])) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
@@ -493,30 +494,30 @@ namespace winrt::GraphPaper::implementation
 				s[s_cnt][3].x = -orthogonal.x;
 				s[s_cnt][3].y = -orthogonal.y;
 				s[s_cnt][4] = q[p_cnt];
-				// 判定する位置が拡張された辺に含まれるか判定する.
-				if (pt_in_poly(test, 4, s[s_cnt++])) {
+				// 判定される点が拡張された辺に含まれるか判定する.
+				if (pt_in_poly(t, 4, s[s_cnt++])) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-				if (poly_test_join_bevel(test, s_cnt, e_closed, s)) {
+				if (poly_test_join_bevel(t, s_cnt, e_closed, s)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				if (poly_test_join_miter(test, s_cnt, e_closed, e_width, s, s_limit, s_join)) {
+				if (poly_test_join_miter(t, s_cnt, e_closed, e_width, s, s_limit, s_join)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-				if (poly_test_join_round(test, p_cnt + 1, q, e_width)) {
+				if (poly_test_join_round(t, p_cnt + 1, q, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 		}
 		if (f_opaque) {
-			if (pt_in_poly(test, p_cnt + 1, q)) {
+			if (pt_in_poly(t, p_cnt + 1, q)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -793,8 +794,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 位置を含むか判定する.
-	// t_pos	判定する位置
+	// 図形が点を含むか判定する.
+	// t_pos	判定される点
 	// a_len	アンカーの大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F test) const noexcept

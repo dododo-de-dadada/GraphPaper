@@ -14,8 +14,20 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::ComboBoxItem;
 
-	void MainPage::arrow_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	void MainPage::arrow_selection_changed(
+		IInspectable const&, SelectionChangedEventArgs const&) noexcept
 	{
+		if (dialog_radio_btns().SelectedIndex() == 0) {
+			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+				dialog_draw();
+			}
+		}
+		else if (dialog_radio_btns().SelectedIndex() == 1) {
+			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+				dialog_draw();
+			}
+		}
+		/*
 		if (dialog_combo_box().SelectedIndex() == 0) {
 			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
 				dialog_draw();
@@ -26,6 +38,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
+		*/
 	}
 
 	//------------------------------
@@ -65,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<0>(val);
+			arrow_slider_set_header<S>(val);
 			a_size.m_width = static_cast<FLOAT>(val);
 			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
 				dialog_draw();
@@ -75,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<1>(val);
+			arrow_slider_set_header<S>(val);
 			a_size.m_length = static_cast<FLOAT>(val);
 			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
 				dialog_draw();
@@ -85,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<2>(val);
+			arrow_slider_set_header<S>(val);
 			a_size.m_offset = static_cast<FLOAT>(val);
 			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
 				dialog_draw();
@@ -138,6 +151,17 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(a_size.m_offset);
 		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_radio_btns().Header(box_value(mfsi_arrow_style().Text()));
+		dialog_radio_btn_0().Content(box_value(rmfi_arrow_style_opened().Text()));
+		dialog_radio_btn_1().Content(box_value(rmfi_arrow_style_filled().Text()));
+		dialog_radio_btns().Visibility(Visibility::Visible);
+		if (a_style == ARROW_STYLE::OPENED) {
+			dialog_radio_btns().SelectedIndex(0);
+		}
+		else if (a_style == ARROW_STYLE::FILLED) {
+			dialog_radio_btns().SelectedIndex(1);
+		}
+		/*
 		dialog_combo_box().Header(box_value(mfsi_arrow_style().Text()));
 		dialog_combo_box().Items().Append(box_value(rmfi_arrow_style_opened().Text()));
 		dialog_combo_box().Items().Append(box_value(rmfi_arrow_style_filled().Text()));
@@ -148,6 +172,7 @@ namespace winrt::GraphPaper::implementation
 		else if (a_style == ARROW_STYLE::FILLED) {
 			dialog_combo_box().SelectedIndex(1);
 		}
+		*/
 		const winrt::event_token token0{
 			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<0> })
 		};
@@ -158,8 +183,11 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed<2> })
 		};
 		const winrt::event_token token3{
-			dialog_combo_box().SelectionChanged({ this, &MainPage::arrow_selection_changed })
+			dialog_radio_btns().SelectionChanged({ this, &MainPage::arrow_selection_changed })
 		};
+		//const winrt::event_token token3{
+		//	dialog_combo_box().SelectionChanged({ this, &MainPage::arrow_selection_changed })
+		//};
 		arrow_slider_set_header<0>(a_size.m_width);
 		arrow_slider_set_header<1>(a_size.m_length);
 		arrow_slider_set_header<2>(a_size.m_offset);
@@ -186,8 +214,8 @@ namespace winrt::GraphPaper::implementation
 			m_dialog_page.m_shape_list.back()->get_arrow_size(new_size);
 			m_dialog_page.m_shape_list.back()->get_arrow_style(new_style);
 			arrow_style_is_checked(new_style);
-			const bool flag_size = ustack_push_set<UNDO_ID::ARROW_SIZE>(new_size);
-			const bool flag_style = ustack_push_set<UNDO_ID::ARROW_STYLE>(new_style);
+			const bool flag_size = ustack_push_set<UNDO_T::ARROW_SIZE>(new_size);
+			const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
 			if (flag_size || flag_style) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -197,7 +225,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().ValueChanged(token0);
 		dialog_slider_1().ValueChanged(token1);
 		dialog_slider_2().ValueChanged(token2);
-		dialog_combo_box().SelectionChanged(token3);
+		//dialog_combo_box().SelectionChanged(token3);
+		dialog_radio_btns().SelectionChanged(token3);
 		dialog_slider_0().Maximum(max0);
 		dialog_slider_0().TickFrequency(freq0);
 		dialog_slider_0().SnapsTo(snap0);
@@ -213,8 +242,9 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(snap2);
 		dialog_slider_2().Value(val2);
 		dialog_slider_2().Visibility(vis2);
-		dialog_combo_box().Visibility(Visibility::Collapsed);
-		dialog_combo_box().Items().Clear();
+		dialog_radio_btns().Visibility(Visibility::Collapsed);
+		//dialog_combo_box().Visibility(Visibility::Collapsed);
+		//dialog_combo_box().Items().Clear();
 		slist_clear(m_dialog_page.m_shape_list);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
@@ -239,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		arrow_style_is_checked(a_style);
-		if (ustack_push_set<UNDO_ID::ARROW_STYLE>(a_style)) {
+		if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();

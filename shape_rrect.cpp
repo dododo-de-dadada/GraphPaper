@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置が角丸方形に含まれるか判定する.
-	// test	判定する位置
+	// test	判定される点
 	// r_lt	角丸方形の左上位置
 	// r_rb	角丸方形の右下位置
 	// r_rad	角丸の半径
@@ -210,8 +210,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか判定する.
-	// test	判定する位置
+	// 図形が点を含むか判定する.
+	// test	判定される点
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F test) const noexcept
 	{

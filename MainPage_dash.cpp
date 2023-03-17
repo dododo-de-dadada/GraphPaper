@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	void MainPage::dash_combo_box_selection_changed(
+	void MainPage::dash_style_selection_changed(
 		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
 	{
 		if (dialog_combo_box().SelectedIndex() == 0) {
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		const winrt::event_token token5{
 			dialog_combo_box().SelectionChanged(
-				{ this, &MainPage::dash_combo_box_selection_changed })
+				{ this, &MainPage::dash_style_selection_changed })
 		};
 
 		constexpr auto MAX_VALUE = 127.5;
@@ -170,9 +170,9 @@ namespace winrt::GraphPaper::implementation
 			m_dialog_page.m_shape_list.back()->get_stroke_width(new_width);
 			m_dialog_page.m_shape_list.back()->get_dash_style(new_style);
 			dash_style_is_checked(new_style);
-			const bool flag_patt = ustack_push_set<UNDO_ID::DASH_PAT>(new_patt);
-			const bool flag_width = ustack_push_set<UNDO_ID::STROKE_WIDTH>(new_width);
-			const bool flag_style = ustack_push_set<UNDO_ID::DASH_STYLE>(new_style);
+			const bool flag_patt = ustack_push_set<UNDO_T::DASH_PAT>(new_patt);
+			const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+			const bool flag_style = ustack_push_set<UNDO_T::DASH_STYLE>(new_style);
 			if (flag_patt || flag_width || flag_style) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		if (ustack_push_set<UNDO_ID::DASH_STYLE>(d_style)) {
+		if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();

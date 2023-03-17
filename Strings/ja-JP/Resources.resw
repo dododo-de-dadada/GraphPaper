@@ -1222,4 +1222,16 @@
     <value>長さの単位</value>
     <comment>ComboBox</comment>
   </data>
+  <data name="str_arc_clockwize" xml:space="preserve">
+    <value>時計回り</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arc_counter_clockwize" xml:space="preserve">
+    <value>反時計回り</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arc_sweep_direction" xml:space="preserve">
+    <value>円弧の方向</value>
+    <comment>String</comment>
+  </data>
 </root>

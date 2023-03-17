@@ -9,36 +9,33 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// 図形の種類
 	// ファイルへの書き込みで使用する.
-	enum SHAPE_TYPE : uint32_t {
+	enum SHAPE_T : uint32_t {
 		SHAPE_NULL,	// ヌル
+		SHAPE_ARC,	// 円弧
 		SHAPE_BEZIER,	// 曲線
-		SHAPE_IMAGE,	// 画像
 		SHAPE_ELLIPSE,	// だ円
 		SHAPE_GROUP,	// グループ
+		SHAPE_IMAGE,	// 画像
 		SHAPE_LINE,	// 線分
 		SHAPE_POLY,	// 多角形
 		SHAPE_RECT,	// 方形
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_RULER,	// 定規
 		SHAPE_TEXT,	// 文字列
-		SHAPE_ARC	// 四分円
 	};
 
 	// データリーダーから図形を読み込む.
 	static Shape* slist_read_shape(DataReader const& dt_reader);
-	// 次の図形を得る.
+	// リスト中の図形のその次の図形を得る.
 	template <typename T>
 	static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
-	// 次の図形とその距離を得る.
+	// リスト中の図形のその次の図形と, その間隔をリストから得る.
 	template <typename T>
 	static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept;
 
-	// 図形リストの中の文字列図形に, 利用できない書体があったならばその書体名を得る.
+	// リストの中の文字列図形に, 利用できない書体があったならばその書体名を得る.
 	// slist	図形リスト
 	// unavailable_font	利用できない書体名
 	// 戻り値	利用できない書体があったなら true
@@ -61,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 最後の図形を得る.
+	// リスト中の最後の図形を得る.
 	// slist	図形リスト
 	// 戻り値	得られた図形
 	Shape* slist_back(SHAPE_LIST const& slist) noexcept
@@ -70,15 +67,15 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.rbegin(), slist.rend(), _);
 	}
 
-	// 図形と表示を囲む領域を得る.
+	// リスト中の図形とページを囲む領域を得る.
 	// slist	図形リスト
-	// page_size	表示の大きさ
+	// p_size	ページの大きさ
 	// b_lt	領域の左上位置
 	// b_rb	領域の右下位置
-	void slist_bound_view(SHAPE_LIST const& slist, const D2D1_SIZE_F page_size, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
+	void slist_bound_page(SHAPE_LIST const& slist, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		b_lt = { 0.0F, 0.0F };	// 左上位置
-		b_rb = { page_size.width, page_size.height };	// 右下位置
+		b_lt = { 0.0f, 0.0f };
+		b_rb = { p_size.width, p_size.height };
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
@@ -87,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// すべての図形を囲む領域を得る.
+	// リスト中の図形を囲む領域を得る.
 	// slist	図形リスト
 	// b_lt	領域の左上位置
 	// b_rb	領域の右下位置
@@ -103,13 +100,14 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 選択された図形を囲む領域を得る.
+	// リスト中の選択された図形を囲む領域を得る.
 	// slist	図形リスト
 	// b_lt	領域の左上位置
 	// b_rb	領域の右下位置
+	// 戻り値	選択された図形があったなら true.
 	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		bool done = false;
+		bool flag = false;
 		b_lt = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
 		b_rb = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
 		for (const Shape* s : slist) {
@@ -117,11 +115,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			s->get_bound(b_lt, b_rb, b_lt, b_rb);
-			if (!done) {
-				done = true;
-			}
+			flag = true;
 		}
-		return done;
+		return flag;
 	}
 
 	// 図形リストを消去し, 含まれる図形を破棄する.
@@ -177,13 +173,13 @@ namespace winrt::GraphPaper::implementation
 			// 消去フラグがない図形の数をインクリメントする.
 			undeleted_cnt++;
 			// 図形の動的な型を得る.
-			auto const& s_type = typeid(*s);
-			if (s_type == typeid(ShapeText)) {
+			auto const& s_tid = typeid(*s);
+			if (s_tid == typeid(ShapeText)) {
 				// 型が文字列図形の場合,
 				// 文字列図形の数をインクリメントする.
 				text_cnt++;
 			}
-			else if (s_type == typeid(ShapeGroup)) {
+			else if (s_tid == typeid(ShapeGroup)) {
 				if (static_cast<ShapeGroup*>(s)->has_text()) {
 					// 型が文字列図形の場合,
 					// 文字列図形の数をインクリメントする.
@@ -202,20 +198,20 @@ namespace winrt::GraphPaper::implementation
 					back_selected = true;
 				}
 				// 図形の型が画像か判定する.,
-				if (s_type == typeid(ShapeImage)) {
+				if (s_tid == typeid(ShapeImage)) {
 					selected_image_cnt++;
 				}
 				// 図形の型が画像か判定する.,
-				if (s_type == typeid(ShapeArc)) {
+				if (s_tid == typeid(ShapeArc)) {
 					selected_arc_cnt++;
 				}
 				// 図形の型がグループ図形か判定する.,
-				else if (s_type == typeid(ShapeGroup)) {
+				else if (s_tid == typeid(ShapeGroup)) {
 					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
 				}
-				else if (s_type == typeid(ShapeText)) {
+				else if (s_tid == typeid(ShapeText)) {
 					// 図形の型が文字列図形の場合,
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
@@ -262,34 +258,31 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.begin(), slist.end(), _);
 	}
 
-	// 位置を含む図形とその部位を得る.
+	// リスト中の図形が点を含むか判定する.
 	// slist	図形リスト
-	// t_pos	判定する位置
-	// s	位置を含む図形
-	// 戻り値	位置を含む図形の部位
-	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, Shape*& s) noexcept
+	// t	判定される点
+	// s	点を含む図形
+	// 戻り値	点を含む図形の部位
+	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
-			const auto t = *it;
-			if (t->is_deleted()) {
+			const auto i = *it;
+			if (i->is_deleted()) {
 				continue;
 			}
-			//if (!t->is_selected()) {
-			//	continue;
-			//}
-			const uint32_t anc = t->hit_test(t_pos);
+			const uint32_t anc = i->hit_test(t);
 			if (anc != ANC_TYPE::ANC_PAGE) {
-				s = t;
+				s = i;
 				return anc;
 			}
 		}
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 図形を挿入する.
+	// リストに図形を挿入する.
 	// slist	図形リスト
-	// s	挿入する図形
+	// s_ins	挿入される図形
 	// s_at	挿入する位置にある図形
 	void slist_insert(SHAPE_LIST& slist, Shape* const s_ins, const Shape* s_at) noexcept
 	{
@@ -393,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	// 図形のその次の図形をリストから得る.
+	// リスト中の図形のその次の図形を得る.
 	// slist	図形リスト
 	// s	図形
 	// 戻り値	その次の図形
@@ -402,13 +395,13 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.begin(), slist.end(), s);
 	}
 
-	// 図形の, 次の図形をリストから得る.
+	// リスト中の図形のその次の図形を得る.
 	// it_beg	リストの始端
 	// it_end	リストの終端
 	// s	図形
 	// 戻り値	次の図形. ヌルならば次の図形はない.
-	template <typename T> static Shape* slist_next(
-		T const& it_beg, T const& it_end, const Shape* s) noexcept
+	template <typename T>
+	static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept
 	{
 		auto it{ std::find(it_beg, it_end, s) };
 		if (it != it_end) {
@@ -424,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend,
 		const Shape* s) noexcept;
 
-	// 図形の次の図形と, その間隔をリストから得る.
+	// リスト中の図形のその次の図形と, その間隔をリストから得る.
 	// it_beg	リストの始端
 	// it_end	リストの終端
 	// distance	次の図形との間隔
@@ -476,40 +469,40 @@ namespace winrt::GraphPaper::implementation
 			return nullptr;
 		}
 		Shape* s = nullptr;
-		auto s_type = dt_reader.ReadUInt32();
-		if (s_type == SHAPE_TYPE::SHAPE_NULL) {
+		auto s_tid = dt_reader.ReadUInt32();
+		if (s_tid == SHAPE_T::SHAPE_NULL) {
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_BEZIER) {
+		else if (s_tid == SHAPE_T::SHAPE_BEZIER) {
 			s = new ShapeBezier(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_IMAGE) {
+		else if (s_tid == SHAPE_T::SHAPE_IMAGE) {
 			s = new ShapeImage(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_ELLIPSE) {
+		else if (s_tid == SHAPE_T::SHAPE_ELLIPSE) {
 			s = new ShapeEllipse(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
+		else if (s_tid == SHAPE_T::SHAPE_LINE) {
 			s = new ShapeLine(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
+		else if (s_tid == SHAPE_T::SHAPE_POLY) {
 			s = new ShapePoly(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
+		else if (s_tid == SHAPE_T::SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_RRECT) {
+		else if (s_tid == SHAPE_T::SHAPE_RRECT) {
 			s = new ShapeRRect(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_TEXT) {
+		else if (s_tid == SHAPE_T::SHAPE_TEXT) {
 			s = new ShapeText(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_GROUP) {
+		else if (s_tid == SHAPE_T::SHAPE_GROUP) {
 			s = new ShapeGroup(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
+		else if (s_tid == SHAPE_T::SHAPE_RULER) {
 			s = new ShapeRuler(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_ARC) {
+		else if (s_tid == SHAPE_T::SHAPE_ARC) {
 			s = new ShapeArc(dt_reader);
 		}
 		else {
@@ -573,47 +566,51 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 			}
-			auto const& s_type = typeid(*s);
-			uint32_t s_int;
-			if (s_type == typeid(ShapeArc)) {
-				s_int = SHAPE_TYPE::SHAPE_ARC;
+			auto const& s_tid = typeid(*s);
+			if (s_tid == typeid(ShapeArc)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_ARC);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeBezier)) {
-				s_int = SHAPE_TYPE::SHAPE_BEZIER;
+			else if (s_tid == typeid(ShapeBezier)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_BEZIER);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeImage)) {
-				s_int = SHAPE_TYPE::SHAPE_IMAGE;
+			else if (s_tid == typeid(ShapeEllipse)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_ELLIPSE);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeEllipse)) {
-				s_int = SHAPE_TYPE::SHAPE_ELLIPSE;
+			else if (s_tid == typeid(ShapeGroup)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_GROUP);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeGroup)) {
-				s_int = SHAPE_TYPE::SHAPE_GROUP;
+			else if (s_tid == typeid(ShapeImage)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_IMAGE);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeLine)) {
-				s_int = SHAPE_TYPE::SHAPE_LINE;
+			else if (s_tid == typeid(ShapeLine)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_LINE);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapePoly)) {
-				s_int = SHAPE_TYPE::SHAPE_POLY;
+			else if (s_tid == typeid(ShapePoly)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_POLY);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeRect)) {
-				s_int = SHAPE_TYPE::SHAPE_RECT;
+			else if (s_tid == typeid(ShapeRect)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_RECT);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeRRect)) {
-				s_int = SHAPE_TYPE::SHAPE_RRECT;
+			else if (s_tid == typeid(ShapeRRect)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_RRECT);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeRuler)) {
-				s_int = SHAPE_TYPE::SHAPE_RULER;
+			else if (s_tid == typeid(ShapeRuler)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_RULER);
+				s->write(dt_writer);
 			}
-			else if (s_type == typeid(ShapeText)) {
-				s_int = SHAPE_TYPE::SHAPE_TEXT;
+			else if (s_tid == typeid(ShapeText)) {
+				dt_writer.WriteUInt32(SHAPE_T::SHAPE_TEXT);
+				s->write(dt_writer);
 			}
-			else {
-				continue;
-			}
-			// 図形の種類と図形を書き込む.
-			dt_writer.WriteUInt32(s_int);
-			s->write(dt_writer);
 		}
 		// 終端を書き込む.
 		dt_writer.WriteUInt32(static_cast<uint32_t>(SHAPE_NULL));

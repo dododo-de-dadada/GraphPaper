@@ -86,94 +86,94 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方形の頂点とそれらの中間点のうち, どの部位に含まれるかを判定する.
-	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec,
-		const D2D1_POINT_2F test, const double a_len) noexcept
+	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
+		const D2D1_POINT_2F t, const double a_len) noexcept
 	{
 		// 4----8----2
 		// |         |
 		// 7         6
 		// |         |
 		// 3----5----1
-		const D2D1_POINT_2F anc_se{ start.x + vec.x, start.y + vec.y };
-		if (pt_in_anc(test, anc_se, a_len)) {
+		const D2D1_POINT_2F anc_se{ start.x + pos.x, start.y + pos.y };
+		if (pt_in_anc(t, anc_se, a_len)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		const D2D1_POINT_2F anc_ne{ anc_se.x, start.y };
-		if (pt_in_anc(test, anc_ne, a_len)) {
+		if (pt_in_anc(t, anc_ne, a_len)) {
 			return ANC_TYPE::ANC_NE;
 		}
 		const D2D1_POINT_2F anc_sw{ start.x, anc_se.y };
-		if (pt_in_anc(test, anc_sw, a_len)) {
+		if (pt_in_anc(t, anc_sw, a_len)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		if (pt_in_anc(test, start, a_len)) {
+		if (pt_in_anc(t, start, a_len)) {
 			return ANC_TYPE::ANC_NW;
 		}
-		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(start.x + vec.x * 0.5), anc_se.y };
-		if (pt_in_anc(test, anc_s, a_len)) {
+		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(start.x + pos.x * 0.5), anc_se.y };
+		if (pt_in_anc(t, anc_s, a_len)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
-		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(start.y + vec.y * 0.5f) };
-		if (pt_in_anc(test, anc_e, a_len)) {
+		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(start.y + pos.y * 0.5f) };
+		if (pt_in_anc(t, anc_e, a_len)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		const D2D1_POINT_2F anc_w{ start.x, anc_e.y };
-		if (pt_in_anc(test, anc_w, a_len)) {
+		if (pt_in_anc(t, anc_w, a_len)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		const D2D1_POINT_2F anc_n{ anc_s.x, start.y };
-		if (pt_in_anc(test, anc_n, a_len)) {
+		if (pt_in_anc(t, anc_n, a_len)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 位置を含むか判定する.
-	// t_pos	判定される位置
+	// 図形が点を含むか判定する.
+	// t	判定される位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F test) const noexcept
+	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
 		// 各頂点の部位に含まれるか判定する.
 		D2D1_POINT_2F p[4]{ m_start, };	// 頂点の配列
 
 		p[2].x = m_start.x + m_pos.x;
 		p[2].y = m_start.y + m_pos.y;
-		if (pt_in_anc(test, p[2], m_anc_width)) {
+		if (pt_in_anc(t, p[2], m_anc_width)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		p[3].x = m_start.x;
 		p[3].y = m_start.y + m_pos.y;
-		if (pt_in_anc(test, p[3], m_anc_width)) {
+		if (pt_in_anc(t, p[3], m_anc_width)) {
 			return ANC_TYPE::ANC_SW;
 		}
 		p[1].x = m_start.x + m_pos.x;
 		p[1].y = m_start.y;
-		if (pt_in_anc(test, p[1], m_anc_width)) {
+		if (pt_in_anc(t, p[1], m_anc_width)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		if (pt_in_anc(test, p[0], m_anc_width)) {
+		if (pt_in_anc(t, p[0], m_anc_width)) {
 			return ANC_TYPE::ANC_NW;
 		}
 
 		// 各辺の中点の部位に含まれるか判定する.
 		D2D1_POINT_2F bottom;
 		pt_avg(p[2], p[3], bottom);
-		if (pt_in_anc(test, bottom, m_anc_width)) {
+		if (pt_in_anc(t, bottom, m_anc_width)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
 		D2D1_POINT_2F right;
 		pt_avg(p[1], p[2], right);
-		if (pt_in_anc(test, right, m_anc_width)) {
+		if (pt_in_anc(t, right, m_anc_width)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		D2D1_POINT_2F left;
 		pt_avg(p[0], p[3], left);
-		if (pt_in_anc(test, left, m_anc_width)) {
+		if (pt_in_anc(t, left, m_anc_width)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		D2D1_POINT_2F top;
 		pt_avg(p[0], p[1], top);
-		if (pt_in_anc(test, top, m_anc_width)) {
+		if (pt_in_anc(t, top, m_anc_width)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 
@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
-			if (is_opaque(m_fill_color) && pt_in_rect2(test, r_lt, r_rb)) {
+			if (is_opaque(m_fill_color) && pt_in_rect2(t, r_lt, r_rb)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -218,13 +218,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(r_lt, -e_thick, e_lb);
 			pt_add(r_rb, e_thick, e_rb);
 			// 拡大した方形に含まれるか判定する.
-			if (pt_in_rect2(test, e_lb, e_rb)) {
+			if (pt_in_rect2(t, e_lb, e_rb)) {
 				// 太さの大きさだけ内側に, 拡大した方形を縮小する.
 				D2D1_POINT_2F s_lb, s_rb;	// 縮小した方形
 				pt_add(e_lb, s_thick, s_lb);
 				pt_add(e_rb, -s_thick, s_rb);
 				// 縮小した方形に含まれる (辺に含まれない) か判定する.
-				if (pt_in_rect2(test, s_lb, s_rb)) {
+				if (pt_in_rect2(t, s_lb, s_rb)) {
 					if (is_opaque(m_fill_color)) {
 						return ANC_TYPE::ANC_FILL;
 					}
@@ -232,15 +232,15 @@ namespace winrt::GraphPaper::implementation
 				// 縮小した方形が反転する (枠が太すぎて図形を覆う),
 				// または, 方形の角に含まれてない (辺に含まれる) か判定する.
 				else if (s_rb.x <= s_lb.x || s_rb.y <= s_lb.y ||
-					r_lt.x <= test.x && test.x <= r_rb.x || r_lt.y <= test.y && test.y <= r_rb.y) {
+					r_lt.x <= t.x && t.x <= r_rb.x || r_lt.y <= t.y && t.y <= r_rb.y) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 				// 線枠の結合が丸めか判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					if (pt_in_circle(test, p[0], e_thick) ||
-						pt_in_circle(test, p[1], e_thick) ||
-						pt_in_circle(test, p[2], e_thick) ||
-						pt_in_circle(test, p[3], e_thick)) {
+					if (pt_in_circle(t, p[0], e_thick) ||
+						pt_in_circle(t, p[1], e_thick) ||
+						pt_in_circle(t, p[2], e_thick) ||
+						pt_in_circle(t, p[3], e_thick)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -253,10 +253,10 @@ namespace winrt::GraphPaper::implementation
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, 
 						D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
-					if (pt_in_poly(D2D1_POINT_2F{ test.x - p[0].x, test.y - p[0].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[1].x, test.y - p[1].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[2].x, test.y - p[2].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[3].x, test.y - p[3].y }, 4, q)) {
+					if (pt_in_poly(D2D1_POINT_2F{ t.x - p[0].x, t.y - p[0].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[1].x, t.y - p[1].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[2].x, t.y - p[2].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[3].x, t.y - p[3].y }, 4, q)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -264,16 +264,16 @@ namespace winrt::GraphPaper::implementation
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
 						m_join_miter_limit >= M_SQRT2)) {
-					const auto limit = static_cast<FLOAT>(M_SQRT2 * 0.5 * m_stroke_width * 
-						m_join_miter_limit);
+					const auto limit =
+						static_cast<FLOAT>(M_SQRT2 * 0.5 * m_stroke_width * m_join_miter_limit);
 					const D2D1_POINT_2F q[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f },
 						D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
-					if (pt_in_poly(D2D1_POINT_2F{ test.x - p[0].x, test.y - p[0].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[1].x, test.y - p[1].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[2].x, test.y - p[2].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ test.x - p[3].x, test.y - p[3].y }, 4, q)) {
+					if (pt_in_poly(D2D1_POINT_2F{ t.x - p[0].x, t.y - p[0].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[1].x, t.y - p[1].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[2].x, t.y - p[2].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ t.x - p[3].x, t.y - p[3].y }, 4, q)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}

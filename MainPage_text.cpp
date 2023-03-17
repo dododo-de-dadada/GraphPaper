@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		text_align_vert_is_checked(val);
-		if (ustack_push_set<UNDO_ID::TEXT_PAR_ALIGN>(val)) {
+		if (ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		text_align_horz_is_checked(val);
-		if (ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(val)) {
+		if (ustack_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -176,12 +176,12 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val);
-		text_slider_set_header<UNDO_ID::TEXT_LINE_SP, 0>(val);
+		text_slider_set_header<UNDO_T::TEXT_LINE_SP, 0>(val);
 		dialog_slider_0().Visibility(Visibility::Visible);
 
 		const auto token0{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_LINE_SP, 0> })
+				{ this, &MainPage::text_slider_val_changed<UNDO_T::TEXT_LINE_SP, 0> })
 		};
 		text_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()), 
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_text_line_sp(samp_val);
-			if (ustack_push_set<UNDO_ID::TEXT_LINE_SP>(samp_val)) {
+			if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -223,23 +223,23 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(pad.width);
-		text_slider_set_header<UNDO_ID::TEXT_PAD, 0>(pad.width);
+		text_slider_set_header<UNDO_T::TEXT_PAD, 0>(pad.width);
 
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(pad.height);
-		text_slider_set_header<UNDO_ID::TEXT_PAD, 1>(pad.height);
+		text_slider_set_header<UNDO_T::TEXT_PAD, 1>(pad.height);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		const auto token0{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PAD, 0> })
+				{ this, &MainPage::text_slider_val_changed<UNDO_T::TEXT_PAD, 0> })
 		};
 		const auto token1{
 			dialog_slider_1().ValueChanged(
-				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PAD, 1> })
+				{ this, &MainPage::text_slider_val_changed<UNDO_T::TEXT_PAD, 1> })
 		};
 		text_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F samp_val;
 			m_dialog_page.m_shape_list.back()->get_text_pad(samp_val);
-			if (ustack_push_set<UNDO_ID::TEXT_PAD>(samp_val)) {
+			if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -271,20 +271,20 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <UNDO_T U, int S>
 	void MainPage::text_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring text;
-		if constexpr (U == UNDO_ID::TEXT_PAD) {
+		if constexpr (U == UNDO_T::TEXT_PAD) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		if constexpr (U == UNDO_ID::TEXT_LINE_SP) {
+		if constexpr (U == UNDO_T::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (val >= FLT_MIN) {
 				wchar_t buf[32];
@@ -305,20 +305,20 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S>
+	template <UNDO_T U, int S>
 	void MainPage::text_slider_val_changed(
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::TEXT_LINE_SP && S == 0) {
+		if constexpr (U == UNDO_T::TEXT_LINE_SP && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_ID::TEXT_LINE_SP, 0>(val);
+			text_slider_set_header<UNDO_T::TEXT_LINE_SP, 0>(val);
 			if (m_dialog_page.m_shape_list.back()->set_text_line_sp(val)) {
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::TEXT_PAD && S == 0) {
+		else if constexpr (U == UNDO_T::TEXT_PAD && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_ID::TEXT_PAD, 0>(val);
+			text_slider_set_header<UNDO_T::TEXT_PAD, 0>(val);
 			D2D1_SIZE_F pad;
 			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
 			pad.width = static_cast<FLOAT>(val);
@@ -326,9 +326,9 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::TEXT_PAD && S == 1) {
+		else if constexpr (U == UNDO_T::TEXT_PAD && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_ID::TEXT_PAD, 1>(val);
+			text_slider_set_header<UNDO_T::TEXT_PAD, 1>(val);
 			D2D1_SIZE_F pad;
 			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
 			pad.height = static_cast<FLOAT>(val);

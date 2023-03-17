@@ -516,8 +516,8 @@ namespace winrt::GraphPaper::implementation
 		template<int S>
 		void edit_arc_slider_value_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		template<int S>
-		void edit_arc_checkbox_checked(IInspectable const&, RoutedEventArgs const& args);
+		void edit_arc_dir_selection_changed(IInspectable const&, SelectionChangedEventArgs const&);
+		IAsyncAction edit_poly_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -594,9 +594,9 @@ namespace winrt::GraphPaper::implementation
 		// 方眼メニューの「方眼に合わせる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_ID U, int S> void grid_slider_set_header(const float val);
+		template <UNDO_T U, int S> void grid_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S>
+		template <UNDO_T U, int S>
 		void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
@@ -857,7 +857,7 @@ namespace winrt::GraphPaper::implementation
 		// スライダーの値が変更された.
 		template<int S>
 		void dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		void dash_combo_box_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+		void dash_style_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -871,9 +871,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_ID U, int S> void stroke_slider_set_header(const float val);
+		template<UNDO_T U, int S> void stroke_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template<UNDO_ID U, int S>
+		template<UNDO_T U, int S>
 		void stroke_slider_value_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
@@ -959,9 +959,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」が選択された.
 		void text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> void text_slider_set_header(const float val);
+		template <UNDO_T U, int S> void text_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S>
+		template <UNDO_T U, int S>
 		void text_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
@@ -1028,11 +1028,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転して, その操作をスタックに積む.
 		void ustack_push_select(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_ID U, typename T> void ustack_push_set(Shape* const s, T const& val);
+		template <UNDO_T U, typename T> void ustack_push_set(Shape* const s, T const& val);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
-		template <UNDO_ID U, typename T> bool ustack_push_set(T const& val);
+		template <UNDO_T U, typename T> bool ustack_push_set(T const& val);
 		// 図形の値をスタックに保存する.
-		template <UNDO_ID U> void ustack_push_set(Shape* const s);
+		template <UNDO_T U> void ustack_push_set(Shape* const s);
 		// データリーダーから操作スタックを読み込む.
 		void ustack_read(DataReader const& dt_reader);
 		// データリーダーに操作スタックを書き込む.

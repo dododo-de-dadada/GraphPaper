@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 			winrt::hresult_not_implemented();
 		}
 		cap_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_ID::STROKE_CAP>(new_val)) {
+		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
@@ -121,8 +121,8 @@ namespace winrt::GraphPaper::implementation
 			float new_width;
 			m_dialog_page.m_shape_list.back()->get_join_miter_limit(new_limit);
 			m_dialog_page.m_shape_list.back()->get_stroke_width(new_width);
-			const bool flag_limit = ustack_push_set<UNDO_ID::JOIN_LIMIT>(new_limit);
-			const bool flag_width = ustack_push_set<UNDO_ID::STROKE_WIDTH>(new_width);
+			const bool flag_limit = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
+			const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 			if (flag_limit || flag_width) {
 				ustack_push_null();
 				ustack_is_enable();
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		join_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_ID::JOIN_STYLE>(new_val)) {
+		if (ustack_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			page_draw();

@@ -56,142 +56,142 @@ namespace winrt::GraphPaper::implementation
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
 			return false;
 		}
-		auto u_op = static_cast<UNDO_ID>(dt_reader.ReadUInt32());
-		if (u_op == UNDO_ID::END) {
+		auto u_op = static_cast<UNDO_T>(dt_reader.ReadUInt32());
+		if (u_op == UNDO_T::END) {
 			return false;
 		}
 		switch (u_op) {
-		case UNDO_ID::NIL:
+		case UNDO_T::NIL:
 			u = nullptr;
 			break;
-		case UNDO_ID::ARC_DIR:
-			u = new UndoValue<UNDO_ID::ARC_DIR>(dt_reader);
+		case UNDO_T::ARC_DIR:
+			u = new UndoValue<UNDO_T::ARC_DIR>(dt_reader);
 			break;
-		case UNDO_ID::ARC_END:
-			u = new UndoValue<UNDO_ID::ARC_END>(dt_reader);
+		case UNDO_T::ARC_END:
+			u = new UndoValue<UNDO_T::ARC_END>(dt_reader);
 			break;
-		case UNDO_ID::ARC_ROT:
-			u = new UndoValue<UNDO_ID::ARC_ROT>(dt_reader);
+		case UNDO_T::ARC_ROT:
+			u = new UndoValue<UNDO_T::ARC_ROT>(dt_reader);
 			break;
-		case UNDO_ID::ARC_START:
-			u = new UndoValue<UNDO_ID::ARC_START>(dt_reader);
+		case UNDO_T::ARC_START:
+			u = new UndoValue<UNDO_T::ARC_START>(dt_reader);
 			break;
-		case UNDO_ID::DEFORM:
+		case UNDO_T::DEFORM:
 			u = new UndoDeform(dt_reader);
 			break;
-		case UNDO_ID::ORDER:
+		case UNDO_T::ORDER:
 			u = new UndoOrder(dt_reader);
 			break;
-		case UNDO_ID::ARROW_SIZE:
-			u = new UndoValue<UNDO_ID::ARROW_SIZE>(dt_reader);
+		case UNDO_T::ARROW_SIZE:
+			u = new UndoValue<UNDO_T::ARROW_SIZE>(dt_reader);
 			break;
-		case UNDO_ID::ARROW_STYLE:
-			u = new UndoValue<UNDO_ID::ARROW_STYLE>(dt_reader);
+		case UNDO_T::ARROW_STYLE:
+			u = new UndoValue<UNDO_T::ARROW_STYLE>(dt_reader);
 			break;
-		case UNDO_ID::IMAGE:
+		case UNDO_T::IMAGE:
 			u = new UndoImage(dt_reader);
 			break;
-		//case UNDO_ID::IMAGE_ASPECT:
-		//	u = new UndoValue<UNDO_ID::IMAGE_ASPECT>(dt_reader);
+		//case UNDO_T::IMAGE_ASPECT:
+		//	u = new UndoValue<UNDO_T::IMAGE_ASPECT>(dt_reader);
 		//	break;
-		case UNDO_ID::IMAGE_OPAC:
-			u = new UndoValue<UNDO_ID::IMAGE_OPAC>(dt_reader);
+		case UNDO_T::IMAGE_OPAC:
+			u = new UndoValue<UNDO_T::IMAGE_OPAC>(dt_reader);
 			break;
-		case UNDO_ID::FILL_COLOR:
-			u = new UndoValue<UNDO_ID::FILL_COLOR>(dt_reader);
+		case UNDO_T::FILL_COLOR:
+			u = new UndoValue<UNDO_T::FILL_COLOR>(dt_reader);
 			break;
-		case UNDO_ID::FONT_COLOR:
-			u = new UndoValue<UNDO_ID::FONT_COLOR>(dt_reader);
+		case UNDO_T::FONT_COLOR:
+			u = new UndoValue<UNDO_T::FONT_COLOR>(dt_reader);
 			break;
-		case UNDO_ID::FONT_FAMILY:
-			u = new UndoValue<UNDO_ID::FONT_FAMILY>(dt_reader);
+		case UNDO_T::FONT_FAMILY:
+			u = new UndoValue<UNDO_T::FONT_FAMILY>(dt_reader);
 			break;
-		case UNDO_ID::FONT_SIZE:
-			u = new UndoValue<UNDO_ID::FONT_SIZE>(dt_reader);
+		case UNDO_T::FONT_SIZE:
+			u = new UndoValue<UNDO_T::FONT_SIZE>(dt_reader);
 			break;
-		case UNDO_ID::FONT_STYLE:
-			u = new UndoValue<UNDO_ID::FONT_STYLE>(dt_reader);
+		case UNDO_T::FONT_STYLE:
+			u = new UndoValue<UNDO_T::FONT_STYLE>(dt_reader);
 			break;
-		case UNDO_ID::FONT_STRETCH:
-			u = new UndoValue<UNDO_ID::FONT_STRETCH>(dt_reader);
+		case UNDO_T::FONT_STRETCH:
+			u = new UndoValue<UNDO_T::FONT_STRETCH>(dt_reader);
 			break;
-		case UNDO_ID::FONT_WEIGHT:
-			u = new UndoValue<UNDO_ID::FONT_WEIGHT>(dt_reader);
+		case UNDO_T::FONT_WEIGHT:
+			u = new UndoValue<UNDO_T::FONT_WEIGHT>(dt_reader);
 			break;
-		case UNDO_ID::GRID_BASE:
-			u = new UndoValue<UNDO_ID::GRID_BASE>(dt_reader);
+		case UNDO_T::GRID_BASE:
+			u = new UndoValue<UNDO_T::GRID_BASE>(dt_reader);
 			break;
-		case UNDO_ID::GRID_COLOR:
-			u = new UndoValue<UNDO_ID::GRID_COLOR>(dt_reader);
+		case UNDO_T::GRID_COLOR:
+			u = new UndoValue<UNDO_T::GRID_COLOR>(dt_reader);
 			break;
-		case UNDO_ID::GRID_EMPH:
-			u = new UndoValue<UNDO_ID::GRID_EMPH>(dt_reader);
+		case UNDO_T::GRID_EMPH:
+			u = new UndoValue<UNDO_T::GRID_EMPH>(dt_reader);
 			break;
-		case UNDO_ID::GRID_SHOW:
-			u = new UndoValue<UNDO_ID::GRID_SHOW>(dt_reader);
+		case UNDO_T::GRID_SHOW:
+			u = new UndoValue<UNDO_T::GRID_SHOW>(dt_reader);
 			break;
-		case UNDO_ID::GROUP:
+		case UNDO_T::GROUP:
 			u = new UndoGroup(dt_reader);
 			break;
-		case UNDO_ID::LIST:
+		case UNDO_T::LIST:
 			u = new UndoList(dt_reader);
 			break;
-		case UNDO_ID::SELECT:
+		case UNDO_T::SELECT:
 			u = new UndoSelect(dt_reader);
 			break;
-		case UNDO_ID::PAGE_COLOR:
-			u = new UndoValue<UNDO_ID::PAGE_COLOR>(dt_reader);
+		case UNDO_T::PAGE_COLOR:
+			u = new UndoValue<UNDO_T::PAGE_COLOR>(dt_reader);
 			break;
-		case UNDO_ID::PAGE_SIZE:
-			u = new UndoValue<UNDO_ID::PAGE_SIZE>(dt_reader);
+		case UNDO_T::PAGE_SIZE:
+			u = new UndoValue<UNDO_T::PAGE_SIZE>(dt_reader);
 			break;
-		case UNDO_ID::PAGE_PAD:
-			u = new UndoValue<UNDO_ID::PAGE_PAD>(dt_reader);
+		case UNDO_T::PAGE_PAD:
+			u = new UndoValue<UNDO_T::PAGE_PAD>(dt_reader);
 			break;
-		case UNDO_ID::MOVE:
-			u = new UndoValue<UNDO_ID::MOVE>(dt_reader);
+		case UNDO_T::MOVE:
+			u = new UndoValue<UNDO_T::MOVE>(dt_reader);
 			break;
-		case UNDO_ID::STROKE_CAP:
-			u = new UndoValue<UNDO_ID::STROKE_CAP>(dt_reader);
+		case UNDO_T::STROKE_CAP:
+			u = new UndoValue<UNDO_T::STROKE_CAP>(dt_reader);
 			break;
-		case UNDO_ID::STROKE_COLOR:
-			u = new UndoValue<UNDO_ID::STROKE_COLOR>(dt_reader);
+		case UNDO_T::STROKE_COLOR:
+			u = new UndoValue<UNDO_T::STROKE_COLOR>(dt_reader);
 			break;
-		case UNDO_ID::DASH_CAP:
-			u = new UndoValue<UNDO_ID::DASH_CAP>(dt_reader);
+		case UNDO_T::DASH_CAP:
+			u = new UndoValue<UNDO_T::DASH_CAP>(dt_reader);
 			break;
-		case UNDO_ID::DASH_PAT:
-			u = new UndoValue<UNDO_ID::DASH_PAT>(dt_reader);
+		case UNDO_T::DASH_PAT:
+			u = new UndoValue<UNDO_T::DASH_PAT>(dt_reader);
 			break;
-		case UNDO_ID::DASH_STYLE:
-			u = new UndoValue<UNDO_ID::DASH_STYLE>(dt_reader);
+		case UNDO_T::DASH_STYLE:
+			u = new UndoValue<UNDO_T::DASH_STYLE>(dt_reader);
 			break;
-		case UNDO_ID::JOIN_LIMIT:
-			u = new UndoValue<UNDO_ID::JOIN_LIMIT>(dt_reader);
+		case UNDO_T::JOIN_LIMIT:
+			u = new UndoValue<UNDO_T::JOIN_LIMIT>(dt_reader);
 			break;
-		case UNDO_ID::JOIN_STYLE:
-			u = new UndoValue<UNDO_ID::JOIN_STYLE>(dt_reader);
+		case UNDO_T::JOIN_STYLE:
+			u = new UndoValue<UNDO_T::JOIN_STYLE>(dt_reader);
 			break;
-		case UNDO_ID::STROKE_WIDTH:
-			u = new UndoValue<UNDO_ID::STROKE_WIDTH>(dt_reader);
+		case UNDO_T::STROKE_WIDTH:
+			u = new UndoValue<UNDO_T::STROKE_WIDTH>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_PAR_ALIGN:
-			u = new UndoValue<UNDO_ID::TEXT_PAR_ALIGN>(dt_reader);
+		case UNDO_T::TEXT_PAR_ALIGN:
+			u = new UndoValue<UNDO_T::TEXT_PAR_ALIGN>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_ALIGN_T:
-			u = new UndoValue<UNDO_ID::TEXT_ALIGN_T>(dt_reader);
+		case UNDO_T::TEXT_ALIGN_T:
+			u = new UndoValue<UNDO_T::TEXT_ALIGN_T>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_CONTENT:
-			u = new UndoValue<UNDO_ID::TEXT_CONTENT>(dt_reader);
+		case UNDO_T::TEXT_CONTENT:
+			u = new UndoValue<UNDO_T::TEXT_CONTENT>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_LINE_SP:
-			u = new UndoValue<UNDO_ID::TEXT_LINE_SP>(dt_reader);
+		case UNDO_T::TEXT_LINE_SP:
+			u = new UndoValue<UNDO_T::TEXT_LINE_SP>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_PAD:
-			u = new UndoValue<UNDO_ID::TEXT_PAD>(dt_reader);
+		case UNDO_T::TEXT_PAD:
+			u = new UndoValue<UNDO_T::TEXT_PAD>(dt_reader);
 			break;
-		case UNDO_ID::TEXT_RANGE:
-			u = new UndoValue<UNDO_ID::TEXT_RANGE>(dt_reader);
+		case UNDO_T::TEXT_RANGE:
+			u = new UndoValue<UNDO_T::TEXT_RANGE>(dt_reader);
 			break;
 		default:
 			throw winrt::hresult_invalid_argument();
@@ -209,7 +209,7 @@ namespace winrt::GraphPaper::implementation
 			u->write(dt_writer);
 		}
 		else {
-			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::NIL));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::NIL));
 		}
 	}
 
@@ -327,67 +327,67 @@ namespace winrt::GraphPaper::implementation
 		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
-		if (u_type == typeid(UndoValue<UNDO_ID::ARROW_STYLE>)) {
+		if (u_type == typeid(UndoValue<UNDO_T::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じるしの形式」に印をつける.
 			ARROW_STYLE val;
 			m_main_page.get_arrow_style(val);
 			arrow_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::FONT_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE val;
 			m_main_page.get_font_style(val);
 			font_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::GRID_BASE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
 			status_bar_set_grid();
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::GRID_EMPH>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::GRID_EMPH>)) {
 			// 方眼メニューの「方眼の強調」に印をつける.
 			GRID_EMPH val;
 			m_main_page.get_grid_emph(val);
 			grid_emph_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::GRID_SHOW>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::GRID_SHOW>)) {
 			GRID_SHOW val;
 			m_main_page.get_grid_show(val);
 			grid_show_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::PAGE_SIZE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
 			status_bar_set_page();
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::STROKE_CAP>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {
 			CAP_STYLE val;
 			m_main_page.get_stroke_cap(val);
 			cap_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::DASH_CAP>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::DASH_CAP>)) {
 			D2D1_CAP_STYLE val;
 			m_main_page.get_dash_cap(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::DASH_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
 			m_main_page.get_dash_style(val);
 			dash_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::JOIN_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
 			m_main_page.get_join_style(val);
 			join_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::STROKE_WIDTH>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_WIDTH>)) {
 			float val;
 			m_main_page.get_stroke_width(val);
 			stroke_width_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::TEXT_ALIGN_T>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
 			m_main_page.get_text_align_horz(val);
 			text_align_horz_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_ID::TEXT_PAR_ALIGN>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_PAR_ALIGN>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
 			m_main_page.get_text_align_vert(val);
 			text_align_vert_is_checked(val);
@@ -468,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || (!any && !s->is_selected())) {
 				continue;
 			}
-			ustack_push_set<UNDO_ID::MOVE>(s);
+			ustack_push_set<UNDO_T::MOVE>(s);
 			s->move(pos);
 		}
 	}
@@ -544,7 +544,7 @@ namespace winrt::GraphPaper::implementation
 	// s	図形
 	// val	値
 	// 戻り値	なし
-	template <UNDO_ID U, typename T> void MainPage::ustack_push_set(Shape* const s, T const& val)
+	template <UNDO_T U, typename T> void MainPage::ustack_push_set(Shape* const s, T const& val)
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
 		T t_val;
@@ -560,7 +560,7 @@ namespace winrt::GraphPaper::implementation
 	// T	格納する型.
 	// val	格納する値
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
-	template<UNDO_ID U, typename T> bool MainPage::ustack_push_set(T const& val)
+	template<UNDO_T U, typename T> bool MainPage::ustack_push_set(T const& val)
 	{
 		// メインページに属性ありなら, メインページの属性も変更する.
 		T page_val;
@@ -582,52 +582,52 @@ namespace winrt::GraphPaper::implementation
 	// U	操作の種類.
 	// s	値を保存する図形
 	// 戻り値	なし
-	template <UNDO_ID U> void MainPage::ustack_push_set(Shape* const s)
+	template <UNDO_T U> void MainPage::ustack_push_set(Shape* const s)
 	{
 		m_ustack_undo.push_back(new UndoValue<U>(s));
 	}
 
-	template bool MainPage::ustack_push_set<UNDO_ID::ARC_DIR>(D2D1_SWEEP_DIRECTION const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::ARC_END>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::ARC_START>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_SIZE>(ARROW_SIZE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_STYLE>(ARROW_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::DASH_CAP>(D2D1_CAP_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::DASH_PAT>(DASH_PAT const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::DASH_STYLE>(D2D1_DASH_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FILL_COLOR>(D2D1_COLOR_F const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_COLOR>(D2D1_COLOR_F const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_FAMILY>(wchar_t* const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_SIZE>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_STRETCH>(DWRITE_FONT_STRETCH const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::GRID_BASE>(Shape* const s, float const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_LIMIT>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::PAGE_PAD>(Shape* const s, D2D1_RECT_F const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_CAP>(CAP_STYLE const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_COLOR>(D2D1_COLOR_F const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_WIDTH>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_PAR_ALIGN>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_LINE_SP>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_PAD>(D2D1_SIZE_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::MOVE>(Shape* const s);
-	template void MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(Shape* const s);
+	template bool MainPage::ustack_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARC_END>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARC_ROT>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARC_START>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARROW_SIZE>(ARROW_SIZE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARROW_STYLE>(ARROW_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::IMAGE_OPAC>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::DASH_CAP>(D2D1_CAP_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::DASH_PAT>(DASH_PAT const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::DASH_STYLE>(D2D1_DASH_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FILL_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_FAMILY>(wchar_t* const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_SIZE>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_STRETCH>(DWRITE_FONT_STRETCH const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_BASE>(Shape* const s, float const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::JOIN_LIMIT>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_PAD>(Shape* const s, D2D1_RECT_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::STROKE_CAP>(CAP_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::STROKE_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::STROKE_WIDTH>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
+	template void MainPage::ustack_push_set<UNDO_T::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::TEXT_LINE_SP>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAD>(D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::MOVE>(Shape* const s);
+	template void MainPage::ustack_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
 	/*
-	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_T::ARC_ROT, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -635,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_ROT>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_ROT>(s, val));
 			flag = true;
 		}
 		return flag;
@@ -645,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
 	/*
-	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_START, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_T::ARC_START, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -653,7 +653,7 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_START>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_START>(s, val));
 			flag = true;
 		}
 		return flag;
@@ -663,7 +663,7 @@ namespace winrt::GraphPaper::implementation
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
 	/*
-	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_END, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_T::ARC_END, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -671,7 +671,7 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_END>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_END>(s, val));
 			flag = true;
 		}
 		return flag;
@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 	// s	操作する図形
 	// val	文字範囲の値
 	// 戻り値	なし
-	template<> void MainPage::ustack_push_set<UNDO_ID::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
+	template<> void MainPage::ustack_push_set<UNDO_T::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
 	{
 		auto flag = false;
 		// 元に戻す操作スタックの各操作について
@@ -696,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 				// 操作がヌルの場合,
 				break;
 			}
-			else if (typeid(*u) != typeid(UndoValue<UNDO_ID::TEXT_RANGE>)) {
+			else if (typeid(*u) != typeid(UndoValue<UNDO_T::TEXT_RANGE>)) {
 				// 操作が文字範囲の選択する操作でない場合,
 				if (typeid(*u) != typeid(UndoSelect)) {
 					// 操作が図形の選択を反転する操作でない場合,
@@ -714,7 +714,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (!flag) {
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::TEXT_RANGE>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
 		}
 
 	}
@@ -744,12 +744,12 @@ namespace winrt::GraphPaper::implementation
 		for (const auto& r : m_ustack_redo) {
 			ustack_write_op(r, dt_writer);
 		}
-		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::END));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::END));
 		dt_writer.WriteUInt32(m_ustack_rcnt);
 		for (const auto& u : m_ustack_undo) {
 			ustack_write_op(u, dt_writer);
 		}
-		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::END));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::END));
 		dt_writer.WriteUInt32(m_ustack_ucnt);
 		dt_writer.WriteBoolean(m_ustack_is_changed);
 	}

@@ -421,8 +421,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 位置を含むか判定する.
-	// test	判定する位置
+	// 図形が点を含むか判定する.
+	// test	判定される点
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	//------------------------------
 	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F test) const noexcept
@@ -432,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(test, m_start, tp);
-		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
+		// 判定される点によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F cp[4];
 		cp[0].x = cp[0].y = 0.0;
 		pt_add(cp[0], m_pos[0], cp[1]);
@@ -451,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 			return ANC_TYPE::ANC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
-			if (pt_in_circle(tp, ew)) {
+			if (pt_in_circle(tp.x, tp.y, ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 			if (pt_in_circle(tp, cp[3], ew)) {
@@ -554,14 +554,14 @@ namespace winrt::GraphPaper::implementation
 			POINT_2D c0 = c0_rb - c0_lt;
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
-				// 凸包 c1 は判定する位置を含んでいるので, 図形の部位を返す.
+				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
 				return ANC_TYPE::ANC_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
-				// 凸包 c1は判定する位置を含んでいるので, 図形の部位を返す.
+				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
 				return ANC_TYPE::ANC_STROKE;
 			}
 

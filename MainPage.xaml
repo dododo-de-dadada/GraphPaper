@@ -256,7 +256,19 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem
+                <MenuFlyoutItem
+					x:Name="mfi_edit_poly" x:Uid="mfi_edit_poly" Click="edit_poly_click_async"
+					Text="Edit Polygon" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon
+							Data="{StaticResource data_poly}" HorizontalAlignment="Center"
+							VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="P" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem
 					x:Name="mfi_edit_arc" x:Uid="mfi_edit_arc" Click="edit_arc_click_async"
 					Text="Edit Arc" >
 					<MenuFlyoutItem.Icon>
@@ -1198,17 +1210,35 @@
 					RelativePanel.Below="dialog_slider_2" RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
 					Visibility="Collapsed" />
-				<Slider x:Name="dialog_slider_4" x:Uid = "dialog_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider
+                    x:Name="dialog_slider_4" x:Uid = "dialog_slider_4"
+                    IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" 
+                    RelativePanel.Below="dialog_slider_3" RelativePanel.AlignLeftWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
+                    Visibility="Collapsed" />
 				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="dialog_slider_4" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
 				<CheckBox
 					x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box"
 					IsChecked="False" Margin="0,0,0,4" RelativePanel.Below="dialog_slider_4"
 					RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
-				<ComboBox
-					x:Name="dialog_combo_box" x:Uid="dialog_combo_box" Header="Length Unit" Margin="0,0,0,4"
-                    RelativePanel.Below="dialog_check_box" RelativePanel.AlignLeftWithPanel="True"
-					Visibility="Collapsed" />
-			</RelativePanel>
+                <ComboBox
+					x:Name="dialog_combo_box" x:Uid="dialog_combo_box" Header="Length Unit"
+                    Margin="0,0,0,4" RelativePanel.Below="dialog_check_box"
+                    RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
+                <muxc:RadioButtons
+                    x:Name="dialog_radio_btns" MaxColumns="2"  Margin="0,0,0,4"
+                    RelativePanel.Below="dialog_combo_box" RelativePanel.AlignLeftWithPanel="True"
+                    Visibility="Collapsed" >
+                    <!--
+                    x:String などの UIElement でない要素のリストでは,
+                    オブザベーションのタイミングかなんかでうまくチェックがつかなかったりする.
+					そこで UIElement であるラディオボタンを要素にする. 重複して使用する例については
+                    https://learn.microsoft.com/ja-jp/windows/apps/design/controls/radio-button を参照
+                    -->
+                    <RadioButton x:Name="dialog_radio_btn_0"/>
+                    <RadioButton x:Name="dialog_radio_btn_1"/>
+                </muxc:RadioButtons>
+            </RelativePanel>
 		</ContentDialog>
 		<!-- 印刷のための透明なキャンバス -->
 		<Canvas x:Name="PrintCanvas" Opacity="0" />

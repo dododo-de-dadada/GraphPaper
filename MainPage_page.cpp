@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F page_val;
 			m_main_page.get_page_color(page_val);
 			if (!equal(page_val, setting_val)) {
-				ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, setting_val);
+				ustack_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, setting_val);
 				ustack_push_null();
 				ustack_is_enable();
 				page_draw();
@@ -617,10 +617,10 @@ namespace winrt::GraphPaper::implementation
 			const bool flag_pad = !equal(p_pad, m_main_page.m_page_pad);
 			if (flag_size || flag_pad) {
 				if (flag_size) {
-					ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
+					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				}
 				if (flag_pad) {
-					ustack_push_set<UNDO_ID::PAGE_PAD>(&m_main_page, p_pad);
+					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_pad);
 				}
 				ustack_push_null();
 				ustack_is_enable();
@@ -668,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.m_page_pad.top + p_max.y + m_main_page.m_page_pad.bottom
 			};
 			if (!equal(m_main_page.m_page_size, p_size)) {
-				ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
+				ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				ustack_push_null();
 				ustack_is_enable();
 			}
@@ -816,8 +816,9 @@ namespace winrt::GraphPaper::implementation
 	// 表示の左上位置と右下位置を設定する.
 	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_view(
-			m_main_page.m_shape_list, m_main_page.m_page_size, m_main_bbox_lt, m_main_bbox_rb);
+		slist_bound_page(
+			m_main_page.m_shape_list, m_main_page.m_page_size, m_main_bbox_lt,
+			m_main_bbox_rb);
 	}
 
 	void MainPage::page_zoom_is_checked(float scale)

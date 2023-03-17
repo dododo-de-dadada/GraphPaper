@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			ustack_push_set<UNDO_ID::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			if (!done) {
 				done = true;
 			}

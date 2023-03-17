@@ -664,8 +664,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか判定する.
-	// test	判定する位置
+	// 図形が点を含むか判定する.
+	// test	判定される点
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
@@ -676,7 +676,7 @@ namespace winrt::GraphPaper::implementation
 		const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : 
 			(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
-		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
+		// 文字列の範囲の左上が原点になるよう, 判定される点を移動する.
 		D2D1_POINT_2F lt;
 		ShapeRect::get_bound_lt(lt);
 		pt_sub(test, lt, lt);

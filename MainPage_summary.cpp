@@ -10,11 +10,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
-	//using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 図形リストをもとに図形の一覧を作成する.
 	static void summary_create(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict);

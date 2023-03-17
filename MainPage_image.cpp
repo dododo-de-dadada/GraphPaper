@@ -69,8 +69,8 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_image_opacity(samp_val);
-			ustack_push_set<UNDO_ID::IMAGE_OPAC>(&m_main_page, samp_val);
-			if (ustack_push_set<UNDO_ID::IMAGE_OPAC>(samp_val)) {
+			ustack_push_set<UNDO_T::IMAGE_OPAC>(&m_main_page, samp_val);
+			if (ustack_push_set<UNDO_T::IMAGE_OPAC>(samp_val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();

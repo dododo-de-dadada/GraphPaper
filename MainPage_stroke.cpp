@@ -54,25 +54,25 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 0>(val0);
+		stroke_slider_set_header<UNDO_T::STROKE_COLOR, 0>(val0);
 
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 1>(val1);
+		stroke_slider_set_header<UNDO_T::STROKE_COLOR, 1>(val1);
 
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 2>(val2);
+		stroke_slider_set_header<UNDO_T::STROKE_COLOR, 2>(val2);
 
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 3>(val3);
+		stroke_slider_set_header<UNDO_T::STROKE_COLOR, 3>(val3);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
@@ -80,19 +80,19 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().Visibility(Visibility::Visible);
 		const auto token0{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 0> })
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_T::STROKE_COLOR, 0> })
 		};
 		const auto token1{
 			dialog_slider_1().ValueChanged(
-				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 1> })
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_T::STROKE_COLOR, 1> })
 		};
 		const auto token2{
 			dialog_slider_2().ValueChanged(
-				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 2> })
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_T::STROKE_COLOR, 2> })
 		};
 		const auto token3{
 			dialog_slider_3().ValueChanged(
-				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 3> })
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_T::STROKE_COLOR, 3> })
 		};
 		stroke_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F val;
 			m_dialog_page.m_shape_list.back()->get_stroke_color(val);
-			if (ustack_push_set<UNDO_ID::STROKE_COLOR>(val)) {
+			if (ustack_push_set<UNDO_T::STROKE_COLOR>(val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
@@ -131,13 +131,13 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <UNDO_T U, int S>
 	void MainPage::stroke_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_ID::STROKE_WIDTH) {
+		if constexpr (U == UNDO_T::STROKE_WIDTH) {
 			wchar_t buf[32];
 			float g_base;
 			m_main_page.get_grid_base(g_base);
@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 			dialog_set_slider_header<S>(
 				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf);
 		}
-		else if constexpr (U == UNDO_ID::STROKE_COLOR) {
+		else if constexpr (U == UNDO_T::STROKE_COLOR) {
 			constexpr wchar_t* R[]{
 				L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity"
 			};
@@ -162,18 +162,18 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S>
+	template <UNDO_T U, int S>
 	void MainPage::stroke_slider_value_changed(
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 0) {
+		if constexpr (U == UNDO_T::STROKE_WIDTH && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			stroke_slider_set_header<UNDO_ID::STROKE_WIDTH, 0>(val);
+			stroke_slider_set_header<UNDO_T::STROKE_WIDTH, 0>(val);
 			if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 0) {
+		else if constexpr (U == UNDO_T::STROKE_COLOR && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 1) {
+		else if constexpr (U == UNDO_T::STROKE_COLOR && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 2) {
+		else if constexpr (U == UNDO_T::STROKE_COLOR && S == 2) {
 			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 3) {
+		else if constexpr (U == UNDO_T::STROKE_COLOR && S == 3) {
 			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		stroke_width_is_checked(s_width);
-		if (ustack_push_set<UNDO_ID::STROKE_WIDTH>(s_width)) {
+		if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -273,11 +273,11 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().StepFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::StepValues);
 		dialog_slider_0().Value(s_width);
-		stroke_slider_set_header<UNDO_ID::STROKE_WIDTH, 0>(s_width);
+		stroke_slider_set_header<UNDO_T::STROKE_WIDTH, 0>(s_width);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		const auto token0{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_WIDTH, 0> })
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_T::STROKE_WIDTH, 0> })
 		};
 		stroke_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -291,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_stroke_width(samp_val);
 			stroke_width_is_checked(samp_val);
-			if (ustack_push_set<UNDO_ID::STROKE_WIDTH>(samp_val)) {
+			if (ustack_push_set<UNDO_T::STROKE_WIDTH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();

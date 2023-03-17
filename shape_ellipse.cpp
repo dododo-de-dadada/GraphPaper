@@ -53,8 +53,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
-	// test	”»’è‚·‚éˆÊ’u
+	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
+	// test	”»’è‚³‚ê‚é“_
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
 	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
@@ -64,13 +64,13 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ”¼Œa‚ğ“¾‚é.
-		D2D1_POINT_2F r;
-		pt_mul(m_pos, 0.5, r);
+		D2D1_POINT_2F rad;
+		pt_mul(m_pos, 0.5, rad);
 		// ’†S“_‚ğ“¾‚é.
-		D2D1_POINT_2F c;
-		pt_add(m_start, r, c);
-		r.x = fabsf(r.x);
-		r.y = fabsf(r.y);
+		D2D1_POINT_2F ctr;
+		pt_add(m_start, rad, ctr);
+		rad.x = fabsf(rad.x);
+		rad.y = fabsf(rad.y);
 		if (is_opaque(m_stroke_color)) {
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
@@ -78,8 +78,8 @@ namespace winrt::GraphPaper::implementation
 			const double s_width = max(static_cast<double>(m_stroke_width), m_anc_width);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
-			pt_add(r, s_width * 0.5, r_outer);
-			if (!pt_in_ellipse(test, c, r_outer.x, r_outer.y)) {
+			pt_add(rad, s_width * 0.5, r_outer);
+			if (!pt_in_ellipse(test, ctr, r_outer.x, r_outer.y)) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
 				// ANC_PAGE ‚ğ•Ô‚·.
 				return ANC_TYPE::ANC_PAGE;
@@ -97,13 +97,13 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_STROKE;
 			}
 			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
-			if (!pt_in_ellipse(test, c, r_inner.x, r_inner.y)) {
+			if (!pt_in_ellipse(test, ctr, r_inner.x, r_inner.y)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ‚¾‰~‚ÉˆÊ’u‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (pt_in_ellipse(test, c, r.x, r.y)) {
+			if (pt_in_ellipse(test, ctr, rad.x, rad.y)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}

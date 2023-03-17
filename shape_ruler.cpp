@@ -9,8 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 位置を含むか判定する.
-	// t_pos	判定する位置
+	// 図形が点を含むか判定する.
+	// t_pos	判定される点
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const uint32_t anc = rect_hit_test_anc(m_start, m_pos, t_pos, m_anc_width);

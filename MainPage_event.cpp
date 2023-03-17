@@ -1060,23 +1060,23 @@ namespace winrt::GraphPaper::implementation
 				const uint32_t anc = slist_hit_test(
 					m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (anc == ANC_TYPE::ANC_PAGE) {
-					ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
+					ustack_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 					ustack_push_null();
 					xcvd_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
-						ustack_push_set<UNDO_ID::FILL_COLOR>(s, m_eyedropper_color);
+						ustack_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
 						xcvd_is_enabled();
 					}
 					else if (m_event_anc_pressed == ANC_TYPE::ANC_TEXT) {
-						ustack_push_set<UNDO_ID::FONT_COLOR>(s, m_eyedropper_color);
+						ustack_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
 						xcvd_is_enabled();
 					}
 					else if (m_event_anc_pressed == ANC_TYPE::ANC_STROKE) {
-						ustack_push_set<UNDO_ID::STROKE_COLOR>(s, m_eyedropper_color);
+						ustack_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
 						xcvd_is_enabled();
 					}

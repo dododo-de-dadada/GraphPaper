@@ -209,17 +209,17 @@ namespace winrt::GraphPaper::implementation
 		return 3;
 	}
 
-	// 位置を含むか判定する.
-	// t_pos	判定する位置
-	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F test) const noexcept
+	// 図形が点を含むか判定する.
+	// t	判定される点
+	// 戻り値	図形の部位
+	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
 		D2D1_POINT_2F end;	// 終点
 		pt_add(m_start, m_pos[0], end);
-		if (pt_in_anc(test, end, m_anc_width)) {
+		if (pt_in_anc(t, end, m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(test, m_start, m_anc_width)) {
+		if (pt_in_anc(t, m_start, m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
 		const double e_width = 0.5 * max(m_stroke_width, m_anc_width);
@@ -234,55 +234,57 @@ namespace winrt::GraphPaper::implementation
 			const double dy = pos.y;	// 辺の方向ベクトル Y 軸
 			const double ox = dy;	// 辺の直交ベクトル X 軸
 			const double oy = -dx;	// 辺の直交ベクトル Y 軸
-			D2D1_POINT_2F s[4]{};	// 太らせた辺の四辺形
-			pt_add(m_start, -dx + ox, -dy + oy, s[0]);
-			pt_add(m_start, -dx - ox, -dy - oy, s[1]);
-			pt_add(end, dx - ox, dy - oy, s[2]);
-			pt_add(end, dx + ox, dy + oy, s[3]);
-			if (pt_in_poly(test, 4, s)) {
+			D2D1_POINT_2F q[4]{};	// 太らせた辺の四辺形
+			pt_add(m_start, -dx + ox, -dy + oy, q[0]);
+			pt_add(m_start, -dx - ox, -dy - oy, q[1]);
+			pt_add(end, dx - ox, dy - oy, q[2]);
+			pt_add(end, dx + ox, dy + oy, q[3]);
+			if (pt_in_poly(t, 4, q)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
-			D2D1_POINT_2F pos{ m_pos[0] };
-			const double abs2 = pt_abs2(pos);
+			D2D1_POINT_2F p{ m_pos[0] };
+			const double abs2 = pt_abs2(p);
 			pt_mul(
-				abs2 >= FLT_MIN ? pos : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 >= FLT_MIN ? p : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
 				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
-				pos);
-			const double dx = pos.x;	// 辺の方向ベクトル X 座標
-			const double dy = pos.y;	// 辺の方向ベクトル Y 座標
+				p);
+			const double dx = p.x;	// 辺の方向ベクトル X 座標
+			const double dy = p.y;	// 辺の方向ベクトル Y 座標
 			const double ox = dy;	// 辺の直交ベクトル X 座標
 			const double oy = -dx;	// 辺の直交ベクトル Y 座標
-			D2D1_POINT_2F s[6]{};	// 太らせた辺の六角形
-			pt_add(m_start, ox, oy, s[0]);
-			pt_add(m_start, -dx, -dy, s[1]);
-			pt_add(m_start, -ox, -oy, s[2]);
-			pt_add(end, -ox, -oy, s[3]);
-			pt_add(end, dx, dy, s[4]);
-			pt_add(end, ox, oy, s[5]);
-			if (pt_in_poly(test, 6, s)) {
+			D2D1_POINT_2F h[6]{};	// 太らせた辺の六角形
+			pt_add(m_start, ox, oy, h[0]);
+			pt_add(m_start, -dx, -dy, h[1]);
+			pt_add(m_start, -ox, -oy, h[2]);
+			pt_add(end, -ox, -oy, h[3]);
+			pt_add(end, dx, dy, h[4]);
+			pt_add(end, ox, oy, h[5]);
+			if (pt_in_poly(t, 6, h)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		else {
 			if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
-				if (pt_in_circle(test, m_start, e_width) || pt_in_circle(test, end, e_width)) {
+				if (pt_in_circle(t, m_start, e_width) || pt_in_circle(t, end, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
-			D2D1_POINT_2F pos{ m_pos[0] };
-			const double abs2 = pt_abs2(pos);
+			D2D1_POINT_2F p{ m_pos[0] };
+			const double abs2 = pt_abs2(p);
 			if (abs2 >= FLT_MIN) {
-				pt_mul(pos, e_width / sqrt(abs2), pos);
-				const double ox = pos.y;	// 辺の直交ベクトル X 座標
-				const double oy = -pos.x;	// 辺の直交ベクトル Y 座標
-				D2D1_POINT_2F s[4];	// 太らせた辺の四辺形
-				pt_add(m_start, ox, oy, s[0]);
-				pt_add(m_start, -ox, -oy, s[1]);
-				pt_add(end, -ox, -oy, s[2]);
-				pt_add(end, ox, oy, s[3]);
-				return pt_in_poly(test, 4, s);
+				pt_mul(p, e_width / sqrt(abs2), p);
+				const double ox = p.y;	// 辺の直交ベクトル X 座標
+				const double oy = -p.x;	// 辺の直交ベクトル Y 座標
+				D2D1_POINT_2F q[4];	// 太らせた辺の四辺形
+				pt_add(m_start, ox, oy, q[0]);
+				pt_add(m_start, -ox, -oy, q[1]);
+				pt_add(end, -ox, -oy, q[2]);
+				pt_add(end, ox, oy, q[3]);
+				if (pt_in_poly(t, 4, q)) {
+					return ANC_TYPE::ANC_STROKE;
+				}
 			}
 		}
 		return ANC_TYPE::ANC_PAGE;

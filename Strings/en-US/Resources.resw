@@ -1234,4 +1234,16 @@
     <value>Length Unit</value>
     <comment>ComboBox</comment>
   </data>
+  <data name="str_arc_clockwize" xml:space="preserve">
+    <value>Clockwize</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arc_counter_clockwize" xml:space="preserve">
+    <value>Counter Clockwize</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arc_sweep_direction" xml:space="preserve">
+    <value>Sweep Direction</value>
+    <comment>String</comment>
+  </data>
 </root>

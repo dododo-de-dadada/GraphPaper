@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 			ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
 			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				auto text = wchar_cpy(tx_edit_text().Text().c_str());
-				ustack_push_set<UNDO_ID::TEXT_CONTENT>(s, text);
+				ustack_push_set<UNDO_T::TEXT_CONTENT>(s, text);
 				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 				if (m_text_fit_frame_to_text) {
 					ustack_push_position(s, ANC_TYPE::ANC_SE);
@@ -135,6 +135,31 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	void MainPage::edit_arc_dir_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args)
+	{
+		if (dialog_radio_btns().SelectedIndex() == 0) {
+			if (m_dialog_page.m_shape_list.back()->set_arc_dir(
+				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+				const auto val0 = dialog_slider_0().Value();
+				const auto val1 = dialog_slider_1().Value();
+				dialog_slider_0().Value(-val1);
+				dialog_slider_1().Value(-val0);
+				dialog_draw();
+			}
+			auto items = args.AddedItems();
+		}
+		else if (dialog_radio_btns().SelectedIndex() == 1) {
+			if (m_dialog_page.m_shape_list.back()->set_arc_dir(
+				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+				const auto val0 = dialog_slider_0().Value();
+				const auto val1 = dialog_slider_1().Value();
+				dialog_slider_0().Value(-val1);
+				dialog_slider_1().Value(-val0);
+				dialog_draw();
+			}
+		}
+	}
+	/*
 	template<int S>
 	void MainPage::edit_arc_checkbox_checked(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -159,7 +184,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 	}
+	*/
 
+	IAsyncAction MainPage::edit_poly_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		co_return;
+	}
 
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -230,11 +260,16 @@ namespace winrt::GraphPaper::implementation
 					{ this, &MainPage::edit_arc_slider_value_changed<2> })
 			};
 			const winrt::event_token token3{
+				dialog_radio_btns().SelectionChanged({ this, &MainPage::edit_arc_dir_selection_changed })
+			};
+			/*
+			const winrt::event_token token3{
 				dialog_check_box().Checked({ this, &MainPage::edit_arc_checkbox_checked<0> })
 			};
 			const winrt::event_token token4{
 				dialog_check_box().Unchecked({ this, &MainPage::edit_arc_checkbox_checked<1> })
 			};
+			*/
 
 			const auto min0 = dialog_slider_0().Minimum();
 			const auto max0 = dialog_slider_0().Maximum();
@@ -254,8 +289,9 @@ namespace winrt::GraphPaper::implementation
 			const auto snap2 = dialog_slider_2().SnapsTo();
 			const auto val2 = dialog_slider_2().Value();
 			const auto vis2 = dialog_slider_2().Visibility();
-			const auto val3 = dialog_check_box().IsChecked();
-			const auto vis3 = dialog_check_box().Visibility();
+			//const auto val3 = dialog_check_box().IsChecked();
+			//const auto vis3 = dialog_check_box().Visibility();
+			//const auto vis3 = dialog_radio_buttons().Visibility();
 
 			dialog_slider_0().Minimum(0.0);
 			dialog_slider_0().Maximum(45.0);
@@ -290,14 +326,20 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_2().Value(a_rot);
 			edit_arc_slider_set_header<2>(a_rot);
 			dialog_slider_2().Visibility(Visibility::Visible);
+
+			dialog_radio_btns().Header(
+				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction")));
+			dialog_radio_btn_0().Content(
+				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize")));
+			dialog_radio_btn_1().Content(
+				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize")));
+			dialog_radio_btns().Visibility(Visibility::Visible);
 			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				dialog_check_box().IsChecked(true);
+				dialog_radio_btns().SelectedIndex(0);
 			}
 			else {
-				dialog_check_box().IsChecked(false);
+				dialog_radio_btns().SelectedIndex(1);
 			}
-			dialog_check_box().Visibility(Visibility::Visible);
-
 			cd_setting_dialog().Title(
 				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot")));
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
@@ -306,44 +348,46 @@ namespace winrt::GraphPaper::implementation
 				// ’ˆÓ: ‡”Ô‚ª OK ‚©‚Ç‚¤‚©.
 				D2D1_SWEEP_DIRECTION new_dir;
 				s->get_arc_dir(new_dir);
-				ustack_push_set<UNDO_ID::ARC_DIR>(new_dir);
+				ustack_push_set<UNDO_T::ARC_DIR>(new_dir);
 				float new_val;
 				s->get_arc_start(new_val);
-				ustack_push_set<UNDO_ID::ARC_START>(new_val);
+				ustack_push_set<UNDO_T::ARC_START>(new_val);
 				s->get_arc_end(new_val);
-				ustack_push_set<UNDO_ID::ARC_END>(new_val);
+				ustack_push_set<UNDO_T::ARC_END>(new_val);
 				s->get_arc_rot(new_val);
-				ustack_push_set<UNDO_ID::ARC_ROT>(new_val);
+				ustack_push_set<UNDO_T::ARC_ROT>(new_val);
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 			slist_clear(m_dialog_page.m_shape_list);
 			dialog_slider_0().ValueChanged(token0);
+			dialog_slider_1().ValueChanged(token1);
+			dialog_slider_2().ValueChanged(token2);
+			dialog_radio_btns().SelectionChanged(token3);
 			dialog_slider_0().Minimum(min0);
 			dialog_slider_0().Maximum(max0);
 			dialog_slider_0().TickFrequency(freq0);
 			dialog_slider_0().SnapsTo(snap0);
 			dialog_slider_0().Value(val0);
 			dialog_slider_0().Visibility(vis0);
-			dialog_slider_1().ValueChanged(token1);
 			dialog_slider_1().Minimum(min1);
 			dialog_slider_1().Maximum(max1);
 			dialog_slider_1().TickFrequency(freq1);
 			dialog_slider_1().SnapsTo(snap1);
 			dialog_slider_1().Value(val1);
 			dialog_slider_1().Visibility(vis1);
-			dialog_slider_2().ValueChanged(token2);
 			dialog_slider_2().Minimum(min2);
 			dialog_slider_2().Maximum(max2);
 			dialog_slider_2().TickFrequency(freq2);
 			dialog_slider_2().SnapsTo(snap2);
 			dialog_slider_2().Value(val2);
 			dialog_slider_2().Visibility(vis2);
-			dialog_check_box().Checked(token3);
-			dialog_check_box().Unchecked(token4);
-			dialog_check_box().IsChecked(val3);
-			dialog_check_box().Visibility(vis3);
+			dialog_radio_btns().Visibility(Visibility::Collapsed);
+			//dialog_check_box().Checked(token3);
+			//dialog_check_box().Unchecked(token4);
+			//dialog_check_box().IsChecked(val3);
+			//dialog_check_box().Visibility(vis3);
 			m_mutex_event.unlock();
 			slist_clear(m_dialog_page.m_shape_list);
 		}

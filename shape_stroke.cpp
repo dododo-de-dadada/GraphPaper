@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか判定する.
+	// 図形が点を含むか判定する.
 	// 戻り値	つねに ANC_PAGE
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{

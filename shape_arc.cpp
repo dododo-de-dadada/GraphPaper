@@ -893,20 +893,21 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	uint32_t ShapeArc::hit_test(const D2D1_POINT_2F test) const noexcept
+	// 図形が点を含むか判定する.
+	uint32_t ShapeArc::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
 		D2D1_POINT_2F p[5];
 		get_verts(p);
-		if (pt_in_anc(test, p[AXIS2], m_anc_width)) {
+		if (pt_in_anc(t, p[AXIS2], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		else if (pt_in_anc(test, p[AXIS1], m_anc_width)) {
+		else if (pt_in_anc(t, p[AXIS1], m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		else if (pt_in_anc(test, p[END], m_anc_width)) {
+		else if (pt_in_anc(t, p[END], m_anc_width)) {
 			return ANC_TYPE::ANC_A_END;
 		}
-		else if (pt_in_anc(test, p[START], m_anc_width)) {
+		else if (pt_in_anc(t, p[START], m_anc_width)) {
 			return ANC_TYPE::ANC_A_START;
 		}
 		// 位置 t が, 扇形の内側にあるか判定する.
@@ -920,8 +921,8 @@ namespace winrt::GraphPaper::implementation
 		const double sy = p[START].y - p[CENTER].y;
 		const double ex = p[END].x - p[CENTER].x;
 		const double ey = p[END].y - p[CENTER].y;
-		const double tx = test.x - p[CENTER].x;
-		const double ty = test.y - p[CENTER].y;
+		const double tx = t.x - p[CENTER].x;
+		const double ty = t.y - p[CENTER].y;
 		const double st = sx * ty - sy * tx;
 		const double et = ex * ty - ey * tx;
 		const double rw = abs(m_radius.width);
@@ -929,45 +930,38 @@ namespace winrt::GraphPaper::implementation
 		if (st >= 0.0 && et <= 0.0) {
 			// 線枠が可視で,
 			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-				// 判定する位置が, 内側と外側のだ円の中にあるなら,
+				// 判定される点が, 内側と外側のだ円の中にあるなら,
 				const double ew = max(m_stroke_width, m_anc_width) * 0.5;
-				if (!pt_in_ellipse(test, p[CENTER], rw - ew, rh - ew, rot)) {
-					if (pt_in_ellipse(test, p[CENTER], rw + ew, rh + ew, rot)) {
+				if (!pt_in_ellipse(tx, ty, rw - ew, rh - ew, rot)) {
+					if (pt_in_ellipse(tx, ty, rw + ew, rh + ew, rot)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// 判定する位置が, 内側のだ円の中にあるなら
+				// 判定される点が, 内側のだ円の中にあるなら
 				else if (is_opaque(m_fill_color)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
 			// 塗りつぶし色が不透明で,
 			else if (is_opaque(m_fill_color)) {
-				// 判定する位置が, だ円の内にあるなら,
-				if (pt_in_ellipse(test, p[CENTER], rw, rh, rot)) {
+				// 判定される点が, だ円の内にあるなら,
+				if (pt_in_ellipse(tx, ty, rw, rh, rot)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
 		}
-		// 判定する位置が, 扇形の外側にあり, かつ線枠が可視なら,
+		// 判定される点が, 扇形の外側にあり, かつ線枠が可視なら,
 		else if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			// 端点に含まれるか判定する.
 			// 時計回りに対してのみ判定しているので要注意.
 			auto c_style = m_stroke_cap.m_start;
 			const double ew = m_stroke_width * 0.5;	// 辺の半分の幅.
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
-				// 判定する位置を, 端点を原点とする座標に平行移動する.
-				const D2D1_POINT_2F t{
-					static_cast<FLOAT>(test.x - sx), static_cast<FLOAT>(test.y - sy)
-				};
-				if (pt_in_circle(t, ew)) {
+				if (pt_in_circle(tx - sx, ty - sy, ew)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else {
-				const D2D1_POINT_2F t{
-					static_cast<FLOAT>(tx), static_cast<FLOAT>(ty)
-				};
 				// だ円 A・x^2 + B・y^2 = 1 における点 p { x0, y0 } の接線は
 				// (A・x0)・x + (B・y0)・y = 1
 				const double x0 = sx;
@@ -989,7 +983,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ox - oy), static_cast<FLOAT>(y0 + ox - oy) },
 						{ static_cast<FLOAT>(x0 + ox - oy), static_cast<FLOAT>(y0 + ox + oy) }
 					};
-					if (pt_in_poly(t, 4, quad)) {
+					if (pt_in_poly(tx, ty, 4, quad)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -1000,7 +994,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 					};
-					if (pt_in_poly(t, 4, quad)) {
+					if (pt_in_poly(tx, ty, 4, quad)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -1010,24 +1004,17 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 + oy), static_cast<FLOAT>(y0 - ox) },
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
 					};
-					if (pt_in_poly(t, 3, tri)) {
+					if (pt_in_poly(tx, ty, 3, tri)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
 			}
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
-				// 判定する位置を, 端点を原点とする座標に平行移動する.
-				const D2D1_POINT_2F t{
-					static_cast<FLOAT>(test.x - ex), static_cast<FLOAT>(test.y - ey)
-				};
-				if (pt_in_circle(t, ew)) {
+				if (pt_in_circle(tx - ex, ty - ey, ew)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else {
-				const D2D1_POINT_2F t{
-					static_cast<FLOAT>(tx), static_cast<FLOAT>(ty)
-				};
 				// だ円 A・x^2 + B・y^2 = 1 における点 { x0, y0 } の接線は
 				// (A・x0)・x + (B・y0)・y = 1
 				const double x0 = ex;
@@ -1050,7 +1037,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 					};
-					if (pt_in_poly(t, 4, quad)) {
+					if (pt_in_poly(tx, ty, 4, quad)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -1061,7 +1048,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ex - oy), static_cast<FLOAT>(y0 + ox - oy) },
 						{ static_cast<FLOAT>(x0 + ex - oy), static_cast<FLOAT>(y0 + ox + oy) }
 					};
-					if (pt_in_poly(t, 4, quad)) {
+					if (pt_in_poly(tx, ty, 4, quad)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
@@ -1071,7 +1058,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
 						{ static_cast<FLOAT>(x0 - oy), static_cast<FLOAT>(y0 + ox) }
 					};
-					if (pt_in_poly(t, 3, tri)) {
+					if (pt_in_poly(tx, ty, 3, tri)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}

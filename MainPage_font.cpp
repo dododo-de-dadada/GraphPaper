@@ -194,8 +194,8 @@ namespace winrt::GraphPaper::implementation
 			m_dialog_page.m_shape_list.back()->get_font_color(new_color);
 			float new_size;
 			m_dialog_page.m_shape_list.back()->get_font_size(new_size);
-			const bool flag_color = ustack_push_set<UNDO_ID::FONT_COLOR>(new_color);
-			const bool flag_size = ustack_push_set<UNDO_ID::FONT_SIZE>(new_size);
+			const bool flag_color = ustack_push_set<UNDO_T::FONT_COLOR>(new_color);
+			const bool flag_size = ustack_push_set<UNDO_T::FONT_SIZE>(new_size);
 			if (flag_color || flag_size) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -266,7 +266,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_family(samp_val);
-			if (ustack_push_set<UNDO_ID::FONT_FAMILY>(samp_val)) {
+			if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
-			if (ustack_push_set<UNDO_ID::FONT_SIZE>(samp_val)) {
+			if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -462,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_stretch(samp_val);
-			if (ustack_push_set<UNDO_ID::FONT_STRETCH>(samp_val)) {
+			if (ustack_push_set<UNDO_T::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「イタリック体」が選択された.
 	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -504,7 +504,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「標準」が選択された.
 	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
+		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -515,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::font_style_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
+		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
-			if (ustack_push_set<UNDO_ID::FONT_WEIGHT>(samp_val)) {
+			if (ustack_push_set<UNDO_T::FONT_WEIGHT>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
