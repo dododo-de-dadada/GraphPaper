@@ -95,34 +95,34 @@ namespace winrt::GraphPaper::implementation
 		// |         |
 		// 3----5----1
 		const D2D1_POINT_2F anc_se{ start.x + pos.x, start.y + pos.y };
-		if (pt_in_anc(t, anc_se, a_len)) {
+		if (anc_hit_test(t, anc_se, a_len)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		const D2D1_POINT_2F anc_ne{ anc_se.x, start.y };
-		if (pt_in_anc(t, anc_ne, a_len)) {
+		if (anc_hit_test(t, anc_ne, a_len)) {
 			return ANC_TYPE::ANC_NE;
 		}
 		const D2D1_POINT_2F anc_sw{ start.x, anc_se.y };
-		if (pt_in_anc(t, anc_sw, a_len)) {
+		if (anc_hit_test(t, anc_sw, a_len)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		if (pt_in_anc(t, start, a_len)) {
+		if (anc_hit_test(t, start, a_len)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(start.x + pos.x * 0.5), anc_se.y };
-		if (pt_in_anc(t, anc_s, a_len)) {
+		if (anc_hit_test(t, anc_s, a_len)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
 		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(start.y + pos.y * 0.5f) };
-		if (pt_in_anc(t, anc_e, a_len)) {
+		if (anc_hit_test(t, anc_e, a_len)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		const D2D1_POINT_2F anc_w{ start.x, anc_e.y };
-		if (pt_in_anc(t, anc_w, a_len)) {
+		if (anc_hit_test(t, anc_w, a_len)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		const D2D1_POINT_2F anc_n{ anc_s.x, start.y };
-		if (pt_in_anc(t, anc_n, a_len)) {
+		if (anc_hit_test(t, anc_n, a_len)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 		return ANC_TYPE::ANC_PAGE;
@@ -138,42 +138,42 @@ namespace winrt::GraphPaper::implementation
 
 		p[2].x = m_start.x + m_pos.x;
 		p[2].y = m_start.y + m_pos.y;
-		if (pt_in_anc(t, p[2], m_anc_width)) {
+		if (anc_hit_test(t, p[2], m_anc_width)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		p[3].x = m_start.x;
 		p[3].y = m_start.y + m_pos.y;
-		if (pt_in_anc(t, p[3], m_anc_width)) {
+		if (anc_hit_test(t, p[3], m_anc_width)) {
 			return ANC_TYPE::ANC_SW;
 		}
 		p[1].x = m_start.x + m_pos.x;
 		p[1].y = m_start.y;
-		if (pt_in_anc(t, p[1], m_anc_width)) {
+		if (anc_hit_test(t, p[1], m_anc_width)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		if (pt_in_anc(t, p[0], m_anc_width)) {
+		if (anc_hit_test(t, p[0], m_anc_width)) {
 			return ANC_TYPE::ANC_NW;
 		}
 
 		// 各辺の中点の部位に含まれるか判定する.
 		D2D1_POINT_2F bottom;
 		pt_avg(p[2], p[3], bottom);
-		if (pt_in_anc(t, bottom, m_anc_width)) {
+		if (anc_hit_test(t, bottom, m_anc_width)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
 		D2D1_POINT_2F right;
 		pt_avg(p[1], p[2], right);
-		if (pt_in_anc(t, right, m_anc_width)) {
+		if (anc_hit_test(t, right, m_anc_width)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		D2D1_POINT_2F left;
 		pt_avg(p[0], p[3], left);
-		if (pt_in_anc(t, left, m_anc_width)) {
+		if (anc_hit_test(t, left, m_anc_width)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		D2D1_POINT_2F top;
 		pt_avg(p[0], p[1], top);
-		if (pt_in_anc(t, top, m_anc_width)) {
+		if (anc_hit_test(t, top, m_anc_width)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 
@@ -387,12 +387,12 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 矩形範囲に含まれるか判定する.
+	// 矩形に含まれるか判定する.
 	// lt	矩形の左上位置
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeRect::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeRect::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_pos, pos);

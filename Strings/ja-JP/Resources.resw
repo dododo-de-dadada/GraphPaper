@@ -837,7 +837,7 @@
     <value>不透明度</value>
     <comment>String</comment>
   </data>
-  <data name="str_page_settings" xml:space="preserve">
+  <data name="str_page_layouts" xml:space="preserve">
     <value>ページ設定</value>
     <comment>String</comment>
   </data>
@@ -919,7 +919,7 @@
     <comment>TextBlock</comment>
   </data>
   <data name="tmfi_grid_snap.Text" xml:space="preserve">
-    <value>方眼にくっつける</value>
+    <value>方眼に合わせる</value>
     <comment>TextBlock</comment>
   </data>
   <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
@@ -1010,12 +1010,12 @@
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_page_setting_reset.Text" xml:space="preserve">
-    <value>ページ設定をリセット</value>
+  <data name="mfi_page_layout_reset.Text" xml:space="preserve">
+    <value>ページレイアウトをリセット</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_setting_save.Text" xml:space="preserve">
-    <value>ページ設定を保存</value>
+  <data name="mfi_page_layout_save.Text" xml:space="preserve">
+    <value>ページレイアウトを保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -1134,8 +1134,8 @@
     <value>線の結合の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_stick_to_vertex.Text" xml:space="preserve">
-    <value>頂点をくっつける...</value>
+  <data name="mfi_snap_interval.Text" xml:space="preserve">
+    <value>点をくっつける間隔...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_style_flat.Text" xml:space="preserve">

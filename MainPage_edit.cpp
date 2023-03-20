@@ -186,9 +186,12 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 
-	IAsyncAction MainPage::edit_poly_click_async(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::edit_poly_open_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		co_return;
+	}
+
+	void MainPage::edit_poly_close_click(IInspectable const&, RoutedEventArgs const&)
+	{
 	}
 
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)

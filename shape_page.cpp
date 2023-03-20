@@ -1181,7 +1181,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーに書き込む.
 	// dt_writer	データリーダー
-	void ShapePage::write(DataWriter const& dt_writer)
+	void ShapePage::write(DataWriter const& dt_writer) const
 	{
 		// 方眼の基準の大きさ
 		dt_writer.WriteSingle(m_grid_base);

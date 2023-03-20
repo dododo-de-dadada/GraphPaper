@@ -122,6 +122,7 @@ namespace winrt::GraphPaper::implementation
 			g_abs[0] = pt_abs2(d[0]);
 			g_abs[1] = pt_abs2(d[1]);
 		}
+
 		// 方眼にそろえない場合,
 		// 押された位置と離された位置を, 最も近い格子の位置に格納し,
 		// その距離は最大値とする.
@@ -515,14 +516,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_deforming(void)
 	{
 		const auto g_snap = m_main_page.m_grid_snap;
-		if (g_snap && m_vert_stick >= FLT_MIN) {
+		if (g_snap && m_snap_interval >= FLT_MIN) {
 			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
 			const auto p_scale = m_main_page.m_page_scale;
 			D2D1_POINT_2F p;
 			D2D1_POINT_2F d;
 			pt_round(m_event_pos_curr, m_main_page.m_grid_base + 1.0, p);
 			pt_sub(p, m_event_pos_curr, d);
-			float dist = min(static_cast<float>(sqrt(pt_abs2(d))), m_vert_stick) / p_scale;
+			float dist = min(static_cast<float>(sqrt(pt_abs2(d))), m_snap_interval) / p_scale;
 			if (slist_find_vertex_closest(
 				m_main_page.m_shape_list, m_event_pos_curr, dist, p)) {
 				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
@@ -542,12 +543,12 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed->set_pos_anc(
 				m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 		}
-		else if (m_vert_stick >= FLT_MIN) {
+		else if (m_snap_interval >= FLT_MIN) {
 			slist_find_vertex_closest(
 				m_main_page.m_shape_list, m_event_pos_curr,
-				m_vert_stick / m_main_page.m_page_scale, m_event_pos_curr);
+				m_snap_interval / m_main_page.m_page_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed,
-				m_vert_stick / m_main_page.m_page_scale, m_image_keep_aspect);
+				m_snap_interval / m_main_page.m_page_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -563,7 +564,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_moving(void)
 	{
 		const auto g_snap = m_main_page.m_grid_snap;
-		const auto v_stick = m_vert_stick;
+		const auto v_stick = m_snap_interval;
 		const auto g_base = m_main_page.m_grid_base;
 		const auto p_scale = m_main_page.m_page_scale;
 
@@ -613,49 +614,49 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 修飾キーがコントロールか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
-			D2D1_POINT_2F area_lt{};
-			D2D1_POINT_2F area_rb{};
+			D2D1_POINT_2F lt{};
+			D2D1_POINT_2F rb{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				area_lt.x = m_event_pos_pressed.x;
-				area_rb.x = m_event_pos_curr.x;
+				lt.x = m_event_pos_pressed.x;
+				rb.x = m_event_pos_curr.x;
 			}
 			else {
-				area_lt.x = m_event_pos_curr.x;
-				area_rb.x = m_event_pos_pressed.x;
+				lt.x = m_event_pos_curr.x;
+				rb.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				area_lt.y = m_event_pos_pressed.y;
-				area_rb.y = m_event_pos_curr.y;
+				lt.y = m_event_pos_pressed.y;
+				rb.y = m_event_pos_curr.y;
 			}
 			else {
-				area_lt.y = m_event_pos_curr.y;
-				area_rb.y = m_event_pos_pressed.y;
+				lt.y = m_event_pos_curr.y;
+				rb.y = m_event_pos_pressed.y;
 			}
-			if (toggle_area(area_lt, area_rb)) {
+			if (toggle_inside(lt, rb)) {
 				xcvd_is_enabled();
 			}
 		}
 		// 修飾キーが押されてないか判定する.
 		else if (k_mod == VirtualKeyModifiers::None) {
-			D2D1_POINT_2F area_lt{};
-			D2D1_POINT_2F area_rb{};
+			D2D1_POINT_2F lt{};
+			D2D1_POINT_2F rb{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				area_lt.x = m_event_pos_pressed.x;
-				area_rb.x = m_event_pos_curr.x;
+				lt.x = m_event_pos_pressed.x;
+				rb.x = m_event_pos_curr.x;
 			}
 			else {
-				area_lt.x = m_event_pos_curr.x;
-				area_rb.x = m_event_pos_pressed.x;
+				lt.x = m_event_pos_curr.x;
+				rb.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				area_lt.y = m_event_pos_pressed.y;
-				area_rb.y = m_event_pos_curr.y;
+				lt.y = m_event_pos_pressed.y;
+				rb.y = m_event_pos_curr.y;
 			}
 			else {
-				area_lt.y = m_event_pos_curr.y;
-				area_rb.y = m_event_pos_pressed.y;
+				lt.y = m_event_pos_curr.y;
+				rb.y = m_event_pos_pressed.y;
 			}
-			if (select_area(area_lt, area_rb)) {
+			if (select_inside(lt, rb)) {
 				xcvd_is_enabled();
 			}
 		}
@@ -840,7 +841,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-			page_setting_is_checked();
+			page_layout_is_checked();
 		}
 		popup.Closed([=](IInspectable const&, IInspectable const&) {
 			ContextFlyout(nullptr);
@@ -1018,7 +1019,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				unselect_all();
 				// 頂点をくっつける閾値がゼロより大きいか判定する.
-				if (m_vert_stick >= FLT_MIN) {
+				if (m_snap_interval >= FLT_MIN) {
 					const bool boxed = (
 						m_drawing_tool == DRAWING_TOOL::ELLIPSE ||
 						m_drawing_tool == DRAWING_TOOL::POLY ||
@@ -1027,7 +1028,7 @@ namespace winrt::GraphPaper::implementation
 						m_drawing_tool == DRAWING_TOOL::RULER ||
 						m_drawing_tool == DRAWING_TOOL::TEXT
 					);
-					const float v_stick = m_vert_stick / m_main_page.m_page_scale;
+					const float v_stick = m_snap_interval / m_main_page.m_page_scale;
 					const double g_len = max(m_main_page.m_grid_base, 0.0) + 1.0;
 					event_pos_snap_to(m_main_page.m_shape_list, boxed, v_stick,
 						m_main_page.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
@@ -1201,9 +1202,8 @@ namespace winrt::GraphPaper::implementation
 		// 引数として渡された位置をスワップチェーンパネル上の位置として得る.
 		// 得られた位置に拡大率の逆数を乗じて, 境界ボックスの表示されている左上位置を加えた値を,
 		// ポインターの現在位置に格納する.
-		pt_mul_add(
-			args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / p_scale, lt,
-			m_event_pos_curr);
+		const auto p{ args.GetCurrentPoint(scp_page_panel()).Position() };
+		pt_mul_add(D2D1_POINT_2F{ p.X, p.Y }, 1.0 / p_scale, lt, m_event_pos_curr);
 	}
 
 	//------------------------------

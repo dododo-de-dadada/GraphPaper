@@ -418,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形が表示されるようスクロールする.
 			scroll_to(t);
 //			m_main_page.set_attr_to(t);
-//			page_setting_is_checked();
+//			page_layout_is_checked();
 		}
 
 		// 編集メニュー項目の使用の可否を設定する.

@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < p_cnt; i++) {
 			// 判定される点が, 頂点の部位に含まれるか判定する.
-			if (pt_in_anc(t, q[i], a_len)) {
+			if (anc_hit_test(t, q[i], a_len)) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(q[i], p[i], q[i + 1]);
 		}
 		// 判定される点が, 終点の部位に含まれるか判定する.
-		if (pt_in_anc(t, q[p_cnt], a_len)) {
+		if (anc_hit_test(t, q[p_cnt], a_len)) {
 			k = p_cnt;
 		}
 		// 頂点が見つかったか判定する.
@@ -807,12 +807,12 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_anc_width);
 	}
 
-	// 矩形範囲に含まれるか判定する.
+	// 矩形に含まれるか判定する.
 	// lt	矩形の左上位置
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapePoly::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapePoly::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		if (!pt_in_rect(m_start, lt, rb)) {
 			return false;

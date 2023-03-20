@@ -228,14 +228,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「頂点をくっつける...」が選択された.
-	IAsyncAction MainPage::stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		vert_stick_set_header(m_vert_stick);
-		sd_vert_stick().Value(static_cast<double>(m_vert_stick));
+		vert_stick_set_header(m_snap_interval);
+		sd_vert_stick().Value(static_cast<double>(m_snap_interval));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_vert_stick().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			m_vert_stick = static_cast<float>(sd_vert_stick().Value());
+			m_snap_interval = static_cast<float>(sd_vert_stick().Value());
 		}
 		m_mutex_event.unlock();
 	}

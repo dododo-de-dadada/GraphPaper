@@ -853,7 +853,7 @@
     <value>Opacity</value>
     <comment>String</comment>
   </data>
-  <data name="str_page_settings" xml:space="preserve">
+  <data name="str_page_layouts" xml:space="preserve">
     <value>Page Settings</value>
     <comment>String</comment>
   </data>
@@ -1014,12 +1014,12 @@
     <value>Paste as Shape</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_page_setting_reset.Text" xml:space="preserve">
-    <value>Reset Page Setting</value>
+  <data name="mfi_page_layout_reset.Text" xml:space="preserve">
+    <value>Reset Page Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_setting_save.Text" xml:space="preserve">
-    <value>Save Page Setting</value>
+  <data name="mfi_page_layout_save.Text" xml:space="preserve">
+    <value>Save Page Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -1134,8 +1134,8 @@
     <value>Line Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_stick_to_vertex.Text" xml:space="preserve">
-    <value>Stick to Vertex...</value>
+  <data name="mfi_snap_interval.Text" xml:space="preserve">
+    <value>Snap Point Interval...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_style_flat.Text" xml:space="preserve">

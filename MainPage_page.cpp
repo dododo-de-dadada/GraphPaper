@@ -19,25 +19,25 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Setter;
 	using winrt::Windows::Storage::ApplicationData;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_page_settings";	// 表示の表題
+	constexpr wchar_t DLG_TITLE[] = L"str_page_layouts";	// 表示の表題
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
-	void MainPage::page_background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::win_background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == tmfi_page_background_pattern()) {
-			if (m_background_show != tmfi_page_background_pattern().IsChecked()) {
-				m_background_show = tmfi_page_background_pattern().IsChecked();
+		if (sender == tmfi_win_background_pattern()) {
+			if (m_background_show != tmfi_win_background_pattern().IsChecked()) {
+				m_background_show = tmfi_win_background_pattern().IsChecked();
 				page_draw();
 			}
 		}
-		else if (sender == rmfi_page_background_white()) {
+		else if (sender == rmfi_win_background_white()) {
 			if (!equal(m_background_color, COLOR_WHITE)) {
 				m_background_color = COLOR_WHITE;
 				page_draw();
 			}
 		}
-		else if (sender == rmfi_page_background_black()) {
+		else if (sender == rmfi_win_background_black()) {
 			if (!equal(m_background_color, COLOR_BLACK)) {
 				m_background_color = COLOR_BLACK;
 				page_draw();
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 
 
 	// チェックマークを図形の属性関連のメニュー項目につける.
-	void MainPage::page_setting_is_checked(void) noexcept
+	void MainPage::page_layout_is_checked(void) noexcept
 	{
 		ARROW_STYLE a_style;
 		m_main_page.get_arrow_style(a_style);
@@ -307,7 +307,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 表示の設定を初期化する.
-	void MainPage::page_setting_init(void) noexcept
+	void MainPage::page_layout_init(void) noexcept
 	{
 		// 書体の属性を初期化する.
 		{
@@ -491,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 方眼メニューの「表示の大きさ」が選択された
+	// 方眼メニューの「ページの大きさ」が選択された
 	//------------------------------
 	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -897,7 +897,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 方眼メニューの「用紙設定をリセット」が選択された.
 	// 設定データを保存したファイルがある場合, それを削除する.
-	IAsyncAction MainPage::page_setting_reset_click_async(
+	IAsyncAction MainPage::page_layout_reset_click_async(
 		IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
@@ -911,7 +911,7 @@ namespace winrt::GraphPaper::implementation
 				HRESULT hres = E_FAIL;
 				try {
 					co_await delete_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_page_setting_reset().IsEnabled(false);
+					mfi_page_layout_reset().IsEnabled(false);
 					hres = S_OK;
 				}
 				catch (winrt::hresult_error const& e) {
@@ -924,14 +924,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			setting_item = nullptr;
 		}
-		page_setting_init();
+		page_layout_init();
 		page_draw();
 		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「ページ設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
-	IAsyncAction MainPage::page_setting_save_click_async(
+	IAsyncAction MainPage::page_layout_save_click_async(
 		IInspectable const&, RoutedEventArgs const&)
 	{
 		auto setting_file{ 
@@ -941,7 +941,7 @@ namespace winrt::GraphPaper::implementation
 		if (setting_file != nullptr) {
 			co_await file_write_gpf_async<false, true>(setting_file);
 			setting_file = nullptr;
-			mfi_page_setting_reset().IsEnabled(true);
+			mfi_page_layout_reset().IsEnabled(true);
 		}
 		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();

@@ -102,11 +102,11 @@ namespace winrt::GraphPaper::implementation
 		const float samp_y = static_cast<float>(samp_h * 0.5);
 		s->set_select(true);
 		s->set_pos_anc(
-			D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_vert_stick, false);
+			D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_snap_interval, false);
 		s->set_pos_anc(
-			D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_vert_stick, false);
+			D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_snap_interval, false);
 		s->set_pos_anc(
-			D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_vert_stick, false);
+			D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_snap_interval, false);
 		m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;

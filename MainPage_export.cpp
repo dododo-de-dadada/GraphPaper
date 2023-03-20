@@ -637,7 +637,7 @@ namespace winrt::GraphPaper::implementation
 					obj_len.push_back(obj_len.back() + len);
 					text_cnt++;
 				}
-				if (typeid(*s) == typeid(ShapeRuler)) {
+				else if (typeid(*s) == typeid(ShapeRuler)) {
 					const ShapeRuler* r = static_cast<ShapeRuler*>(s);
 					IDWriteFontFace3* face;
 					r->get_font_face(face);
@@ -883,7 +883,8 @@ namespace winrt::GraphPaper::implementation
 						D2D_SIZE_U{ page_w, page_h },
 						D2D1_PIXEL_FORMAT{
 							DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
-							D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED,
+D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_STRAIGHT
+							//D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED
 						},
 						D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
 						target.put()

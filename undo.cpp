@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_T::PAGE_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
-	template UndoValue<UNDO_T::POLY_CLOSED>::UndoValue(Shape* s, const bool &val);
+	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else if constexpr (
-			U == UNDO_T::POLY_CLOSED
+			U == UNDO_T::POLY_END
 			) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
 		}
@@ -366,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::PAGE_PAD>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_T::POLY_CLOSED>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_T::POLY_END>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 		s->set_page_pad(val);
 	}
 
-	void UndoValue<UNDO_T::POLY_CLOSED>::SET(Shape* const s, const bool& val)
+	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const bool& val)
 	{
 		s->set_poly_closed(val);
 	}
@@ -688,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_pad(val);
 	}
 
-	bool UndoValue<UNDO_T::POLY_CLOSED>::GET(const Shape* s, bool& val) noexcept
+	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, bool& val) noexcept
 	{
 		return s->get_poly_closed(val);
 	}
@@ -854,7 +854,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_value.y);
 		}
 		else if constexpr (
-			U == UNDO_T::POLY_CLOSED
+			U == UNDO_T::POLY_END
 			) {
 			dt_writer.WriteBoolean(m_value);
 		}

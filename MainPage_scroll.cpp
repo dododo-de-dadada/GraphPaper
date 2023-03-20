@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			if (s->in_area(v_lt, v_rb)) {
+			if (s->is_inside(v_lt, v_rb)) {
 				return false;
 			}
 			s->get_bound(

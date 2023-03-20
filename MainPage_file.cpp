@@ -352,10 +352,10 @@ namespace winrt::GraphPaper::implementation
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
-		page_setting_is_checked();
+		page_layout_is_checked();
 
 		wchar_t* unavailable_font;	// 無効な書体名
-		if (!slist_test_avaiable_font(m_main_page.m_shape_list, unavailable_font)) {
+		if (!slist_check_avaiable_font(m_main_page.m_shape_list, unavailable_font)) {
 
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, L"str_err_font", unavailable_font);
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_vert_stick = dt_reader.ReadSingle();
+			m_snap_interval = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
 
@@ -560,10 +560,10 @@ namespace winrt::GraphPaper::implementation
 				message_show(ICON_ALERT, L"str_err_resume", s_file.Path());
 
 				// 表示設定を既定値に戻す.
-				page_setting_init();
+				page_layout_init();
 				m_len_unit = LEN_UNIT::PIXEL;
 				m_color_code = COLOR_CODE::DEC;
-				m_vert_stick = VERT_STICK_DEF_VAL;
+				m_snap_interval =SNAP_INTERVAL_DEF_VAL;
 				m_status_bar = STATUS_BAR_DEF_VAL;
 			}
 			else if constexpr (SETTING_ONLY) {
@@ -895,7 +895,7 @@ namespace winrt::GraphPaper::implementation
 			// その他
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
-			dt_writer.WriteSingle(m_vert_stick);
+			dt_writer.WriteSingle(m_snap_interval);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);
 
@@ -1037,17 +1037,17 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 設定データを保存するフォルダーを得る.
-		mfi_page_setting_reset().IsEnabled(false);
+		mfi_page_layout_reset().IsEnabled(false);
 		winrt::Windows::Storage::IStorageItem setting_item{
 			co_await ApplicationData::Current().LocalFolder().TryGetItemAsync(PAGE_SETTING)
 		};
 
 		if (setting_item == nullptr) {
 			// 表示設定を既定値に戻す.
-			page_setting_init();
+			page_layout_init();
 			m_len_unit = LEN_UNIT::PIXEL;
 			m_color_code = COLOR_CODE::DEC;
-			m_vert_stick = VERT_STICK_DEF_VAL;
+			m_snap_interval = SNAP_INTERVAL_DEF_VAL;
 			m_status_bar = STATUS_BAR_DEF_VAL;
 		}
 		else {
@@ -1057,7 +1057,7 @@ namespace winrt::GraphPaper::implementation
 				constexpr bool SETTING_ONLY = true;
 				co_await file_read_gpf_async<!RESUME, SETTING_ONLY>(setting_file);
 				setting_file = nullptr;
-				mfi_page_setting_reset().IsEnabled(true);
+				mfi_page_layout_reset().IsEnabled(true);
 			}
 			setting_item = nullptr;
 		}

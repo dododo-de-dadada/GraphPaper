@@ -89,8 +89,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
 	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
-	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
-	constexpr wchar_t PAGE_SETTING[] = L"page_setting.dat";	// ページ設定を格納するファイル名
+	constexpr auto SNAP_INTERVAL_DEF_VAL = 2.0f * 6.0f;	// 点をくっつける間隔の既定値
+	constexpr wchar_t PAGE_SETTING[] = L"page_layout.dat";	// ページ設定を格納するファイル名
 	constexpr uint32_t VERT_CNT_MAX = 12;	// 折れ線の頂点の最大数.
 
 	//-------------------------------
@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_vert_stick = VERT_STICK_DEF_VAL;	// 頂点をくっつける閾値
+		float m_snap_interval = SNAP_INTERVAL_DEF_VAL;	// 頂点をくっつける閾値
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
 
@@ -517,7 +517,8 @@ namespace winrt::GraphPaper::implementation
 		void edit_arc_slider_value_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 		void edit_arc_dir_selection_changed(IInspectable const&, SelectionChangedEventArgs const&);
-		IAsyncAction edit_poly_click_async(IInspectable const&, RoutedEventArgs const&);
+		void edit_poly_open_click(IInspectable const&, RoutedEventArgs const&);
+		void edit_poly_close_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -598,7 +599,7 @@ namespace winrt::GraphPaper::implementation
 		// スライダーの値が変更された.
 		template <UNDO_T U, int S>
 		void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-
+		void grid_len_unit_changed(IInspectable const&, SelectionChangedEventArgs const&);
 		//-------------------------------
 		// MainPage_group.cpp
 		// グループ化とグループの解除
@@ -688,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点をくっつける...」が選択された.
-		IAsyncAction stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		IAsyncAction snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
 		void vert_stick_set_header(const float val) noexcept;
 		// スライダーの値が変更された.
@@ -708,9 +709,9 @@ namespace winrt::GraphPaper::implementation
 
 		void setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&);
 		// 属性ダイアログが開かれた.
-		void setting_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
+		void setting_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&);
 		// 属性ダイアログが開かれた.
-		void setting_dialog_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
+		void setting_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&);
 		// 設定を表示する
 		void dialog_draw(void);
 		// 属性のリストがロードされた.
@@ -745,16 +746,16 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&,RoutedEventArgs const&);
-		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
-		bool select_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
+		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
+		bool select_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 次の図形を選択する.
 		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
 		bool select_range(Shape* const s_from, Shape* const s_to);
 		// 図形を選択する.
 		void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
-		// 領域に含まれる図形の選択を反転する.
-		bool toggle_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
+		// 矩形に含まれる図形の選択を反転する.
+		bool toggle_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
 		bool unselect_all(const bool t_range_only = false);
 		//　Shft + 下矢印キーが押された.
@@ -774,9 +775,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// ページ設定に印をつける.
-		void page_setting_is_checked(void) noexcept;
+		void page_layout_is_checked(void) noexcept;
 		// ページ設定を初期化する.
-		void page_setting_init(void) noexcept;
+		void page_layout_init(void) noexcept;
 		// 方眼メニューの「ページの色」が選択された.
 		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 方眼メニューの「ページの大きさ」が選択された
@@ -790,9 +791,9 @@ namespace winrt::GraphPaper::implementation
 		// 前景色を得る.
 		//const D2D1_COLOR_F& page_foreground(void) const noexcept;
 		// 方眼メニューの「ページ設定をリセット」が選択された.
-		IAsyncAction page_setting_reset_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction page_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 方眼メニューの「ページ設定を保存」が選択された.
-		IAsyncAction page_setting_save_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction page_layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <int S> void page_slider_set_header(const float val);
 		// スライダーの値が変更された.
@@ -815,7 +816,7 @@ namespace winrt::GraphPaper::implementation
 		// ページを拡大または縮小する.
 		void page_zoom_delta(const int32_t delta) noexcept;
 		void page_zoom_is_checked(float scale);
-		void page_background_pattern_click(IInspectable const&, RoutedEventArgs const&);
+		void win_background_pattern_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_status.cpp

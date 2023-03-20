@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 	void MainPage::dash_style_selection_changed(
-		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+		IInspectable const&, SelectionChangedEventArgs const&) noexcept
 	{
 		if (dialog_combo_box().SelectedIndex() == 0) {
 			if (m_dialog_page.m_shape_list.back()->set_dash_style(D2D1_DASH_STYLE_DASH)) {

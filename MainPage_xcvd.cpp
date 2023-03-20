@@ -173,6 +173,8 @@ namespace winrt::GraphPaper::implementation
 		uint32_t text_cnt = 0;	// 文字列図形の数
 		uint32_t selected_image_cnt = 0;	// 選択された画像図形の数
 		uint32_t selected_arc_cnt = 0;	// 選択された円弧図形の数
+		uint32_t selected_poly_open_cnt = 0;	// 選択された開いた多角形図形の数
+		uint32_t selected_poly_close_cnt = 0;	// 選択された閉じた多角形図形の数
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -186,6 +188,8 @@ namespace winrt::GraphPaper::implementation
 			text_cnt,
 			selected_image_cnt,
 			selected_arc_cnt,
+			selected_poly_open_cnt,
+			selected_poly_close_cnt,
 			fore_selected,
 			back_selected,
 			prev_selected
@@ -201,6 +205,10 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_selected_image = (selected_image_cnt > 0);
 		// 選択された円弧がひとつ以上ある場合.
 		const auto exists_selected_arc = (selected_arc_cnt > 0);
+		// 選択された開いた多角形がひとつ以上ある場合.
+		const auto exists_selected_poly_open = (selected_poly_open_cnt > 0);
+		// 選択された閉じた多角形がひとつ以上ある場合.
+		const auto exists_selected_poly_close = (selected_poly_close_cnt > 0);
 		// 選択されてない図形がひとつ以上ある場合.
 		const auto exists_unselected = (selected_cnt < undeleted_cnt);
 		// 選択された図形がふたつ以上ある場合.
@@ -230,9 +238,11 @@ namespace winrt::GraphPaper::implementation
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
 		mfi_ungroup().IsEnabled(exists_selected_group);
+		mfi_edit_poly_open().IsEnabled(exists_selected_poly_close);
+		mfi_edit_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_edit_arc().IsEnabled(exists_selected_arc);
 		mfi_edit_text().IsEnabled(exists_selected_text);
 		mfi_find_text().IsEnabled(exists_text);
-		mfi_edit_arc().IsEnabled(exists_selected_arc);
 		mfi_text_fit_frame_to_text().IsEnabled(exists_selected_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);
@@ -339,7 +349,7 @@ namespace winrt::GraphPaper::implementation
 		reference = nullptr;
 
 		const double grid_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
-		const float vert_stick = m_vert_stick / m_main_page.m_page_scale;
+		const float vert_stick = m_snap_interval / m_main_page.m_page_scale;
 		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, vert_stick);
 		s->set_pos_start(pos);
 
@@ -458,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 			const float lt_x = m_main_bbox_lt.x;
 			const float lt_y = m_main_bbox_lt.y;
 			const double g_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
-			const float v_stick = m_vert_stick / scale;
+			const float v_stick = m_snap_interval / scale;
 			ShapeText* t = new ShapeText(
 				D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h },
 				wchar_cpy(text.c_str()), &m_main_page);

@@ -216,10 +216,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F end;	// 終点
 		pt_add(m_start, m_pos[0], end);
-		if (pt_in_anc(t, end, m_anc_width)) {
+		if (anc_hit_test(t, end, m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(t, m_start, m_anc_width)) {
+		if (anc_hit_test(t, m_start, m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
 		const double e_width = 0.5 * max(m_stroke_width, m_anc_width);
@@ -290,12 +290,12 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 矩形範囲に含まれるか判定する.
+	// 矩形に含まれるか判定する.
 	// lt	矩形の左上位置
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeLine::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeLine::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		if (pt_in_rect(m_start, lt, rb)) {
 			D2D1_POINT_2F p;

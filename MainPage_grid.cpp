@@ -36,6 +36,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_emph(g_emph);
 		if (!equal(g_emph, val)) {
 			ustack_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
+			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
 		}
@@ -109,6 +110,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			if (!equal(m_main_page.m_grid_color, m_dialog_page.m_grid_color)) {
 				ustack_push_set<UNDO_T::GRID_COLOR>(&m_main_page, m_dialog_page.m_grid_color);
+				ustack_push_null();
 				ustack_is_enable();
 				page_draw();
 			}
@@ -126,6 +128,40 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
+	void MainPage::grid_len_unit_changed(IInspectable const&, SelectionChangedEventArgs const&)
+	{
+		if (dialog_combo_box().SelectedIndex() == 0) {
+			if (m_len_unit != LEN_UNIT::PIXEL) {
+				m_len_unit = LEN_UNIT::PIXEL;
+				grid_slider_set_header<UNDO_T::GRID_BASE, 0>(m_dialog_page.m_grid_base);
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 1) {
+			if (m_len_unit != LEN_UNIT::INCH) {
+				m_len_unit = LEN_UNIT::INCH;
+				grid_slider_set_header<UNDO_T::GRID_BASE, 0>(m_dialog_page.m_grid_base);
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 2) {
+			if (m_len_unit != LEN_UNIT::MILLI) {
+				m_len_unit = LEN_UNIT::MILLI;
+				grid_slider_set_header<UNDO_T::GRID_BASE, 0>(m_dialog_page.m_grid_base);
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 3) {
+			if (m_len_unit != LEN_UNIT::POINT) {
+				m_len_unit = LEN_UNIT::POINT;
+				grid_slider_set_header<UNDO_T::GRID_BASE, 0>(m_dialog_page.m_grid_base);
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 4) {
+			if (m_len_unit != LEN_UNIT::GRID) {
+				m_len_unit = LEN_UNIT::GRID;
+				grid_slider_set_header<UNDO_T::GRID_BASE, 0>(m_dialog_page.m_grid_base);
+			}
+		}
+	}
+
 	// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -141,9 +177,33 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_T::GRID_BASE, 0>(g_base);
 		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_pixel().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_inch().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_milli().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_point().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_grid().Text()));
+		if (m_len_unit == LEN_UNIT::PIXEL) {
+			dialog_combo_box().SelectedIndex(0);
+		}
+		else if (m_len_unit == LEN_UNIT::INCH) {
+			dialog_combo_box().SelectedIndex(1);
+		}
+		else if (m_len_unit == LEN_UNIT::MILLI) {
+			dialog_combo_box().SelectedIndex(2);
+		}
+		else if (m_len_unit == LEN_UNIT::POINT) {
+			dialog_combo_box().SelectedIndex(3);
+		}
+		else if (m_len_unit == LEN_UNIT::GRID) {
+			dialog_combo_box().SelectedIndex(4);
+		}
+		dialog_combo_box().Visibility(Visibility::Visible);
 		const auto token0{
 			dialog_slider_0().ValueChanged(
 				{ this, &MainPage::grid_slider_value_changed<UNDO_T::GRID_BASE, 0> })
+		};
+		const auto token1{
+			dialog_combo_box().SelectionChanged({ this, &MainPage::grid_len_unit_changed })
 		};
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")));
@@ -157,6 +217,7 @@ namespace winrt::GraphPaper::implementation
 			m_dialog_page.get_grid_base(setting_val);
 			if (!equal(page_val, setting_val)) {
 				ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
+				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
 				page_draw();
@@ -165,6 +226,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(token0);
+		dialog_combo_box().SelectionChanged(token1);
+		dialog_combo_box().Items().Clear();
+		dialog_combo_box().Visibility(Visibility::Collapsed);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
@@ -177,6 +241,7 @@ namespace winrt::GraphPaper::implementation
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
 		}
@@ -191,6 +256,7 @@ namespace winrt::GraphPaper::implementation
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
 		}
@@ -208,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_T::GRID_BASE) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-				m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, val + 1.0, buf);
+				m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0, buf);
 			dialog_set_slider_header<S>(
 				ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf);
 		}
@@ -301,6 +367,7 @@ namespace winrt::GraphPaper::implementation
 		grid_show_is_checked(new_val);
 		if (m_main_page.m_grid_show != new_val) {
 			ustack_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
+			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
 		}
@@ -320,9 +387,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼メニューの「方眼に合わせる」が選択された.
-	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::grid_snap_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_main_page.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
+		//ustack_push_set<UNDO_T::GRID_SNAP>(&m_main_page, tmfi_grid_snap().IsChecked());
+		m_main_page.m_grid_snap = tmfi_grid_snap().IsChecked();
 		status_bar_set_pos();
 	}
 

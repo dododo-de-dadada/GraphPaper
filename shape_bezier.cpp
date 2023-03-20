@@ -438,16 +438,16 @@ namespace winrt::GraphPaper::implementation
 		pt_add(cp[0], m_pos[0], cp[1]);
 		pt_add(cp[1], m_pos[1], cp[2]);
 		pt_add(cp[2], m_pos[2], cp[3]);
-		if (pt_in_anc(tp, cp[3], m_anc_width)) {
+		if (anc_hit_test(tp, cp[3], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 3;
 		}
-		if (pt_in_anc(tp, cp[2], m_anc_width)) {
+		if (anc_hit_test(tp, cp[2], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 2;
 		}
-		if (pt_in_anc(tp, cp[1], m_anc_width)) {
+		if (anc_hit_test(tp, cp[1], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(tp, cp[0], m_anc_width)) {
+		if (anc_hit_test(tp, cp[0], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
@@ -604,13 +604,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 範囲に含まれるか判定する.
+	// 矩形に含まれるか判定する.
 	// 線の太さは考慮されない.
 	// lt	範囲の左上位置
 	// rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezier::in_area(
+	bool ShapeBezier::is_inside(
 		const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,

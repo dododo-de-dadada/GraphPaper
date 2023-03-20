@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 
 				// バッファを解放する.
 				// SoftwareBitmap がロックされたままになるので,
-				// IMemoryBufferByteAccess は Release() する必要がある.
+				// IMemoryBufferByteAccess は Release する必要がある.
 				soft_bmp_buf.Close();
 				soft_bmp_buf = nullptr;
 				soft_bmp_ref.Close();
@@ -173,8 +173,21 @@ namespace winrt::GraphPaper::implementation
 				BitmapEncoder bmp_enc{
 					co_await BitmapEncoder::CreateAsync(enc_id, stream)
 				};
-				// 符号器を, 新しいサムネイルを生成するよう設定する.
-				//bmp_enc.IsThumbnailGenerated(true);
+
+				// 符号器にソフトウェアビットマップを格納する.
+				bmp_enc.SetSoftwareBitmap(soft_bmp);
+				try {
+					// 符号化されたビットマップをストリームに書き出す.
+					co_await bmp_enc.FlushAsync();
+					ret = true;
+				}
+				catch (const winrt::hresult_error& e) {
+					ret = e.code();
+				}
+
+				/*
+				// 符号器を, 新しいサムネイルを生成するよう設定する.]
+				bmp_enc.IsThumbnailGenerated(true);
 				// 符号器にソフトウェアビットマップを格納する.
 				bmp_enc.SetSoftwareBitmap(soft_bmp);
 				try {
@@ -184,16 +197,16 @@ namespace winrt::GraphPaper::implementation
 				}
 				catch (const winrt::hresult_error& e) {
 					// サムネイルの自動生成が出来ないなら, false を格納する.
-					//if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
-					//	bmp_enc.IsThumbnailGenerated(false);
-					//}
-					//else
-					ret = e.code();
+					if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
+						bmp_enc.IsThumbnailGenerated(false);
+					}
 				}
-				//if (!bmp_enc.IsThumbnailGenerated()) {
+				if (!bmp_enc.IsThumbnailGenerated()) {
 					// 再度やり直す.
-				//	co_await bmp_enc.FlushAsync();
-				//}
+					co_await bmp_enc.FlushAsync();
+				}
+				*/
+
 				// 符号器を解放する.
 				bmp_enc = nullptr;
 			}
@@ -217,16 +230,13 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 
+		// D2D ビットマップが空なら, 作成する.
 		if (m_d2d_bitmap == nullptr) {
-			//const D2D1_BITMAP_PROPERTIES1 b_prop{
-			//	D2D1::BitmapProperties1(
-			//		D2D1_BITMAP_OPTIONS_NONE,
-			//		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
-			//	)
-			//};
 			const D2D1_BITMAP_PROPERTIES b_prop{
 				D2D1::BitmapProperties(
-					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+					D2D1::PixelFormat(
+						DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+						D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
 			const UINT32 pitch = 4u * m_orig.width;
@@ -237,6 +247,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
+
 		const D2D1_RECT_F rect{
 			m_start.x,
 			m_start.y,
@@ -245,9 +256,9 @@ namespace winrt::GraphPaper::implementation
 		};
 		target->DrawBitmap(
 			m_d2d_bitmap.get(), rect, m_opac,
-			D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-			m_clip);
+			D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
+		// 選択された図形なら, 補助線と図形の部位を表示する.
 		if (m_anc_show && is_selected()) {
 			brush->SetColor(COLOR_WHITE);
 			target->DrawRectangle(rect, brush, m_aux_width, nullptr);
@@ -416,25 +427,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	// test	判定される点
+	// t	判定される点
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F test) const noexcept
+	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
 		D2D1_POINT_2F p[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(p);
-		if (pt_in_anc(test, p[2], m_anc_width)) {
+		if (anc_hit_test(t, p[2], m_anc_width)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		else if (pt_in_anc(test, p[3], m_anc_width)) {
+		else if (anc_hit_test(t, p[3], m_anc_width)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		else if (pt_in_anc(test, p[1], m_anc_width)) {
+		else if (anc_hit_test(t, p[1], m_anc_width)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		else if (pt_in_anc(test, p[0], m_anc_width)) {
+		else if (anc_hit_test(t, p[0], m_anc_width)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		else {
@@ -444,28 +455,28 @@ namespace winrt::GraphPaper::implementation
 			e[0].y = static_cast<FLOAT>(p[0].y - e_width);
 			e[1].x = p[1].x;
 			e[1].y = static_cast<FLOAT>(p[1].y + e_width);
-			if (pt_in_rect(test, e[0], e[1])) {
+			if (pt_in_rect(t, e[0], e[1])) {
 				return ANC_TYPE::ANC_NORTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[1].x - e_width);
 			e[0].y = p[1].y;
 			e[1].x = static_cast<FLOAT>(p[2].x + e_width);
 			e[1].y = p[2].y;
-			if (pt_in_rect(test, e[0], e[1])) {
+			if (pt_in_rect(t, e[0], e[1])) {
 				return ANC_TYPE::ANC_EAST;
 			}
 			e[0].x = p[3].x;
 			e[0].y = static_cast<FLOAT>(p[3].y - e_width);
 			e[1].x = p[2].x;
 			e[1].y = static_cast<FLOAT>(p[2].y + e_width);
-			if (pt_in_rect(test, e[0], e[1])) {
+			if (pt_in_rect(t, e[0], e[1])) {
 				return ANC_TYPE::ANC_SOUTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[0].x - e_width);
 			e[0].y = p[0].y;
 			e[1].x = static_cast<FLOAT>(p[3].x + e_width);
 			e[1].y = p[3].y;
-			if (pt_in_rect(test, e[0], e[1])) {
+			if (pt_in_rect(t, e[0], e[1])) {
 				return ANC_TYPE::ANC_WEST;
 			}
 		}
@@ -479,23 +490,28 @@ namespace winrt::GraphPaper::implementation
 			p[2].y = p[0].y;
 			p[0].y = less_y;
 		}
-		if (p[0].x <= test.x && test.x <= p[2].x &&
-			p[0].y <= test.y && test.y <= p[2].y) {
+		if (p[0].x <= t.x && t.x <= p[2].x &&
+			p[0].y <= t.y && t.y <= p[2].y) {
 			return ANC_TYPE::ANC_FILL;
 		}
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 矩形範囲に含まれるか判定する.
+	// 矩形に含まれるか判定する.
 	// lt	矩形の左上位置
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeImage::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeImage::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 始点と終点とが範囲に含まれるか判定する.
-		return pt_in_rect(m_start, lt, rb) &&pt_in_rect(
-				D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, lt, rb);
+		if (pt_in_rect(m_start, lt, rb)) {
+			const D2D1_POINT_2F end{
+				m_start.x + m_view.width, m_start.y + m_view.height
+			};
+			return pt_in_rect(end, lt, rb);
+		}
+		return false;
 	}
 
 	// 位置を移動する.

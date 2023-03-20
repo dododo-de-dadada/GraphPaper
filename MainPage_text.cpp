@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			winrt::hresult_not_implemented{};
 			return;
 		}
 		text_align_vert_is_checked(val);

@@ -1155,7 +1155,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F start1{};
 		D2D1_BEZIER_SEGMENT b_seg1{};
-		alternate_bezier(start1, b_seg1);
+		alter_bezier(start1, b_seg1);
 
 		D2D1_POINT_2F ctr{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {

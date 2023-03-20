@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 		PAGE_COLOR,	// ページの色の操作
 		PAGE_SIZE,	// ページの大きさの操作
 		PAGE_PAD,	// ページの内余白の操作
-		POLY_CLOSED,	// 多角形の終端の操作
+		POLY_END,	// 多角形の端の操作
 		ARC_START,	// 円弧の始点の操作
 		ARC_END,	// 円弧の終点の操作
 		ARC_ROT,	// 円弧の傾きの操作
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::PAGE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_PAD> { using type = D2D1_RECT_F; };
-	template <> struct U_TYPE<UNDO_T::POLY_CLOSED> { using type = bool; };
+	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = bool; };
 	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::STROKE_WIDTH> { using type = float; };

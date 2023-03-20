@@ -257,8 +257,8 @@
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
                 <MenuFlyoutItem
-					x:Name="mfi_edit_poly" x:Uid="mfi_edit_poly" Click="edit_poly_click_async"
-					Text="Edit Polygon" >
+					x:Name="mfi_edit_poly_open" x:Uid="mfi_edit_poly_open" Click="edit_poly_open_click"
+					Text="Open Polygon End" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon
 							Data="{StaticResource data_poly}" HorizontalAlignment="Center"
@@ -266,6 +266,18 @@
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="P" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem
+					x:Name="mfi_edit_poly_close" x:Uid="mfi_edit_poly_close" Click="edit_poly_close_click"
+					Text="Close Polygon End" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon
+							Data="{StaticResource data_poly}" HorizontalAlignment="Center"
+							VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="P" Modifiers="Control,Shift" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem
@@ -771,7 +783,6 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show"/>
 				</MenuFlyoutSubItem>
-				<ToggleMenuFlyoutItem x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
 					<MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
@@ -786,70 +797,10 @@
 				<!-- 表示メニュー -->
 				<MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click_async" Text="Page Size..." />
 				<MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click_async" Text="Page Color..." />
-				<MenuFlyoutItem x:Uid="mfi_page_setting_save" Click="page_setting_save_click_async" Text="Save Page setting" />
-				<MenuFlyoutItem x:Name="mfi_page_setting_reset" x:Uid="mfi_page_setting_reset" Click="page_setting_reset_click_async" Text="Reset Page Setting" />
-				<MenuFlyoutSeparator />
-				<!-- 拡大率メニュー -->
-				<MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Text="Zoom">
-					<!--
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
-					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_100" Click="mfi_page_zoom_100_click" Icon="Zoom" Text="Reset">
-						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
-						</MenuFlyoutItem.KeyboardAccelerators>
-					</MenuFlyoutItem>
-					-->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_100" Click="page_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-				</MenuFlyoutSubItem>
-				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_page_background_pattern" Text="Background Pattern">
-					<ToggleMenuFlyoutItem x:Name="tmfi_page_background_pattern" x:Uid="tmfi_page_background_pattern" IsChecked="False" Click="page_background_pattern_click" Text="Show Checker Board Pattern">
-					</ToggleMenuFlyoutItem>
-					<MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_background_white" x:Uid="rmfi_page_background_white" IsChecked="True" Click="page_background_pattern_click" Text="Make Background White" GroupName="background_color">
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_background_black" x:Uid="rmfi_page_background_black" IsChecked="False" Click="page_background_pattern_click" Text="Make Background Black" GroupName="background_color">
-					</muxc:RadioMenuFlyoutItem>
-				</MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
-				<MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Text="List Summary" >
+                 <MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Text="List Summary" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -925,9 +876,72 @@
 						x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom"
 						Click="status_bar_click" Text="Page Scale" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutItem
-					x:Name="mfi_stick_to_vertex" x:Uid="mfi_stick_to_vertex"
-					Click="stick_to_vertex_click_async" Text="Stick to Vertex..." />
+                <!-- 拡大率メニュー -->
+                <MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Text="Zoom">
+                    <!--
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
+					<MenuFlyoutSeparator />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_100" Click="mfi_page_zoom_100_click" Icon="Zoom" Text="Reset">
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					-->
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_100" Click="page_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number1" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number2" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number3" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number4" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutSubItem x:Uid="mfsi_win_background_pattern" Text="Background Pattern">
+                    <ToggleMenuFlyoutItem x:Name="tmfi_win_background_pattern" x:Uid="tmfi_win_background_pattern" IsChecked="False" Click="win_background_pattern_click" Text="Show Checker Board Pattern">
+                    </ToggleMenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_win_background_white" x:Uid="rmfi_win_background_white" IsChecked="True" Click="win_background_pattern_click" Text="Background White" GroupName="gn_background_color">
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_win_background_black" x:Uid="rmfi_win_background_black" IsChecked="False" Click="win_background_pattern_click" Text="Background Black" GroupName="gn_background_color">
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutItem
+                    x:Uid="mfi_page_layout_save" Click="page_layout_save_click_async" Text="Save Page Layout" />
+                <MenuFlyoutItem
+                    x:Name="mfi_page_layout_reset" x:Uid="mfi_page_layout_reset" Click="page_layout_reset_click_async" Text="Reset Page Layout" />
+                <ToggleMenuFlyoutItem
+                    x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
+                <MenuFlyoutItem
+					x:Name="mfi_snap_interval" x:Uid="mfi_snap_interval"
+					Click="snap_interval_click_async" Text="Stick to Vertex..." />
 				<MenuFlyoutSeparator />
 				<!-- バージョン情報メニュー -->
 				<MenuFlyoutItem 

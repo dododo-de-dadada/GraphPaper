@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 	// slist	図形リスト
 	// unavailable_font	利用できない書体名
 	// 戻り値	利用できない書体があったなら true
-	bool slist_test_avaiable_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
+	bool slist_check_avaiable_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
 	{
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
@@ -149,7 +149,8 @@ namespace winrt::GraphPaper::implementation
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
 		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
-		bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept
+		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, bool& fore_selected,
+		bool& back_selected, bool& prev_selected) noexcept
 	{
 		undeleted_cnt = 0;	// 消去フラグがない図形の数
 		selected_cnt = 0;	// 選択された図形の数
@@ -157,6 +158,8 @@ namespace winrt::GraphPaper::implementation
 		runlength_cnt = 0;	// 選択された図形のランレングスの数
 		selected_text_cnt = 0;	// 選択された文字列図形の数
 		selected_image_cnt = 0;	// 選択された画像図形の数
+		selected_poly_open_cnt = 0;	// 選択された開いた多角形図形の数
+		selected_poly_close_cnt = 0;	// 選択された閉じた多角形図形の数
 		selected_arc_cnt = 0;	// 選択された円弧図形の数
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
@@ -210,6 +213,20 @@ namespace winrt::GraphPaper::implementation
 					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
+				}
+				else if (s_tid == typeid(ShapePoly)) {
+					// 図形の型が多角形図形の場合,
+					bool closed;
+					if (s->get_poly_closed(closed)) {
+						if (closed) {
+							// 選択された閉じた多角形図形の数をインクリメントする.
+							selected_poly_close_cnt++;
+						}
+						else {
+							// 選択された開いた多角形図形の数をインクリメントする.
+							selected_poly_open_cnt++;
+						}
+					}
 				}
 				else if (s_tid == typeid(ShapeText)) {
 					// 図形の型が文字列図形の場合,

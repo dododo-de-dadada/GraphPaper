@@ -111,7 +111,9 @@ namespace winrt::GraphPaper::implementation
 		m_dialog_page.m_page_pad.right = 0.0f;
 		m_dialog_page.m_page_pad.bottom = 0.0f;
 		m_dialog_page.draw();
-		const auto hr = m_dialog_d2d.m_d2d_context->EndDraw();
+		winrt::check_hresult(
+			m_dialog_d2d.m_d2d_context->EndDraw()
+		);
 		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
 		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();
@@ -127,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性ダイアログが開かれた.
-	void MainPage::setting_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const&)
+	void MainPage::setting_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::OPENED;

@@ -236,16 +236,16 @@ namespace winrt::GraphPaper::implementation
 		};
 		const D2D1_POINT_2F anc_r_ne{ anc_r_se.x, anc_r_nw.y };
 		const D2D1_POINT_2F anc_r_sw{ anc_r_nw.x, anc_r_se.y };
-		if (pt_in_anc(test, anc_r_se, m_anc_width)) {
+		if (anc_hit_test(test, anc_r_se, m_anc_width)) {
 			anc_r = ANC_TYPE::ANC_R_SE;
 		}
-		else if (pt_in_anc(test, anc_r_nw, m_anc_width)) {
+		else if (anc_hit_test(test, anc_r_nw, m_anc_width)) {
 			anc_r = ANC_TYPE::ANC_R_NW;
 		}
-		else if (pt_in_anc(test, anc_r_sw, m_anc_width)) {
+		else if (anc_hit_test(test, anc_r_sw, m_anc_width)) {
 			anc_r = ANC_TYPE::ANC_R_SW;
 		}
-		else if (pt_in_anc(test, anc_r_ne, m_anc_width)) {
+		else if (anc_hit_test(test, anc_r_ne, m_anc_width)) {
 			anc_r = ANC_TYPE::ANC_R_NE;
 		}
 		else {

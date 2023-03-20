@@ -23,8 +23,17 @@ namespace winrt::GraphPaper::implementation
 	constexpr int START = 3;	// 始点
 	constexpr int END = 4;	// 終点
 
+	// 円弧をベジェ曲線で近似する.
+	static void arc_alter_bezier(
+		const double px, const double py, const double rx, const double ry, const double c,
+		const double s, const double t_min, const double t_max, D2D1_POINT_2F& b_start,
+		D2D1_BEZIER_SEGMENT& b_seg) noexcept;
 	// 円弧が含まれる象限を得る.
-	static int arc_quadrant_number(const double px, const double py, const double c, const double s);
+	inline static int arc_quadrant_number(const double px, const double py, const double c, const double s) noexcept;
+	// だ円の中心点を得る.
+	static bool arc_center(
+		const D2D1_POINT_2F start, const D2D1_POINT_2F end, const D2D1_SIZE_F rad, const double C,
+		const double S, D2D1_POINT_2F& val) noexcept;
 
 	// 円弧をベジェ曲線で近似する.
 	// px, py	終点への位置ベクトル
@@ -37,10 +46,10 @@ namespace winrt::GraphPaper::implementation
 	// 助変数にちょうど 0-1 を与えると, 1/4 円弧が得られる.
 	// 助変数を外挿できるが, 近似精度は悪くなる.
 	//
-	static void arc_alternate_bezier(
+	static void arc_alter_bezier(
 		const double px, const double py, const double rx, const double ry, const double c,
-		const double s, const double t_min, const double t_max, const bool dir,
-		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg)
+		const double s, const double t_min, const double t_max, D2D1_POINT_2F& b_start,
+		D2D1_BEZIER_SEGMENT& b_seg) noexcept
 	{
 		const int qn = arc_quadrant_number(px, py, c, s);	// 象限の番号
 		/*
@@ -323,7 +332,8 @@ namespace winrt::GraphPaper::implementation
 	// c, s	円弧の傾きのコサインとサイン (傾きは, 時計周りが正)
 	// 戻り値	象限の番号 (1,2,3,4). 終点ベクトルがゼロベクトルなら 0.
 	// ページの Y 軸は下向きだが, 向かって右上を第 1 象限とする.
-	static int arc_quadrant_number(const double px, const double py, const double c, const double s)
+	inline static int arc_quadrant_number(const double px, const double py, const double c, const double s)
+		noexcept
 	{
 		// 円弧の, 始点から終点への位置ベクトルを, 円弧の傾きが 0 になるよう回転して戻す.
 		const double qx = c * px + s * py;
@@ -849,12 +859,12 @@ namespace winrt::GraphPaper::implementation
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
-			D2D1_POINT_2F start = m_start;
+			//D2D1_POINT_2F start = m_start;
 			D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
 			};
 			D2D1_POINT_2F ctr;
-			if (arc_center(start, end, m_radius, c, s, ctr)) {
+			if (arc_center(m_start, end, m_radius, c, s, ctr)) {
 				const D2D1_POINT_2F start{
 					m_start.x + val.x - ctr.x,
 					m_start.y + val.y - ctr.y
@@ -898,16 +908,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F p[5];
 		get_verts(p);
-		if (pt_in_anc(t, p[AXIS2], m_anc_width)) {
+		if (anc_hit_test(t, p[AXIS2], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		else if (pt_in_anc(t, p[AXIS1], m_anc_width)) {
+		else if (anc_hit_test(t, p[AXIS1], m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		else if (pt_in_anc(t, p[END], m_anc_width)) {
+		else if (anc_hit_test(t, p[END], m_anc_width)) {
 			return ANC_TYPE::ANC_A_END;
 		}
-		else if (pt_in_anc(t, p[START], m_anc_width)) {
+		else if (anc_hit_test(t, p[START], m_anc_width)) {
 			return ANC_TYPE::ANC_A_START;
 		}
 		// 位置 t が, 扇形の内側にあるか判定する.
@@ -1069,7 +1079,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧をベジェ曲線で近似する.
 	// ただし, 始点の終点の角度が 180 度に近くなるとズレる.
-	void ShapeArc::alternate_bezier(
+	void ShapeArc::alter_bezier(
 		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept
 	{
 		const double rot = M_PI * m_angle_rot / 180.0;
@@ -1077,16 +1087,19 @@ namespace winrt::GraphPaper::implementation
 		const double s = sin(rot);
 		const double t_min = 0.0 + m_angle_start / 90.0;
 		const double t_max = 1.0 + m_angle_end / 90.0;
-		if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-			arc_alternate_bezier(
-				m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, true,
-				b_start, b_seg);
-		}
-		else {
-			arc_alternate_bezier(
-				m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, false,
-				b_start, b_seg);
-		}
+		arc_alter_bezier(
+			m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, b_start,
+			b_seg);
+		//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+		//	arc_alter_bezier(
+		//		m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, true,
+		//		b_start, b_seg);
+		//}
+		//else {
+		//	arc_alter_bezier(
+		//		m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, false,
+		//		b_start, b_seg);
+		//}
 		D2D1_POINT_2F p[5];
 		get_verts(p);
 		// 精度がさがらないよう, 始点と終点には, 近似したベジェ曲線からでなく, 元の始点と終点を格納する.
@@ -1112,16 +1125,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F start{};	// ベジェ曲線の始点
 		D2D1_BEZIER_SEGMENT b_seg{};	// ベジェ曲線の制御点
-		const double rot = M_PI * deg_rot / 180.0;
+		const double rot = M_PI * deg_rot / 180.0;	// 円弧の傾き
 		const double t_min = 0.0 + deg_start / 90.0;	// 助変数の下限
 		const double t_max = 1.0 + deg_end / 90.0;	// 助変数の上限
-		const double d = (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
+		//const double d = (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
 		const double c = cos(rot);
 		const double s = sin(rot);
-		arc_alternate_bezier(
-			pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, d, start, b_seg);
+		arc_alter_bezier(
+			pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, /*d,*/ start, b_seg);
 		if (ShapeBezier::bezi_get_pos_arrow(start, b_seg, a_size, arrow)) {
-			// 得られた各位置は, だ円中心点を原点とする座標なので, もとの座標へ戻す.
+			// 得られた各点は, だ円中心点を原点とする座標なので, もとの座標へ戻す.
 			arrow[0].x += ctr.x;
 			arrow[0].y += ctr.y;
 			arrow[1].x += ctr.x;
@@ -1299,13 +1312,13 @@ namespace winrt::GraphPaper::implementation
 		m_start = start;	// 始点
 		m_pos.push_back(pos);	// 終点
 		if (typeid(*page) == typeid(ShapeArc)) {
-			const float start = static_cast<const ShapeArc*>(page)->m_angle_start;
-			const float end = static_cast<const ShapeArc*>(page)->m_angle_end;
-			const float rot = static_cast<const ShapeArc*>(page)->m_angle_rot;
+			const float angle_start = static_cast<const ShapeArc*>(page)->m_angle_start;
+			const float angle_end = static_cast<const ShapeArc*>(page)->m_angle_end;
+			const float angle_rot = static_cast<const ShapeArc*>(page)->m_angle_rot;
 			const D2D1_SWEEP_DIRECTION dir = static_cast<const ShapeArc*>(page)->m_sweep_dir;
-			set_arc_start(start);
-			set_arc_end(end);
-			set_arc_rot(rot);
+			set_arc_start(angle_start);
+			set_arc_end(angle_end);
+			set_arc_rot(angle_rot);
 			set_arc_dir(dir);
 		}
 	}
