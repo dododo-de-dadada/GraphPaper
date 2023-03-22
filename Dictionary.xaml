@@ -258,10 +258,12 @@
 		M0,8 L16,8 L16,9 L0,9 Z
 	</x:String>
 	<!-- 多角形アイコンの描画コマンド -->
-	<x:String x:Key="data_poly">
-		M8,2 L16,8 L8,14 L0,8 Z
-				M8,3.33333 L14.66666,8 L8,12.66666 L1.33333,8 Z
-	</x:String>
+    <x:String x:Key="data_end_open">
+        M 8.314 2.234		L 16 8		L 8 14		L 0.588 8.444		L 1.294 7.503		L 8 12.524		L 14.043 8		L 7.598 3.187		Z
+    </x:String>
+    <x:String x:Key="data_end_closed">
+        M 8 2		L 16 8		L 8 14		L 0 8		Z		M 8 3.466		L 14.043 8		L 8 12.524		L 1.928 8		Z
+    </x:String>
 	<!-- 三角形アイコンの描画コマンド -->
 	<x:String x:Key="data_polygon">
 		M8.000000 0.000000 l-8.000000 13.856406 l15.999999 0.000000 Z

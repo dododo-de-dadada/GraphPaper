@@ -97,7 +97,6 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::GRID_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::GRID_EMPH> { using type = GRID_EMPH; };
 	template <> struct U_TYPE<UNDO_T::GRID_SHOW> { using type = GRID_SHOW; };
-	//template <> struct U_TYPE<UNDO_T::IMAGE_ASPECT> { using type = bool; };
 	template <> struct U_TYPE<UNDO_T::IMAGE_OPAC> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::JOIN_LIMIT> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };

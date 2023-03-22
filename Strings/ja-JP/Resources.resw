@@ -177,19 +177,19 @@
     <value>折り返す</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_code_pct.Text" xml:space="preserve">
+  <data name="rmfi_color_base_pct.Text" xml:space="preserve">
     <value>パーセント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
+  <data name="rmfi_color_base_dec.Text" xml:space="preserve">
     <value>10進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_real.Text" xml:space="preserve">
+  <data name="rmfi_color_base_real.Text" xml:space="preserve">
     <value>実数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
+  <data name="rmfi_color_base_hex.Text" xml:space="preserve">
     <value>16進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -213,8 +213,8 @@
     <value>ポイント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_color_code.Text" xml:space="preserve">
-    <value>色の表記</value>
+  <data name="mfsi_color_base.Text" xml:space="preserve">
+    <value>色の基数</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
@@ -321,8 +321,8 @@
     <value>書体(T)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_grid.Title" xml:space="preserve">
-    <value>方眼(G)</value>
+  <data name="mbi_layout.Title" xml:space="preserve">
+    <value>レイアウト(L)</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_misc.Title" xml:space="preserve">
@@ -374,7 +374,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_file_export_as.Text" xml:space="preserve">
-    <value>他の形式としてエクスポートする...</value>
+    <value>エクスポートする...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_file_import_image.Text" xml:space="preserve">
@@ -1010,12 +1010,12 @@
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_page_layout_reset.Text" xml:space="preserve">
-    <value>ページレイアウトをリセット</value>
+  <data name="mfi_layout_reset.Text" xml:space="preserve">
+    <value>レイアウトをリセット</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_layout_save.Text" xml:space="preserve">
-    <value>ページレイアウトを保存</value>
+  <data name="mfi_layout_save.Text" xml:space="preserve">
+    <value>レイアウトを保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -1154,8 +1154,8 @@
     <value>三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_vert_stick" xml:space="preserve">
-    <value>しきい値</value>
+  <data name="str_snap_interval" xml:space="preserve">
+    <value>点をくっつける間隔</value>
     <comment>String</comment>
   </data>
   <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">

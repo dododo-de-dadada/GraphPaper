@@ -33,7 +33,8 @@ namespace winrt::GraphPaper::implementation
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
 	//-------------------------------
-	// 待機カーソルを表示, 表示する前のカーソルを得る.
+	// 待機カーソルを表示する.
+	// 戻り値	それまで表示されていたカーソル.
 	//-------------------------------
 	const CoreCursor wait_cursor_show(void)
 	{
@@ -154,12 +155,12 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さををピクセル単位の値に変換する.
-// 変換された値は, 0.5 ピクセル単位に丸められる.
-// l_unit	長さの単位
-// l_val	長さの値
-// dpi	DPI
-// g_len	方眼の大きさ
-// 戻り値	ピクセル単位の値
+	// 変換された値は, 0.5 ピクセル単位に丸められる.
+	// l_unit	長さの単位
+	// l_val	長さの値
+	// dpi	DPI
+	// g_len	方眼の大きさ
+	// 戻り値	ピクセル単位の値
 	double conv_len_to_pixel(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
 	{
 		double ret;
@@ -215,13 +216,17 @@ namespace winrt::GraphPaper::implementation
 		{
 			auto const& disp{ DisplayInformation::GetForCurrentView() };
 			m_token_dpi_changed = disp.DpiChanged({ this, &MainPage::display_dpi_changed });
-			m_token_orientation_changed = disp.OrientationChanged({ this, &MainPage::display_orientation_changed });
-			m_token_contents_invalidated = disp.DisplayContentsInvalidated({ this, &MainPage::display_contents_invalidated });
+			m_token_orientation_changed = disp.OrientationChanged(
+				{ this, &MainPage::display_orientation_changed });
+			m_token_contents_invalidated = disp.DisplayContentsInvalidated(
+				{ this, &MainPage::display_contents_invalidated });
 		}
 
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
-			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({ this, &MainPage::navi_close_requested });
+			m_token_close_requested = 
+				SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+					{ this, &MainPage::navi_close_requested });
 		}
 
 		// D2D/DWRITE ファクトリを図形クラスに, 
@@ -232,34 +237,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 背景パターン画像の読み込み.
 		{
-			// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
-			// WIC ファクトリは ShapeImage が確保しているものを使用する.
-			winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
-			winrt::check_hresult(
-				ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr,
-					GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
-			);
-			// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
-			UINT f_cnt;
-			winrt::check_hresult(
-				wic_decoder->GetFrameCount(&f_cnt)
-			);
-			// 最後のフレームを得る.
-			winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
-			winrt::check_hresult(
-				wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
-			);
-			wic_decoder = nullptr;
-			// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
-			winrt::check_hresult(
-				ShapeImage::wic_factory->CreateFormatConverter(m_background.put())
-			);
-			// WIC フォーマットコンバーターに, 得たフレームを格納する.
-			winrt::check_hresult(
-				m_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA,
-					WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
-			);
-			wic_frame = nullptr;
+			background_get_brush();
 		}
 
 		auto _{ file_new_click_async(nullptr, nullptr) };
@@ -335,4 +313,50 @@ namespace winrt::GraphPaper::implementation
 		}
 		*/
 	}
+
+	//------------------------------
+	// スワップチェーンパネルの寸法が変わった.
+	//------------------------------
+	void MainPage::main_panel_scale_changed(IInspectable const&, IInspectable const&)
+	{
+		m_main_d2d.SetCompositionScale(
+			scp_main_panel().CompositionScaleX(), scp_main_panel().CompositionScaleY());
+	}
+
+	//------------------------------
+	// スワップチェーンパネルがロードされた.
+	//------------------------------
+	void MainPage::main_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+	{
+#if defined(_DEBUG)
+		if (sender != scp_main_panel()) {
+			return;
+		}
+#endif // _DEBUG
+
+		m_main_d2d.SetSwapChainPanel(scp_main_panel());
+		page_draw();
+	}
+
+	//------------------------------
+	// スワップチェーンパネルの寸法が変わった.
+	// args	イベントの引数
+	//------------------------------
+	void MainPage::main_panel_size_changed(
+		IInspectable const& sender, SizeChangedEventArgs const& args)
+	{
+		if (sender != scp_main_panel()) {
+			return;
+		}
+		const auto z = args.NewSize();
+		const float w = z.Width;
+		const float h = z.Height;
+		scroll_set(w, h);
+		if (scp_main_panel().IsLoaded()) {
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+			page_draw();
+		}
+		status_bar_set_pos();
+	}
+
 }

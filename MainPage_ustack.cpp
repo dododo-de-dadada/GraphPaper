@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			if (flag) {
 				xcvd_is_enabled();
 				page_bbox_update();
-				page_panel_size();
+				main_panel_size();
 				page_draw();
 				// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 				if (summary_is_visible()) {
@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			xcvd_is_enabled();
 			page_bbox_update();
-			page_panel_size();
+			main_panel_size();
 			page_draw();
 			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 			if (summary_is_visible()) {
@@ -604,23 +604,26 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_T::FONT_STRETCH>(DWRITE_FONT_STRETCH const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& val);
-	template void MainPage::ustack_push_set<UNDO_T::GRID_BASE>(Shape* const s, float const& val);
-	template void MainPage::ustack_push_set<UNDO_T::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
-	template void MainPage::ustack_push_set<UNDO_T::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::ustack_push_set<UNDO_T::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::JOIN_LIMIT>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
-	template void MainPage::ustack_push_set<UNDO_T::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::ustack_push_set<UNDO_T::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
-	template void MainPage::ustack_push_set<UNDO_T::PAGE_PAD>(Shape* const s, D2D1_RECT_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::POLY_END>(bool const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_WIDTH>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
-	template void MainPage::ustack_push_set<UNDO_T::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_LINE_SP>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAD>(D2D1_SIZE_F const& val);
+
+	template void MainPage::ustack_push_set<UNDO_T::GRID_BASE>(Shape* const s, float const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::PAGE_PAD>(Shape* const s, D2D1_RECT_F const& val);
+	template void MainPage::ustack_push_set<UNDO_T::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
+
 	template void MainPage::ustack_push_set<UNDO_T::MOVE>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
 

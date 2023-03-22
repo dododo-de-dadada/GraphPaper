@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
 			const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 			const auto wb = CoreWindow::GetForCurrentThread().Bounds();
-			const auto tr = scp_page_panel().TransformToVisual(nullptr);
+			const auto tr = scp_main_panel().TransformToVisual(nullptr);
 			const auto tp = tr.TransformPoint({ 0.0f, 0.0f });
 			const double sx = sb_horz().Value();
 			const double sy = sb_vert().Value();

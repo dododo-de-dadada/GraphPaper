@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity"
 			};
 			wchar_t buf[32];
-			conv_col_to_str(m_color_code, val, buf);
+			conv_col_to_str(m_color_base, val, buf);
 			dialog_set_slider_header<S>(
 				ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf);
 		}

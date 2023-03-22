@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		if (sender != scp_page_panel()) {
+		if (sender != scp_main_panel()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 		}
 		else {
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
 	{
-		if (sender == scp_page_panel()) {
+		if (sender == scp_main_panel()) {
 			auto const& win = Window::Current().CoreWindow();
 			auto const& curs = win.PointerCursor();
 			if (curs.Type() != CURS_ARROW.Type()) {
@@ -456,7 +456,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_prev = s;
 		xcvd_is_enabled();
 		page_bbox_update(s);
-		page_panel_size();
+		main_panel_size();
 		page_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
@@ -495,7 +495,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_prev = s;
 			xcvd_is_enabled();
 			page_bbox_update(s);
-			page_panel_size();
+			main_panel_size();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_append(s);
@@ -553,7 +553,7 @@ namespace winrt::GraphPaper::implementation
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
 			page_bbox_update();
-			page_panel_size();
+			main_panel_size();
 			xcvd_is_enabled();
 		}
 	}
@@ -601,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
 			page_bbox_update();
-			page_panel_size();
+			main_panel_size();
 			xcvd_is_enabled();
 		}
 	}
@@ -669,7 +669,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 #if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
+		if (sender != scp_main_panel()) {
 			throw winrt::hresult_not_implemented();
 		}
 #endif
@@ -785,7 +785,7 @@ namespace winrt::GraphPaper::implementation
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
 		if (pressed == nullptr ||
 			anc_pressed == ANC_TYPE::ANC_PAGE) {
-			for (const auto item : mbi_grid().Items()) {
+			for (const auto item : mbi_layout().Items()) {
 				popup.Items().Append(item);
 			}
 		}
@@ -841,7 +841,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-			page_layout_is_checked();
+			layout_is_checked();
 		}
 		popup.Closed([=](IInspectable const&, IInspectable const&) {
 			ContextFlyout(nullptr);
@@ -856,7 +856,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 #if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
+		if (sender != scp_main_panel()) {
 			throw winrt::hresult_not_implemented();
 		}
 #endif
@@ -951,7 +951,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 //#if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
+		if (sender != scp_main_panel()) {
 			return;
 		}
 //#endif
@@ -1202,7 +1202,7 @@ namespace winrt::GraphPaper::implementation
 		// 引数として渡された位置をスワップチェーンパネル上の位置として得る.
 		// 得られた位置に拡大率の逆数を乗じて, 境界ボックスの表示されている左上位置を加えた値を,
 		// ポインターの現在位置に格納する.
-		const auto p{ args.GetCurrentPoint(scp_page_panel()).Position() };
+		const auto p{ args.GetCurrentPoint(scp_main_panel()).Position() };
 		pt_mul_add(D2D1_POINT_2F{ p.X, p.Y }, 1.0 / p_scale, lt, m_event_pos_curr);
 	}
 
@@ -1212,7 +1212,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 #if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
+		if (sender != scp_main_panel()) {
 			throw winrt::hresult_not_implemented();
 		}
 #endif
@@ -1227,13 +1227,13 @@ namespace winrt::GraphPaper::implementation
 		const auto mod = args.KeyModifiers();
 		if (mod == VirtualKeyModifiers::Control) {
 			// 拡大縮小
-			const int32_t w_delta = args.GetCurrentPoint(scp_page_panel()).Properties().MouseWheelDelta();
-			page_zoom_delta(w_delta);
+			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
+			zoom_delta(w_delta);
 		}
 		// シフトキーが押されてるか判定する.
 		else if (mod == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
-			const int32_t w_delta = args.GetCurrentPoint(scp_page_panel()).Properties().MouseWheelDelta();
+			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, p_scale)) {
 				page_draw();
@@ -1243,7 +1243,7 @@ namespace winrt::GraphPaper::implementation
 		// 何も押されてないか判定する.
 		else if (mod == VirtualKeyModifiers::None) {
 			// 縦スクロール.
-			const int32_t w_delta = args.GetCurrentPoint(scp_page_panel()).Properties().MouseWheelDelta();
+			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_vert(), w_delta, p_scale)) {
 				page_draw();

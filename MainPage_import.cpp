@@ -63,8 +63,8 @@ namespace winrt::GraphPaper::implementation
 			const double scale = m_main_page.m_page_scale;
 			const double win_x = sb_horz().Value();
 			const double win_y = sb_vert().Value();
-			const double win_w = scp_page_panel().ActualWidth();
-			const double win_h = scp_page_panel().ActualHeight();
+			const double win_w = scp_main_panel().ActualWidth();
+			const double win_h = scp_main_panel().ActualHeight();
 			const double image_w = bitmap.PixelWidth();
 			const double image_h = bitmap.PixelHeight();
 			const D2D1_POINT_2F ctr{
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			xcvd_is_enabled();
 			page_bbox_update(s);
-			page_panel_size();
+			main_panel_size();
 			page_draw();
 
 			// ÉJÅ[É\ÉãÇå≥Ç…ñﬂÇ∑.

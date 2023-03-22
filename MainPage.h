@@ -90,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
 	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
 	constexpr auto SNAP_INTERVAL_DEF_VAL = 2.0f * 6.0f;	// 点をくっつける間隔の既定値
-	constexpr wchar_t PAGE_SETTING[] = L"page_layout.dat";	// ページ設定を格納するファイル名
 	constexpr uint32_t VERT_CNT_MAX = 12;	// 折れ線の頂点の最大数.
+	constexpr wchar_t LAYOUT_FILE[] = L"gp_layout.dat";	// レイアウトを格納するファイル名
 
 	//-------------------------------
 	// 色の表記
@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページを含めた図形全体の境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
 		// 背景パターン
-		winrt::com_ptr<IWICFormatConverter> m_background{ nullptr };
+		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };
 		bool m_background_show = false;
 		D2D1_COLOR_F m_background_color{ COLOR_WHITE };
 
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
+		COLOR_CODE m_color_base = COLOR_CODE::DEC;	// 色成分の書式
 		float m_snap_interval = SNAP_INTERVAL_DEF_VAL;	// 頂点をくっつける閾値
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
@@ -308,7 +308,8 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage.cpp
-		// メインページの作成, アプリの終了
+		// メインページの作成, アプリの終了, 
+		// メインのスワップチェーンパネルのハンドラー
 		//-------------------------------
 
 		// メインページを作成する.
@@ -325,6 +326,14 @@ namespace winrt::GraphPaper::implementation
 			auto _{ file_exit_click_async(nullptr, nullptr) };
 		}
 		IAsyncAction MainPage::print_click_async(const IInspectable&, const RoutedEventArgs&);
+		// スワップチェーンパネルがロードされた.
+		void main_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
+		// スワップチェーンパネルの寸法が変わった.
+		void main_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
+		// スワップチェーンパネルの寸法が変わった.
+		void main_panel_scale_changed(IInspectable const& sender, IInspectable const&);
+		// スワップチェーンパネルの大きさを設定する.
+		void main_panel_size(void);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -360,8 +369,7 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーに格納する.
 		template <int S> void join_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <int S>
-		void join_slider_val_changed(
+		template <int S> void join_slider_val_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
@@ -394,9 +402,11 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーに格納する.
 		template <int S> void arrow_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <int S>
-		void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		void arrow_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+		template <int S> void arrow_slider_val_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// 矢じるしの形式の選択が変更された.
+		void arrow_selection_changed(
+			IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -511,14 +521,13 @@ namespace winrt::GraphPaper::implementation
 		void edit_arc_slider_set_header(const float val);
 		// 編集メニューの「円弧の編集」が選択された.
 		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
+		template<int S> void edit_arc_slider_value_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		// 円弧の向きの選択が変更された
+		void edit_arc_selection_changed(IInspectable const&, SelectionChangedEventArgs const&);
+		void edit_poly_end_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
-		template<int S>
-		void edit_arc_slider_value_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		void edit_arc_dir_selection_changed(IInspectable const&, SelectionChangedEventArgs const&);
-		void edit_poly_open_click(IInspectable const&, RoutedEventArgs const&);
-		void edit_poly_close_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -600,6 +609,7 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_T U, int S>
 		void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		void grid_len_unit_changed(IInspectable const&, SelectionChangedEventArgs const&);
+
 		//-------------------------------
 		// MainPage_group.cpp
 		// グループ化とグループの解除
@@ -685,22 +695,28 @@ namespace winrt::GraphPaper::implementation
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「色の表記」に印をつける.
-		void color_code_is_checked(const COLOR_CODE c_code);
+		void color_base_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
-		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
+		void color_base_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点をくっつける...」が選択された.
 		IAsyncAction snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		void vert_stick_set_header(const float val) noexcept;
+		void snap_interval_set_header(const float val) noexcept;
 		// スライダーの値が変更された.
-		void vert_stick_val_changed(
+		void snap_interval_val_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
-
+		// ダイアログの「長さの単位」の選択が変更された.
 		void len_unit_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+		// 方眼メニューの「ページの倍率」が選択された.
+		void zoom_click(IInspectable const& sender, RoutedEventArgs const&);
+		// ページを拡大または縮小する.
+		void zoom_delta(const int32_t delta) noexcept;
+		// ズームメニューに印をつける.
+		void zoom_is_cheched(float scale);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -771,13 +787,9 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_page.cpp
-		// ページ設定の保存と削除
+		// ページの大きさ, 色
 		//-------------------------------
 
-		// ページ設定に印をつける.
-		void page_layout_is_checked(void) noexcept;
-		// ページ設定を初期化する.
-		void page_layout_init(void) noexcept;
 		// 方眼メニューの「ページの色」が選択された.
 		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 方眼メニューの「ページの大きさ」が選択された
@@ -790,33 +802,39 @@ namespace winrt::GraphPaper::implementation
 		void page_draw(void);
 		// 前景色を得る.
 		//const D2D1_COLOR_F& page_foreground(void) const noexcept;
-		// 方眼メニューの「ページ設定をリセット」が選択された.
-		IAsyncAction page_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 方眼メニューの「ページ設定を保存」が選択された.
-		IAsyncAction page_layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <int S> void page_slider_set_header(const float val);
 		// スライダーの値が変更された.
 		template <int S>
 		void page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// 表示のスワップチェーンパネルがロードされた.
-		void page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
-		// ページのスワップチェーンパネルのロードが始まった.
-		void page_panel_loading(IInspectable const& sender, IInspectable const&);
-		// 表示のスワップチェーンパネルの寸法が変わった.
-		void page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
-		// 表示のスワップチェーンパネルの寸法が変わった.
-		void page_panel_scale_changed(IInspectable const& sender, IInspectable const&);
-		// 表示のスワップチェーンパネルの大きさを設定する.
-		void page_panel_size(void);
 		// ページの大きさダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
 		void page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
-		// 方眼メニューの「ページの倍率」が選択された.
-		void page_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
-		// ページを拡大または縮小する.
-		void page_zoom_delta(const int32_t delta) noexcept;
-		void page_zoom_is_checked(float scale);
-		void win_background_pattern_click(IInspectable const&, RoutedEventArgs const&);
+
+		//-------------------------------
+		// MainPage_layout.cpp
+		// レイアウト
+		//-------------------------------
+
+		// レイアウトメニューの項目に印をつける.
+		void layout_is_checked(void) noexcept;
+		// レイアウトを既定値に戻す.
+		void layout_init(void) noexcept;
+		// レイアウトメニューの「レイアウトをリセット」が選択された.
+		IAsyncAction layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
+		// レイアウトメニューの「 レイアウトを保存」が選択された
+		IAsyncAction layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
+
+		//-------------------------------
+		// MainPage_background.cpp
+		// 背景パターン, 色
+		//-------------------------------
+
+		// 背景パターンの画像ブラシを得る.
+		void background_get_brush(void);
+		// 背景パターンがクリックされた.
+		void background_pattern_click(IInspectable const&, RoutedEventArgs const&);
+		// 背景色の項目に印をつける
+		void background_color_is_checked(const bool checker_board, const D2D1_COLOR_F& color);
 
 		//-------------------------------
 		// MainPage_status.cpp

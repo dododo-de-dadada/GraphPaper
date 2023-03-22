@@ -9,10 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Xaml::Controls::ListViewItem;
-	//using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// Escape ‚ª‰Ÿ‚³‚ê‚½.
 	void MainPage::select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
@@ -283,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 		if (s->is_selected()) {
 			// ‰Ÿ‚³‚ê‚½}Œ`‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚éê‡,
 //			m_main_page.set_attr_to(s);
-//			page_layout_is_checked();
+//			layout_is_checked();
 		}
 	}
 

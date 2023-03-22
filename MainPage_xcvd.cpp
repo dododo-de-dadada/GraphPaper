@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// 貼り付ける位置を求める.
 	static void xcvd_paste_pos(
 		D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len,
-		const float vert_stick);
+		const float snap_interval);
 
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 			selected_list.clear();
 			xcvd_is_enabled();
 			page_bbox_update();
-			page_panel_size();
+			main_panel_size();
 			page_draw();
 		}
 		status_bar_set_pos();
@@ -238,6 +238,10 @@ namespace winrt::GraphPaper::implementation
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
 		mfi_ungroup().IsEnabled(exists_selected_group);
+		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
+		// そうしないと, 子の項目の可否がただちに反映しない.
+		mfsi_edit_poly_end().IsEnabled(
+			exists_selected_poly_close || exists_selected_poly_open);
 		mfi_edit_poly_open().IsEnabled(exists_selected_poly_close);
 		mfi_edit_poly_close().IsEnabled(exists_selected_poly_open);
 		mfi_edit_arc().IsEnabled(exists_selected_arc);
@@ -299,8 +303,8 @@ namespace winrt::GraphPaper::implementation
 		unselect_all();
 
 		// resume_background する前に UI から値を得る.
-		const float win_w = static_cast<float>(scp_page_panel().ActualWidth());
-		const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
+		const float win_w = static_cast<float>(scp_main_panel().ActualWidth());
+		const float win_h = static_cast<float>(scp_main_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
 		const float lt_x = m_main_bbox_lt.x;
@@ -349,8 +353,8 @@ namespace winrt::GraphPaper::implementation
 		reference = nullptr;
 
 		const double grid_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
-		const float vert_stick = m_snap_interval / m_main_page.m_page_scale;
-		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, vert_stick);
+		const float snap_interval = m_snap_interval / m_main_page.m_page_scale;
+		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, snap_interval);
 		s->set_pos_start(pos);
 
 		{
@@ -370,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		xcvd_is_enabled();
 		page_bbox_update(s);
-		page_panel_size();
+		main_panel_size();
 		page_draw();
 
 		//スレッドコンテキストを復元する.
@@ -430,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_null();
 					slist_pasted.clear();
 					xcvd_is_enabled();
-					page_panel_size();
+					main_panel_size();
 					page_draw();
 					ok = true;
 				}
@@ -461,9 +465,9 @@ namespace winrt::GraphPaper::implementation
 			const float scale = m_main_page.m_page_scale;
 			const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
 			const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
-			const float win_w = min(static_cast<float>(scp_page_panel().ActualWidth()) / scale,
+			const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
 				m_main_page.m_page_size.width); // ページの表示されている幅
-			const float win_h = min(static_cast<float>(scp_page_panel().ActualHeight()) / scale,
+			const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale,
 				m_main_page.m_page_size.height); // ページの表示されている高さ
 			const float lt_x = m_main_bbox_lt.x;
 			const float lt_y = m_main_bbox_lt.y;
@@ -499,7 +503,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			xcvd_is_enabled();
 			page_bbox_update(t);
-			page_panel_size();
+			main_panel_size();
 			page_draw();
 		}
 		else {

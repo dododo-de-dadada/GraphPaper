@@ -135,7 +135,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::edit_arc_dir_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args)
+	// ‰~ŒÊ‚ÌŒü‚«‚Ì‘I‘ð‚ª•ÏX‚³‚ê‚½
+	void MainPage::edit_arc_selection_changed(
+		IInspectable const&, SelectionChangedEventArgs const& args)
 	{
 		if (dialog_radio_btns().SelectedIndex() == 0) {
 			if (m_dialog_page.m_shape_list.back()->set_arc_dir(
@@ -186,12 +188,22 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 
-	void MainPage::edit_poly_open_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-	}
-
-	void MainPage::edit_poly_close_click(IInspectable const&, RoutedEventArgs const&)
-	{
+		if (sender == mfi_edit_poly_close()) {
+			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
+				ustack_push_null();
+				page_draw();
+				xcvd_is_enabled();
+			}
+		}
+		else if (sender == mfi_edit_poly_open()) {
+			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
+				ustack_push_null();
+				page_draw();
+				xcvd_is_enabled();
+			}
+		}
 	}
 
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -263,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 					{ this, &MainPage::edit_arc_slider_value_changed<2> })
 			};
 			const winrt::event_token token3{
-				dialog_radio_btns().SelectionChanged({ this, &MainPage::edit_arc_dir_selection_changed })
+				dialog_radio_btns().SelectionChanged({ this, &MainPage::edit_arc_selection_changed })
 			};
 			/*
 			const winrt::event_token token3{

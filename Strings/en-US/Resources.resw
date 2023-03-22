@@ -177,19 +177,19 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_code_pct.Text" xml:space="preserve">
+  <data name="rmfi_color_base_pct.Text" xml:space="preserve">
     <value>Percent</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
+  <data name="rmfi_color_base_dec.Text" xml:space="preserve">
     <value>Decimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_real.Text" xml:space="preserve">
+  <data name="rmfi_color_base_real.Text" xml:space="preserve">
     <value>Real Number</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
+  <data name="rmfi_color_base_hex.Text" xml:space="preserve">
     <value>Hexdecimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -213,8 +213,8 @@
     <value>Point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_color_code.Text" xml:space="preserve">
-    <value>Color Code</value>
+  <data name="mfsi_color_base.Text" xml:space="preserve">
+    <value>Color Base Number</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
@@ -321,8 +321,8 @@
     <value>Font</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_grid.Title" xml:space="preserve">
-    <value>Grid</value>
+  <data name="mbi_layout.Title" xml:space="preserve">
+    <value>Layout</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_misc.Title" xml:space="preserve">
@@ -1014,12 +1014,12 @@
     <value>Paste as Shape</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_page_layout_reset.Text" xml:space="preserve">
-    <value>Reset Page Layout</value>
+  <data name="mfi_layout_reset.Text" xml:space="preserve">
+    <value>Reset Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_layout_save.Text" xml:space="preserve">
-    <value>Save Page Layout</value>
+  <data name="mfi_layout_save.Text" xml:space="preserve">
+    <value>Save Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -1135,7 +1135,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_snap_interval.Text" xml:space="preserve">
-    <value>Snap Point Interval...</value>
+    <value>Interval for snapping...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_style_flat.Text" xml:space="preserve">
@@ -1154,8 +1154,8 @@
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_vert_stick" xml:space="preserve">
-    <value>Thresholds</value>
+  <data name="str_snap_interval" xml:space="preserve">
+    <value>Interval between points to snap</value>
     <comment>String</comment>
   </data>
   <data name="str_must_0_to_32768" xml:space="preserve">

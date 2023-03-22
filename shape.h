@@ -1603,6 +1603,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			if (m_end_closed != val) {
 				m_end_closed = val;
+				m_d2d_arrow_geom = nullptr;
+				m_d2d_path_geom = nullptr;
 				return true;
 			}
 			return false;

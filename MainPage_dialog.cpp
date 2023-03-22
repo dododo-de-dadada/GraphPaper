@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// •`‰æŠÂ‹«‚ÌÝ’è.
-		m_dialog_page.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_background.get(), 1.0f);
+		m_dialog_page.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
 		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
 		m_dialog_d2d.m_d2d_context->BeginDraw();
 		m_dialog_d2d.m_d2d_context->Clear(m_background_color);

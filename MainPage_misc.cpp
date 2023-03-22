@@ -61,34 +61,34 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「色の表記」のサブ項目が選択された.
-	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::color_base_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_color_code_pct()) {
-			m_color_code = COLOR_CODE::PCT;
+		if (sender == rmfi_color_base_pct()) {
+			m_color_base = COLOR_CODE::PCT;
 		}
-		else if (sender == rmfi_color_code_dec()) {
-			m_color_code = COLOR_CODE::DEC;
+		else if (sender == rmfi_color_base_dec()) {
+			m_color_base = COLOR_CODE::DEC;
 		}
-		else if (sender == rmfi_color_code_hex()) {
-			m_color_code = COLOR_CODE::HEX;
+		else if (sender == rmfi_color_base_hex()) {
+			m_color_base = COLOR_CODE::HEX;
 		}
-		else if (sender == rmfi_color_code_real()) {
-			m_color_code = COLOR_CODE::REAL;
+		else if (sender == rmfi_color_base_real()) {
+			m_color_base = COLOR_CODE::REAL;
 		}
 		else {
 			winrt::hresult_not_implemented();
 		}
-		color_code_is_checked(m_color_code);
+		color_base_is_checked(m_color_base);
 		status_bar_set_pos();
 	}
 
 	// その他メニューの「色の表記」に印をつける.
-	void MainPage::color_code_is_checked(const COLOR_CODE val)
+	void MainPage::color_base_is_checked(const COLOR_CODE val)
 	{
-		rmfi_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
-		rmfi_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
-		rmfi_color_code_real().IsChecked(val == COLOR_CODE::REAL);
-		rmfi_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
+		rmfi_color_base_dec().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_color_base_hex().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_color_base_real().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_color_base_pct().IsChecked(val == COLOR_CODE::PCT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -139,6 +139,7 @@ namespace winrt::GraphPaper::implementation
 		cbi_len_unit_point().IsSelected(val == LEN_UNIT::POINT);
 	}
 
+	// ダイアログの「長さの単位」の選択が変更された.
 	void MainPage::len_unit_selection_changed(
 		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
 	{
@@ -230,31 +231,105 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「頂点をくっつける...」が選択された.
 	IAsyncAction MainPage::snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		vert_stick_set_header(m_snap_interval);
-		sd_vert_stick().Value(static_cast<double>(m_snap_interval));
+		snap_interval_set_header(m_snap_interval);
+		sd_snap_interval().Value(static_cast<double>(m_snap_interval));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_vert_stick().ShowAsync();
+		const auto d_result = co_await cd_snap_interval().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			m_snap_interval = static_cast<float>(sd_vert_stick().Value());
+			m_snap_interval = static_cast<float>(sd_snap_interval().Value());
 		}
 		m_mutex_event.unlock();
 	}
 
-	void MainPage::vert_stick_set_header(const float val) noexcept
+	void MainPage::snap_interval_set_header(const float val) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 			m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
-		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_vert_stick") + L": " + buf;
-		sd_vert_stick().Header(box_value(text));
+		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_snap_interval") + L": " + buf;
+		sd_snap_interval().Header(box_value(text));
 	}
 
 	// スライダーの値が変更された.
-	void MainPage::vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
+	void MainPage::snap_interval_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
 	{
-		vert_stick_set_header(static_cast<float>(args.NewValue()));
+		snap_interval_set_header(static_cast<float>(args.NewValue()));
 	}
 
+	// ズームメニューに印をつける.
+	void MainPage::zoom_is_cheched(float scale)
+	{
+		rmfi_page_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_page_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_page_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_page_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_page_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_page_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_page_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_page_zoom_025().IsChecked(equal(scale, 0.25f));
+	}
+
+	// その他メニューの「ズーム」が選択された.
+	void MainPage::zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		float scale;
+		if (sender == rmfi_page_zoom_100()) {
+			scale = 1.0f;
+		}
+		else if (sender == rmfi_page_zoom_150()) {
+			scale = 1.5f;
+		}
+		else if (sender == rmfi_page_zoom_200()) {
+			scale = 2.0f;
+		}
+		else if (sender == rmfi_page_zoom_300()) {
+			scale = 3.0f;
+		}
+		else if (sender == rmfi_page_zoom_400()) {
+			scale = 4.0f;
+		}
+		else if (sender == rmfi_page_zoom_075()) {
+			scale = 0.75f;
+		}
+		else if (sender == rmfi_page_zoom_050()) {
+			scale = 0.5f;
+		}
+		else if (sender == rmfi_page_zoom_025()) {
+			scale = 0.25f;
+		}
+		else {
+			return;
+		}
+		zoom_is_cheched(scale);
+		if (scale != m_main_page.m_page_scale) {
+			m_main_page.m_page_scale = scale;
+			main_panel_size();
+			page_draw();
+			status_bar_set_zoom();
+		}
+		status_bar_set_pos();
+	}
+
+	// 表示を拡大または縮小する.
+	void MainPage::zoom_delta(const int32_t delta) noexcept
+	{
+		if (delta > 0 &&
+			m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
+			m_main_page.m_page_scale *= 1.1f;
+		}
+		else if (delta < 0 &&
+			m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
+			m_main_page.m_page_scale /= 1.1f;
+		}
+		else {
+			return;
+		}
+		zoom_is_cheched(m_main_page.m_page_scale);
+		main_panel_size();
+		page_draw();
+		status_bar_set_pos();
+		status_bar_set_zoom();
+	}
 }

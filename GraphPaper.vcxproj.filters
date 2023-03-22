@@ -71,6 +71,8 @@
     <ClCompile Include="shape_arc.cpp" />
     <ClCompile Include="MainPage_edit.cpp" />
     <ClCompile Include="MainPage_import.cpp" />
+    <ClCompile Include="MainPage_background.cpp" />
+    <ClCompile Include="MainPage_layout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

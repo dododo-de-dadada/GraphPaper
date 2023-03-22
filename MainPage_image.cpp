@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeImage*>(s)->revert();
 		}
 		ustack_push_null();
-		page_panel_size();
+		main_panel_size();
 		page_draw();
 		status_bar_set_pos();
 	}
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr wchar_t R[]{ L"str_opacity" };
 		wchar_t buf[32];
-		conv_col_to_str(m_color_code, val, buf);
+		conv_col_to_str(m_color_base, val, buf);
 		const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
 		dialog_set_slider_header<0>(text);
 	}

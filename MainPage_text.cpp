@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			ustack_push_null();
-			page_panel_size();
+			main_panel_size();
 			page_draw();
 		}
 		status_bar_set_pos();
