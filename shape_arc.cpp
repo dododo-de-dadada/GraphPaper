@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 			{ x3, y3 }
 		};
 		const double t_len = bezi_len_by_param(b, t_min, t_max, SIMPSON_CNT);
-		// 助変数の下限で, 曲線を分割し, 下限より後ろの部分の曲線を得る.
+		// 助変数の下限で, 曲線を分割し, 後半の曲線を得る.
 		double x4, y4;
 		double x5, y5;
 		double x6, y6;
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			b[2].x = x6;
 			b[2].y = y6;
 		}
-		// 分割された曲線を, 最初に求めた曲線の長さで分割し, 長さより前の部分の曲線を得る.
+		// 得られた曲線を, 最初に求めた曲線の長さで分割し, 前半の曲線を得る.
 		const double t_new = bezi_param_by_len(b, t_len);
 		if (t_new > FLT_MIN) {
 			x0 = b[0].x;
@@ -1078,7 +1078,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 円弧をベジェ曲線で近似する.
-	// ただし, 始点の終点の角度が 180 度に近くなるとズレる.
+	// ただし, だ円の中心点と始点, 終点がなす角度が 90 度以上, 開けば開くほどズレる.
 	void ShapeArc::alter_bezier(
 		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept
 	{

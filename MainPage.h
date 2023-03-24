@@ -17,13 +17,13 @@
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
 // MainPage_arrow.cpp	矢じるしの形式と寸法
+// MainPage_color.cpp	線枠, 塗りつぶし, 書体, 方眼, ページの色
 // MainPage_dash.cpp	破線の形式
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
 // MainPage_edit.cpp	円弧や文字列の編集
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
-// MainPage_fill.cpp	塗りつぶし
 // MainPage_find.cpp	文字列の編集, 検索と置換
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
@@ -305,7 +305,6 @@ namespace winrt::GraphPaper::implementation
 		//PrintDocument m_print_doc;
 		//IPrintDocumentSource m_print_source;
 
-
 		//-------------------------------
 		// MainPage.cpp
 		// メインページの作成, アプリの終了, 
@@ -330,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		void main_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
 		// スワップチェーンパネルの寸法が変わった.
 		void main_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
-		// スワップチェーンパネルの寸法が変わった.
+		// スワップチェーンパネルの倍率が変わった.
 		void main_panel_scale_changed(IInspectable const& sender, IInspectable const&);
 		// スワップチェーンパネルの大きさを設定する.
 		void main_panel_size(void);
@@ -341,11 +340,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// アプリケーションがバックグラウンドに移った.
-		void app_entered_background(
-			IInspectable const& sender, EnteredBackgroundEventArgs const& args);
+		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
-		void app_leaving_background(
-			IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
 		// アプリケーションが再開された.
 		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
@@ -366,11 +363,6 @@ namespace winrt::GraphPaper::implementation
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		// 線枠メニューの「結合の形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 値をスライダーのヘッダーに格納する.
-		template <int S> void join_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		template <int S> void join_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_order.cpp
@@ -399,14 +391,6 @@ namespace winrt::GraphPaper::implementation
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 値をスライダーのヘッダーに格納する.
-		template <int S> void arrow_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		template <int S> void arrow_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// 矢じるしの形式の選択が変更された.
-		void arrow_selection_changed(
-			IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -482,8 +466,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「上書き保存」が選択された
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ストレージファイルを非同期に読む.
-		template <bool RESUME, bool SETTING_ONLY>
-		IAsyncOperation<winrt::hresult> file_read_gpf_async(StorageFile s_file) noexcept;
+		template <bool RESUME, bool SETTING_ONLY> IAsyncOperation<winrt::hresult> file_read_gpf_async(StorageFile s_file) noexcept;
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
 		IAsyncAction file_recent_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルにストレージファイルを追加する.
@@ -493,38 +476,31 @@ namespace winrt::GraphPaper::implementation
 		// 最近使ったファイルのメニュー項目を更新する.
 		void file_recent_menu_update(void);
 		// 図形データをストレージファイルに非同期に書き込む.
-		template <bool SUSPEND, bool SETTING>
-		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
+		template <bool SUSPEND, bool SETTING> IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
 		// ファイルメニューの「他の形式としてエクスポートする」が選択された
 		IAsyncAction file_export_as_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_fill.cpp
-		// 塗りつぶし
+		// MainPage_color.cpp
+		// 色設定
 		//-------------------------------
 
-		// 塗りつぶしメニューの「塗りつぶし色」が選択された.
-		IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// スライダーの値が変更された.
-		template <int S>
-		void fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// 値をスライダーのヘッダーに格納する.
-		template <int S> void fill_slider_set_header(const float val);
+		// 「...色」が選択された.
+		template <UNDO_T U> IAsyncAction color_click_async(void);
+
+		// 属性メニューの「塗りつぶし色」が選択された.
+		void fill_color_click(IInspectable const&, RoutedEventArgs const&) {
+			color_click_async<UNDO_T::FILL_COLOR>();
+		}
 
 		//-------------------------------
 		// MainPage_edit.cpp
 		// 文字列の編集, 円弧の編集
 		//-------------------------------
 
-		// 値をスライダーのヘッダーに格納する.
-		template <int S>
-		void edit_arc_slider_set_header(const float val);
 		// 編集メニューの「円弧の編集」が選択された.
 		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
-		template<int S> void edit_arc_slider_value_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		// 円弧の向きの選択が変更された
-		void edit_arc_selection_changed(IInspectable const&, SelectionChangedEventArgs const&);
+		// 編集メニューの「多角形の終端の編集」のサブ項目が選択された.
 		void edit_poly_end_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -557,7 +533,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「字体」に印をつける.
 		void font_style_is_checked(const DWRITE_FONT_STYLE f_style);
 		// 書体メニューの「色」が選択された.
-		IAsyncAction font_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		void font_color_click(IInspectable const&, RoutedEventArgs const&) {
+			color_click_async<UNDO_T::FONT_COLOR>();
+		}
 		// 書体メニューの「書体名」が選択された.
 		IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「イタリック体」が選択された.
@@ -572,12 +550,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 値をスライダーのヘッダーに格納する.
-		template <int S>
-		void font_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		template <int S>
-		void font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// リストボックスの選択が変更された.
 		void font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args);
 
 		//-------------------------------
@@ -596,7 +569,9 @@ namespace winrt::GraphPaper::implementation
 		// 方眼メニューの「方眼の大きさ」>「広げる」が選択された.
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// 方眼メニューの「方眼の色」が選択された.
-		IAsyncAction grid_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		void grid_color_click(IInspectable const&, RoutedEventArgs const&) {
+			color_click_async<UNDO_T::GRID_COLOR>();
+		}
 		// 方眼メニューの「方眼の強調」が選択された.
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 方眼メニューの「方眼の表示」が選択された.
@@ -604,11 +579,11 @@ namespace winrt::GraphPaper::implementation
 		// 方眼メニューの「方眼に合わせる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_T U, int S> void grid_slider_set_header(const float val);
+		//template <UNDO_T U, int S> void grid_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_T U, int S>
-		void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		void grid_len_unit_changed(IInspectable const&, SelectionChangedEventArgs const&);
+		//template <UNDO_T U, int S>
+		//void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//void grid_len_unit_changed(IInspectable const&, SelectionChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_group.cpp
@@ -681,11 +656,6 @@ namespace winrt::GraphPaper::implementation
 		void image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「画像の不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 値をスライダーのヘッダーに格納する.
-		void image_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		void image_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-----------------------------
 		// MainPage_misc.cpp
@@ -734,14 +704,12 @@ namespace winrt::GraphPaper::implementation
 		void dialog_list_loaded(IInspectable const&, RoutedEventArgs const&);
 		// 属性の画像を読み込む.
 		IAsyncAction dialog_image_load_async(const float samp_w, const float samp_h);
-		// 属性のスワップチェーンパネルが読み込まれた.
+		// スワップチェーンパネルが読み込まれた.
 		void dialog_panel_loaded(IInspectable const& sender, RoutedEventArgs const&);
-		// 属性のスワップチェーンパネルの大きさが変わった.
+		// スワップチェーンパネルの大きさが変わった.
 		void dialog_panel_size_changed(IInspectable const&, SizeChangedEventArgs const&);
-		// 属性のスワップチェーンパネルの倍率が変わった.
+		// スワップチェーンパネルの倍率が変わった.
 		void dialog_panel_scale_changed(IInspectable const&, IInspectable const&);
-		// 属性ダイアログのスライダーヘッダーに文字列を格納する.
-		template<int S> void dialog_set_slider_header(const winrt::hstring& text);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -791,7 +759,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 方眼メニューの「ページの色」が選択された.
-		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		void page_color_click(IInspectable const&, RoutedEventArgs const&) {
+			color_click_async<UNDO_T::PAGE_COLOR>();
+		}
 		// 方眼メニューの「ページの大きさ」が選択された
 		IAsyncAction page_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ページの左上位置と右下位置を更新する.
@@ -872,11 +842,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「破線の配列」が選択された.
 		IAsyncAction dash_pat_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<int S> void dash_slider_set_header(const float val);
+		//template<int S> void dash_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template<int S>
-		void dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		void dash_style_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+		//template<int S>
+		//void dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//void dash_style_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -884,17 +854,19 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 線枠メニューの「色」が選択された.
-		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		void stroke_color_click(IInspectable const&, RoutedEventArgs const&) {
+			color_click_async<UNDO_T::STROKE_COLOR>();
+		}
 		// 線枠メニューの「太さ」が選択された.
 		void stroke_width_click(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_T U, int S> void stroke_slider_set_header(const float val);
+		//template<UNDO_T U, int S> void stroke_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template<UNDO_T U, int S>
-		void stroke_slider_value_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template<UNDO_T U, int S>
+		//void stroke_slider_value_changed(
+		//	IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
 		void stroke_width_is_checked(const float s_width) noexcept;
 
@@ -978,10 +950,10 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」が選択された.
 		void text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_T U, int S> void text_slider_set_header(const float val);
+		//template <UNDO_T U, int S> void text_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_T U, int S>
-		void text_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template <UNDO_T U, int S>
+		//void text_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_thread.cpp

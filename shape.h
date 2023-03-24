@@ -527,8 +527,8 @@ namespace winrt::GraphPaper::implementation
 		virtual uint32_t hit_test(const D2D1_POINT_2F/*t*/) const noexcept
 		{ return ANC_TYPE::ANC_PAGE; }
 		// 矩形に含まれるか判定する.
-		virtual bool is_inside(
-			const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
+		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept
+		{ return false; }
 		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
@@ -1665,6 +1665,14 @@ namespace winrt::GraphPaper::implementation
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;	// 円弧の大きさ
 
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom{ nullptr };	// 塗りつぶしジオメトリ
+
+		virtual bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override
+		{
+			D2D1_POINT_2F p[5];
+			get_verts(p);
+			return pt_in_rect(p[0], lt, rb) && pt_in_rect(p[1], lt, rb) &&
+				pt_in_rect(p[2], lt, rb) && pt_in_rect(p[3], lt, rb) && pt_in_rect(p[4], lt, rb);
+		}
 
 		virtual bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
 		{

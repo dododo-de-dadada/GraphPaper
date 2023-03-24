@@ -46,44 +46,59 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「不透明度...」が選択された.
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		const winrt::hstring str_opacity = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": ";
+		const winrt::hstring str_title = ResourceLoader::GetForCurrentView().GetString(L"str_image_opac");
 		m_dialog_page.set_attr_to(&m_main_page);
-		const float val = static_cast<float>(conv_color_comp(m_dialog_page.m_image_opac));
-		dialog_slider_0().Maximum(255.0);
-		dialog_slider_0().TickFrequency(1.0);
-		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_0().Value(val);
-		image_slider_set_header(val);
-
-		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::image_slider_val_changed });
 
 		dialog_image_load_async(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()));
 
-		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
+		const float val = static_cast<float>(conv_color_comp(m_dialog_page.m_image_opac));
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val);
+		wchar_t buf[32];
+		conv_col_to_str(m_color_base, val, buf);
+		dialog_slider_0().Header(box_value(str_opacity + buf));
+		dialog_slider_0().Visibility(Visibility::Visible);
+		cd_setting_dialog().Title(box_value(str_title));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			float samp_val;
-			m_dialog_page.m_shape_list.back()->get_image_opacity(samp_val);
-			ustack_push_set<UNDO_T::IMAGE_OPAC>(&m_main_page, samp_val);
-			if (ustack_push_set<UNDO_T::IMAGE_OPAC>(samp_val)) {
-				ustack_push_null();
-				ustack_is_enable();
-				xcvd_is_enabled();
-				page_draw();
+		{
+			const auto revoker{
+				dialog_slider_0().ValueChanged(
+					winrt::auto_revoke,
+					[this, str_opacity](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+						const float val = static_cast<float>(args.NewValue());
+						wchar_t buf[32];
+						conv_col_to_str(m_color_base, val, buf);
+						dialog_slider_0().Header(box_value(str_opacity + buf));
+						if (m_dialog_page.m_shape_list.back()->set_image_opacity(val / COLOR_MAX)) {
+							dialog_draw();
+						}
+					}
+				)
+			};
+			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				float new_val;
+				m_dialog_page.m_shape_list.back()->get_image_opacity(new_val);
+				if (ustack_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
+					ustack_push_null();
+					ustack_is_enable();
+					xcvd_is_enabled();
+					page_draw();
+				}
 			}
 		}
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
 		page_draw();
 		m_mutex_event.unlock();
 	}
 
+	/*
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の識別子
 	// S	スライダーの番号
@@ -111,5 +126,6 @@ namespace winrt::GraphPaper::implementation
 			dialog_draw();
 		}
 	}
+	*/
 
 }

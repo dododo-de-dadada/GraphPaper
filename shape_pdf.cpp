@@ -171,36 +171,48 @@ namespace winrt::GraphPaper::implementation
 		else {
 			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
 			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
-			// 尖り制限
+			// D2D の尖り制限とは異なるので注意.
+			// 尖り制限を超える部分があるとき, D2D では超えた部分だけが断ち切られるが, 
+			// PDF と SVG ではいきなり Bevel join　になる.
 			swprintf_s(buf, 
 				L"0 j\n"
-				L"%f M\n", 
+				L"%f M\n",
 				miter_limit);
 			len += dt_writer.WriteString(buf);
 		}
 
 		// 破線の形式
+		// 最後の数値は配置 (破線パターン) を適用するオフセット.
+		// [] 0		| 実線
+		// [3] 0	| ***___ ***___
+		// [2] 1	| *__**__**
+		// [2 1] 0	| **_**_ **_
+		// [3 5] 6	| __ ***_____***_____
+		// [2 3] 11	| *___ **___ **___
 		if (dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
-			// 最後の数値は配置 (破線パターン) を適用するオフセット.
-			// [] 0		| 実線
-			// [3] 0	| ***___ ***___
-			// [2] 1	| *__**__**
-			// [2 1] 0	| **_**_ **_
-			// [3 5] 6	| __ ***_____***_____
-			// [2 3] 11	| *___ **___ **___
+			// 破線
 			swprintf_s(buf, 
 				L"[ %f %f ] 0 d\n",
 				patt.m_[0], patt.m_[1]);
 			len += dt_writer.WriteString(buf);
 		}
+		else if (dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+			// 点線
+			swprintf_s(buf,
+				L"[ %f %f ] 0 d\n",
+				patt.m_[2], patt.m_[3]);
+			len += dt_writer.WriteString(buf);
+		}
 		else if (dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-			swprintf_s(buf, 
+			// 一点破線
+			swprintf_s(buf,
 				L"[ %f %f %f %f ] 0 d\n",
 				patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3]);
 			len += dt_writer.WriteString(buf);
 		}
 		else if (dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			swprintf_s(buf, 
+			// 二点破線
+			swprintf_s(buf,
 				L"[ %f %f %f %f %f %f ] 0 d\n",
 				patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3], patt.m_[4], patt.m_[5]);
 			len += dt_writer.WriteString(buf);
@@ -1075,10 +1087,9 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;	// 書き込んだバイト数
 		len += dt_writer.WriteString(
 			L"% Grid Lines\n");
-		len += export_pdf_stroke(0.0f,
-			D2D1_COLOR_F{
-				static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f 
-			},
+		len += export_pdf_stroke(
+			0.0f,
+			D2D1_COLOR_F{ static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f },
 			CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
 			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
 
@@ -1181,9 +1192,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			len += export_pdf_stroke(
-				m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat,
-				m_join_style, m_join_miter_limit, dt_writer);
+			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 			// S = パスをストロークで描画
 			// パスは開いたまま.
 			wchar_t buf[1024];

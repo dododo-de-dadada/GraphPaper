@@ -894,11 +894,11 @@
     <value>余白</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_pad_horzorz" xml:space="preserve">
+  <data name="str_text_pad_horz" xml:space="preserve">
     <value>左右の余白</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_pad_vertert" xml:space="preserve">
+  <data name="str_text_pad_vert" xml:space="preserve">
     <value>上下の余白</value>
     <comment>String</comment>
   </data>

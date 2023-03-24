@@ -179,11 +179,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 				join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				// D2D では, 尖りを指定すると, 尖り制限は常に無視され, すべて尖りになる.
-				// D2D では, 尖り/面取りを指定すると, 尖り制限が有効になり, これを超える角が面取りになる.
-				// SVG では, 尖りを指定すると, 尖り制限は常に有効で, これを超える角は面取りになる.
-				// つまり, SVG の尖りは, D2D の尖り/面取りと同じ.
-				// なお, SVG2 には, arcs と miter-clip というプロパティ値があるが D2D にはない.
+				// D2D の尖り制限とは異なるので注意.
+				// 尖り制限を超える部分があるとき, D2D では超えた部分だけが断ち切られるが, 
+				// PDF と SVG ではいきなり Bevel join　になる.
 				swprintf_s(buf + len4, len - len4,
 					L"stroke-linejoin=\"miter\" stroke-miterlimit=\"%f\" ", limit);
 			}

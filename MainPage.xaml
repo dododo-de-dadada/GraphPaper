@@ -686,23 +686,17 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." >
+				<MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click" Text="Stroke Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_color}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." >
+				<MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click" Text="Fill Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_fill_color}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 			</muxc:MenuBarItem>
-			<!-- 塗りつぶしメニュー -->
-			<!--
-			<muxc:MenuBarItem x:Name="mbi_fill" x:Uid="mbi_fill" AccessKey="L" Title="Fill">
-				<MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
-			</muxc:MenuBarItem>
-			-->
 			<!-- 書体メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 字体メニュー -->
@@ -771,7 +765,7 @@
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem
-                    x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor"
+                    x:Uid="mfi_font_color" Click="font_color_click" Icon="FontColor"
                     Text="Font Color..." />
 			</muxc:MenuBarItem>
 			<!-- 画像メニュー -->
@@ -805,7 +799,7 @@
 					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Grid Size..." />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click_async" Text="Grid Color..." />
+				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="Pattern 1" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Pattern 2" GroupName="gn_grid_emph" />
@@ -814,7 +808,7 @@
 				<MenuFlyoutSeparator />
 				<!-- ページメニュー -->
 				<MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click_async" Text="Page Size..." />
-				<MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click_async" Text="Page Color..." />
+				<MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
                 <MenuFlyoutSeparator />
                 <!-- 背景パターン -->
                 <MenuFlyoutSubItem x:Uid="mfsi_background_pattern" Text="Background Pattern">
@@ -878,7 +872,7 @@
 						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
                 <!-- 色の基数 -->
-				<MenuFlyoutSubItem x:Uid="mfsi_color_base" Text="Color Base Number">
+                <MenuFlyoutSubItem x:Name="mfsi_color_base" x:Uid="mfsi_color_base" Text="Color Base Number">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -1249,7 +1243,7 @@
 					RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
 					Visibility="Collapsed" />
-				<Slider
+                <Slider
 					x:Name="dialog_slider_1" x:Uid = "dialog_slider_1"
 					IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0"
 					RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True"

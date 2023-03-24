@@ -115,115 +115,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//---------------------------------
-	// 書体メニューの「色」が選択された.
-	//---------------------------------
-	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		constexpr auto TICK_FREQ = 1.0;
-		m_dialog_page.set_attr_to(&m_main_page);
-		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-
-		D2D1_COLOR_F f_color;
-		m_dialog_page.get_font_color(f_color);
-		const float val0 = static_cast<float>(conv_color_comp(f_color.r));
-		const float val1 = static_cast<float>(conv_color_comp(f_color.g));
-		const float val2 = static_cast<float>(conv_color_comp(f_color.b));
-		const float val3 = static_cast<float>(conv_color_comp(f_color.a));
-		float f_size;
-		m_dialog_page.get_font_size(f_size);
-		const float val4 = f_size;
-		dialog_slider_0().Maximum(255.0);
-		dialog_slider_0().TickFrequency(1.0);
-		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_0().Value(val0);
-		font_slider_set_header<0>(val0);
-		dialog_slider_1().Maximum(255.0);
-		dialog_slider_1().TickFrequency(1.0);
-		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_1().Value(val1);
-		font_slider_set_header<1>(val1);
-		dialog_slider_2().Maximum(255.0);
-		dialog_slider_2().TickFrequency(1.0);
-		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_2().Value(val2);
-		font_slider_set_header<2>(val2);
-		dialog_slider_3().Maximum(255.0);
-		dialog_slider_3().TickFrequency(1.0);
-		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_3().Value(val3);
-		font_slider_set_header<3>(val3);
-		dialog_slider_4().Maximum(FONT_SIZE_MAX - 1.0f);
-		dialog_slider_4().TickFrequency(TICK_FREQ);
-		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_4().Value(val4 - 1.0);
-		font_slider_set_header<4>(val4 - 1.0f);
-
-		dialog_slider_0().Visibility(Visibility::Visible);
-		dialog_slider_1().Visibility(Visibility::Visible);
-		dialog_slider_2().Visibility(Visibility::Visible);
-		dialog_slider_3().Visibility(Visibility::Visible);
-		dialog_slider_4().Visibility(Visibility::Visible);
-		const auto token0{
-			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<0> })
-		};
-		const auto token1{
-			dialog_slider_1().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<1> })
-		};
-		const auto token2{
-			dialog_slider_2().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<2> })
-		};
-		const auto token3{
-			dialog_slider_3().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<3> })
-		};
-		const auto token4{
-			dialog_slider_4().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<4> })
-		};
-		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_color")));
-		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F new_color;
-			m_dialog_page.m_shape_list.back()->get_font_color(new_color);
-			float new_size;
-			m_dialog_page.m_shape_list.back()->get_font_size(new_size);
-			const bool flag_color = ustack_push_set<UNDO_T::FONT_COLOR>(new_color);
-			const bool flag_size = ustack_push_set<UNDO_T::FONT_SIZE>(new_size);
-			if (flag_color || flag_size) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				page_draw();
-			}
-		}
-		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_1().Visibility(Visibility::Collapsed);
-		dialog_slider_2().Visibility(Visibility::Collapsed);
-		dialog_slider_3().Visibility(Visibility::Collapsed);
-		dialog_slider_4().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(token0);
-		dialog_slider_1().ValueChanged(token1);
-		dialog_slider_2().ValueChanged(token2);
-		dialog_slider_3().ValueChanged(token3);
-		dialog_slider_4().ValueChanged(token4);
-		page_draw();
-
-		m_mutex_event.unlock();
-		slist_clear(m_dialog_page.m_shape_list);
-	}
-
-	//---------------------------------
 	// 書体メニューの「書体名」が選択された.
 	//---------------------------------
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		//FindName(L"cd_setting_dialog");
 		m_dialog_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
 			// ローカル名をリストアイテムに格納する.
@@ -288,6 +183,7 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	// 戻り値	なし.
 	//---------------------------------
+	/*
 	template <int S>
 	void MainPage::font_slider_set_header(const float val)
 	{
@@ -311,6 +207,7 @@ namespace winrt::GraphPaper::implementation
 				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf);
 		}
 	}
+	*/
 
 	//---------------------------------
 	// スライダーの値が変更された.
@@ -318,6 +215,7 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	//---------------------------------
+	/*
 	template <int S>
 	void MainPage::font_slider_value_changed(
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
@@ -370,12 +268,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 	}
+	*/
 
 	//---------------------------------
 	// 書体メニューの「大きさ」が選択された.
 	//---------------------------------
 	IAsyncAction MainPage::font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		const auto str_font_size{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") };
 		constexpr auto TICK_FREQ = 1.0;
 		m_dialog_page.set_attr_to(&m_main_page);
 		font_create_sample_shape(
@@ -383,37 +284,52 @@ namespace winrt::GraphPaper::implementation
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		float f_size;
 		m_dialog_page.get_font_size(f_size);
-		dialog_slider_4().Maximum(FONT_SIZE_MAX - 1.0f);
+		dialog_slider_4().Minimum(1.0f);
+		dialog_slider_4().Maximum(FONT_SIZE_MAX);
 		dialog_slider_4().TickFrequency(TICK_FREQ);
 		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_4().Value(f_size - 1.0);
-		font_slider_set_header<4>(f_size - 1.0f);
+		dialog_slider_4().Value(f_size);
+		const auto unit = m_len_unit;
+		const auto dpi = m_dialog_d2d.m_logical_dpi;
+		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, f_size, dpi, g_len, buf);
+		dialog_slider_4().Header(box_value(str_font_size + buf));
 		dialog_slider_4().Visibility(Visibility::Visible);
-		const auto token4{
-			dialog_slider_4().ValueChanged(
-				{ this, &MainPage::font_slider_value_changed<4> })
-		};
-		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_size")));
+		cd_setting_dialog().Title(box_value(str_title));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			float samp_val;
-			m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
-			if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				page_draw();
+		{
+			const auto revoker4{
+				dialog_slider_4().ValueChanged(winrt::auto_revoke, [this, str_font_size](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_dialog_d2d.m_logical_dpi;
+					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto val = static_cast<float>(args.NewValue());
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_4().Header(box_value(str_font_size + buf));
+					if (m_dialog_page.m_shape_list.back()->set_font_size(val)) {
+						dialog_draw();
+					}
+				})
+			};
+			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				float samp_val;
+				m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
+				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
+					ustack_push_null();
+					xcvd_is_enabled();
+					page_draw();
+				}
 			}
 		}
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
-		dialog_slider_4().ValueChanged(token4);
 		page_draw();
 		m_mutex_event.unlock();
 	}
 
-	void MainPage::font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args)
+	void MainPage::font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const&)
 	{
 		uint32_t i = lv_dialog_list().SelectedIndex();
 		if (m_dialog_page.m_shape_list.back()->set_font_stretch(
@@ -545,16 +461,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
-		const auto changed_token = lv_dialog_list().SelectionChanged(
-			[this](auto, auto args) {
-				uint32_t i = lv_dialog_list().SelectedIndex();
-				m_dialog_page.m_shape_list.back()->set_font_weight(
-					static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-				if (scp_dialog_panel().IsLoaded()) {
-					dialog_draw();
-				}
-			}
-		);
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -562,19 +468,30 @@ namespace winrt::GraphPaper::implementation
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_weight")));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			DWRITE_FONT_WEIGHT samp_val;
-			m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
-			if (ustack_push_set<UNDO_T::FONT_WEIGHT>(samp_val)) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				page_draw();
+		{
+			const auto revoker = lv_dialog_list().SelectionChanged(
+				winrt::auto_revoke,
+				[this](auto, auto args) {
+					uint32_t i = lv_dialog_list().SelectedIndex();
+					m_dialog_page.m_shape_list.back()->set_font_weight(
+						static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
+					if (scp_dialog_panel().IsLoaded()) {
+						dialog_draw();
+					}
+				}
+			);
+			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				DWRITE_FONT_WEIGHT samp_val;
+				m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
+				if (ustack_push_set<UNDO_T::FONT_WEIGHT>(samp_val)) {
+					ustack_push_null();
+					xcvd_is_enabled();
+					page_draw();
+				}
 			}
 		}
 		slist_clear(m_dialog_page.m_shape_list);
 		lv_dialog_list().Loaded(loaded_token);
-		lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
 		status_bar_set_pos();

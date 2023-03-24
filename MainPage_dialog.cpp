@@ -24,10 +24,7 @@ namespace winrt::GraphPaper::implementation
 	// 1. size_changed
 	// 2. loaded
 	// 3. opened
-	// の順番で呼ばれることがあり, 
-	// ふつうと違う順番で呼び出されたとき, スワップチェーンパネルには何も表示されないにも関わらず, 
-	// Direct2D はエラーを返さない.
-	// loaded で, スワップチェーンパネルの UpdateLayout を呼び出すことでこれを回避できるかも.
+	// の順番で呼ばれることがある.
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::Uri;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
@@ -35,34 +32,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::Storage::FileAccessMode;
 	using winrt::Windows::UI::Xaml::Window;
-
-	// 設定ダイアログのスライダーヘッダーに文字列を格納する.
-	// S	スライダーの番号
-	// text	文字列
-	template<int S> 
-	void MainPage::dialog_set_slider_header(const winrt::hstring& text)
-	{
-		if constexpr (S == 0) {
-			dialog_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			dialog_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			dialog_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			dialog_slider_3().Header(box_value(text));
-		}
-		if constexpr (S == 4) {
-			dialog_slider_4().Header(box_value(text));
-		}
-	}
-	template void MainPage::dialog_set_slider_header<0>(const winrt::hstring& text);
-	template void MainPage::dialog_set_slider_header<1>(const winrt::hstring& text);
-	template void MainPage::dialog_set_slider_header<2>(const winrt::hstring& text);
-	template void MainPage::dialog_set_slider_header<3>(const winrt::hstring& text);
-	template void MainPage::dialog_set_slider_header<4>(const winrt::hstring& text);
 
 //#ifdef _DEBUG
 //	enum struct DEBUG_DIALOG {

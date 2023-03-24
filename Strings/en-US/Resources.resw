@@ -898,11 +898,11 @@
     <value>Padding</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_pad_horzorz" xml:space="preserve">
+  <data name="str_text_pad_horz" xml:space="preserve">
     <value>Left and Right Padding</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_pad_vertert" xml:space="preserve">
+  <data name="str_text_pad_vert" xml:space="preserve">
     <value>Top and Bottom Padding</value>
     <comment>String</comment>
   </data>
