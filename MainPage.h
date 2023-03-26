@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 色の表記
 	//-------------------------------
-	enum struct COLOR_CODE : uint32_t {
+	enum struct COLOR_NOTATION : uint32_t {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		REAL,	// 実数
@@ -104,10 +104,10 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_CODE c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept;
+	void conv_col_to_str(const COLOR_NOTATION c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	// 色成分を文字列に変換する.
-	template <size_t Z> inline void conv_col_to_str(const COLOR_CODE c_code, const double c_val, wchar_t(&t_buf)[Z]) noexcept
+	template <size_t Z> inline void conv_col_to_str(const COLOR_NOTATION c_code, const double c_val, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_col_to_str(c_code, c_val, Z, t_buf);
 	}
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_base = COLOR_CODE::DEC;	// 色成分の書式
+		COLOR_NOTATION m_color_notation = COLOR_NOTATION::DEC;	// 色成分の書式
 		float m_snap_interval = SNAP_INTERVAL_DEF_VAL;	// 頂点をくっつける閾値
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
@@ -665,9 +665,9 @@ namespace winrt::GraphPaper::implementation
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「色の表記」に印をつける.
-		void color_base_is_checked(const COLOR_CODE c_code);
+		void color_notation_is_checked(const COLOR_NOTATION c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
-		void color_base_click(IInspectable const& sender, RoutedEventArgs const&);
+		void color_notation_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点をくっつける...」が選択された.
 		IAsyncAction snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.

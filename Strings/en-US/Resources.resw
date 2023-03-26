@@ -177,19 +177,19 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_base_pct.Text" xml:space="preserve">
+  <data name="rmfi_color_notation_pct.Text" xml:space="preserve">
     <value>Percent</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_base_dec.Text" xml:space="preserve">
+  <data name="rmfi_color_notation_dec.Text" xml:space="preserve">
     <value>Decimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_base_real.Text" xml:space="preserve">
+  <data name="rmfi_color_notation_real.Text" xml:space="preserve">
     <value>Real Number</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_base_hex.Text" xml:space="preserve">
+  <data name="rmfi_color_notation_hex.Text" xml:space="preserve">
     <value>Hexdecimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -213,8 +213,8 @@
     <value>Point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_color_base.Text" xml:space="preserve">
-    <value>Color Base Number</value>
+  <data name="mfsi_color_notation.Text" xml:space="preserve">
+    <value>Color Notation</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">

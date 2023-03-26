@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		xcvd_is_enabled();
 		drawing_tool_is_checked(m_drawing_tool);
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
-		color_base_is_checked(m_color_base);
+		color_notation_is_checked(m_color_notation);
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_base = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_color_notation = static_cast<COLOR_NOTATION>(dt_reader.ReadUInt16());
 			m_snap_interval = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
@@ -891,7 +891,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(1.0f);
 			// その他
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_base));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_notation));
 			dt_writer.WriteSingle(m_snap_interval);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);

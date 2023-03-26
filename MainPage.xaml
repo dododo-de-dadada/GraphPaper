@@ -871,25 +871,25 @@
 						x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid"
 						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
-                <!-- 色の基数 -->
-                <MenuFlyoutSubItem x:Name="mfsi_color_base" x:Uid="mfsi_color_base" Text="Color Base Number">
+                <!-- 色の表記 -->
+                <MenuFlyoutSubItem x:Name="mfsi_color_notation" x:Uid="mfsi_color_notation" Text="Color Base Number">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
 							Glyph="{StaticResource glyph_color}" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_base_dec" x:Uid="rmfi_color_base_dec" IsChecked="True" 
-						Click="color_base_click" Text="Decimal" GroupName="gn_color_base" />
+						x:Name="rmfi_color_notation_dec" x:Uid="rmfi_color_notation_dec" IsChecked="True" 
+						Click="color_notation_click" Text="Decimal" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_color_base_hex" x:Uid="rmfi_color_base_hex"
-						Click="color_base_click" Text="Hexadecimal" GroupName="gn_color_base" />
+						x:Name="rmfi_color_notation_hex" x:Uid="rmfi_color_notation_hex"
+						Click="color_notation_click" Text="Hexadecimal" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_base_real" x:Uid="rmfi_color_base_real"
-						Click="color_base_click" Text="Real" GroupName="gn_color_base" />
+						x:Name="rmfi_color_notation_real" x:Uid="rmfi_color_notation_real"
+						Click="color_notation_click" Text="Real" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_base_pct" x:Uid="rmfi_color_base_pct"
-						Click="color_base_click" Text="Percent" GroupName="gn_color_base" />
+						x:Name="rmfi_color_notation_pct" x:Uid="rmfi_color_notation_pct"
+						Click="color_notation_click" Text="Percent" GroupName="gn_color_notation" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>
@@ -1156,8 +1156,8 @@
 		<ContentDialog
 			x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close"
 			DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
-			<StackPanel>
-				<TextBox
+            <StackPanel ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <TextBox
 					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,0,0,12"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width"
 					PlaceholderText="Must be between 1 and 32767."

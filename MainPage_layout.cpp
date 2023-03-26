@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
 		}
 		m_len_unit = LEN_UNIT::PIXEL;
-		m_color_base = COLOR_CODE::DEC;
+		m_color_notation = COLOR_NOTATION::DEC;
 		m_snap_interval = SNAP_INTERVAL_DEF_VAL;
 		m_status_bar = STATUS_BAR_DEF_VAL;
 		m_background_show = false;

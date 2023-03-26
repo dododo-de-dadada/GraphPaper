@@ -48,31 +48,31 @@ namespace winrt::GraphPaper::implementation
 
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
+	void conv_col_to_str(const COLOR_NOTATION c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	//-------------------------------
 	// 色成分を文字列に変換する.
-	// c_base	色の基数
+	// c_no	色の表記
 	// c_val	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	//-------------------------------
-	void conv_col_to_str(const COLOR_CODE c_base, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(const COLOR_NOTATION c_no, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の表記が 10 進数か判定する.
-		if (c_base == COLOR_CODE::DEC) {
+		if (c_no == COLOR_NOTATION::DEC) {
 			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_val));
 		}
 		// 色の表記が 16 進数か判定する.
-		else if (c_base == COLOR_CODE::HEX) {
-			swprintf_s(t_buf, t_len, L"%02X", static_cast<uint32_t>(std::round(c_val)));
+		else if (c_no == COLOR_NOTATION::HEX) {
+			swprintf_s(t_buf, t_len, L"x%02X", static_cast<uint32_t>(std::round(c_val)));
 		}
 		// 色の表記が実数か判定する.
-		else if (c_base == COLOR_CODE::REAL) {
+		else if (c_no == COLOR_NOTATION::REAL) {
 			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
 		}
 		// 色の表記がパーセントか判定する.
-		else if (c_base == COLOR_CODE::PCT) {
+		else if (c_no == COLOR_NOTATION::PCT) {
 			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {
