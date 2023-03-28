@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_mutex_draw.lock();
 		m_main_d2d.Trim();
-		m_dialog_d2d.Trim();
+		m_prop_d2d.Trim();
 		m_mutex_draw.unlock();
 	}
 

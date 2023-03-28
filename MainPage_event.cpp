@@ -1195,15 +1195,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_set_position(PointerRoutedEventArgs const& args)
 	{
 		const auto p_scale = m_main_page.m_page_scale;
-		// 境界ボックスの左上位置にスクロールの値を加え, 境界ボックスの表示されている左上位置を得る
-		D2D1_POINT_2F lt;
-		pt_add(m_main_bbox_lt, sb_horz().Value() - m_main_page.m_page_pad.left,
-			sb_vert().Value() - m_main_page.m_page_pad.top, lt);
-		// 引数として渡された位置をスワップチェーンパネル上の位置として得る.
-		// 得られた位置に拡大率の逆数を乗じて, 境界ボックスの表示されている左上位置を加えた値を,
-		// ポインターの現在位置に格納する.
+		// 境界ボックスの左上点にスクロールの値を加え, 表示されている左上点を得る.
+		D2D1_POINT_2F q;
+		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), q);
+		// 引数として渡された点に,
+		// 拡大率の逆数を乗じ, 表示されている左上点を加えた点を得る.
+		// 得られた点を, ポインターの現在位置に格納する.
 		const auto p{ args.GetCurrentPoint(scp_main_panel()).Position() };
-		pt_mul_add(D2D1_POINT_2F{ p.X, p.Y }, 1.0 / p_scale, lt, m_event_pos_curr);
+		pt_mul_add(D2D1_POINT_2F{ p.X, p.Y }, 1.0 / p_scale, q, m_event_pos_curr);
 	}
 
 	//------------------------------

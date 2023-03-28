@@ -26,13 +26,13 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	static void text_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto pad_w = p_width * 0.125;
-		const auto pad_h = p_height * 0.125;
+		const auto mar_w = p_width * 0.125;
+		const auto mar_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h)
+			static_cast<FLOAT>(mar_w), static_cast<FLOAT>(mar_h)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * pad_w), static_cast<FLOAT>(p_width - 2.0 * pad_h) 
+			static_cast<FLOAT>(p_width - 2.0 * mar_w), static_cast<FLOAT>(p_width - 2.0 * mar_h) 
 		};
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
@@ -171,17 +171,17 @@ namespace winrt::GraphPaper::implementation
 		const auto str_def_val{ ResourceLoader::GetForCurrentView().GetString(L"str_def_val") };
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		float val;
-		m_dialog_page.get_text_line_sp(val);
+		m_prop_page.get_text_line_sp(val);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val);
 		const auto unit = m_len_unit;
-		const auto dpi = m_dialog_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
 		wchar_t buf[32];
 		if (val >= FLT_MIN) {
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
@@ -193,8 +193,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Visible);
 
 		text_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()), 
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+			static_cast<float>(scp_prop_panel().Width()), 
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
 
 		cd_setting_dialog().Title(box_value(str_title));
 		m_mutex_event.lock();
@@ -204,8 +204,8 @@ namespace winrt::GraphPaper::implementation
 					winrt::auto_revoke,
 					[this, str_text_line_sp, str_def_val](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 						const auto unit = m_len_unit;
-						const auto dpi = m_dialog_d2d.m_logical_dpi;
-						const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+						const auto dpi = m_prop_d2d.m_logical_dpi;
+						const auto g_len = m_prop_page.m_grid_base + 1.0f;
 						const float val = static_cast<float>(args.NewValue());
 						wchar_t buf[32];
 						if (val >= FLT_MIN) {
@@ -215,15 +215,15 @@ namespace winrt::GraphPaper::implementation
 							wcscpy_s(buf, str_def_val.data());
 						}
 						dialog_slider_0().Header(box_value(str_text_line_sp + buf));
-						if (m_dialog_page.m_shape_list.back()->set_text_line_sp(val)) {
-							dialog_draw();
+						if (m_prop_page.m_shape_list.back()->set_text_line_sp(val)) {
+							prop_dialog_draw();
 						}
 					}
 				)
 			};
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_dialog_page.m_shape_list.back()->get_text_line_sp(samp_val);
+				m_prop_page.m_shape_list.back()->get_text_line_sp(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
 	}
@@ -248,9 +248,9 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		D2D1_SIZE_F pad;
-		m_dialog_page.get_text_pad(pad);
+		m_prop_page.get_text_pad(pad);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr wchar_t* HEADER[] = { L"str_text_pad_horz", L"str_text_pad_vert" };
 		const auto unit = m_len_unit;
 		const auto dpi = m_main_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, pad.width, dpi, g_len, buf);
 		dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
@@ -274,8 +274,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		text_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+			static_cast<float>(scp_prop_panel().Width()),
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
 
 		cd_setting_dialog().Title(box_value(str_title));
 		m_mutex_event.lock();
@@ -283,40 +283,40 @@ namespace winrt::GraphPaper::implementation
 			const auto revoker0{
 				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_text_pad_horz](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
 					D2D1_SIZE_F pad;
-					m_dialog_page.m_shape_list.back()->get_text_pad(pad);
+					m_prop_page.m_shape_list.back()->get_text_pad(pad);
 					pad.width = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_text_pad(pad)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker1{
 				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_text_pad_vert](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_vert + buf));
 					D2D1_SIZE_F pad;
-					m_dialog_page.m_shape_list.back()->get_text_pad(pad);
+					m_prop_page.m_shape_list.back()->get_text_pad(pad);
 					pad.height = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_text_pad(pad)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
-				m_dialog_page.m_shape_list.back()->get_text_pad(samp_val);
+				m_prop_page.m_shape_list.back()->get_text_pad(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
@@ -343,28 +343,28 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_T::TEXT_LINE_SP && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			text_slider_set_header<UNDO_T::TEXT_LINE_SP, 0>(val);
-			if (m_dialog_page.m_shape_list.back()->set_text_line_sp(val)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_text_line_sp(val)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (U == UNDO_T::TEXT_PAD && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			text_slider_set_header<UNDO_T::TEXT_PAD, 0>(val);
 			D2D1_SIZE_F pad;
-			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
+			m_prop_page.m_shape_list.back()->get_text_pad(pad);
 			pad.width = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_text_pad(mar)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (U == UNDO_T::TEXT_PAD && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			text_slider_set_header<UNDO_T::TEXT_PAD, 1>(val);
-			D2D1_SIZE_F pad;
-			m_dialog_page.m_shape_list.back()->get_text_pad(pad);
-			pad.height = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_text_pad(pad)) {
-				dialog_draw();
+			D2D1_SIZE_F mar;
+			m_prop_page.m_shape_list.back()->get_text_mar(mar);
+			mar.height = static_cast<FLOAT>(val);
+			if (m_prop_page.m_shape_list.back()->set_text_mar(mar)) {
+				prop_dialog_draw();
 			}
 		}
 	}

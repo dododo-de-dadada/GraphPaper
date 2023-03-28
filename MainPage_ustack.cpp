@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 			status_bar_set_grid();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_EMPH>)) {
-			// 方眼メニューの「方眼の強調」に印をつける.
+			// レイアウトメニューの「方眼の強調」に印をつける.
 			GRID_EMPH val;
 			m_main_page.get_grid_emph(val);
 			grid_emph_is_checked(val);

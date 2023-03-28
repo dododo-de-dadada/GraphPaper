@@ -92,13 +92,13 @@ namespace winrt::GraphPaper::implementation
 	static void font_create_sample_shape(
 		const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto pad_w = p_width * 0.125;
-		const auto pad_h = p_height * 0.125;
+		const auto mar_w = p_width * 0.125;
+		const auto mar_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h)
+			static_cast<FLOAT>(mar_w), static_cast<FLOAT>(mar_h)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * pad_w), static_cast<FLOAT>(p_width - 2.0 * pad_h)
+			static_cast<FLOAT>(p_width - 2.0 * mar_w), static_cast<FLOAT>(p_width - 2.0 * mar_h)
 		};
 		const auto pangram = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
 			// ローカル名をリストアイテムに格納する.
 			auto item = box_value(winrt::hstring(name + wcslen(name) + 1));
@@ -139,35 +139,35 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
+		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::prop_dialog_list_loaded });
 		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto)
 			{
 				auto i = lv_dialog_list().SelectedIndex();
-				m_dialog_page.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
-				if (scp_dialog_panel().IsLoaded()) {
-					dialog_draw();
+				m_prop_page.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
+				if (scp_prop_panel().IsLoaded()) {
+					prop_dialog_draw();
 				}
 			}
 		);
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+			static_cast<float>(scp_prop_panel().Width()),
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_family")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* samp_val;
-			m_dialog_page.m_shape_list.back()->get_font_family(samp_val);
+			m_prop_page.m_shape_list.back()->get_font_family(samp_val);
 			if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		lv_dialog_list().Loaded(loaded_token);
 		lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
@@ -190,8 +190,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-				m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, 
-				m_dialog_page.m_grid_base + 1.0f, buf);
+				m_len_unit, val + 1.0f, m_prop_d2d.m_logical_dpi, 
+				m_prop_page.m_grid_base + 1.0f, buf);
 			const auto text{
 				ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf
 			};
@@ -223,48 +223,48 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 4) {
 			const auto val = static_cast<float>(args.NewValue());
 			font_slider_set_header<4>(val);
-			if (m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0f)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_font_size(val + 1.0f)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 0) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
-			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			m_prop_page.m_shape_list.back()->get_font_color(f_color);
 			font_slider_set_header<0>(val);
 			f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_font_color(f_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 1) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
-			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			m_prop_page.m_shape_list.back()->get_font_color(f_color);
 			font_slider_set_header<1>(val);
 			f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_font_color(f_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 2) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
-			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			m_prop_page.m_shape_list.back()->get_font_color(f_color);
 			font_slider_set_header<2>(val);
 			f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_font_color(f_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 3) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
-			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			m_prop_page.m_shape_list.back()->get_font_color(f_color);
 			font_slider_set_header<3>(val);
 			f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_font_color(f_color)) {
+				prop_dialog_draw();
 			}
 		}
 	}
@@ -278,20 +278,20 @@ namespace winrt::GraphPaper::implementation
 		const auto str_font_size{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " };
 		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") };
 		constexpr auto TICK_FREQ = 1.0;
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+			static_cast<float>(scp_prop_panel().Width()),
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
 		float f_size;
-		m_dialog_page.get_font_size(f_size);
+		m_prop_page.get_font_size(f_size);
 		dialog_slider_4().Minimum(1.0f);
 		dialog_slider_4().Maximum(FONT_SIZE_MAX);
 		dialog_slider_4().TickFrequency(TICK_FREQ);
 		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_4().Value(f_size);
 		const auto unit = m_len_unit;
-		const auto dpi = m_dialog_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, f_size, dpi, g_len, buf);
 		dialog_slider_4().Header(box_value(str_font_size + buf));
@@ -302,20 +302,20 @@ namespace winrt::GraphPaper::implementation
 			const auto revoker4{
 				dialog_slider_4().ValueChanged(winrt::auto_revoke, [this, str_font_size](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const auto val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_4().Header(box_value(str_font_size + buf));
-					if (m_dialog_page.m_shape_list.back()->set_font_size(val)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_font_size(val)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
+				m_prop_page.m_shape_list.back()->get_font_size(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -323,7 +323,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
 		page_draw();
 		m_mutex_event.unlock();
@@ -332,9 +332,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const&)
 	{
 		uint32_t i = lv_dialog_list().SelectedIndex();
-		if (m_dialog_page.m_shape_list.back()->set_font_stretch(
+		if (m_prop_page.m_shape_list.back()->set_font_stretch(
 			static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]))) {
-			dialog_draw();
+			prop_dialog_draw();
 		}
 	}
 
@@ -343,7 +343,8 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_dialog_page.set_attr_to(&m_main_page);
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_font_stretch") };
+		m_prop_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
 			lv_dialog_list().Items().Append(item);
@@ -361,30 +362,28 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
+		font_create_sample_shape(
+			static_cast<float>(scp_prop_panel().Width()),
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
+		lv_dialog_list().Visibility(Visibility::Visible);
+		cd_setting_dialog().Title(box_value(str_title));
 		const auto loaded_token{
-			lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded })
+			lv_dialog_list().Loaded({ this, &MainPage::prop_dialog_list_loaded })
 		};
 		const auto changed_token{
 			lv_dialog_list().SelectionChanged({ this, &MainPage::font_stretch_selection_changed })
 		};
-		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_stretch")));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
+		if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH samp_val;
-			m_dialog_page.m_shape_list.back()->get_font_stretch(samp_val);
+			m_prop_page.m_shape_list.back()->get_font_stretch(samp_val);
 			if (ustack_push_set<UNDO_T::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		lv_dialog_list().Loaded(loaded_token);
 		lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
@@ -442,7 +441,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「太さ」が選択された.
 	IAsyncAction MainPage::font_weight_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
 			lv_dialog_list().Items().Append(item);
@@ -460,11 +459,11 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
+		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::prop_dialog_list_loaded });
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+			static_cast<float>(scp_prop_panel().Width()),
+			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_weight")));
 		m_mutex_event.lock();
@@ -473,16 +472,16 @@ namespace winrt::GraphPaper::implementation
 				winrt::auto_revoke,
 				[this](auto, auto args) {
 					uint32_t i = lv_dialog_list().SelectedIndex();
-					m_dialog_page.m_shape_list.back()->set_font_weight(
+					m_prop_page.m_shape_list.back()->set_font_weight(
 						static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-					if (scp_dialog_panel().IsLoaded()) {
-						dialog_draw();
+					if (scp_prop_panel().IsLoaded()) {
+						prop_dialog_draw();
 					}
 				}
 			);
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				DWRITE_FONT_WEIGHT samp_val;
-				m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
+				m_prop_page.m_shape_list.back()->get_font_weight(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_WEIGHT>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -490,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		lv_dialog_list().Loaded(loaded_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();

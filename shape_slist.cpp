@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 	// slist	図形リスト
 	// b_lt	領域の左上位置
 	// b_rb	領域の右下位置
-	void slist_bound_all(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
+	void slist_bound_shape(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
 		b_lt = { FLT_MAX, FLT_MAX };	// 左上位置
 		b_rb = { -FLT_MAX, -FLT_MAX };	// 右下位置

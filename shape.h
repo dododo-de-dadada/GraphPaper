@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST const& slist, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_lt,
 		D2D1_POINT_2F& b_rb) noexcept;
 	// リスト中の図形を囲む領域を得る.
-	void slist_bound_all(
+	void slist_bound_shape(
 		SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept;
 	// リスト中の選択された図形を囲む領域を得る.
 	bool slist_bound_selected(
@@ -496,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 		// ページの色を得る.
 		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// ページの余白を得る.
-		virtual bool get_page_pad(D2D1_RECT_F&/*val*/) const noexcept { return false; }
+		virtual bool get_page_margin(D2D1_RECT_F&/*val*/) const noexcept { return false; }
 		// ページ倍率を得る.
 		virtual bool get_page_scale(float&/*val*/) const noexcept { return false; }
 		// ページの大きさを得る.
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 		// 値をページの色に格納する.
 		virtual bool set_page_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// ページの余白に格納する.
-		virtual bool set_page_pad(const D2D1_RECT_F&/*val*/) noexcept { return false; }
+		virtual bool set_page_margin(const D2D1_RECT_F&/*val*/) noexcept { return false; }
 		// 値をページ倍率に格納する.
 		virtual bool set_page_scale(const float/*val*/) noexcept { return false; }
 		// 値をページの大きさに格納する.
@@ -830,7 +830,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
 		float m_page_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
-		D2D1_RECT_F m_page_pad{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
+		D2D1_RECT_F m_page_margin{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
 
 		//------------------------------
 		// shape_page.cpp
@@ -902,9 +902,9 @@ namespace winrt::GraphPaper::implementation
 		// ページの大きさを得る.
 		virtual bool get_page_size(D2D1_SIZE_F& val) const noexcept final override;
 		// ページの余白を得る.
-		virtual bool get_page_pad(D2D1_RECT_F& val) const noexcept final override
+		virtual bool get_page_margin(D2D1_RECT_F& val) const noexcept final override
 		{
-			val = m_page_pad;
+			val = m_page_margin;
 			return true;
 		}
 		// 線枠の色を得る.
@@ -968,10 +968,10 @@ namespace winrt::GraphPaper::implementation
 		// 値をページの色に格納する.
 		virtual bool set_page_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値をページの余白に格納する.
-		virtual bool set_page_pad(const D2D1_RECT_F& val) noexcept final override
+		virtual bool set_page_margin(const D2D1_RECT_F& val) noexcept final override
 		{
-			if (!equal(m_page_pad, val)) {
-				m_page_pad = val;
+			if (!equal(m_page_margin, val)) {
+				m_page_margin = val;
 				return true;
 			}
 			return false;

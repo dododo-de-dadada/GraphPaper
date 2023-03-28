@@ -62,12 +62,12 @@ namespace winrt::GraphPaper::implementation
 		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") };
 		wchar_t buf[32];
 
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		const auto unit = m_len_unit;
-		const auto dpi = m_dialog_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
 		float j_limit;
-		m_dialog_page.get_join_miter_limit(j_limit);
+		m_prop_page.get_join_miter_limit(j_limit);
 		j_limit -= 1.0f;
 
 		dialog_slider_0().Minimum(0.0);
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Header(box_value(str_join_miter_limit + buf));
 
 		float s_width;
-		m_dialog_page.get_stroke_width(s_width);
+		m_prop_page.get_stroke_width(s_width);
 
 		dialog_slider_1().Minimum(0.0);
 		dialog_slider_1().Maximum(MAX_VALUE);
@@ -93,17 +93,17 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
 		dialog_slider_1().Header(box_value(str_stroke_width + buf));
 
-		const auto samp_w = scp_dialog_panel().Width();
-		const auto samp_h = scp_dialog_panel().Height();
-		const auto pad = samp_w * 0.125;
+		const auto samp_w = scp_prop_panel().Width();
+		const auto samp_h = scp_prop_panel().Height();
+		const auto mar = samp_w * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) 
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar) 
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(samp_w - 2.0 * pad), static_cast<FLOAT>(samp_h - 2.0 * pad)
+			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
 		};
 		POLY_OPTION p_opt{ 3, true, true, false, true };
-		auto s = new ShapePoly(start, pos, &m_dialog_page, p_opt);
+		auto s = new ShapePoly(start, pos, &m_prop_page, p_opt);
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
@@ -111,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_snap_interval, false);
 		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_snap_interval, false);
 		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_snap_interval, false);
-		m_dialog_page.m_shape_list.push_back(s);
+		m_prop_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -125,30 +125,30 @@ namespace winrt::GraphPaper::implementation
 					const float val = static_cast<float>(args.NewValue());
 					swprintf_s(buf, L"%.1lf", static_cast<double>(val) + 1.0);
 					dialog_slider_0().Header(box_value(str_join_miter_limit + buf));
-					if (m_dialog_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker1{
 				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_stroke_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					wchar_t buf[32];
 					const float val = static_cast<float>(args.NewValue());
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_1().Header(box_value(str_stroke_width + buf));
-					if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_stroke_width(val)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				float new_limit;
 				float new_width;
-				m_dialog_page.m_shape_list.back()->get_join_miter_limit(new_limit);
-				m_dialog_page.m_shape_list.back()->get_stroke_width(new_width);
+				m_prop_page.m_shape_list.back()->get_join_miter_limit(new_limit);
+				m_prop_page.m_shape_list.back()->get_stroke_width(new_width);
 				const bool flag_limit = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
 				const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (flag_limit || flag_width) {
@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			const auto unit = m_len_unit;
-			const auto dpi = m_dialog_d2d.m_logical_dpi;
+			const auto dpi = m_prop_d2d.m_logical_dpi;
 			const auto g_len = m_main_page.m_grid_base + 1.0f;
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 			const auto str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
@@ -207,15 +207,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<0>(val);
-			if (m_dialog_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<1>(val);
-			if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_stroke_width(val)) {
+				prop_dialog_draw();
 			}
 		}
 	}

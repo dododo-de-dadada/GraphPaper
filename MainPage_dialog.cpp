@@ -47,9 +47,9 @@ namespace winrt::GraphPaper::implementation
 //#endif
 
 	// 設定ダイアログのスワップチェーンパネルを表示する
-	void MainPage::dialog_draw(void)
+	void MainPage::prop_dialog_draw(void)
 	{
-		if (!scp_dialog_panel().IsLoaded()) {
+		if (!scp_prop_panel().IsLoaded()) {
 			return;
 		}
 		if (!m_mutex_draw.try_lock()) {
@@ -57,40 +57,41 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 描画環境の設定.
-		m_dialog_page.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
-		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
-		m_dialog_d2d.m_d2d_context->BeginDraw();
-		m_dialog_d2d.m_d2d_context->Clear(m_background_color);
+		m_prop_page.begin_draw(m_prop_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
+		m_prop_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
+		m_prop_d2d.m_d2d_context->BeginDraw();
+		m_prop_d2d.m_d2d_context->Clear(m_background_color);
 		const D2D1_RECT_F w_rect{
-			0, 0, m_dialog_d2d.m_logical_width, m_dialog_d2d.m_logical_height
+			0, 0, m_prop_d2d.m_logical_width, m_prop_d2d.m_logical_height
 		};
 		if (m_background_show) {
 			// 背景パターンを描画する,
-			m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+			m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
 		}
-		Shape::m_d2d_color_brush->SetColor(m_dialog_page.m_page_color);
-		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
+		Shape::m_d2d_color_brush->SetColor(m_prop_page.m_page_color);
+		m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
 
 		const float offset = static_cast<FLOAT>(std::fmod(
-			m_dialog_page.m_page_size.width * 0.5, m_dialog_page.m_grid_base + 1.0));
-		m_dialog_page.m_grid_offset.x = offset;
-		m_dialog_page.m_grid_offset.y = offset;
-		m_dialog_page.m_page_pad.left = 0.0f;
-		m_dialog_page.m_page_pad.top = 0.0f;
-		m_dialog_page.m_page_pad.right = 0.0f;
-		m_dialog_page.m_page_pad.bottom = 0.0f;
-		m_dialog_page.draw();
+			m_prop_page.m_page_size.width * 0.5, m_prop_page.m_grid_base + 1.0));
+		m_prop_page.m_grid_offset.x = offset;
+		m_prop_page.m_grid_offset.y = offset;
+		m_prop_page.m_page_margin.left = 0.0f;
+		m_prop_page.m_page_margin.top = 0.0f;
+		m_prop_page.m_page_margin.right = 0.0f;
+		m_prop_page.m_page_margin.bottom = 0.0f;
+		m_prop_page.draw();
 		winrt::check_hresult(
-			m_dialog_d2d.m_d2d_context->EndDraw()
+			m_prop_d2d.m_d2d_context->EndDraw()
 		);
-		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
-		m_dialog_d2d.Present();
+		m_prop_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
+		m_prop_d2d.Present();
 		m_mutex_draw.unlock();
 	}
 
 	// ダイアログのリストビューがロードされた.
-	void MainPage::dialog_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::prop_dialog_list_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
+		// 選択された行が表示されるようスクロールする.
 		const auto item = lv_dialog_list().SelectedItem();
 		if (item != nullptr) {
 			lv_dialog_list().ScrollIntoView(item);
@@ -123,13 +124,13 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;
 //#endif
-		m_dialog_d2d.Trim();
+		m_prop_d2d.Trim();
 	}
 
 	// 属性の画像を読み込む
 	// p_width	パネルの幅
 	// p_height	パネルの高さ
-	IAsyncAction MainPage::dialog_image_load_async(const float p_width, const float p_height)
+	IAsyncAction MainPage::prop_image_load_async(const float p_width, const float p_height)
 	{
 		bool ok;
 		winrt::apartment_context context;
@@ -153,10 +154,10 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_SIZE_F size{
 				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
 			};
-			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_page.m_image_opac);
+			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_prop_page.m_image_opac);
 			bitmap.Close();
 
-			m_dialog_page.m_shape_list.push_back(s);
+			m_prop_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -167,51 +168,51 @@ namespace winrt::GraphPaper::implementation
 		}
 		co_await context;
 		if (ok) {
-			dialog_draw();
+			prop_dialog_draw();
 		}
 	}
 
 	// 属性のスワップチェーンパネルが読み込まれた.
-	void MainPage::dialog_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::prop_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender != scp_dialog_panel()) {
+		if (sender != scp_prop_panel()) {
 			return;
 		}
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::LOADED;
 //#endif
-//		dialog_draw();
+//		prop_dialog_draw();
 	}
 
 	// 属性のスワップチェーンパネルの寸法が変わった.
-	void MainPage::dialog_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
+	void MainPage::prop_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 	{
-		if (sender != scp_dialog_panel()) {
+		if (sender != scp_prop_panel()) {
 			return;
 		}
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SIZE_CHANGED;
 //#endif
-		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
+		m_prop_d2d.SetSwapChainPanel(scp_prop_panel());
 		const float w = args.NewSize().Width;
 		const float h = args.NewSize().Height;
-		m_dialog_page.m_page_size.width = w;
-		m_dialog_page.m_page_size.height = h;
-		m_dialog_d2d.SetLogicalSize2({ w, h });
-		dialog_draw();
+		m_prop_page.m_page_size.width = w;
+		m_prop_page.m_page_size.height = h;
+		m_prop_d2d.SetLogicalSize2({ w, h });
+		prop_dialog_draw();
 	}
 
 	// 属性のスワップチェーンパネルの倍率が変わった.
-	void MainPage::dialog_panel_scale_changed(IInspectable const&, IInspectable const&)
+	void MainPage::prop_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SCALE_CHANGED;
 //#endif
-		const float comp_x = scp_dialog_panel().CompositionScaleX();
-		const float comp_y = scp_dialog_panel().CompositionScaleY();
-		m_dialog_d2d.SetCompositionScale(comp_x, comp_y);
+		const float x = scp_prop_panel().CompositionScaleX();
+		const float y = scp_prop_panel().CompositionScaleY();
+		m_prop_d2d.SetCompositionScale(x, y);
 
-		dialog_draw();
+		prop_dialog_draw();
 	}
 
 }

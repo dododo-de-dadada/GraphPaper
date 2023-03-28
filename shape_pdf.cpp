@@ -1046,8 +1046,8 @@ namespace winrt::GraphPaper::implementation
 			min(max(page_b, 0.0), 1.0),
 			m_page_size.width,
 			m_page_size.height,
-			m_page_pad.left,
-			-m_page_pad.top
+			m_page_margin.left,
+			-m_page_margin.top
 		);
 		return dt_writer.WriteString(buf);
 	}
@@ -1070,8 +1070,8 @@ namespace winrt::GraphPaper::implementation
 		//const float page_scale = m_page_scale;
 		const D2D1_SIZE_F g_size{	// 方眼を描く領域の大きさ
 			// ページの大きさから内余白の大きさを除く.
-			m_page_size.width - (m_page_pad.left + m_page_pad.right),
-			m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
+			m_page_size.width - (m_page_margin.left + m_page_margin.right),
+			m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
 		};
 
 		const FLOAT g_width = 1.0;	// 方眼の太さ

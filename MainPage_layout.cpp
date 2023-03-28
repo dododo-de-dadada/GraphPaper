@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
-			m_main_page.set_page_pad(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_main_page.set_page_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
 			m_main_page.set_stroke_cap(CAP_STYLE_FLAT);
 			m_main_page.set_stroke_color(COLOR_BLACK);
 			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
 		}
 		m_len_unit = LEN_UNIT::PIXEL;
-		m_color_notation = COLOR_NOTATION::DEC;
+		m_color_notation = COLOR_BASE_N::DEC;
 		m_snap_interval = SNAP_INTERVAL_DEF_VAL;
 		m_status_bar = STATUS_BAR_DEF_VAL;
 		m_background_show = false;

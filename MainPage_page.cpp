@@ -54,6 +54,7 @@ namespace winrt::GraphPaper::implementation
 		tran.m11 = tran.m22 = p_scale;
 		D2D1_POINT_2F lt;	// 表示されている左上位置
 		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), lt);
+		//pt_add(m_main_bbox_lt, sb_horz().Value() - m_main_page.m_page_margin.left, sb_vert().Value() - m_main_page.m_page_margin.top, lt);
 		pt_mul(lt, p_scale, lt);
 		tran.dx = -lt.x;
 		tran.dy = -lt.y;
@@ -164,34 +165,60 @@ namespace winrt::GraphPaper::implementation
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 		}
 	}
+	/*
+	static void page_just_size(const SHAPE_LIST& s_list)
+	{
+		D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
+		D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
+		D2D1_POINT_2F b_size;
 
+		slist_bound_shape(s_list, b_lt, b_rb);
+		pt_sub(b_rb, b_lt, b_size);
+		if (b_size.x < 1.0F || b_size.y < 1.0F) {
+			co_return;
+		}
+		float dx = 0.0F;
+		float dy = 0.0F;
+		if (b_lt.x < 0.0F) {
+			dx = -b_lt.x;
+			b_lt.x = 0.0F;
+			b_rb.x += dx;
+		}
+		if (b_lt.y < 0.0F) {
+			dy = -b_lt.y;
+			b_lt.y = 0.0F;
+			b_rb.y += dy;
+		}
+		bool flag = false;
+		if (dx > 0.0F || dy > 0.0F) {
+			constexpr auto ANY = true;
+			ustack_push_move({ dx, dy }, ANY);
+			flag = true;
+		}
+		return false;
+	}
+	*/
 	//------------------------------
-	// 方眼メニューの「ページの大きさ」が選択された
+	// レイアウトメニューの「ページの大きさ」が選択された
 	//------------------------------
 	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 		const double g_len = m_main_page.m_grid_base + 1.0;
 		const double dpi = m_main_d2d.m_logical_dpi;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
 		tx_page_size_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
 		tx_page_size_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_pad.left, dpi, g_len, buf);
-		tx_page_pad_left().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_pad.top, dpi, g_len, buf);
-		tx_page_pad_top().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_pad.right, dpi, g_len, buf);
-		tx_page_pad_right().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-			m_len_unit, m_main_page.m_page_pad.bottom, dpi, g_len, buf);
-		tx_page_pad_bottom().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.left, dpi, g_len, buf);
+		tx_page_margin_left().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.top, dpi, g_len, buf);
+		tx_page_margin_top().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.right, dpi, g_len, buf);
+		tx_page_margin_right().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.bottom, dpi, g_len, buf);
+		tx_page_margin_bottom().Text(buf);
 
 		if (m_len_unit == LEN_UNIT::GRID) {
 			cb_len_unit().SelectedItem(box_value(cbi_len_unit_grid()));
@@ -209,54 +236,14 @@ namespace winrt::GraphPaper::implementation
 			cb_len_unit().SelectedItem(box_value(cbi_len_unit_pixel()));
 		}
 
-
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
 		cd_page_size_dialog().IsPrimaryButtonEnabled(true);
 		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
 		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			const D2D1_SIZE_F old_val = m_main_page.m_page_size;
 			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
-			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
-			// 必要ないエラーチェックだが, 念のため.
-			float new_width;
-			if (swscanf_s(tx_page_size_width().Text().c_str(), L"%f", &new_width) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_width/Header");
-				co_return;
-			}
-			float new_height;
-			if (swscanf_s(tx_page_size_height().Text().c_str(), L"%f", &new_height) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_height/Header");
-				co_return;
-			}
-			float new_left;
-			if (swscanf_s(tx_page_pad_left().Text().c_str(), L"%f", &new_left) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_left/Header");
-				co_return;
-			}
-			float new_top;
-			if (swscanf_s(tx_page_pad_top().Text().c_str(), L"%f", &new_top) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_top/Header");
-				co_return;
-			}
-			float new_right;
-			if (swscanf_s(tx_page_pad_right().Text().c_str(), L"%f", &new_right) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_right/Header");
-				co_return;
-			}
-			float new_bottom;
-			if (swscanf_s(tx_page_pad_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_pad_bottom/Header");
-				co_return;
-			}
 			if (cbi_len_unit_grid().IsSelected()) {
 				m_len_unit = LEN_UNIT::GRID;
 			}
@@ -277,25 +264,63 @@ namespace winrt::GraphPaper::implementation
 			}
 			len_unit_is_checked(m_len_unit);
 
+			float new_left;
+			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
+				co_return;
+			}
+			float new_top;
+			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				co_return;
+			}
+			float new_right;
+			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				co_return;
+			}
+			float new_bottom;
+			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				co_return;
+			}
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
-			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
-			};
-			D2D1_RECT_F p_pad{
+			D2D1_RECT_F p_mar{
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
 			};
+
+			float new_width;
+			if (swscanf_s(tx_page_size_width().Text().c_str(), L"%f", &new_width) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_width/Header");
+				co_return;
+			}
+			float new_height;
+			if (swscanf_s(tx_page_size_height().Text().c_str(), L"%f", &new_height) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_height/Header");
+				co_return;
+			}
+			D2D1_SIZE_F p_size{
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
+			};
+
 			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
-			const bool flag_pad = !equal(p_pad, m_main_page.m_page_pad);
-			if (flag_size || flag_pad) {
+			const bool flag_mar = !equal(p_mar, m_main_page.m_page_margin);
+			if (flag_size || flag_mar) {
 				if (flag_size) {
 					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				}
-				if (flag_pad) {
-					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_pad);
+				if (flag_mar) {
+					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
 				ustack_push_null();
 				ustack_is_enable();
@@ -309,17 +334,74 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
-			D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
-			D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
-			D2D1_POINT_2F b_size;
+			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
-			slist_bound_all(m_main_page.m_shape_list, b_lt, b_rb);
-			pt_sub(b_rb, b_lt, b_size);
-			if (b_size.x < 1.0F || b_size.y < 1.0F) {
+			if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_inch().IsSelected()) {
+				m_len_unit = LEN_UNIT::INCH;
+			}
+			else if (cbi_len_unit_milli().IsSelected()) {
+				m_len_unit = LEN_UNIT::MILLI;
+			}
+			else if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_point().IsSelected()) {
+				m_len_unit = LEN_UNIT::POINT;
+			}
+			else {
+				m_len_unit = LEN_UNIT::PIXEL;
+			}
+			len_unit_is_checked(m_len_unit);
+
+			float new_left;
+			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
 				co_return;
 			}
-			float dx = 0.0F;
-			float dy = 0.0F;
+			float new_top;
+			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				co_return;
+			}
+			float new_right;
+			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				co_return;
+			}
+			float new_bottom;
+			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				co_return;
+			}
+			// 長さの値をピクセル単位の値に変換する.
+			D2D1_RECT_F p_mar{	// ページの余白
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
+			};
+
+			// 図形全体をちょうど含む矩形の左上点と右下点を得る.
+			D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
+			//D2D1_POINT_2F b_size;
+			slist_bound_shape(m_main_page.m_shape_list, b_lt, b_rb);
+
+			// 矩形の大きさがゼロ,なら中断する.
+			if (b_rb.x - b_lt.x < 1.0F || b_rb.y - b_lt.y < 1.0F) {
+				co_return;
+			}
+
+			// 左上点の座標のいずれかが負ならば, 原点となるよう矩形を移動する.
+			float dx = 0.0f;	// 矩形を移動した距離
+			float dy = 0.0f;	// 矩形を移動した距離
 			if (b_lt.x < 0.0F) {
 				dx = -b_lt.x;
 				b_lt.x = 0.0F;
@@ -330,27 +412,49 @@ namespace winrt::GraphPaper::implementation
 				b_lt.y = 0.0F;
 				b_rb.y += dy;
 			}
-			bool flag = false;
-			if (dx > 0.0F || dy > 0.0F) {
-				constexpr auto ANY = true;
-				ustack_push_move({ dx, dy }, ANY);
-				flag = true;
+
+			// 左上点の値を, 図形を取り囲むパディングとみなし,
+			// 左上点の座標のいずれかが正ならば, その分だけ右下点を右下に移動する.
+			if (b_lt.x > 0.0f) {
+				b_rb.x += b_lt.x;
 			}
-			D2D1_POINT_2F p_max;
-			pt_add(b_rb, b_lt, p_max);
-			D2D1_SIZE_F p_size{
-				m_main_page.m_page_pad.left + p_max.x + m_main_page.m_page_pad.right,
-				m_main_page.m_page_pad.top + p_max.y + m_main_page.m_page_pad.bottom
+			if (b_lt.y > 0.0f) {
+				b_rb.y += b_lt.y;
+			}
+
+			// 右下点に余白を加えた値がページの大きさとなる.
+			D2D1_SIZE_F p_size{	// ページの大きさ.
+				new_left + b_rb.x + new_right,
+				new_top + b_rb.y + new_bottom
 			};
-			if (!equal(m_main_page.m_page_size, p_size)) {
-				ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+
+			// ページの大きさ, 余白, いずれかが異なる.
+			// あるいは矩形が移動したなら
+			const bool size_changed = !equal(p_size, m_main_page.m_page_size);
+			const bool mar_chanfed = !equal(p_mar, m_main_page.m_page_margin);
+			if (size_changed || mar_chanfed || dx > 0.0f || dy > 0.0f) {
+				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
+				if (dx > 0.0f || dy > 0.0f) {
+					constexpr auto ANY = true;
+					ustack_push_move({ dx, dy }, ANY);
+				}
+				// ページの大きさが異なるなら, 更新する.
+				if (size_changed) {
+					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+				}
+				// ページの余白が異なるなら, 更新する.
+				if (mar_chanfed) {
+					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+				}
 				ustack_push_null();
 				ustack_is_enable();
+				page_bbox_update();
+				main_panel_size();
+				page_draw();
+				status_bar_set_grid();
+				status_bar_set_page();
 			}
-			page_bbox_update();
-			main_panel_size();
-			page_draw();
-			status_bar_set_page();
+			status_bar_set_unit();
 		}
 		status_bar_set_pos();
 	}
@@ -371,19 +475,19 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		double l;
-		if (swscanf_s(tx_page_pad_left().Text().c_str(), L"%lf", &l) != 1) {
+		if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%lf", &l) != 1) {
 			return;
 		}
 		double t;
-		if (swscanf_s(tx_page_pad_top().Text().c_str(), L"%lf", &t) != 1) {
+		if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%lf", &t) != 1) {
 			return;
 		}
 		double r;
-		if (swscanf_s(tx_page_pad_right().Text().c_str(), L"%lf", &r) != 1) {
+		if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%lf", &r) != 1) {
 			return;
 		}
 		double b;
-		if (swscanf_s(tx_page_pad_bottom().Text().c_str(), L"%lf", &b) != 1) {
+		if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%lf", &b) != 1) {
 			return;
 		}
 		LEN_UNIT u;
@@ -450,40 +554,40 @@ namespace winrt::GraphPaper::implementation
 			const auto val = static_cast<float>(args.NewValue());
 			page_slider_set_header<S>(val);
 			D2D1_COLOR_F s_color;
-			m_dialog_page.get_page_color(s_color);
+			m_prop_page.get_page_color(s_color);
 			s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.set_page_color(s_color)) {
-				dialog_draw();
+			if (m_prop_page.set_page_color(s_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 1) {
 			const auto val = static_cast<float>(args.NewValue());
 			page_slider_set_header<S>(val);
 			D2D1_COLOR_F s_color;
-			m_dialog_page.get_page_color(s_color);
+			m_prop_page.get_page_color(s_color);
 			s_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.set_page_color(s_color)) {
-				dialog_draw();
+			if (m_prop_page.set_page_color(s_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 2) {
 			const auto val = static_cast<float>(args.NewValue());
 			page_slider_set_header<S>(val);
 			D2D1_COLOR_F s_color;
-			m_dialog_page.get_page_color(s_color);
+			m_prop_page.get_page_color(s_color);
 			s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.set_page_color(s_color)) {
-				dialog_draw();
+			if (m_prop_page.set_page_color(s_color)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 3) {
 			const auto val = static_cast<float>(args.NewValue());
 			page_slider_set_header<S>(val);
 			D2D1_COLOR_F s_color;
-			m_dialog_page.get_page_color(s_color);
+			m_prop_page.get_page_color(s_color);
 			s_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			if (m_dialog_page.set_page_color(s_color)) {
-				dialog_draw();
+			if (m_prop_page.set_page_color(s_color)) {
+				prop_dialog_draw();
 			}
 		}
 	}
@@ -491,9 +595,18 @@ namespace winrt::GraphPaper::implementation
 	// 表示の左上位置と右下位置を設定する.
 	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_page(
-			m_main_page.m_shape_list, m_main_page.m_page_size, m_main_bbox_lt,
-			m_main_bbox_rb);
+		// 方眼が原点のため, ページの大きさから, 余白を引く.
+		D2D1_SIZE_F rb{
+			m_main_page.m_page_size.width - m_main_page.m_page_margin.left,
+			m_main_page.m_page_size.height - m_main_page.m_page_margin.top
+		};
+		slist_bound_page(m_main_page.m_shape_list, rb, m_main_bbox_lt, m_main_bbox_rb);
+		if (m_main_bbox_lt.x > -m_main_page.m_page_margin.left) {
+			m_main_bbox_lt.x = -m_main_page.m_page_margin.left;
+		}
+		if (m_main_bbox_lt.y > -m_main_page.m_page_margin.top) {
+			m_main_bbox_lt.y = -m_main_page.m_page_margin.top;
+		}
 	}
 
 }

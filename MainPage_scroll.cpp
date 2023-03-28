@@ -52,8 +52,6 @@ namespace winrt::GraphPaper::implementation
 		const auto rb = m_main_bbox_rb;	// ページを含む図形全体の境界矩形の右下位置
 		const auto mw = static_cast<double>(rb.x) - static_cast<double>(lt.x) - view_w;
 		const auto mh = static_cast<double>(rb.y) - static_cast<double>(lt.y) - view_h;
-		//const auto w_gt0 = mw > 0.0;
-		//const auto h_gt0 = mh > 0.0;
 		sb_horz().ViewportSize(view_w);
 		sb_horz().Maximum(mw >= 1.0 ? (mh >= 1.0 ? mw + SB_SIZE : mw) : 0.0);
 		sb_horz().Visibility(mw >= 1.0 ? Visibility::Visible : Visibility::Collapsed);

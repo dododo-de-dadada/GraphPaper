@@ -958,19 +958,19 @@
     <value>幅</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_pad_left.Header" xml:space="preserve">
+  <data name="tx_page_margin_left.Header" xml:space="preserve">
     <value>左余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_pad_top.Header" xml:space="preserve">
+  <data name="tx_page_margin_top.Header" xml:space="preserve">
     <value>上余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_pad_right.Header" xml:space="preserve">
+  <data name="tx_page_margin_right.Header" xml:space="preserve">
     <value>右余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_pad_bottom.Header" xml:space="preserve">
+  <data name="tx_page_margin_bottom.Header" xml:space="preserve">
     <value>下余白</value>
     <comment>TextBox</comment>
   </data>

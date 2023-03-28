@@ -20,13 +20,13 @@ namespace winrt::GraphPaper::implementation
 		IInspectable const&, SelectionChangedEventArgs const&) noexcept
 	{
 		if (dialog_radio_btns().SelectedIndex() == 0) {
-			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+				prop_dialog_draw();
 			}
 		}
 		else if (dialog_radio_btns().SelectedIndex() == 1) {
-			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+				prop_dialog_draw();
 			}
 		}
 	}
@@ -62,31 +62,31 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
-			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 			arrow_slider_set_header<S>(val);
 			a_size.m_width = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
-			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 			arrow_slider_set_header<S>(val);
 			a_size.m_length = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+				prop_dialog_draw();
 			}
 		}
 		else if constexpr (S == 2) {
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
-			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 			arrow_slider_set_header<S>(val);
 			a_size.m_offset = static_cast<FLOAT>(val);
-			if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				dialog_draw();
+			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+				prop_dialog_draw();
 			}
 		}
 	}
@@ -107,9 +107,9 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.lock();
 		ARROW_SIZE a_size;
 		ARROW_STYLE a_style;
-		m_dialog_page.set_attr_to(&m_main_page);
-		m_dialog_page.get_arrow_size(a_size);
-		m_dialog_page.get_arrow_style(a_style);
+		m_prop_page.set_attr_to(&m_main_page);
+		m_prop_page.get_arrow_size(a_size);
+		m_prop_page.get_arrow_style(a_style);
 
 		const auto max0 = dialog_slider_0().Maximum();
 		const auto freq0 = dialog_slider_0().TickFrequency();
@@ -160,8 +160,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const auto unit = m_len_unit;
-		const auto dpi = m_dialog_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, a_size.m_width, dpi, g_len, buf);
 		dialog_slider_0().Header(box_value(str_arrow_width + buf));
@@ -169,16 +169,16 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Header(box_value(str_arrow_length + buf));
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, a_size.m_offset, dpi, g_len, buf);
 		dialog_slider_2().Header(box_value(str_arrow_offset + buf));
-		const auto samp_w = scp_dialog_panel().Width();
-		const auto samp_h = scp_dialog_panel().Height();
-		const auto pad = samp_w * 0.125;
+		const auto samp_w = scp_prop_panel().Width();
+		const auto samp_h = scp_prop_panel().Height();
+		const auto mar = samp_w * 0.125;
 		const D2D1_POINT_2F start{	// 始点
-			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad)
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
 		const D2D1_POINT_2F pos{	// 対角点の位置ベクトル
-			static_cast<FLOAT>(samp_w - 2.0 * pad), static_cast<FLOAT>(samp_h - 2.0 * pad)
+			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
 		};
-		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
+		m_prop_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_prop_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -188,64 +188,64 @@ namespace winrt::GraphPaper::implementation
 			const auto revoker0{
 				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arrow_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_arrow_width + buf));
 					a_size.m_width = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker1{
 				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arrow_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_1().Header(box_value(str_arrow_length + buf));
 					a_size.m_length = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker2{
 				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arrow_offset](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
-					const auto g_len = m_dialog_page.m_grid_base + 1.0f;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_2().Header(box_value(str_arrow_offset + buf));
 					a_size.m_offset = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						dialog_draw();
+					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker3{
 				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
 					if (dialog_radio_btns().SelectedIndex() == 0) {
-						if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
-							dialog_draw();
+						if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+							prop_dialog_draw();
 						}
 					}
 					else if (dialog_radio_btns().SelectedIndex() == 1) {
-						if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
-							dialog_draw();
+						if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+							prop_dialog_draw();
 						}
 					}
 				})
@@ -253,8 +253,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				ARROW_SIZE new_size;
 				ARROW_STYLE new_style;
-				m_dialog_page.m_shape_list.back()->get_arrow_size(new_size);
-				m_dialog_page.m_shape_list.back()->get_arrow_style(new_style);
+				m_prop_page.m_shape_list.back()->get_arrow_size(new_size);
+				m_prop_page.m_shape_list.back()->get_arrow_style(new_style);
 				arrow_style_is_checked(new_style);
 				const bool flag_size = ustack_push_set<UNDO_T::ARROW_SIZE>(new_size);
 				const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
@@ -284,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_radio_btns().Visibility(Visibility::Collapsed);
 		//dialog_combo_box().Visibility(Visibility::Collapsed);
 		//dialog_combo_box().Items().Clear();
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}

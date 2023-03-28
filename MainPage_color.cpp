@@ -95,27 +95,27 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_T U>
 	IAsyncAction MainPage::color_click_async(void)
 	{
-		m_dialog_page.set_attr_to(&m_main_page);
+		m_prop_page.set_attr_to(&m_main_page);
 
-		const auto p_width = scp_dialog_panel().Width();
-		const auto p_height = scp_dialog_panel().Height();
-		const auto pad = p_width * 0.125;
+		const auto p_width = scp_prop_panel().Width();
+		const auto p_height = scp_prop_panel().Height();
+		const auto mar = p_width * 0.125;
 		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(pad), static_cast<FLOAT>(pad)
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
 		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * pad), static_cast<FLOAT>(p_height - 2.0 * pad)
+			static_cast<FLOAT>(p_width - 2.0 * mar), static_cast<FLOAT>(p_height - 2.0 * mar)
 		};
 		if constexpr (U == UNDO_T::FILL_COLOR) {
-			m_dialog_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_dialog_page));
-			m_dialog_page.m_shape_list.back()->set_select(true);
+			m_prop_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_prop_page));
+			m_prop_page.m_shape_list.back()->set_select(true);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
 		}
 		else if constexpr (U == UNDO_T::STROKE_COLOR) {
-			m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
-			m_dialog_page.m_shape_list.back()->set_select(true);
+			m_prop_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_prop_page));
+			m_prop_page.m_shape_list.back()->set_select(true);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -123,10 +123,10 @@ namespace winrt::GraphPaper::implementation
 		else if constexpr (U == UNDO_T::FONT_COLOR) {
 			const auto pangram = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 			if (pangram.empty()) {
-				m_dialog_page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(L"The quick brown fox jumps over a lazy dog."), &m_dialog_page));
+				m_prop_page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(L"The quick brown fox jumps over a lazy dog."), &m_prop_page));
 			}
 			else {
-				m_dialog_page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(pangram.data()), &m_dialog_page));
+				m_prop_page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(pangram.data()), &m_prop_page));
 			}
 #if defined(_DEBUG)
 			debug_leak_cnt++;
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		D2D1_COLOR_F val;
-		color_get<U>(m_dialog_page, val);
+		color_get<U>(m_prop_page, val);
 		const float val0 = static_cast<float>(conv_color_comp(val.r));
 		const float val1 = static_cast<float>(conv_color_comp(val.g));
 		const float val2 = static_cast<float>(conv_color_comp(val.b));
@@ -203,16 +203,16 @@ namespace winrt::GraphPaper::implementation
 		dialog_combo_box().Items().Append(box_value(rmfi_color_notation_hex().Text()));
 		dialog_combo_box().Items().Append(box_value(rmfi_color_notation_real().Text()));
 		dialog_combo_box().Items().Append(box_value(rmfi_color_notation_pct().Text()));
-		if (m_color_notation == COLOR_NOTATION::DEC) {
+		if (m_color_notation == COLOR_BASE_N::DEC) {
 			dialog_combo_box().SelectedIndex(0);
 		}
-		else if (m_color_notation == COLOR_NOTATION::HEX) {
+		else if (m_color_notation == COLOR_BASE_N::HEX) {
 			dialog_combo_box().SelectedIndex(1);
 		}
-		else if (m_color_notation == COLOR_NOTATION::REAL) {
+		else if (m_color_notation == COLOR_BASE_N::REAL) {
 			dialog_combo_box().SelectedIndex(2);
 		}
-		else if (m_color_notation == COLOR_NOTATION::PCT) {
+		else if (m_color_notation == COLOR_BASE_N::PCT) {
 			dialog_combo_box().SelectedIndex(3);
 		}
 		dialog_combo_box().Visibility(Visibility::Visible);
@@ -227,10 +227,10 @@ namespace winrt::GraphPaper::implementation
 					conv_col_to_str(m_color_notation, val, buf);
 					dialog_slider_0().Header(box_value(str_color_r + buf));
 					D2D1_COLOR_F color;
-					color_get<U>(m_dialog_page, color);
+					color_get<U>(m_prop_page, color);
 					color.r = static_cast<FLOAT>(val / COLOR_MAX);
-					if (color_set<U>(m_dialog_page, color)) {
-						dialog_draw();
+					if (color_set<U>(m_prop_page, color)) {
+						prop_dialog_draw();
 					}
 				})
 			};
@@ -241,10 +241,10 @@ namespace winrt::GraphPaper::implementation
 					conv_col_to_str(m_color_notation, val, buf);
 					dialog_slider_1().Header(box_value(str_color_g + buf));
 					D2D1_COLOR_F color;
-					color_get<U>(m_dialog_page, color);
+					color_get<U>(m_prop_page, color);
 					color.g = static_cast<FLOAT>(val / COLOR_MAX);
-					if (color_set<U>(m_dialog_page, color)) {
-						dialog_draw();
+					if (color_set<U>(m_prop_page, color)) {
+						prop_dialog_draw();
 					}
 				})
 			};
@@ -255,10 +255,10 @@ namespace winrt::GraphPaper::implementation
 					conv_col_to_str(m_color_notation, val, buf);
 					dialog_slider_2().Header(box_value(str_color_b + buf));
 					D2D1_COLOR_F color;
-					color_get<U>(m_dialog_page, color);
+					color_get<U>(m_prop_page, color);
 					color.b = static_cast<FLOAT>(val / COLOR_MAX);
-					if (color_set<U>(m_dialog_page, color)) {
-						dialog_draw();
+					if (color_set<U>(m_prop_page, color)) {
+						prop_dialog_draw();
 					}
 				})
 			};
@@ -269,26 +269,26 @@ namespace winrt::GraphPaper::implementation
 					conv_col_to_str(m_color_notation, val, buf);
 					dialog_slider_3().Header(box_value(str_opacity + buf));
 					D2D1_COLOR_F color;
-					color_get<U>(m_dialog_page, color);
+					color_get<U>(m_prop_page, color);
 					color.a = static_cast<FLOAT>(val / COLOR_MAX);
-					if (color_set<U>(m_dialog_page, color)) {
-						dialog_draw();
+					if (color_set<U>(m_prop_page, color)) {
+						prop_dialog_draw();
 					}
 				})
 			};
 			const auto revoker4{
 				dialog_combo_box().SelectionChanged(winrt::auto_revoke, [this, str_color_r, str_color_g, str_color_b, str_opacity](IInspectable const&, SelectionChangedEventArgs const&) {
-					if (m_color_notation != COLOR_NOTATION::DEC && dialog_combo_box().SelectedIndex() == 0) {
-						m_color_notation = COLOR_NOTATION::DEC;
+					if (m_color_notation != COLOR_BASE_N::DEC && dialog_combo_box().SelectedIndex() == 0) {
+						m_color_notation = COLOR_BASE_N::DEC;
 					}
-					else if (m_color_notation != COLOR_NOTATION::HEX && dialog_combo_box().SelectedIndex() == 1) {
-						m_color_notation = COLOR_NOTATION::HEX;
+					else if (m_color_notation != COLOR_BASE_N::HEX && dialog_combo_box().SelectedIndex() == 1) {
+						m_color_notation = COLOR_BASE_N::HEX;
 					}
-					else if (m_color_notation != COLOR_NOTATION::REAL && dialog_combo_box().SelectedIndex() == 2) {
-						m_color_notation = COLOR_NOTATION::REAL;
+					else if (m_color_notation != COLOR_BASE_N::REAL && dialog_combo_box().SelectedIndex() == 2) {
+						m_color_notation = COLOR_BASE_N::REAL;
 					}
-					else if (m_color_notation != COLOR_NOTATION::PCT && dialog_combo_box().SelectedIndex() == 3) {
-						m_color_notation = COLOR_NOTATION::PCT;
+					else if (m_color_notation != COLOR_BASE_N::PCT && dialog_combo_box().SelectedIndex() == 3) {
+						m_color_notation = COLOR_BASE_N::PCT;
 					}
 					else {
 						return;
@@ -306,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_COLOR_F new_val;
-				color_get<U>(m_dialog_page, new_val);
+				color_get<U>(m_prop_page, new_val);
 				if (color_ustack_set<U>(*this, new_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);

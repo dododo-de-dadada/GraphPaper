@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
 	//constexpr float SLIDER_STEP = 0.5f;
-	// 方眼メニューの「方眼の強調」が選択された.
+	// レイアウトメニューの「方眼の強調」が選択された.
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_EMPH val;
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// 方眼メニューの「方眼の強調」に印をつける.
+	// レイアウトメニューの「方眼の強調」に印をつける.
 	// g_emph	方眼の強調
 	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
@@ -52,18 +52,18 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
-	// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
+	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		const auto str_grid_length{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " };
 		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") };
-		m_dialog_page.set_attr_to(&m_main_page);
-		const auto dpi = m_dialog_d2d.m_logical_dpi;
-		const auto g_len = m_dialog_page.m_grid_base + 1.0;
+		m_prop_page.set_attr_to(&m_main_page);
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0;
 		float g_base;
-		m_dialog_page.get_grid_base(g_base);
+		m_prop_page.get_grid_base(g_base);
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, g_base + 1.0f, dpi, g_len, buf);
 
@@ -103,14 +103,14 @@ namespace winrt::GraphPaper::implementation
 			const auto revoker0{
 				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
 					const auto unit = m_len_unit;
-					const auto dpi = m_dialog_d2d.m_logical_dpi;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
 					const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val + 1.0f, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_grid_length + buf));
-					if (m_dialog_page.set_grid_base(val)) {
-						dialog_draw();
+					if (m_prop_page.set_grid_base(val)) {
+						prop_dialog_draw();
 					}
 				})
 			};
@@ -120,9 +120,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::PIXEL) {
 							m_len_unit = LEN_UNIT::PIXEL;
 							const auto unit = m_len_unit;
-							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
 							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_dialog_page.m_grid_base + 1.0f;
+							const auto val = m_prop_page.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -132,9 +132,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::INCH) {
 							m_len_unit = LEN_UNIT::INCH;
 							const auto unit = m_len_unit;
-							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
 							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_dialog_page.m_grid_base + 1.0f;
+							const auto val = m_prop_page.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -144,9 +144,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::MILLI) {
 							m_len_unit = LEN_UNIT::MILLI;
 							const auto unit = m_len_unit;
-							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
 							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_dialog_page.m_grid_base + 1.0f;
+							const auto val = m_prop_page.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -156,9 +156,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::POINT) {
 							m_len_unit = LEN_UNIT::POINT;
 							const auto unit = m_len_unit;
-							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
 							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_dialog_page.m_grid_base + 1.0f;
+							const auto val = m_prop_page.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -168,9 +168,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::GRID) {
 							m_len_unit = LEN_UNIT::GRID;
 							const auto unit = m_len_unit;
-							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
 							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_dialog_page.m_grid_base + 1.0f;
+							const auto val = m_prop_page.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val , dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -184,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 				float page_val;
 
 				m_main_page.get_grid_base(page_val);
-				m_dialog_page.get_grid_base(setting_val);
+				m_prop_page.get_grid_base(setting_val);
 				if (!equal(page_val, setting_val)) {
 					ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
 					ustack_push_null();
@@ -202,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
-	// 方眼メニューの「方眼の大きさ」>「狭める」が選択された.
+	// レイアウトメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// 方眼メニューの「方眼の大きさ」>「広げる」が選択された.
+	// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
@@ -232,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// 方眼メニューの「方眼の表示」>「最背面」が選択された.
+	// レイアウトメニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_SHOW new_val;
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// 方眼メニューの「方眼の表示」に印をつける.
+	// レイアウトメニューの「方眼の表示」に印をつける.
 	// g_show	方眼の表示
 	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// 方眼メニューの「方眼に合わせる」が選択された.
+	// レイアウトメニューの「方眼に合わせる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//ustack_push_set<UNDO_T::GRID_SNAP>(&m_main_page, tmfi_grid_snap().IsChecked());

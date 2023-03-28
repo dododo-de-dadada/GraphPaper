@@ -691,8 +691,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapePage::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページの内余白の分を除く)
-			m_page_size.width - (m_page_pad.left + m_page_pad.right),
-			m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
+			m_page_size.width - (m_page_margin.left + m_page_margin.right),
+			m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
 		};
 
 		const FLOAT g_width = 1.0f;	// 方眼の太さ

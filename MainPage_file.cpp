@@ -233,12 +233,12 @@ namespace winrt::GraphPaper::implementation
 				Shape::m_d2d_bitmap_brush = nullptr;
 			}
 			m_main_d2d.Trim();
-			m_dialog_d2d.Trim();
+			m_prop_d2d.Trim();
 		}
 
 		ustack_clear();
 		slist_clear(m_main_page.m_shape_list);
-		slist_clear(m_dialog_page.m_shape_list);
+		slist_clear(m_prop_page.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_DEBUG, DEBUG_MSG, {});
@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		xcvd_is_enabled();
 		drawing_tool_is_checked(m_drawing_tool);
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
-		color_notation_is_checked(m_color_notation);
+		color_base_n_is_checked(m_color_notation);
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_notation = static_cast<COLOR_NOTATION>(dt_reader.ReadUInt16());
+			m_color_notation = static_cast<COLOR_BASE_N>(dt_reader.ReadUInt16());
 			m_snap_interval = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
@@ -951,7 +951,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				ustack_clear();
 				slist_clear(m_main_page.m_shape_list);
-				slist_clear(m_dialog_page.m_shape_list);
+				slist_clear(m_prop_page.m_shape_list);
 #if defined(_DEBUG)
 				if (debug_leak_cnt != 0) {
 					// 「メモリリーク」メッセージダイアログを表示する.

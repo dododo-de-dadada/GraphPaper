@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_NOTATION c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
+	void conv_col_to_str(const COLOR_BASE_N c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	//-------------------------------
 	// 色成分を文字列に変換する.
@@ -57,22 +57,22 @@ namespace winrt::GraphPaper::implementation
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	//-------------------------------
-	void conv_col_to_str(const COLOR_NOTATION c_no, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(const COLOR_BASE_N c_no, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の表記が 10 進数か判定する.
-		if (c_no == COLOR_NOTATION::DEC) {
+		if (c_no == COLOR_BASE_N::DEC) {
 			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_val));
 		}
 		// 色の表記が 16 進数か判定する.
-		else if (c_no == COLOR_NOTATION::HEX) {
+		else if (c_no == COLOR_BASE_N::HEX) {
 			swprintf_s(t_buf, t_len, L"x%02X", static_cast<uint32_t>(std::round(c_val)));
 		}
 		// 色の表記が実数か判定する.
-		else if (c_no == COLOR_NOTATION::REAL) {
+		else if (c_no == COLOR_BASE_N::REAL) {
 			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
 		}
 		// 色の表記がパーセントか判定する.
-		else if (c_no == COLOR_NOTATION::PCT) {
+		else if (c_no == COLOR_BASE_N::PCT) {
 			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {
@@ -245,12 +245,12 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// メッセージダイアログを表示する.
-	// glyph_key	フォントアイコンのグリフの静的リソースのキー
-	// message_key	メッセージのアプリケーションリソースのキー
-	// desc_key		説明文のアプリケーションリソースのキー
+	// glyph	フォントアイコンのグリフの静的リソースのキー
+	// message	メッセージのアプリケーションリソースのキー
+	// desc		説明文のアプリケーションリソースのキー
 	// 戻り値	なし
 	//-------------------------------
-	void MainPage::message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
+	void MainPage::message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc)
 	{
 		constexpr wchar_t QUOT[] = L"\"";	// 引用符
 		constexpr wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
@@ -258,30 +258,30 @@ namespace winrt::GraphPaper::implementation
 		ResourceLoader const& r_loader = ResourceLoader::GetForCurrentView();
 		winrt::hstring text;
 		try {
-			text = r_loader.GetString(message_key);
+			text = r_loader.GetString(message);
 		}
 		catch (winrt::hresult_error const&) {
 		}
 		if (text.empty()) {
 			// 文字列が空の場合,
-			text = message_key;
+			text = message;
 		}
 		winrt::hstring added_text;
 		try {
-			added_text = r_loader.GetString(desc_key);
+			added_text = r_loader.GetString(desc);
 		}
 		catch (winrt::hresult_error const&) {}
 		if (!added_text.empty()) {
 			// 追加する文字列が空以外の場合,
 			text = text + NEW_LINE + added_text;
 		}
-		else if (!desc_key.empty()) {
+		else if (!desc.empty()) {
 			// 説明そのものが空以外の場合,
-			text = text + NEW_LINE + QUOT + desc_key + QUOT;
+			text = text + NEW_LINE + QUOT + desc + QUOT;
 		}
-		const IInspectable glyph_val = Resources().TryLookup(box_value(glyph_key));
+		const IInspectable glyph_val = Resources().TryLookup(box_value(glyph));
 		const winrt::hstring font_icon{
-			glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph_key
+			glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph
 		};
 		fi_message().Glyph(font_icon);
 		tk_message().Text(text);

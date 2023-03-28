@@ -788,7 +788,7 @@
 			</muxc:MenuBarItem>
 			<!-- レイアウトメニュー -->
 			<muxc:MenuBarItem x:Name="mbi_layout" x:Uid="mbi_layout" AccessKey="L" Title="Layout">
-				<!-- 方眼メニュー -->
+				<!-- レイアウトメニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show"/>
@@ -880,16 +880,16 @@
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_color_notation_dec" x:Uid="rmfi_color_notation_dec" IsChecked="True" 
-						Click="color_notation_click" Text="Decimal" GroupName="gn_color_notation" />
+						Click="color_base_n_click" Text="Decimal" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem 
 						x:Name="rmfi_color_notation_hex" x:Uid="rmfi_color_notation_hex"
-						Click="color_notation_click" Text="Hexadecimal" GroupName="gn_color_notation" />
+						Click="color_base_n_click" Text="Hexadecimal" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_color_notation_real" x:Uid="rmfi_color_notation_real"
-						Click="color_notation_click" Text="Real" GroupName="gn_color_notation" />
+						Click="color_base_n_click" Text="Real" GroupName="gn_color_notation" />
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_color_notation_pct" x:Uid="rmfi_color_notation_pct"
-						Click="color_notation_click" Text="Percent" GroupName="gn_color_notation" />
+						Click="color_base_n_click" Text="Percent" GroupName="gn_color_notation" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>
@@ -1041,7 +1041,7 @@
 			</ListView>
 		</Grid>
 
-		<!-- 表示パネル -->
+		<!-- メインパネル -->
 		<RelativePanel Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
 				x:Name="scp_main_panel"
@@ -1152,58 +1152,75 @@
 				<TextBlock x:Name="tk_message"/>
 			</StackPanel>
 		</ContentDialog>
-		<!-- 表示の大きさ入力ダイアログ -->
+		<!-- ページの大きさダイアログ -->
 		<ContentDialog
 			x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close"
 			DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
-            <StackPanel ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
                 <TextBox
-					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,0,0,12"
+					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,8,0,12"
+                    Grid.Column="0" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width"
 					PlaceholderText="Must be between 1 and 32767."
 					TextChanged="page_size_text_changed" />
-				<TextBox
-					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="0,0,0,12"
+                <TextBox
+					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="0,8,0,12"
+                    Grid.Column="1" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height"
 					PlaceholderText="Must be between 1 and 32767."
 					TextChanged="page_size_text_changed" />
-				<TextBox
-					x:Name="tx_page_pad_left" x:Uid="tx_page_pad_left" Margin="0,0,0,12"
+                <TextBox
+					x:Name="tx_page_margin_left" x:Uid="tx_page_margin_left" Margin="0,8,0,12"
+                    Grid.Column="0" Grid.Row="1"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
-				<TextBox
-					x:Name="tx_page_pad_top" x:Uid="tx_page_pad_top" Margin="0,0,0,12"
+                <TextBox
+					x:Name="tx_page_margin_top" x:Uid="tx_page_margin_top" Margin="0,8,0,12"
+                    Grid.Column="1" Grid.Row="1"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Top Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
-				<TextBox
-					x:Name="tx_page_pad_right" x:Uid="tx_page_pad_right" Margin="0,0,0,12"
+                <TextBox
+					x:Name="tx_page_margin_right" x:Uid="tx_page_margin_right" Margin="0,8,0,12"
+                    Grid.Column="0" Grid.Row="2"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Right Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
-				<TextBox
-					x:Name="tx_page_pad_bottom" x:Uid="tx_page_pad_bottom" Margin="0,0,0,12"
+                <TextBox
+					x:Name="tx_page_margin_bottom" x:Uid="tx_page_margin_bottom" Margin="0,8,0,12"
+                    Grid.Column="1" Grid.Row="2"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
-				<ComboBox
-					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,0,0,12"
+                <ComboBox
+					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,8,0,12"
+                    Grid.Column="0" Grid.Row="3"
 					SelectionChanged="len_unit_selection_changed">
-					<ComboBoxItem 
+                    <ComboBoxItem 
 						x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel"
 						IsSelected="True"/>
-					<ComboBoxItem 
+                    <ComboBoxItem 
 						x:Name="cbi_len_unit_inch" x:Uid="cbi_len_unit_inch" Content="Inch"/>
-					<ComboBoxItem 
+                    <ComboBoxItem 
 						x:Name="cbi_len_unit_milli" x:Uid="cbi_len_unit_milli" Content="Millimeter"/>
-					<ComboBoxItem
+                    <ComboBoxItem
 						x:Name="cbi_len_unit_point" x:Uid="cbi_len_unit_point" Content="Point"/>
-					<ComboBoxItem
+                    <ComboBoxItem
 						x:Name="cbi_len_unit_grid" x:Uid="cbi_len_unit_grid" Content="Grid" />
-				</ComboBox>
-			</StackPanel>
-		</ContentDialog>
+                </ComboBox>
+            </Grid>
+        </ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog
 			x:Name="cd_snap_interval" x:Uid="cd_snap_interval" CloseButtonText="Close"
@@ -1222,25 +1239,25 @@
 			Unloaded="setting_dialog_unloaded">
 			<RelativePanel>
 				<SwapChainPanel
-					x:Name="scp_dialog_panel"
+					x:Name="scp_prop_panel"
 					BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1"
 					CornerRadius="1" Padding="1"
-					CompositionScaleChanged="dialog_panel_scale_changed" Height="170"
-					Loaded="dialog_panel_loaded" Margin="0,0,0,12" MaxHeight="170" MaxWidth="170"
+					CompositionScaleChanged="prop_panel_scale_changed" Height="170"
+					Loaded="prop_panel_loaded" Margin="0,0,0,12" MaxHeight="170" MaxWidth="170"
 					RelativePanel.AlignTopWithPanel="True" 
 					RelativePanel.AlignHorizontalCenterWithPanel="True"
-					SizeChanged="dialog_panel_size_changed" Width="170"
+					SizeChanged="prop_panel_size_changed" Width="170"
 					/>
 				<!-- Height を指定するこれ大事 -->
 				<ListView
-					x:Name="lv_dialog_list" RelativePanel.Below="scp_dialog_panel" 
+					x:Name="lv_dialog_list" RelativePanel.Below="scp_prop_panel" 
 					RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True"
 					RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
 				<Slider
 					x:Name="dialog_slider_0" x:Uid = "dialog_slider_0"
 					IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0"
-					RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True"
+					RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
 					Visibility="Collapsed" />
                 <Slider

@@ -515,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_T::PAGE_PAD>::SET(Shape* const s, const D2D1_RECT_F& val)
 	{
-		s->set_page_pad(val);
+		s->set_page_margin(val);
 	}
 
 	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const bool& val)
@@ -685,7 +685,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::PAGE_PAD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
 	{
-		return s->get_page_pad(val);
+		return s->get_page_margin(val);
 	}
 
 	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, bool& val) noexcept

@@ -1028,8 +1028,8 @@ D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_STRAIGHT
 					conv_color_comp(m_main_page.m_page_color.g),
 					conv_color_comp(m_main_page.m_page_color.b),
 					m_main_page.m_page_color.a,
-					m_main_page.m_page_pad.left,
-					m_main_page.m_page_pad.top
+					m_main_page.m_page_margin.left,
+					m_main_page.m_page_margin.top
 				);
 				dt_writer.WriteString(buf);
 			}

@@ -1,6 +1,28 @@
 #include "pch.h"
 #include "shape.h"
-
+//
+// ページの大きさは, 方眼の大きさに余白 (マージン) を足したもの.
+//
+//         margin_left         margin_right
+//            |<->|               |<->|
+//        + - @-----------------------+ - +
+// margin_top |                       |   |
+//        + - |   0---+---+---+---+   |   |
+//            |   |   |   |   |   |   |   |
+//            |   +---+---+---+---+   |   |
+//            |   |   |   |   |   |   |   |
+//            |   +---+---+---+---+   |   |
+//            |   |   |   |   |   |   | page_h
+//            |   +---+---+---+---+   |   |
+//            |   |   |   |   |   |   |   |
+//            |   +---+---+---+---+   |   |
+//            |   |   |   |   |   |   |   |
+//        + - |   +---+---+---+---+   |   |
+// margin_bot |                       |   |
+//        + - +-----------------------@ - +
+//            |<------ page_w ------->|
+//    0 は, 原点
+//    @ は, 図形がページをはみ出さないかぎり, 境界矩形の左上点と右下点
 using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
@@ -212,15 +234,15 @@ namespace winrt::GraphPaper::implementation
 		if (qy * ry < 0.0f) {
 			ry = -ry;
 		}
-		const D2D1_ROUNDED_RECT r_rect = {
-			{ pressed.x, pressed.y, current.x, current.y },
+		const D2D1_ROUNDED_RECT rr{
+			D2D1_RECT_F{ pressed.x, pressed.y, current.x, current.y },
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
 		brush->SetColor(COLOR_WHITE);
-		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, nullptr);
+		target->DrawRoundedRectangle(&rr, brush, Shape::m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
+		target->DrawRoundedRectangle(&rr, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 	}
 
 	void ShapePage::auxiliary_draw_arc(
@@ -272,20 +294,20 @@ namespace winrt::GraphPaper::implementation
 	{
 		// ページの色でページを塗りつぶす.
 		m_d2d_color_brush->SetColor(m_page_color);
-		m_d2d_target->FillRectangle(
-			D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
-		D2D1_MATRIX_3X2_F t{};
-		m_d2d_target->GetTransform(&t);
-		t.dx += m_page_pad.left * m_page_scale;
-		t.dy += m_page_pad.right * m_page_scale;
-		m_d2d_target->SetTransform(&t);
-		// 方眼の表示が最背景に表示なら,
+		D2D1_RECT_F p_rect{	// ページの矩形
+			-m_page_margin.left,
+			-m_page_margin.top,
+			-m_page_margin.left + m_page_size.width,
+			-m_page_margin.top + m_page_size.height
+		};
+		m_d2d_target->FillRectangle(p_rect, m_d2d_color_brush.get());
+
+		// 方眼の表示が最背面なら, 最初に方眼を表示する.
 		if (m_grid_show == GRID_SHOW::BACK) {
 			D2D1_SIZE_F g_size{
-				m_page_size.width - (m_page_pad.left + m_page_pad.right),
-				m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
+				m_page_size.width - (m_page_margin.left + m_page_margin.right),
+				m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
 			};
-			// 方眼を表示する.
 			page_draw_grid(
 				m_d2d_target,
 				m_d2d_color_brush.get(),
@@ -296,18 +318,19 @@ namespace winrt::GraphPaper::implementation
 				m_page_scale,
 				g_size);
 		}
+
+		// 図形を表示する.
 		for (auto s : m_shape_list) {
 			if (!s->is_deleted()) {
-				// 図形を表示する.
 				s->draw();
 			}
 		}
+
+		// 方眼の表示が最前面なら, 最後に方眼を表示する.
 		if (m_grid_show == GRID_SHOW::FRONT) {
-			// 方眼の表示が最前面に表示の場合,
-			// 方眼を表示する.
 			D2D1_SIZE_F g_size{
-				m_page_size.width - (m_page_pad.left + m_page_pad.right),
-				m_page_size.height - (m_page_pad.top + m_page_pad.bottom)
+				m_page_size.width - (m_page_margin.left + m_page_margin.right),
+				m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
 			};
 			page_draw_grid(
 				m_d2d_target,
@@ -648,17 +671,17 @@ namespace winrt::GraphPaper::implementation
 			m_page_size = p_size;
 		}
 		// ページの内余白
-		const D2D1_RECT_F p_pad{
+		const D2D1_RECT_F p_mar{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_pad.left >= 0.0f && p_pad.right >= 0.0f && 
-			p_pad.left + p_pad.right < m_page_size.width &&
-			p_pad.top >= 0.0f && p_pad.bottom >= 0.0f &&
-			p_pad.top + p_pad.bottom < m_page_size.height) {
-			m_page_pad = p_pad;
+		if (p_mar.left >= 0.0f && p_mar.right >= 0.0f && 
+			p_mar.left + p_mar.right < m_page_size.width &&
+			p_mar.top >= 0.0f && p_mar.bottom >= 0.0f &&
+			p_mar.top + p_mar.bottom < m_page_size.height) {
+			m_page_margin = p_mar;
 		}
 		// 矢じるしの寸法
 		const ARROW_SIZE a_size{
@@ -1169,7 +1192,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
 		s->get_page_color(m_page_color);
-		s->get_page_pad(m_page_pad);
+		s->get_page_margin(m_page_margin);
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
@@ -1208,10 +1231,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_page_size.width);
 		dt_writer.WriteSingle(m_page_size.height);
 		// ページの内余白
-		dt_writer.WriteSingle(m_page_pad.left);
-		dt_writer.WriteSingle(m_page_pad.top);
-		dt_writer.WriteSingle(m_page_pad.right);
-		dt_writer.WriteSingle(m_page_pad.bottom);
+		dt_writer.WriteSingle(m_page_margin.left);
+		dt_writer.WriteSingle(m_page_margin.top);
+		dt_writer.WriteSingle(m_page_margin.right);
+		dt_writer.WriteSingle(m_page_margin.bottom);
 		// 矢じるしの大きさ
 		dt_writer.WriteSingle(m_arrow_size.m_width);
 		dt_writer.WriteSingle(m_arrow_size.m_length);
