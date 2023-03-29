@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_select(g);
 		ustack_push_null();
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 		if (summary_is_visible()) {
 			summary_append(g);
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_null();
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 

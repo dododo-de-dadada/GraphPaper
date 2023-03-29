@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		slist.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 					if (done) {
 						ustack_push_null();
 						xcvd_is_enabled();
-						page_draw();
+						main_draw();
 					}
 					return;
 				}
@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 		slist.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 

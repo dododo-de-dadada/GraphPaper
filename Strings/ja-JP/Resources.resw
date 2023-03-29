@@ -214,7 +214,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_color_notation.Text" xml:space="preserve">
-    <value>色の表記</value>
+    <value>色の基数</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
@@ -918,8 +918,8 @@
     <value>変更を保存しますか？</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_grid_snap.Text" xml:space="preserve">
-    <value>方眼に合わせる</value>
+  <data name="tmfi_snap_grid.Text" xml:space="preserve">
+    <value>点を方眼にくっつける</value>
     <comment>TextBlock</comment>
   </data>
   <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
@@ -1134,8 +1134,8 @@
     <value>線の結合の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_snap_interval.Text" xml:space="preserve">
-    <value>点をくっつける間隔...</value>
+  <data name="mfi_snap_point.Text" xml:space="preserve">
+    <value>点を点にくっつける間隔...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_style_flat.Text" xml:space="preserve">
@@ -1154,8 +1154,8 @@
     <value>三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_snap_interval" xml:space="preserve">
-    <value>点をくっつける間隔</value>
+  <data name="str_snap_point" xml:space="preserve">
+    <value>点を点にくっつける間隔</value>
     <comment>String</comment>
   </data>
   <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">

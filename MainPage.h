@@ -30,7 +30,7 @@
 // MainPage_group.cpp	グループ化とグループの解除
 // NainPage_image.cpp	画像
 // NainPage_join.cpp	線分の結合
-// MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点をくっつける閾値
+// MainPage_misc.cpp	長さの単位, 色の基数, ステータスバー, 頂点をくっつける閾値
 // MainPage_order.cpp	並び替え
 // MainPage_prop.cpp	設定
 // MainPage_scroll.cpp	スクロールバー
@@ -82,6 +82,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -94,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t LAYOUT_FILE[] = L"gp_layout.dat";	// レイアウトを格納するファイル名
 
 	//-------------------------------
-	// 色の表記
+	// 色の基数
 	//-------------------------------
 	enum struct COLOR_BASE_N : uint32_t {
 		DEC,	// 10 進数
@@ -260,8 +261,8 @@ namespace winrt::GraphPaper::implementation
 		// メインページ
 		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// ページを含めた図形全体の境界ボックスの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページを含めた図形全体の境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
+		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };
@@ -282,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_BASE_N m_color_notation = COLOR_BASE_N::DEC;	// 色成分の書式
-		float m_snap_interval = SNAP_INTERVAL_DEF_VAL;	// 頂点をくっつける間隔
+		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点を点にくっつける間隔
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
 
@@ -307,8 +308,9 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage.cpp
-		// メインページの作成, アプリの終了, 
+		// メインページの作成, 
 		// メインのスワップチェーンパネルのハンドラー
+		// メインのページ図形の処理
 		//-------------------------------
 
 		// メインページを作成する.
@@ -322,14 +324,20 @@ namespace winrt::GraphPaper::implementation
 			auto _{ file_exit_click_async(nullptr, nullptr) };
 		}
 		IAsyncAction MainPage::print_click_async(const IInspectable&, const RoutedEventArgs&);
-		// スワップチェーンパネルがロードされた.
+		// メインのスワップチェーンパネルがロードされた.
 		void main_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
-		// スワップチェーンパネルの寸法が変わった.
+		// メインのスワップチェーンパネルの大きさが変わった.
 		void main_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
-		// スワップチェーンパネルの倍率が変わった.
+		// メインのスワップチェーンパネルの倍率が変わった.
 		void main_panel_scale_changed(IInspectable const& sender, IInspectable const&);
-		// スワップチェーンパネルの大きさを設定する.
+		// メインのスワップチェーンパネルの大きさを設定する.
 		void main_panel_size(void);
+		// メインのページ図形の境界矩形を更新する.
+		void main_bbox_update(void) noexcept;
+		// 図形をもとにメインのページ図形の境界矩形を更新する.
+		void main_bbox_update(const Shape* s) noexcept;
+		// メインのページ図形を表示する.
+		void main_draw(void);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -566,8 +574,12 @@ namespace winrt::GraphPaper::implementation
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼の表示」が選択された.
 		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼に合わせる」が選択された.
-		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
+
+		//-------------------------------
+		// MainPage_snap.cpp
+		// 点を方眼にくっつける, 点と点をくっつける
+		//-------------------------------
+
 
 		//-------------------------------
 		// MainPage_group.cpp
@@ -644,7 +656,7 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 		// MainPage_misc.cpp
 		// その他
-		// 長さの単位, 色の表記, ステータスバー, バージョン情報
+		// 長さの単位, 色の基数, バージョン情報
 		//-----------------------------
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
@@ -652,46 +664,41 @@ namespace winrt::GraphPaper::implementation
 		void color_base_n_is_checked(const COLOR_BASE_N c_base);
 		// その他メニューの「色の基数」のサブ項目が選択された.
 		void color_base_n_click(IInspectable const& sender, RoutedEventArgs const&);
-		// その他メニューの「頂点をくっつける...」が選択された.
-		IAsyncAction snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 値をスライダーのヘッダーに格納する.
-		void snap_interval_set_header(const float val) noexcept;
-		// スライダーの値が変更された.
-		void snap_interval_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
-		// ダイアログの「長さの単位」の選択が変更された.
-		void len_unit_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
-		// レイアウトメニューの「ページの倍率」が選択された.
+		// その他メニューの「点を点にくっつける間隔...」が選択された.
+		IAsyncAction snap_point_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// その他メニューの「点を方眼にくっつける」が選択された.
+		void snap_grid_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「ページの倍率」が選択された.
 		void zoom_click(IInspectable const& sender, RoutedEventArgs const&);
-		// ページを拡大または縮小する.
-		void zoom_delta(const int32_t delta) noexcept;
-		// ズームメニューに印をつける.
+		// その他メニューの「ズーム」のサブ項目に印をつける.
 		void zoom_is_cheched(float scale);
 
 		//-------------------------------
-		// MainPage_dialog.cpp
-		// 属性
+		// MainPage_prop.cpp
+		// 属性ダイアログ
 		//-------------------------------
 
-		void setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&);
-		// 属性ダイアログが開かれた.
-		void setting_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&);
-		// 属性ダイアログが開かれた.
-		void setting_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&);
-		// 設定を表示する
+		// 属性ダイアログがアンロードされた
+		void prop_dialog_unloaded(IInspectable const&, RoutedEventArgs const&);
+		// 属性ダイアログが開いた.
+		void prop_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&);
+		// 属性ダイアログが閉じた.
+		void prop_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&);
+		// 属性ダイアログの図形を表示する.
 		void prop_dialog_draw(void);
-		// 属性のリストがロードされた.
+		// 属性ダイアログのリストがロードされた.
 		void prop_dialog_list_loaded(IInspectable const&, RoutedEventArgs const&);
-		// 属性の画像を読み込む.
+		// 属性ダイアログの画像を読み込む.
 		IAsyncAction prop_image_load_async(const float samp_w, const float samp_h);
-		// スワップチェーンパネルが読み込まれた.
+		// 属性ダイアログのスワップチェーンパネルが読み込まれた.
 		void prop_panel_loaded(IInspectable const& sender, RoutedEventArgs const&);
-		// スワップチェーンパネルの大きさが変わった.
+		// 属性ダイアログのスワップチェーンパネルの大きさが変わった.
 		void prop_panel_size_changed(IInspectable const&, SizeChangedEventArgs const&);
-		// スワップチェーンパネルの倍率が変わった.
+		// 属性ダイアログのスワップチェーンパネルの倍率が変わった.
 		void prop_panel_scale_changed(IInspectable const&, IInspectable const&);
 
 		//-------------------------------
@@ -745,18 +752,10 @@ namespace winrt::GraphPaper::implementation
 		void page_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::PAGE_COLOR>(); }
 		// レイアウトメニューの「ページの大きさ」が選択された
 		IAsyncAction page_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// ページの左上位置と右下位置を更新する.
-		void page_bbox_update(void) noexcept;
-		// 図形をもとにページの左上位置と右下位置を更新する.
-		void page_bbox_update(const Shape* s) noexcept;
-		// ページを表示する.
-		void page_draw(void);
-		// 値をスライダーのヘッダーに格納する.
-		template <int S> void page_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		template <int S> void page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// ページの大きさダイアログのテキストボックスの値が変更された.
-		void page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
+		void page_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&);
+		// ページの大きさダイアログのコンボボックスの選択が変更された.
+		void page_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//-------------------------------
 		// MainPage_layout.cpp

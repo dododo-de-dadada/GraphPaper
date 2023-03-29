@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_null();
 		main_panel_size();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
@@ -88,13 +88,13 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_null();
 					ustack_is_enable();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
 		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		page_draw();
+		main_draw();
 		m_mutex_event.unlock();
 	}
 

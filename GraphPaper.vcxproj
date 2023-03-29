@@ -224,7 +224,7 @@
     <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_event.cpp" />
-    <ClCompile Include="MainPage_dialog.cpp" />
+    <ClCompile Include="MainPage_prop.cpp" />
     <ClCompile Include="MainPage_edit.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />

@@ -27,7 +27,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 方眼を表示する.
 	static void page_draw_grid(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
 		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
@@ -498,9 +497,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼に合わせるを得る.
-	bool ShapePage::get_grid_snap(bool& val) const noexcept
+	bool ShapePage::get_snap_grid(bool& val) const noexcept
 	{
-		val = m_grid_snap;
+		val = m_snap_grid;
 		return true;
 	}
 
@@ -644,7 +643,7 @@ namespace winrt::GraphPaper::implementation
 			m_grid_show = g_show;
 		}
 		// 方眼に合わせる.
-		m_grid_snap = dt_reader.ReadBoolean();
+		m_snap_grid = dt_reader.ReadBoolean();
 		// ページの色
 		const D2D1_COLOR_F p_color{
 			dt_reader.ReadSingle(),
@@ -1023,10 +1022,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼に合わせるに格納する.
-	bool ShapePage::set_grid_snap(const bool val) noexcept
+	bool ShapePage::set_snap_grid(const bool val) noexcept
 	{
-		if (m_grid_snap != val) {
-			m_grid_snap = val;
+		if (m_snap_grid != val) {
+			m_snap_grid = val;
 			return true;
 		}
 		return false;
@@ -1187,7 +1186,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_color(m_grid_color);
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
-		s->get_grid_snap(m_grid_snap);
+		s->get_snap_grid(m_snap_grid);
 		s->get_image_opacity(m_image_opac);
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
@@ -1219,7 +1218,7 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の表示
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		// 方眼に合わせる
-		dt_writer.WriteBoolean(m_grid_snap);
+		dt_writer.WriteBoolean(m_snap_grid);
 		// ページの色
 		dt_writer.WriteSingle(m_page_color.r);
 		dt_writer.WriteSingle(m_page_color.g);

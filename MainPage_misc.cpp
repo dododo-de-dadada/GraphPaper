@@ -1,6 +1,6 @@
 //-----------------------------
 // MainPage_misc.cpp
-// 長さの単位, 色の表記, ステータスバー, バージョン情報
+// 長さの単位, 色の基数, ステータスバー, バージョン情報
 //-----------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 	// その他メニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
@@ -60,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
-	// その他メニューの「色の表記」のサブ項目が選択された.
+	// その他メニューの「色の基数」のサブ項目が選択された.
 	void MainPage::color_base_n_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == rmfi_color_notation_pct()) {
@@ -82,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// その他メニューの「色の表記」に印をつける.
+	// その他メニューの「色の基数」に印をつける.
 	void MainPage::color_base_n_is_checked(const COLOR_BASE_N val)
 	{
 		rmfi_color_notation_dec().IsChecked(val == COLOR_BASE_N::DEC);
@@ -139,126 +140,40 @@ namespace winrt::GraphPaper::implementation
 		cbi_len_unit_point().IsSelected(val == LEN_UNIT::POINT);
 	}
 
-	// ダイアログの「長さの単位」の選択が変更された.
-	void MainPage::len_unit_selection_changed(
-		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	// その他メニューの「点を方眼にくっつける」が選択された.
+	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		LEN_UNIT old_unit = LEN_UNIT::PIXEL;
-		for (const auto i : args.RemovedItems()) {
-			if (i == cbi_len_unit_grid()) {
-				old_unit = LEN_UNIT::GRID;
-			}
-			else if (i == cbi_len_unit_inch()) {
-				old_unit = LEN_UNIT::INCH;
-			}
-			else if (i == cbi_len_unit_milli()) {
-				old_unit = LEN_UNIT::MILLI;
-			}
-			else if (i == cbi_len_unit_pixel()) {
-				old_unit = LEN_UNIT::PIXEL;
-			}
-			else if (i == cbi_len_unit_point()) {
-				old_unit = LEN_UNIT::POINT;
-			}
-			else {
-				return;
-			}
-		}
-		LEN_UNIT new_unit = LEN_UNIT::PIXEL;
-		for (const auto i : args.AddedItems()) {
-			if (i == cbi_len_unit_grid()) {
-				new_unit = LEN_UNIT::GRID;
-			}
-			else if (i == cbi_len_unit_inch()) {
-				new_unit = LEN_UNIT::INCH;
-			}
-			else if (i == cbi_len_unit_milli()) {
-				new_unit = LEN_UNIT::MILLI;
-			}
-			else if (i == cbi_len_unit_pixel()) {
-				new_unit = LEN_UNIT::PIXEL;
-			}
-			else if (i == cbi_len_unit_point()) {
-				new_unit = LEN_UNIT::POINT;
-			}
-			else {
-				return;
-			}
-		}
-		if (old_unit != new_unit) {
-			const double dpi = m_main_d2d.m_logical_dpi;
-			const double g_len = m_main_page.m_grid_base + 1.0;
-			double val;
-			if (swscanf_s(tx_page_size_width().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_size_width().Text(buf);
-			}
-			if (swscanf_s(tx_page_size_height().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_size_height().Text(buf);
-			}
-			if (swscanf_s(tx_page_margin_left().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_left().Text(buf);
-			}
-			if (swscanf_s(tx_page_margin_top().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_top().Text(buf);
-			}
-			if (swscanf_s(tx_page_margin_right().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_right().Text(buf);
-			}
-			if (swscanf_s(tx_page_margin_bottom().Text().data(), L"%lf", &val)) {
-				wchar_t buf[128];
-				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
-				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_bottom().Text(buf);
-			}
-		}
+		m_main_page.m_snap_grid = tmfi_snap_grid().IsChecked();
+		status_bar_set_pos();
 	}
 
 	// その他メニューの「頂点をくっつける...」が選択された.
-	IAsyncAction MainPage::snap_interval_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::snap_point_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		snap_interval_set_header(m_snap_interval);
-		sd_snap_interval().Value(static_cast<double>(m_snap_interval));
+		const winrt::hstring str_snap_point{ ResourceLoader::GetForCurrentView().GetString(L"str_snap_point") + L": " };
+		const auto val = m_snap_point;
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0f, buf);
+		sd_snap_point().Header(box_value(str_snap_point + buf));
+		sd_snap_point().Value(static_cast<double>(m_snap_point));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_snap_interval().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			m_snap_interval = static_cast<float>(sd_snap_interval().Value());
+		{
+			const auto revoler{
+				sd_snap_point().ValueChanged(winrt::auto_revoke, [this, str_snap_point](auto, auto args) {
+					const auto val = args.NewValue();
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0f, buf);
+					sd_snap_point().Header(box_value(str_snap_point + buf));
+				})
+			};
+			if (co_await cd_snap_point().ShowAsync() == ContentDialogResult::Primary) {
+				m_snap_point = static_cast<float>(sd_snap_point().Value());
+			}
 		}
 		m_mutex_event.unlock();
 	}
 
-	void MainPage::snap_interval_set_header(const float val) noexcept
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-			m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0f, buf);
-		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_snap_interval") + L": " + buf;
-		sd_snap_interval().Header(box_value(text));
-	}
-
-	// スライダーの値が変更された.
-	void MainPage::snap_interval_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
-	{
-		snap_interval_set_header(static_cast<float>(args.NewValue()));
-	}
-
-	// ズームメニューに印をつける.
+	// その他メニューの「ズーム」のサブ項目に印をつける.
 	void MainPage::zoom_is_cheched(float scale)
 	{
 		rmfi_page_zoom_100().IsChecked(equal(scale, 1.0f));
@@ -306,30 +221,10 @@ namespace winrt::GraphPaper::implementation
 		if (scale != m_main_page.m_page_scale) {
 			m_main_page.m_page_scale = scale;
 			main_panel_size();
-			page_draw();
+			main_draw();
 			status_bar_set_zoom();
 		}
 		status_bar_set_pos();
 	}
 
-	// 表示を拡大または縮小する.
-	void MainPage::zoom_delta(const int32_t delta) noexcept
-	{
-		if (delta > 0 &&
-			m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
-			m_main_page.m_page_scale *= 1.1f;
-		}
-		else if (delta < 0 &&
-			m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
-			m_main_page.m_page_scale /= 1.1f;
-		}
-		else {
-			return;
-		}
-		zoom_is_cheched(m_main_page.m_page_scale);
-		main_panel_size();
-		page_draw();
-		status_bar_set_pos();
-		status_bar_set_zoom();
-	}
 }

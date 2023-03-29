@@ -414,10 +414,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
 	// val	値
 	// anc	図形の部位
-	// limit	他の頂点との限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeRect::set_pos_anc(
-		const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool /*keep_aspect*/)
-		noexcept
+	// snap_point	他の点との間隔 (この値より離れた点は無視する)
+	bool ShapeRect::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		bool done = false;
 		switch (anc) {
@@ -529,16 +527,16 @@ namespace winrt::GraphPaper::implementation
 		default:
 			return false;
 		}
-		if (limit >= FLT_MIN) {
+		if (snap_point >= FLT_MIN) {
 			// 終点への差分の x 値が, 限界距離未満か判定する.
-			if (m_pos.x > -limit && m_pos.x < limit) {
+			if (m_pos.x > -snap_point && m_pos.x < snap_point) {
 				if (anc == ANC_TYPE::ANC_NE) {
 					m_start.x += m_pos.x;
 				}
 				m_pos.x = 0.0f;
 				done = true;
 			}
-			if (m_pos.y > -limit && m_pos.y < limit) {
+			if (m_pos.y > -snap_point && m_pos.y < snap_point) {
 				if (anc == ANC_TYPE::ANC_NE) {
 					m_start.y += m_pos.y;
 				}

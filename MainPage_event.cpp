@@ -30,37 +30,31 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CURS_EYEDROPPER1 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR1);	// スポイトカーソル
 	static auto const& CURS_EYEDROPPER2 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR2);	// スポイトカーソル
 
-	// 押された位置と離された位置を調整する.
-	static void event_pos_snap_to(
-		const SHAPE_LIST& slist, const bool boxed, const float limit, const bool g_snap,
-		const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released);
+	// 押された点と離された点を調整する.
+	static void event_pos_snap_to(const SHAPE_LIST& slist, const bool boxed, const float interval, const bool g_snap, const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released);
 	// 最も近い方眼を得る.
-	static bool event_get_nearby_grid(
-		const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_pos) noexcept;
-	// 最も近い頂点を得る.
-	static bool event_get_nearby_vertex(
-		const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_pos) noexcept;
+	static bool event_get_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_pos) noexcept;
+	// 最も近い点を得る.
+	static bool event_get_nearby_point(const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& v_pos) noexcept;
 	// 図形が操作スタックに含まれるか判定する.
 	static bool event_ustack_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept;
 	// 図形リストを整理する.
-	static void event_reduce_slist(
-		SHAPE_LIST& slist, const UNDO_STACK& ustack, const UNDO_STACK& r_stack) noexcept;
+	static void event_reduce_slist(SHAPE_LIST& slist, const UNDO_STACK& ustack, const UNDO_STACK& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
-	static bool event_scroll_by_wheel_delta(
-		const ScrollBar& scroll_bar, const int32_t delta, const float scale);
+	static bool event_scroll_by_wheel_delta(const ScrollBar& scroll_bar, const int32_t delta, const float scale);
 
 	//------------------------------
 	// 押された位置と離された位置を調整する.
 	// slist	図形リスト
 	// boxed	調整の対象を, 図形を囲む領域とするなら true, 図形の頂点を対象とするなら false 
-	// limit	制限距離
+	// interval	制限距離
 	// g_snap	方眼にそろえる.
 	// g_len	方眼の大きさ
 	// pressed	押された位置
 	// released	離された位置
 	//------------------------------
 	static void event_pos_snap_to(
-		const SHAPE_LIST& slist, const bool boxed, const float limit, const bool g_snap,
+		const SHAPE_LIST& slist, const bool boxed, const float interval, const bool g_snap,
 		const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released)
 	{
 		D2D1_POINT_2F box[4]{	// 押された位置と離された位置で囲まれた方形の頂点
@@ -70,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F p[4];	// 頂点の位置
 
 		// 左上位置に最も近い頂点とその距離を得る.
-		if (slist_find_vertex_closest(slist, box[0], limit, p[0])) {
+		if (slist_find_vertex_closest(slist, box[0], interval, p[0])) {
 			D2D1_POINT_2F d;
 			pt_sub(p[0], box[0], d);
 			p_abs[0] = pt_abs2(d);
@@ -80,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 調整の対象が領域なら, 右上位置に最も近い頂点とその距離を得る.
-		if (boxed && slist_find_vertex_closest(slist, box[1], limit, p[1])) {
+		if (boxed && slist_find_vertex_closest(slist, box[1], interval, p[1])) {
 			D2D1_POINT_2F d;
 			pt_sub(p[1], box[1], d);
 			p_abs[1] = pt_abs2(d);
@@ -90,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 右下位置に最も近い頂点とその距離を得る.
-		if (slist_find_vertex_closest(slist, box[2], limit, p[2])) {
+		if (slist_find_vertex_closest(slist, box[2], interval, p[2])) {
 			D2D1_POINT_2F d;
 			pt_sub(p[2], box[2], d);
 			p_abs[2] = pt_abs2(d);
@@ -100,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 調整の対象が領域なら, 左下位置に最も近い頂点とその距離を得る.
-		if (boxed && slist_find_vertex_closest(slist, box[3], limit, p[3])) {
+		if (boxed && slist_find_vertex_closest(slist, box[3], interval, p[3])) {
 			D2D1_POINT_2F d;
 			pt_sub(p[3] , box[3], d);
 			p_abs[3] = pt_abs2(d);
@@ -179,8 +173,7 @@ namespace winrt::GraphPaper::implementation
 	// g_len	方眼の大きさ
 	// g_pos	図形から方眼への位置ベクトル
 	//------------------------------
-	static bool event_get_nearby_grid(
-		const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_pos) noexcept
+	static bool event_get_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_pos) noexcept
 	{
 		D2D1_POINT_2F p[2 + N_GON_MAX];
 		D2D1_POINT_2F g;	// 方眼の大きさで丸めた位置
@@ -214,14 +207,14 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 最も近い頂点を得る.
 	// slist	図形リスト
-	// limit	制限距離 (これ以上離れた頂点は対象としない)
-	// v_pos	最も近い頂点への位置ベクトル
+	// interval	間隔 (これ以上離れた点は無視する)
+	// pos	最も近い頂点への位置ベクトル
 	// 戻り値	見つかったなら true
 	//------------------------------
-	static bool event_get_nearby_vertex(
-		const SHAPE_LIST& slist, const float limit, D2D1_POINT_2F& v_pos) noexcept
+	static bool event_get_nearby_point(
+		const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& pos) noexcept
 	{
-		float dd = limit * limit;
+		float dd = interval * interval;
 		bool flag = false;
 		D2D1_POINT_2F p[N_GON_MAX];
 		D2D1_POINT_2F q{};
@@ -244,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			pt_sub(n, q, v_pos);
+			pt_sub(n, q, pos);
 		}
 		return flag;
 	}
@@ -381,8 +374,7 @@ namespace winrt::GraphPaper::implementation
 		else if (s != nullptr) {
 			if (anc == ANC_TYPE::ANC_FILL) {
 				if (typeid(*s) == typeid(ShapeImage)) {
-					if (static_cast<const ShapeImage*>(s)->get_pixcel(
-						m_event_pos_pressed, m_eyedropper_color)) {
+					if (static_cast<const ShapeImage*>(s)->get_pixcel(m_event_pos_pressed, m_eyedropper_color)) {
 						m_main_page.m_fill_color = m_eyedropper_color;
 						m_eyedropper_filled = true;
 					}
@@ -455,9 +447,9 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_null();
 		m_event_shape_prev = s;
 		xcvd_is_enabled();
-		page_bbox_update(s);
+		main_bbox_update(s);
 		main_panel_size();
-		page_draw();
+		main_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);
@@ -484,8 +476,7 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			if (fit_text) {
-				s->fit_frame_to_text(
-					m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
@@ -494,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_null();
 			m_event_shape_prev = s;
 			xcvd_is_enabled();
-			page_bbox_update(s);
+			main_bbox_update(s);
 			main_panel_size();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -506,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
 		m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
@@ -515,44 +506,38 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_finish_deforming(void)
 	{
-		const auto g_snap = m_main_page.m_grid_snap;
-		if (g_snap && m_snap_interval >= FLT_MIN) {
+		const auto g_snap = m_main_page.m_snap_grid;
+		if (g_snap && m_snap_point >= FLT_MIN) {
 			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
 			const auto p_scale = m_main_page.m_page_scale;
 			D2D1_POINT_2F p;
 			D2D1_POINT_2F d;
 			pt_round(m_event_pos_curr, m_main_page.m_grid_base + 1.0, p);
 			pt_sub(p, m_event_pos_curr, d);
-			float dist = min(static_cast<float>(sqrt(pt_abs2(d))), m_snap_interval) / p_scale;
+			float dist = min(static_cast<float>(sqrt(pt_abs2(d))), m_snap_point) / p_scale;
 			if (slist_find_vertex_closest(
 				m_main_page.m_shape_list, m_event_pos_curr, dist, p)) {
 				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
 				pt_sub(p, m_event_pos_curr, d);
 				dist = static_cast<float>(sqrt(pt_abs2(d))) / p_scale;
 			}
-			// 近傍の頂点によって位置が変わらなかったか判定する.
-			if (!m_event_shape_pressed->set_pos_anc(
-				m_event_pos_curr, m_event_anc_pressed, dist, m_image_keep_aspect)) {
+			// 近傍の頂点によって点が変わらなかったか判定する.
+			if (!m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, dist, m_image_keep_aspect)) {
 				// 変わらなかったならば, 方眼に合わせる.
-				m_event_shape_pressed->set_pos_anc(
-					p, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
+				m_event_shape_pressed->set_pos_anc(p, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 			}
 		}
 		else if (g_snap) {
 			pt_round(m_event_pos_curr, m_main_page.m_grid_base + 1.0, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anc(
-				m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 		}
-		else if (m_snap_interval >= FLT_MIN) {
-			slist_find_vertex_closest(
-				m_main_page.m_shape_list, m_event_pos_curr,
-				m_snap_interval / m_main_page.m_page_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed,
-				m_snap_interval / m_main_page.m_page_scale, m_image_keep_aspect);
+		else if (m_snap_point >= FLT_MIN) {
+			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_page.m_page_scale, m_event_pos_curr);
+			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, m_snap_point / m_main_page.m_page_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
-			page_bbox_update();
+			main_bbox_update();
 			main_panel_size();
 			xcvd_is_enabled();
 		}
@@ -563,18 +548,18 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_finish_moving(void)
 	{
-		const auto g_snap = m_main_page.m_grid_snap;
-		const auto v_stick = m_snap_interval;
+		const auto g_snap = m_main_page.m_snap_grid;
+		const auto interval = m_snap_point;
 		const auto g_base = m_main_page.m_grid_base;
 		const auto p_scale = m_main_page.m_page_scale;
 
 		// 方眼にくっつける, かつ頂点にくっつける.
-		if (g_snap && v_stick >= FLT_MIN) {
+		if (g_snap && interval >= FLT_MIN) {
 			D2D1_POINT_2F pos{};	// 近傍への位置ベクトル
 			if (event_get_nearby_grid(m_main_page.m_shape_list, g_base + 1.0f, pos)) {
 				D2D1_POINT_2F v_pos{};	// 頂点への位置ベクトル
-				if (event_get_nearby_vertex(
-					m_main_page.m_shape_list, v_stick / p_scale, v_pos) &&
+				if (event_get_nearby_point(
+					m_main_page.m_shape_list, interval / p_scale, v_pos) &&
 					pt_abs2(v_pos) < pt_abs2(pos)) {
 					// 方眼と頂点のどちらか短い方の距離を, 差分に得る.
 					pos = v_pos;
@@ -591,16 +576,16 @@ namespace winrt::GraphPaper::implementation
 			}
 		} 
 		// 頂点にくっつける
-		else if (v_stick >= FLT_MIN) {
+		else if (interval >= FLT_MIN) {
 			D2D1_POINT_2F pos{};	// 頂点との差分
-			if (event_get_nearby_vertex(
-				m_main_page.m_shape_list, v_stick / p_scale, pos)) {
+			if (event_get_nearby_point(
+				m_main_page.m_shape_list, interval / p_scale, pos)) {
 				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
-			page_bbox_update();
+			main_bbox_update();
 			main_panel_size();
 			xcvd_is_enabled();
 		}
@@ -703,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 矩形選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RECT) {
-			page_draw();
+			main_draw();
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
@@ -713,16 +698,15 @@ namespace winrt::GraphPaper::implementation
 			slist_move_selected(m_main_page.m_shape_list, pos);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
-			page_draw();
+			main_draw();
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
-			m_event_shape_pressed->set_pos_anc(
-				m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
+			// ポインターの現在位置を, ポインターが押された図形の部位の点に格納する.
+			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
-			page_draw();
+			main_draw();
 		}
 		// 状態が, 左ボタンを押している状態, または
 		// クリック後に左ボタンを押した状態か判定する.
@@ -764,10 +748,9 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_DEFORM;
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_position(m_event_shape_pressed, m_event_anc_pressed);
-					m_event_shape_pressed->set_pos_anc(
-						m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
+					m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 				}
-				page_draw();
+				main_draw();
 			}
 		}
 	}
@@ -932,7 +915,7 @@ namespace winrt::GraphPaper::implementation
 				// 解除された図形があるか判定する.
 				if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 			else {
@@ -1019,7 +1002,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				unselect_all();
 				// 頂点をくっつける閾値がゼロより大きいか判定する.
-				if (m_snap_interval >= FLT_MIN) {
+				if (m_snap_point >= FLT_MIN) {
 					const bool boxed = (
 						m_drawing_tool == DRAWING_TOOL::ELLIPSE ||
 						m_drawing_tool == DRAWING_TOOL::POLY ||
@@ -1028,13 +1011,12 @@ namespace winrt::GraphPaper::implementation
 						m_drawing_tool == DRAWING_TOOL::RULER ||
 						m_drawing_tool == DRAWING_TOOL::TEXT
 					);
-					const float v_stick = m_snap_interval / m_main_page.m_page_scale;
+					const float interval = m_snap_point / m_main_page.m_page_scale;
 					const double g_len = max(m_main_page.m_grid_base, 0.0) + 1.0;
-					event_pos_snap_to(m_main_page.m_shape_list, boxed, v_stick,
-						m_main_page.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
+					event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_main_page.m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
 				// 方眼に合わせるか判定する.
-				else if (m_main_page.m_grid_snap) {
+				else if (m_main_page.m_snap_grid) {
 					// 押された位置よ離された位置を方眼の大きさで丸める.
 					const double g_len = max(m_main_page.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
@@ -1101,7 +1083,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
 		m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
-		page_draw();
+		main_draw();
 	}
 
 	//------------------------------
@@ -1227,7 +1209,24 @@ namespace winrt::GraphPaper::implementation
 		if (mod == VirtualKeyModifiers::Control) {
 			// 拡大縮小
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
-			zoom_delta(w_delta);
+			if (w_delta > 0 &&
+				m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
+				m_main_page.m_page_scale *= 1.1f;
+				zoom_is_cheched(m_main_page.m_page_scale);
+				main_panel_size();
+				main_draw();
+				status_bar_set_pos();
+				status_bar_set_zoom();
+			}
+			else if (w_delta < 0 &&
+				m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
+				m_main_page.m_page_scale /= 1.1f;
+				zoom_is_cheched(m_main_page.m_page_scale);
+				main_panel_size();
+				main_draw();
+				status_bar_set_pos();
+				status_bar_set_zoom();
+			}
 		}
 		// シフトキーが押されてるか判定する.
 		else if (mod == VirtualKeyModifiers::Shift) {
@@ -1235,7 +1234,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, p_scale)) {
-				page_draw();
+				main_draw();
 				status_bar_set_pos();
 			}
 		}
@@ -1245,7 +1244,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_vert(), w_delta, p_scale)) {
-				page_draw();
+				main_draw();
 				status_bar_set_pos();
 			}
 		}

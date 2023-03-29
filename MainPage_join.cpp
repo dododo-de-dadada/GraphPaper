@@ -9,7 +9,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_join_miter_limit";
+	//constexpr wchar_t DLG_TITLE[] = L"str_join_miter_limit";
 
 	// 線枠メニューの「端の形式」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -108,9 +108,9 @@ namespace winrt::GraphPaper::implementation
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
 		s->set_select(true);
-		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_snap_interval, false);
-		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_snap_interval, false);
-		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_snap_interval, false);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_snap_point, false);
+		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_snap_point, false);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_snap_point, false);
 		m_prop_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -149,12 +149,12 @@ namespace winrt::GraphPaper::implementation
 				float new_width;
 				m_prop_page.m_shape_list.back()->get_join_miter_limit(new_limit);
 				m_prop_page.m_shape_list.back()->get_stroke_width(new_width);
-				const bool flag_limit = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
-				const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
-				if (flag_limit || flag_width) {
+				const bool limit_changed = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
+				const bool width_changed = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+				if (limit_changed || width_changed) {
 					ustack_push_null();
 					ustack_is_enable();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}

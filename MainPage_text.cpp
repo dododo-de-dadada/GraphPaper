@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
-		const auto g_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+		const auto g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag) {
 			ustack_push_null();
 			main_panel_size();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -103,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 				if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -242,9 +242,10 @@ namespace winrt::GraphPaper::implementation
 		const auto str_text_pad_horz{ ResourceLoader::GetForCurrentView().GetString(L"str_text_pad_horz") + L": " };
 		const auto str_text_pad_vert{ ResourceLoader::GetForCurrentView().GetString(L"str_text_pad_vert") + L": " };
 		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_text_padding") };
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+		const auto unit = m_len_unit;
+		const auto dpi = m_main_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
+		wchar_t buf[32];
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
@@ -256,11 +257,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(pad.width);
-		constexpr wchar_t* HEADER[] = { L"str_text_pad_horz", L"str_text_pad_vert" };
-		const auto unit = m_len_unit;
-		const auto dpi = m_main_d2d.m_logical_dpi;
-		const auto g_len = m_prop_page.m_grid_base + 1.0f;
-		wchar_t buf[32];
+
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, pad.width, dpi, g_len, buf);
 		dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
 
@@ -320,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 				if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -329,45 +326,5 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
 	}
-
-	// スライダーの値が変更された.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	// 戻り値	なし
-	/*
-	template <UNDO_T U, int S>
-	void MainPage::text_slider_val_changed(
-		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		if constexpr (U == UNDO_T::TEXT_LINE_SP && S == 0) {
-			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_T::TEXT_LINE_SP, 0>(val);
-			if (m_prop_page.m_shape_list.back()->set_text_line_sp(val)) {
-				prop_dialog_draw();
-			}
-		}
-		else if constexpr (U == UNDO_T::TEXT_PAD && S == 0) {
-			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_T::TEXT_PAD, 0>(val);
-			D2D1_SIZE_F pad;
-			m_prop_page.m_shape_list.back()->get_text_pad(pad);
-			pad.width = static_cast<FLOAT>(val);
-			if (m_prop_page.m_shape_list.back()->set_text_pad(mar)) {
-				prop_dialog_draw();
-			}
-		}
-		else if constexpr (U == UNDO_T::TEXT_PAD && S == 1) {
-			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<UNDO_T::TEXT_PAD, 1>(val);
-			D2D1_SIZE_F mar;
-			m_prop_page.m_shape_list.back()->get_text_mar(mar);
-			mar.height = static_cast<FLOAT>(val);
-			if (m_prop_page.m_shape_list.back()->set_text_mar(mar)) {
-				prop_dialog_draw();
-			}
-		}
-	}
-	*/
 
 }

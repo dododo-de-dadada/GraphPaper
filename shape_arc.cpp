@@ -756,10 +756,9 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を, 部位の位置に格納する.
-	bool ShapeArc::set_pos_anc(
-		const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
-		noexcept
+	// 値を, 指定した部位の点に格納する.
+	// snap_point	他の点との間隔 (この値より離れた点は無視する)
+	bool ShapeArc::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept
 	{
 		if (anc == ANC_TYPE::ANC_A_START) {
 			const double rot = M_PI * m_angle_rot / 180.0;
@@ -876,7 +875,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			if (ShapePath::set_pos_anc(val, anc, limit, keep_aspect)) {
+			if (ShapePath::set_pos_anc(val, anc, snap_point, keep_aspect)) {
 				const double rot = M_PI * m_angle_rot / 180.0;
 				const double c = cos(rot);
 				const double s = sin(rot);

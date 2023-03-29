@@ -61,19 +61,19 @@ namespace winrt::GraphPaper::implementation
 		if (sender == tmfi_background_pattern()) {
 			if (m_background_show != tmfi_background_pattern().IsChecked()) {
 				m_background_show = tmfi_background_pattern().IsChecked();
-				page_draw();
+				main_draw();
 			}
 		}
 		else if (sender == rmfi_background_white()) {
 			if (!equal(m_background_color, COLOR_WHITE)) {
 				m_background_color = COLOR_WHITE;
-				page_draw();
+				main_draw();
 			}
 		}
 		else if (sender == rmfi_background_black()) {
 			if (!equal(m_background_color, COLOR_BLACK)) {
 				m_background_color = COLOR_BLACK;
-				page_draw();
+				main_draw();
 			}
 		}
 	}

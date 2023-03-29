@@ -245,9 +245,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (flag) {
 				xcvd_is_enabled();
-				page_bbox_update();
+				main_bbox_update();
 				main_panel_size();
-				page_draw();
+				main_draw();
 				// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 				if (summary_is_visible()) {
 					summary_update();
@@ -309,9 +309,9 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_rcnt++;
 			}
 			xcvd_is_enabled();
-			page_bbox_update();
+			main_bbox_update();
 			main_panel_size();
-			page_draw();
+			main_draw();
 			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 			if (summary_is_visible()) {
 				summary_update();

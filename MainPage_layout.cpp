@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// レイアウトを既定値に戻す.
 		layout_init();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
@@ -105,8 +105,8 @@ namespace winrt::GraphPaper::implementation
 		grid_show_is_checked(g_show);
 
 		bool g_snap;
-		m_main_page.get_grid_snap(g_snap);
-		tmfi_grid_snap().IsChecked(g_snap);
+		m_main_page.get_snap_grid(g_snap);
+		tmfi_snap_grid().IsChecked(g_snap);
 
 		float scale;
 		m_main_page.get_page_scale(scale);
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_grid_color(grid_color);
 			m_main_page.set_grid_emph(GRID_EMPH_0);
 			m_main_page.set_grid_show(GRID_SHOW::BACK);
-			m_main_page.set_grid_snap(true);
+			m_main_page.set_snap_grid(true);
 			m_main_page.set_page_color(COLOR_WHITE);
 			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_len_unit = LEN_UNIT::PIXEL;
 		m_color_notation = COLOR_BASE_N::DEC;
-		m_snap_interval = SNAP_INTERVAL_DEF_VAL;
+		m_snap_point = SNAP_INTERVAL_DEF_VAL;
 		m_status_bar = STATUS_BAR_DEF_VAL;
 		m_background_show = false;
 		m_background_color = COLOR_WHITE;

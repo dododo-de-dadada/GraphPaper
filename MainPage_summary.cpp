@@ -423,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニュー項目の使用の可否を設定する.
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 	}
 
 	// 一覧の図形を選択解除する.

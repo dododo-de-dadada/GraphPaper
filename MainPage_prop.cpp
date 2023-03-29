@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_dialog.cpp
+// MainPage_prop.cpp
 // 設定ダイアログ
 //-------------------------------
 #include "pch.h"
@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 //	int debug_dialog_cnt = 0;
 //#endif
 
-	// 設定ダイアログのスワップチェーンパネルを表示する
+	// 属性ダイアログの図形を表示する.
 	void MainPage::prop_dialog_draw(void)
 	{
 		if (!scp_prop_panel().IsLoaded()) {
@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
-		// 描画環境の設定.
+		// ひな型に描画に必要な変数を格納する.
 		m_prop_page.begin_draw(m_prop_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
 		m_prop_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
 		m_prop_d2d.m_d2d_context->BeginDraw();
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_draw.unlock();
 	}
 
-	// ダイアログのリストビューがロードされた.
+	// 属性ダイアログのリストがロードされた.
 	void MainPage::prop_dialog_list_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された行が表示されるようスクロールする.
@@ -98,16 +98,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 属性ダイアログが開かれた.
-	void MainPage::setting_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	// 属性ダイアログが開いた.
+	void MainPage::prop_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::OPENED;
 //#endif
 	}
 
-	// 属性ダイアログが閉じられた.
-	void MainPage::setting_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
+	// 属性ダイアログが閉じた.
+	void MainPage::prop_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
 	{
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::CLOSED;
@@ -118,8 +118,8 @@ namespace winrt::GraphPaper::implementation
 //#endif
 	}
 
-	// 属性ダイアログが閉じられた.
-	void MainPage::setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
+	// 属性ダイアログがアンロードされた
+	void MainPage::prop_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
 	{
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;

@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 		cd_conf_save_dialog().Hide();
 		cd_edit_text_dialog().Hide();
 		cd_message_dialog().Hide();
-		cd_snap_interval().Hide();
+		cd_snap_point().Hide();
 		cd_setting_dialog().Hide();
 		cd_page_size_dialog().Hide();
 
@@ -379,7 +379,7 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
-		page_bbox_update();
+		main_bbox_update();
 		main_panel_size();
 		status_bar_set_pos();
 		status_bar_set_draw();
@@ -519,7 +519,7 @@ namespace winrt::GraphPaper::implementation
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_notation = static_cast<COLOR_BASE_N>(dt_reader.ReadUInt16());
-			m_snap_interval = dt_reader.ReadSingle();
+			m_snap_point = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
 
@@ -582,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 				if (scroll_v >= sb_vert().Minimum() && scroll_v <= sb_vert().Maximum()) {
 					sb_vert().Value(scroll_v);
 				}
-				page_draw();
+				main_draw();
 			}
 		}
 		// 結果を返し終了する.
@@ -892,7 +892,7 @@ namespace winrt::GraphPaper::implementation
 			// その他
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_notation));
-			dt_writer.WriteSingle(m_snap_interval);
+			dt_writer.WriteSingle(m_snap_point);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);
 
@@ -958,7 +958,7 @@ namespace winrt::GraphPaper::implementation
 					message_show(ICON_DEBUG, DEBUG_MSG, {});
 				}
 #endif
-				page_draw();
+				main_draw();
 			}
 			else if constexpr (SETTING_ONLY) {
 				message_show(ICON_ALERT, L"str_err_save", s_file.Path());
@@ -1065,7 +1065,7 @@ namespace winrt::GraphPaper::implementation
 
 		file_recent_add(nullptr);
 		file_finish_reading();
-		page_draw();
+		main_draw();
 
 	}
 

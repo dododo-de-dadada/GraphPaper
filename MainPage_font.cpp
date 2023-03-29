@@ -119,6 +119,7 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_font_family") };
 		m_prop_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
 			// ローカル名をリストアイテムに格納する.
@@ -139,41 +140,42 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::prop_dialog_list_loaded });
-		const auto changed_token = lv_dialog_list().SelectionChanged(
-			[this](auto, auto)
-			{
-				auto i = lv_dialog_list().SelectedIndex();
-				m_prop_page.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
-				if (scp_prop_panel().IsLoaded()) {
-					prop_dialog_draw();
-				}
-			}
-		);
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(
 			static_cast<float>(scp_prop_panel().Width()),
 			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
-		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_family")));
+		cd_setting_dialog().Title(box_value(str_title));
 		m_mutex_event.lock();
-		const auto d_result = co_await cd_setting_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			wchar_t* samp_val;
-			m_prop_page.m_shape_list.back()->get_font_family(samp_val);
-			if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				page_draw();
+		{
+			const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::prop_dialog_list_loaded });
+			const auto revoker1 = lv_dialog_list().SelectionChanged(
+				winrt::auto_revoke,
+				[this](auto, auto)
+				{
+					auto i = lv_dialog_list().SelectedIndex();
+					m_prop_page.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
+					if (scp_prop_panel().IsLoaded()) {
+						prop_dialog_draw();
+					}
+				}
+			);
+			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				wchar_t* samp_val;
+				m_prop_page.m_shape_list.back()->get_font_family(samp_val);
+				if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
+					ustack_push_null();
+					xcvd_is_enabled();
+					main_draw();
+				}
 			}
 		}
 		slist_clear(m_prop_page.m_shape_list);
-		lv_dialog_list().Loaded(loaded_token);
-		lv_dialog_list().SelectionChanged(changed_token);
+		//lv_dialog_list().Loaded(loaded_token);
+		//lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
 		//UnloadObject(cd_setting_dialog());
-		page_draw();
+		main_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -319,13 +321,13 @@ namespace winrt::GraphPaper::implementation
 				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
 		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
-		page_draw();
+		main_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -380,7 +382,7 @@ namespace winrt::GraphPaper::implementation
 			if (ustack_push_set<UNDO_T::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				page_draw();
+				main_draw();
 			}
 		}
 		slist_clear(m_prop_page.m_shape_list);
@@ -388,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
-		page_draw();
+		main_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -411,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -422,7 +424,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -433,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -485,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 				if (ustack_push_set<UNDO_T::FONT_WEIGHT>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}

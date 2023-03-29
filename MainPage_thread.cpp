@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 			m_thread_win_visible = args.Visible();
 			if (m_thread_win_visible) {
 				event_set_cursor();
-				page_draw();
+				main_draw();
 			}
 		}
 	}

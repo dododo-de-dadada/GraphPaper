@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 			unselect_all();
-			page_draw();
+			main_draw();
 		}
 		else {
 			drawing_tool_click(rmfi_selection_tool(), nullptr);
@@ -68,13 +68,13 @@ namespace winrt::GraphPaper::implementation
 			summary_select_all();
 		}
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
 	// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
-	// lt	範囲の左上位置
-	// rb	範囲の右下位置
+	// lt	範囲の左上点
+	// rb	範囲の右下点
 	bool MainPage::select_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
 		bool done = false;
@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		xcvd_is_enabled();
-		page_draw();
+		main_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 		if (k_mod == VirtualKeyModifiers::Control) {
 			ustack_push_select(s);
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				if (s->is_selected()) {
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
 				xcvd_is_enabled();
-				page_draw();
+				main_draw();
 			}
 		}
 		else {
@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				ustack_push_select(s);
 				xcvd_is_enabled();
-				page_draw();
+				main_draw();
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_select(s);
@@ -285,8 +285,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矩形に含まれる図形の選択を反転する.
-	// lt	矩形の左上位置
-	// rb	矩形の右下位置
+	// lt	矩形の左上点
+	// rb	矩形の右下点
 	bool MainPage::toggle_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
 		bool done = false;

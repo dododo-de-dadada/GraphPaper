@@ -19,6 +19,7 @@
 #include <winrt/Windows.UI.Xaml.Navigation.h>
 
 // Microsoft.UI.Xaml を使用するために追加.
+//#include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 #include <winrt/Microsoft.UI.Xaml.XamlTypeInfo.h>
 

@@ -46,10 +46,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する.
 	// val	値
 	// anc	図形の部位
-	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapePath::set_pos_anc(
-		const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool /*keep_aspect*/)
-		noexcept
+	// snap_point	他の点との間隔 (この値より離れた点は無視する)
+	bool ShapePath::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
@@ -88,12 +86,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 限界距離がゼロでないか判定する.
-			if (limit >= FLT_MIN) {
+			if (snap_point >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
 				for (size_t i = a_cnt; i < d_cnt; i++) {
 					pt_add(p[i], m_pos[i], p[i + 1]);
 				}
-				const double dd = static_cast<double>(limit) * static_cast<double>(limit);
+				const double dd = static_cast<double>(snap_point) * static_cast<double>(snap_point);
 				for (size_t i = 0; i < d_cnt + 1; i++) {
 					// 頂点が, 変更する頂点か判定する.
 					if (i == a_cnt) {

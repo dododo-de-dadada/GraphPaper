@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_null();
 					ustack_is_enable();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 
 			}
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
 			ustack_push_null();
 			ustack_is_enable();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -266,14 +266,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
 		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
-	}
-
-	// レイアウトメニューの「方眼に合わせる」が選択された.
-	void MainPage::grid_snap_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		//ustack_push_set<UNDO_T::GRID_SNAP>(&m_main_page, tmfi_grid_snap().IsChecked());
-		m_main_page.m_grid_snap = tmfi_grid_snap().IsChecked();
-		status_bar_set_pos();
 	}
 
 }

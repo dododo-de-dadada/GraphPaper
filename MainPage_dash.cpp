@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 				if (flag_patt || flag_width || flag_style) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -362,7 +362,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}

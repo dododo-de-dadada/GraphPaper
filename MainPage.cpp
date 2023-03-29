@@ -32,6 +32,12 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_GRID_UNIT = L"%.3lf g";	// グリッド単位の書式
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
+	// 方眼を表示する.
+	static void page_draw_grid(
+		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
+		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
+		const float p_scale, const D2D1_SIZE_F g_size);
+
 	//-------------------------------
 	// 待機カーソルを表示する.
 	// 戻り値	それまで表示されていたカーソル.
@@ -52,27 +58,27 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// 色成分を文字列に変換する.
-	// c_no	色の表記
+	// c_base	色の基数
 	// c_val	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	//-------------------------------
-	void conv_col_to_str(const COLOR_BASE_N c_no, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(const COLOR_BASE_N c_base, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
-		// 色の表記が 10 進数か判定する.
-		if (c_no == COLOR_BASE_N::DEC) {
+		// 色の基数が 10 進数か判定する.
+		if (c_base == COLOR_BASE_N::DEC) {
 			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_val));
 		}
-		// 色の表記が 16 進数か判定する.
-		else if (c_no == COLOR_BASE_N::HEX) {
+		// 色の基数が 16 進数か判定する.
+		else if (c_base == COLOR_BASE_N::HEX) {
 			swprintf_s(t_buf, t_len, L"x%02X", static_cast<uint32_t>(std::round(c_val)));
 		}
-		// 色の表記が実数か判定する.
-		else if (c_no == COLOR_BASE_N::REAL) {
+		// 色の基数が実数か判定する.
+		else if (c_base == COLOR_BASE_N::REAL) {
 			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
 		}
-		// 色の表記がパーセントか判定する.
-		else if (c_no == COLOR_BASE_N::PCT) {
+		// 色の基数がパーセントか判定する.
+		else if (c_base == COLOR_BASE_N::PCT) {
 			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {
@@ -315,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// スワップチェーンパネルの寸法が変わった.
+	// メインのスワップチェーンパネルの寸法が変わった.
 	//------------------------------
 	void MainPage::main_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
@@ -324,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// スワップチェーンパネルがロードされた.
+	// メインのスワップチェーンパネルがロードされた.
 	//------------------------------
 	void MainPage::main_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -335,15 +341,14 @@ namespace winrt::GraphPaper::implementation
 #endif // _DEBUG
 
 		m_main_d2d.SetSwapChainPanel(scp_main_panel());
-		page_draw();
+		main_draw();
 	}
 
 	//------------------------------
-	// スワップチェーンパネルの寸法が変わった.
+	// メインのスワップチェーンパネルの大きさが変わった.
 	// args	イベントの引数
 	//------------------------------
-	void MainPage::main_panel_size_changed(
-		IInspectable const& sender, SizeChangedEventArgs const& args)
+	void MainPage::main_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 	{
 		if (sender != scp_main_panel()) {
 			return;
@@ -354,9 +359,138 @@ namespace winrt::GraphPaper::implementation
 		scroll_set(w, h);
 		if (scp_main_panel().IsLoaded()) {
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
 
+	//------------------------------
+	// メインのスワップチェーンパネルの大きさを設定する.
+	//------------------------------
+	void MainPage::main_panel_size(void)
+	{
+		const float w = static_cast<float>(scp_main_panel().ActualWidth());
+		const float h = static_cast<float>(scp_main_panel().ActualHeight());
+		if (w > 0.0f && h > 0.0f) {
+			scroll_set(w, h);
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+		}
+	}
+
+	// 図形をもとにメインのページ図形の境界矩形を更新する.
+	// s	追加された図形
+	void MainPage::main_bbox_update(const Shape* s) noexcept
+	{
+		s->get_bound(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
+	}
+
+	// メインのページ図形の境界矩形を更新する.
+	void MainPage::main_bbox_update(void) noexcept
+	{
+		// リスト中の図形を囲む矩形を得る.
+		slist_bound_shape(m_main_page.m_shape_list, m_main_bbox_lt, m_main_bbox_rb);
+
+		// 矩形の右下点がページの右下点より小さいなら, ページの右下点を格納する.
+		const auto rb_x = m_main_page.m_page_size.width - m_main_page.m_page_margin.left;
+		if (m_main_bbox_rb.x < rb_x) {
+			m_main_bbox_rb.x = rb_x;
+		}
+		const auto rb_y = m_main_page.m_page_size.height - m_main_page.m_page_margin.top;
+		if (m_main_bbox_rb.y < rb_y) {
+			m_main_bbox_rb.y = rb_y;
+		}
+
+		// 矩形の左上点がページの左上点より大きいなら, ページの左上点を格納する.
+		const auto lb_x = -m_main_page.m_page_margin.left;
+		if (m_main_bbox_lt.x > lb_x) {
+			m_main_bbox_lt.x = lb_x;
+		}
+		const auto lb_y = -m_main_page.m_page_margin.left;
+		if (m_main_bbox_lt.y > lb_y) {
+			m_main_bbox_lt.y = lb_y;
+		}
+	}
+
+	// メインのページ図形を表示する.
+	void MainPage::main_draw(void)
+	{
+		if (!scp_main_panel().IsLoaded()) {
+			return;
+		}
+		if (!m_mutex_draw.try_lock()) {
+			// ロックできない場合
+			return;
+		}
+
+		// ひな型に描画に必要な変数を格納する.
+		const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
+		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), p_scale);
+
+		// 描画環境を保存, 描画を開始する.
+		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
+		m_main_d2d.m_d2d_context->BeginDraw();
+		m_main_d2d.m_d2d_context->Clear(m_background_color);
+
+		// 背景パターンを描画する,
+		if (m_background_show) {
+			const D2D1_RECT_F w_rect{	// ウィンドウの矩形
+				0, 0, m_main_d2d.m_logical_width, m_main_d2d.m_logical_height
+			};
+			m_main_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+		}
+
+		// 変換行列に拡大縮小と平行移動を設定する.
+		D2D1_MATRIX_3X2_F t{};	// 変換行列
+		t.m11 = t.m22 = p_scale;
+		t.dx = static_cast<FLOAT>(-(m_main_bbox_lt.x + sb_horz().Value()) * p_scale);
+		t.dy = static_cast<FLOAT>(-(m_main_bbox_lt.y + sb_vert().Value()) * p_scale);
+		m_main_d2d.m_d2d_context->SetTransform(&t);
+
+		// 図形を (ページも) 表示する.
+		m_main_page.draw();
+
+		// 矩形選択している状態なら, 作図ツールに応じた補助線を表示する.
+		if (m_event_state == EVENT_STATE::PRESS_RECT) {
+			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
+				m_drawing_tool == DRAWING_TOOL::RECT ||
+				m_drawing_tool == DRAWING_TOOL::TEXT ||
+				m_drawing_tool == DRAWING_TOOL::RULER) {
+				m_main_page.auxiliary_draw_rect(m_event_pos_pressed, m_event_pos_curr);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
+				m_main_page.auxiliary_draw_bezi(m_event_pos_pressed, m_event_pos_curr);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
+				m_main_page.auxiliary_draw_elli(m_event_pos_pressed, m_event_pos_curr);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
+				m_main_page.auxiliary_draw_line(m_event_pos_pressed, m_event_pos_curr);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
+				m_main_page.auxiliary_draw_rrect(m_event_pos_pressed, m_event_pos_curr);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
+				m_main_page.auxiliary_draw_poly(m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
+				m_main_page.auxiliary_draw_arc(m_event_pos_pressed, m_event_pos_curr);
+			}
+		}
+
+		// 描画を終了し結果を得る. 保存された描画環境を元に戻す.
+		const HRESULT hres = m_main_d2d.m_d2d_context->EndDraw();
+		m_main_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
+
+		// 結果が S_OK でない場合,
+		if (hres != S_OK) {
+			// 「描画できません」メッセージダイアログを表示する.
+			message_show(ICON_ALERT, L"str_err_draw", {});
+		}
+		// 結果が S_OK の場合,
+		else {
+			// スワップチェーンの内容を画面に表示する.
+			m_main_d2d.Present();
+		}
+		m_mutex_draw.unlock();
+	}
 }

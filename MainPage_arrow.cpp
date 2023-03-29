@@ -15,83 +15,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ComboBoxItem;
 	using winrt::Windows::UI::Xaml::Controls::Slider;
 
-	/*
-	void MainPage::arrow_selection_changed(
-		IInspectable const&, SelectionChangedEventArgs const&) noexcept
-	{
-		if (dialog_radio_btns().SelectedIndex() == 0) {
-			if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
-				prop_dialog_draw();
-			}
-		}
-		else if (dialog_radio_btns().SelectedIndex() == 1) {
-			if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
-				prop_dialog_draw();
-			}
-		}
-	}
-*/
-
-	//------------------------------
-	// 値をスライダーのヘッダーに格納する.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// val	格納する値
-	//------------------------------
-	/*
-	static void arrow_slider_set_header(
-		const Slider& slider, const wchar_t* res, LEN_UNIT unit, const float dpi, const float g_len, const float val)
-	{
-		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
-		slider.Header(box_value(ResourceLoader::GetForCurrentView().GetString(res) + L": " + buf));
-	}
-	*/
-
-	//------------------------------
-	// スライダーの値が変更された.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	//------------------------------
-	/*
-	template <int S>
-	void MainPage::arrow_slider_val_changed(
-		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		if constexpr (S == 0) {
-			const float val = static_cast<float>(args.NewValue());
-			ARROW_SIZE a_size;
-			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<S>(val);
-			a_size.m_width = static_cast<FLOAT>(val);
-			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				prop_dialog_draw();
-			}
-		}
-		else if constexpr (S == 1) {
-			const float val = static_cast<float>(args.NewValue());
-			ARROW_SIZE a_size;
-			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<S>(val);
-			a_size.m_length = static_cast<FLOAT>(val);
-			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				prop_dialog_draw();
-			}
-		}
-		else if constexpr (S == 2) {
-			const float val = static_cast<float>(args.NewValue());
-			ARROW_SIZE a_size;
-			m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
-			arrow_slider_set_header<S>(val);
-			a_size.m_offset = static_cast<FLOAT>(val);
-			if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-				prop_dialog_draw();
-			}
-		}
-	}
-	*/
-
 	//------------------------------
 	// 線枠メニューの「矢じるしの寸法...」が選択された.
 	//------------------------------
@@ -261,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 				if (flag_size || flag_style) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -311,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}

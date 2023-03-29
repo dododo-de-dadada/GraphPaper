@@ -497,11 +497,11 @@ namespace winrt::GraphPaper::implementation
 			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 			if (m_text_fit_frame_to_text) {
 				ustack_push_position(s, ANC_TYPE::ANC_SE);
-				s->fit_frame_to_text(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 	}
 	*/
@@ -611,7 +611,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_null();
 		ustack_is_enable();
-		page_draw();
+		main_draw();
 		status_bar_set_pos();
 	}
 
@@ -661,7 +661,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		if (flag) {
-			page_draw();
+			main_draw();
 		}
 		else {
 			// ŒŸõ‚Å‚«‚È‚¢, ‚©‚Â’uŠ·‚à‚³‚ê‚Ä‚È‚¢ê‡,
@@ -713,7 +713,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			ustack_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
-			page_draw();
+			main_draw();
 		}
 		else {
 			// ŒŸõ‚Å‚«‚È‚¢ê‡,

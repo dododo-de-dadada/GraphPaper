@@ -550,9 +550,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する.
 	// val	値
 	// anc	図形の部位
-	// limit	他の頂点との限界距離 (この値未満になるなら, 図形の部位が指定する頂点を他の頂点に位置に合わせる)
 	// keep_aspect	画像の縦横比を維持
-	bool ShapeImage::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float /*limit*/, const bool keep_aspect) noexcept
+	bool ShapeImage::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float, const bool keep_aspect) noexcept
 	{
 		D2D1_POINT_2F new_p;
 		pt_round(val, PT_ROUND, new_p);

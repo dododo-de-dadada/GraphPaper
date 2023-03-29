@@ -788,27 +788,30 @@
 			</muxc:MenuBarItem>
 			<!-- レイアウトメニュー -->
 			<muxc:MenuBarItem x:Name="mbi_layout" x:Uid="mbi_layout" AccessKey="L" Title="Layout">
-				<!-- レイアウトメニュー -->
+				<!-- 方眼の表示 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show"/>
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
+                <!-- 方眼の大きさ -->
+                <MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
 					<MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Grid Size..." />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click" Text="Grid Color..." />
+                <!-- 方眼の色 -->
+                <MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="Pattern 1" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Pattern 2" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_3" x:Uid="rmfi_grid_emph_3" Click="grid_emph_click" Text="Pattern 3" GroupName="gn_grid_emph" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
-				<!-- ページメニュー -->
+				<!-- ページの大きさ -->
 				<MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click_async" Text="Page Size..." />
-				<MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
+                <!-- ページの色 -->
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
                 <MenuFlyoutSeparator />
                 <!-- 背景パターン -->
                 <MenuFlyoutSubItem x:Uid="mfsi_background_pattern" Text="Background Pattern">
@@ -871,7 +874,7 @@
 						x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid"
 						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
-                <!-- 色の表記 -->
+                <!-- 色の基数 -->
                 <MenuFlyoutSubItem x:Name="mfsi_color_notation" x:Uid="mfsi_color_notation" Text="Color Base Number">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
@@ -973,10 +976,10 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<ToggleMenuFlyoutItem
-					x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
+					x:Name="tmfi_snap_grid" x:Uid="tmfi_snap_grid" Click="snap_grid_click" Text="Snap Point to Grid" />
 				<MenuFlyoutItem
-					x:Name="mfi_snap_interval" x:Uid="mfi_snap_interval"
-					Click="snap_interval_click_async" Text="Stick to Vertex..." />
+					x:Name="mfi_snap_point" x:Uid="mfi_snap_point"
+					Click="snap_point_click_async" Text="Snap Point to Point Interval..." />
 				<MenuFlyoutSeparator />
 				<!-- バージョン情報メニュー -->
 				<MenuFlyoutItem 
@@ -1162,51 +1165,60 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <TextBox
-					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,8,0,12"
-                    Grid.Column="0" Grid.Row="0"
+                <muxc:NumberBox
+					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,0,4,12"
+                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width"
-					PlaceholderText="Must be between 1 and 32767."
-					TextChanged="page_size_text_changed" />
-                <TextBox
-					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="0,8,0,12"
-                    Grid.Column="1" Grid.Row="0"
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
+                    ValueChanged="page_size_value_changed" />
+                <muxc:NumberBox
+					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="4,0,0,12"
+                    Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height"
-					PlaceholderText="Must be between 1 and 32767."
-					TextChanged="page_size_text_changed" />
-                <TextBox
-					x:Name="tx_page_margin_left" x:Uid="tx_page_margin_left" Margin="0,8,0,12"
-                    Grid.Column="0" Grid.Row="1"
-					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
-					PlaceholderText="Must be between 0 and 32767."
-					TextChanged="page_size_text_changed" />
-                <TextBox
-					x:Name="tx_page_margin_top" x:Uid="tx_page_margin_top" Margin="0,8,0,12"
-                    Grid.Column="1" Grid.Row="1"
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
+                    ValueChanged="page_size_value_changed" />
+                <muxc:NumberBox
+					x:Name="tx_page_margin_top" x:Uid="tx_page_margin_top" Margin="0,0,0,12"
+                    Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Top Padding"
-					PlaceholderText="Must be between 0 and 32767."
-					TextChanged="page_size_text_changed" />
-                <TextBox
-					x:Name="tx_page_margin_right" x:Uid="tx_page_margin_right" Margin="0,8,0,12"
-                    Grid.Column="0" Grid.Row="2"
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
+                    ValueChanged="page_size_value_changed" />
+                <muxc:NumberBox
+					x:Name="tx_page_margin_left" x:Uid="tx_page_margin_left" Margin="0,0,4,12"
+                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
+                    ValueChanged="page_size_value_changed" />
+                <muxc:NumberBox
+					x:Name="tx_page_margin_right" x:Uid="tx_page_margin_right" Margin="4,0,0,12"
+                    Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="2"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Right Padding"
-					PlaceholderText="Must be between 0 and 32767."
-					TextChanged="page_size_text_changed" />
-                <TextBox
-					x:Name="tx_page_margin_bottom" x:Uid="tx_page_margin_bottom" Margin="0,8,0,12"
-                    Grid.Column="1" Grid.Row="2"
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
+                    ValueChanged="page_size_value_changed" />
+                <muxc:NumberBox
+					x:Name="tx_page_margin_bottom" x:Uid="tx_page_margin_bottom" Margin="0,0,0,12"
+                    Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
-					PlaceholderText="Must be between 0 and 32767."
-					TextChanged="page_size_text_changed" />
+                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
+                    ValueChanged="page_size_value_changed" />
                 <ComboBox
-					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,8,0,12"
-                    Grid.Column="0" Grid.Row="3"
-					SelectionChanged="len_unit_selection_changed">
+					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,0,0,12"
+                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4"
+					SelectionChanged="page_size_selection_changed">
                     <ComboBoxItem 
 						x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel"
 						IsSelected="True"/>
@@ -1223,20 +1235,19 @@
         </ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog
-			x:Name="cd_snap_interval" x:Uid="cd_snap_interval" CloseButtonText="Close"
+			x:Name="cd_snap_point" x:Uid="cd_snap_point" CloseButtonText="Close"
 			DefaultButton="Close" PrimaryButtonText="Apply" >
 			<StackPanel>
 				<Slider
-					x:Name="sd_snap_interval" x:Uid="sd_snap_interval" Maximum="127.5" Minimum="0"
-					SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds"
-					ValueChanged="snap_interval_val_changed"/>
+					x:Name="sd_snap_point" x:Uid="sd_snap_point" Maximum="127.5" Minimum="0"
+					SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" />
 			</StackPanel>
 		</ContentDialog>
 		<!-- 属性ダイアログ -->
 		<ContentDialog
-			x:Name="cd_setting_dialog" CloseButtonText="Close" Closed="setting_dialog_closed" 
-			DefaultButton="Close" Opened="setting_dialog_opened" PrimaryButtonText="Apply" 
-			Unloaded="setting_dialog_unloaded">
+			x:Name="cd_setting_dialog" CloseButtonText="Close" Closed="prop_dialog_closed" 
+			DefaultButton="Close" Opened="prop_dialog_opened" PrimaryButtonText="Apply" 
+			Unloaded="prop_dialog_unloaded">
 			<RelativePanel>
 				<SwapChainPanel
 					x:Name="scp_prop_panel"

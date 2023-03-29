@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.lock();
 			m_main_d2d.ValidateDevice();
 			m_mutex_draw.unlock();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.lock();
 			m_main_d2d.SetDpi(logical_dpi);
 			m_mutex_draw.unlock();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.lock();
 			m_main_d2d.SetCurrentOrientation(ori);
 			m_mutex_draw.unlock();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}

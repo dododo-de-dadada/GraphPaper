@@ -100,9 +100,9 @@ namespace winrt::GraphPaper::implementation
 				summary_select(s);
 			}
 			xcvd_is_enabled();
-			page_bbox_update(s);
+			main_bbox_update(s);
 			main_panel_size();
-			page_draw();
+			main_draw();
 
 			// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);

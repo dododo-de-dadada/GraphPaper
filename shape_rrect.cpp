@@ -328,9 +328,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
 	// val	値
 	// anc	図形の部位
-	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeRRect::set_pos_anc(
-		const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool /*keep_aspect*/) noexcept
+	// snap_point	他の点との間隔 (この値より離れた点は無視する)
+	bool ShapeRRect::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		D2D1_POINT_2F a;	// 図形の部位の位置
 		D2D1_POINT_2F p;	// 位置ベクトル
@@ -382,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 			rrect_corner_radius(m_pos, r, m_corner_radius);
 			break;
 		default:
-			if (!ShapeRect::set_pos_anc(val, anc, limit, false)) {
+			if (!ShapeRect::set_pos_anc(val, anc, snap_point, false)) {
 				return false;
 			}
 			if (m_pos.x * m_corner_radius.x < 0.0f) {
@@ -393,8 +392,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			break;
 		}
-		const double d = static_cast<double>(limit) * static_cast<double>(limit);
-		if (pt_abs2(m_corner_radius) < d) {
+		const double dd = static_cast<double>(snap_point) * static_cast<double>(snap_point);
+		if (pt_abs2(m_corner_radius) < dd) {
 			m_corner_radius.x = m_corner_radius.y = 0.0f;
 		}
 		return true;

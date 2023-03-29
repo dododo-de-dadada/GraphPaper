@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			page_draw();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 				if (ustack_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}

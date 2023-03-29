@@ -72,26 +72,41 @@ namespace winrt::GraphPaper::implementation
 	// p_size	ページの大きさ
 	// b_lt	領域の左上位置
 	// b_rb	領域の右下位置
+	/*
 	void slist_bound_page(SHAPE_LIST const& slist, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		b_lt = { 0.0f, 0.0f };
-		b_rb = { p_size.width, p_size.height };
-		for (const Shape* s : slist) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			s->get_bound(b_lt, b_rb, b_lt, b_rb);
+		slist_bound_shape(slist, b_lt, b_rb);
+		if (b_lt.x > 0.0f) {
+			b_lt.x = 0.0f;
 		}
+		if (b_lt.y > 0.0f) {
+			b_lt.y = 0.0f;
+		}
+		if (b_rb.x < p_size.width) {
+			b_rb.x = p_size.width;
+		}
+		if (b_rb.y < p_size.height) {
+			b_rb.y = p_size.height;
+		}
+		//b_lt = { 0.0f, 0.0f };
+		//b_rb = { p_size.width, p_size.height };
+		//for (const Shape* s : slist) {
+		//	if (s->is_deleted()) {
+		//		continue;
+		//	}
+		//	s->get_bound(b_lt, b_rb, b_lt, b_rb);
+		//}
 	}
+		*/
 
 	// リスト中の図形を囲む領域を得る.
 	// slist	図形リスト
-	// b_lt	領域の左上位置
-	// b_rb	領域の右下位置
+	// b_lt	領域の左上点
+	// b_rb	領域の右下点
 	void slist_bound_shape(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		b_lt = { FLT_MAX, FLT_MAX };	// 左上位置
-		b_rb = { -FLT_MAX, -FLT_MAX };	// 右下位置
+		b_lt = { FLT_MAX, FLT_MAX };	// 左上点
+		b_rb = { -FLT_MAX, -FLT_MAX };	// 右下点
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
@@ -102,14 +117,14 @@ namespace winrt::GraphPaper::implementation
 
 	// リスト中の選択された図形を囲む領域を得る.
 	// slist	図形リスト
-	// b_lt	領域の左上位置
-	// b_rb	領域の右下位置
+	// b_lt	領域の左上点
+	// b_rb	領域の右下点
 	// 戻り値	選択された図形があったなら true.
 	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
 		bool flag = false;
-		b_lt = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
-		b_rb = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
+		b_lt = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上点
+		b_rb = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下点
 		for (const Shape* s : slist) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
@@ -428,11 +443,9 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<Shape*>(nullptr);
 	}
 	template Shape* winrt::GraphPaper::implementation::slist_next(
-		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, const Shape* s)
-		noexcept;
+		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, const Shape* s) noexcept;
 	template Shape* winrt::GraphPaper::implementation::slist_next(
-		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend,
-		const Shape* s) noexcept;
+		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, const Shape* s) noexcept;
 
 	// リスト中の図形のその次の図形と, その間隔をリストから得る.
 	// it_beg	リストの始端
@@ -454,11 +467,9 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<Shape*>(nullptr);
 	}
 	template Shape* winrt::GraphPaper::implementation::slist_next(
-		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, uint32_t& distance)
-		noexcept;
+		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, uint32_t& distance) noexcept;
 	template Shape* winrt::GraphPaper::implementation::slist_next(
-		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend,
-		uint32_t& distance) noexcept;
+		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
 
 	// 前の図形をリストから得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept
@@ -638,9 +649,9 @@ namespace winrt::GraphPaper::implementation
 	// 消去された図形は省いて, 図形リストを書き込む.
 	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 
-	// 選択されてない図形から, 指定した距離以下で, 指定した位置に最も近い頂点を得る.
+	// 選択されてない図形から, 指定した距離以下で, 指定した点に最も近い点を得る.
 	// slist	図形リスト
-	// p	位置
+	// p	点
 	// d	距離
 	// v	最も近い頂点
 	bool slist_find_vertex_closest(

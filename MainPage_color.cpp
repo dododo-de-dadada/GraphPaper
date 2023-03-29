@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 				if (color_ustack_set<U>(*this, new_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
-					page_draw();
+					main_draw();
 				}
 			}
 		}
@@ -321,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_combo_box().Visibility(Visibility::Collapsed);
 		dialog_combo_box().Items().Clear();
-		page_draw();
+		main_draw();
 		m_mutex_event.unlock();
 	}
 
