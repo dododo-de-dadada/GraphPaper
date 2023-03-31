@@ -22,10 +22,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		const winrt::hstring str_arrow_width{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": " };
-		const winrt::hstring str_arrow_length{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": " };
-		const winrt::hstring str_arrow_offset{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": " };
-		const winrt::hstring str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_size") };
+		const winrt::hstring str_arrow_width{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": " };	// 返しの幅
+		const winrt::hstring str_arrow_length{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": " };	// 矢じりの長さ
+		const winrt::hstring str_arrow_offset{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": " };	// 先端の位置
+		const winrt::hstring str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_size") };	// ダイアログ表題
 
 		m_mutex_event.lock();
 		ARROW_SIZE a_size;
@@ -109,7 +109,8 @@ namespace winrt::GraphPaper::implementation
 		cd_dialog_prop().Title(box_value(str_title));
 		{
 			const auto revoker0{
-				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arrow_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arrow_width](auto, auto args) {
+					// IInspectable const&, RangeBaseValueChangedEventArgs const& args
 					const auto unit = m_len_unit;
 					const auto dpi = m_prop_d2d.m_logical_dpi;
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
@@ -126,7 +127,8 @@ namespace winrt::GraphPaper::implementation
 				})
 			};
 			const auto revoker1{
-				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arrow_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arrow_length](auto, auto args) {
+					// IInspectable const&, RangeBaseValueChangedEventArgs const& args
 					const auto unit = m_len_unit;
 					const auto dpi = m_prop_d2d.m_logical_dpi;
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
@@ -143,7 +145,8 @@ namespace winrt::GraphPaper::implementation
 				})
 			};
 			const auto revoker2{
-				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arrow_offset](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arrow_offset](auto, auto args) {
+					// (IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 					const auto unit = m_len_unit;
 					const auto dpi = m_prop_d2d.m_logical_dpi;
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
@@ -160,7 +163,8 @@ namespace winrt::GraphPaper::implementation
 				})
 			};
 			const auto revoker3{
-				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
+				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
+					// (IInspectable const&, SelectionChangedEventArgs const&)
 					if (dialog_radio_btns().SelectedIndex() == 0) {
 						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
 							dialog_draw();
@@ -183,7 +187,8 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
 				if (flag_size || flag_style) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -229,7 +234,8 @@ namespace winrt::GraphPaper::implementation
 			arrow_style_is_checked(a_style);
 			if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
 				ustack_push_null();
-				xcvd_is_enabled();
+				ustack_is_enable();
+				//xcvd_is_enabled();
 				main_draw();
 			}
 		}

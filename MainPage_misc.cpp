@@ -62,34 +62,34 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「色の基数」のサブ項目が選択された.
-	void MainPage::color_base_n_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_color_notation_pct()) {
-			m_color_base_n = COLOR_BASE_N::PCT;
+		if (sender == rmfi_color_code_pct()) {
+			m_color_code = COLOR_CODE::PCT;
 		}
-		else if (sender == rmfi_color_notation_dec()) {
-			m_color_base_n = COLOR_BASE_N::DEC;
+		else if (sender == rmfi_color_code_dec()) {
+			m_color_code = COLOR_CODE::DEC;
 		}
-		else if (sender == rmfi_color_notation_hex()) {
-			m_color_base_n = COLOR_BASE_N::HEX;
+		else if (sender == rmfi_color_code_hex()) {
+			m_color_code = COLOR_CODE::HEX;
 		}
-		else if (sender == rmfi_color_notation_real()) {
-			m_color_base_n = COLOR_BASE_N::REAL;
+		else if (sender == rmfi_color_code_real()) {
+			m_color_code = COLOR_CODE::REAL;
 		}
 		else {
 			winrt::hresult_not_implemented();
 		}
-		color_base_n_is_checked(m_color_base_n);
+		color_code_is_checked(m_color_code);
 		status_bar_set_pos();
 	}
 
 	// その他メニューの「色の基数」に印をつける.
-	void MainPage::color_base_n_is_checked(const COLOR_BASE_N val)
+	void MainPage::color_code_is_checked(const COLOR_CODE val)
 	{
-		rmfi_color_notation_dec().IsChecked(val == COLOR_BASE_N::DEC);
-		rmfi_color_notation_hex().IsChecked(val == COLOR_BASE_N::HEX);
-		rmfi_color_notation_real().IsChecked(val == COLOR_BASE_N::REAL);
-		rmfi_color_notation_pct().IsChecked(val == COLOR_BASE_N::PCT);
+		rmfi_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_color_code_real().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.

@@ -146,12 +146,12 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_mutex_draw.unlock();
 			ustack_push_null();
-
-			selected_list.clear();
+			ustack_is_enable();
 			xcvd_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
+			selected_list.clear();
 		}
 		status_bar_set_pos();
 	}
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::xcvd_is_enabled(void)
 	{
-		ustack_is_enable();
+		//ustack_is_enable();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -225,23 +225,20 @@ namespace winrt::GraphPaper::implementation
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
 		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && !back_selected));
+		const DataPackageView& dp_view = Clipboard::GetContent();
+		const bool exists_clipboard_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
+			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
-		const DataPackageView& dp_view = Clipboard::GetContent();
-		mfi_xcvd_paste().IsEnabled(
-			dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
-			dp_view.Contains(StandardDataFormats::Text()) ||
-			dp_view.Contains(StandardDataFormats::Bitmap())); 
-			//|| dp_view.Contains(CLIPBOARD_TIFF));
+		mfi_xcvd_paste().IsEnabled(exists_clipboard_data);
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
 		mfi_ungroup().IsEnabled(exists_selected_group);
 		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 		// そうしないと, 子の項目の可否がただちに反映しない.
-		mfsi_edit_poly_end().IsEnabled(
-			exists_selected_poly_close || exists_selected_poly_open);
+		mfsi_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
 		mfi_edit_poly_open().IsEnabled(exists_selected_poly_close);
 		mfi_edit_poly_close().IsEnabled(exists_selected_poly_open);
 		mfi_edit_arc().IsEnabled(exists_selected_arc);
@@ -367,6 +364,8 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 		}
 		ustack_push_null();
+		ustack_is_enable();
+		xcvd_is_enabled();
 
 		co_await winrt::resume_foreground(Dispatcher());
 		ustack_is_enable();
@@ -375,7 +374,6 @@ namespace winrt::GraphPaper::implementation
 			summary_append(s);
 			summary_select(s);
 		}
-		xcvd_is_enabled();
 		main_bbox_update(s);
 		main_panel_size();
 		main_draw();
@@ -435,6 +433,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					m_mutex_draw.unlock();
 					ustack_push_null();
+					ustack_is_enable();
 					slist_pasted.clear();
 					xcvd_is_enabled();
 					main_panel_size();
@@ -500,6 +499,7 @@ namespace winrt::GraphPaper::implementation
 				m_mutex_draw.unlock();
 			}
 			ustack_push_null();
+			ustack_is_enable();
 
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {

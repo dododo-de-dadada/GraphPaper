@@ -90,10 +90,9 @@ namespace winrt::GraphPaper::implementation
 				ustack_push_append(s);
 				ustack_push_select(s);
 				ustack_push_null();
+				ustack_is_enable();
 				m_mutex_draw.unlock();
 			}
-
-			ustack_is_enable();
 
 			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 			if (summary_is_visible()) {

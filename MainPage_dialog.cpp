@@ -72,8 +72,7 @@ namespace winrt::GraphPaper::implementation
 		Shape::m_d2d_color_brush->SetColor(m_prop_page.m_page_color);
 		m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
 
-		const float offset = static_cast<FLOAT>(std::fmod(
-			m_prop_page.m_page_size.width * 0.5, m_prop_page.m_grid_base + 1.0));
+		const float offset = static_cast<FLOAT>(std::fmod(m_prop_page.m_page_size.width * 0.5, m_prop_page.m_grid_base + 1.0));
 		m_prop_page.m_grid_offset.x = offset;
 		m_prop_page.m_grid_offset.y = offset;
 		m_prop_page.m_page_margin.left = 0.0f;

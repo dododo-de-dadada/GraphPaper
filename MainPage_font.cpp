@@ -105,13 +105,10 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_font_stretch_ultra_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED;
 		}
-		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1)) {
-			ustack_push_set<UNDO_T::FONT_STRETCH>(&m_main_page, f_stretch);
-			if (ustack_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				main_draw();
-			}
+		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && ustack_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -183,13 +180,11 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_font_weight_extra_black()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK;
 		}
-		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1)) {
-			ustack_push_set<UNDO_T::FONT_WEIGHT>(&m_main_page, f_weight);
-			if (ustack_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-				ustack_push_null();
-				xcvd_is_enabled();
-				main_draw();
-			}
+		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && ustack_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
+			ustack_push_null();
+			ustack_is_enable();
+			//xcvd_is_enabled();
+			main_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -243,7 +238,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_family(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -307,7 +303,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_size(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -333,23 +330,46 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 書体メニューの「イタリック体」が選択された.
-	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::font_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+		DWRITE_FONT_STYLE f_style = static_cast<DWRITE_FONT_STYLE>(-1);
+		if (sender == rmfi_font_style_normal()) {
+			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
+		}
+		else if (sender == rmfi_font_style_italic()) {
+			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC;
+		}
+		else if (sender == rmfi_font_style_oblique()) {
+			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE;
+		}
+		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && ustack_push_set<UNDO_T::FONT_STYLE>(f_style)) {
 			ustack_push_null();
-			xcvd_is_enabled();
+			ustack_is_enable();
 			main_draw();
 		}
 		status_bar_set_pos();
 	}
 
-	// 書体メニューの「標準」が選択された.
+	// 書体メニューの「イタリック体」が選択された.
+	/*
+	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+			ustack_push_null();
+			ustack_is_enable();
+			//xcvd_is_enabled();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// 書体メニューの「字体「標準」が選択された.
 	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
-			xcvd_is_enabled();
+			ustack_is_enable();
+			//xcvd_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -360,11 +380,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
-			xcvd_is_enabled();
+			ustack_is_enable();
+			//xcvd_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
 	}
+	*/
 
 	// 書体メニューの「太さ」が選択された.
 	/*

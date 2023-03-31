@@ -54,7 +54,8 @@ namespace winrt::GraphPaper::implementation
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
 				ustack_push_null();
-				xcvd_is_enabled();
+				ustack_is_enable();
+				//xcvd_is_enabled();
 				main_draw();
 			}
 		}
@@ -65,129 +66,12 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// S	スライダーの番号
 	// val	格納する値
+	/*
 	static void edit_arc_slider_set_header(Slider const& slider, wchar_t *res, const float val)
 	{
 		wchar_t buf[128];
 		swprintf_s(buf, 128, L"%s: %f°", ResourceLoader::GetForCurrentView().GetString(res).data(), val);
 		slider.Header(box_value(winrt::hstring(buf)));
-		/*
-		if constexpr (S == 0) {
-			wchar_t buf[128];
-			swprintf_s(buf, 128, L"%s: %f°",
-				ResourceLoader::GetForCurrentView().GetString(L"str_arc_start").data(), val);
-			slider.Header(box_value(winrt::hstring(buf)));
-		}
-		else if constexpr (S == 1) {
-			wchar_t buf[128];
-			swprintf_s(buf, 128, L"%s: %f°",
-				ResourceLoader::GetForCurrentView().GetString(L"str_arc_end").data(), val);
-			slider.Header(box_value(winrt::hstring(buf)));
-		}
-		else if constexpr (S == 2) {
-			wchar_t buf[128];
-			swprintf_s(buf, 128, L"%s: %f°",
-				ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot").data(), val);
-			slider.Header(box_value(winrt::hstring(buf)));
-		}
-		*/
-	}
-
-	/*
-	template<int S>
-	void MainPage::edit_arc_slider_value_changed(
-		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		if constexpr (S == 0) {
-			const float val = static_cast<float>(args.NewValue());
-			edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", val);
-			D2D1_SWEEP_DIRECTION dir;
-			m_prop_page.back()->get_arc_dir(dir);
-			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				if (m_prop_page.back()->set_arc_start(val)) {
-					dialog_draw();
-				}
-			}
-			else {
-				if (m_prop_page.back()->set_arc_end(-val)) {
-					dialog_draw();
-				}
-			}
-		}
-		else if constexpr (S == 1) {
-			const float val = static_cast<float>(args.NewValue());
-			edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end", val);
-			D2D1_SWEEP_DIRECTION dir;
-			m_prop_page.back()->get_arc_dir(dir);
-			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				if (m_prop_page.back()->set_arc_end(val)) {
-					dialog_draw();
-				}
-			}
-			else {
-				if (m_prop_page.back()->set_arc_start(-val)) {
-					dialog_draw();
-				}
-			}
-		}
-		else if constexpr (S == 2) {
-			const float val = static_cast<float>(args.NewValue());
-			edit_arc_slider_set_header(dialog_slider_2(), L"str_arc_rot", val);
-			m_prop_page.back()->set_arc_rot(val);
-			dialog_draw();
-
-		}
-	}
-
-	// 円弧の向きの選択が変更された
-	void MainPage::edit_arc_selection_changed(
-		IInspectable const&, SelectionChangedEventArgs const& args)
-	{
-		if (dialog_radio_btns().SelectedIndex() == 0) {
-			if (m_prop_page.back()->set_arc_dir(
-				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
-				const auto val0 = dialog_slider_0().Value();
-				const auto val1 = dialog_slider_1().Value();
-				dialog_slider_0().Value(-val1);
-				dialog_slider_1().Value(-val0);
-				dialog_draw();
-			}
-			auto items = args.AddedItems();
-		}
-		else if (dialog_radio_btns().SelectedIndex() == 1) {
-			if (m_prop_page.back()->set_arc_dir(
-				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
-				const auto val0 = dialog_slider_0().Value();
-				const auto val1 = dialog_slider_1().Value();
-				dialog_slider_0().Value(-val1);
-				dialog_slider_1().Value(-val0);
-				dialog_draw();
-			}
-		}
-	}
-
-	template<int S>
-	void MainPage::edit_arc_checkbox_checked(IInspectable const&, RoutedEventArgs const&)
-	{
-		if constexpr (S == 0) {
-			if (m_prop_page.back()->set_arc_dir(
-				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
-				const auto val0 = dialog_slider_0().Value();
-				const auto val1 = dialog_slider_1().Value();
-				dialog_slider_0().Value(-val1);
-				dialog_slider_1().Value(-val0);
-				dialog_draw();
-			}
-		}
-		else if constexpr (S == 1) {
-			if (m_prop_page.back()->set_arc_dir(
-				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
-				const auto val0 = dialog_slider_0().Value();
-				const auto val1 = dialog_slider_1().Value();
-				dialog_slider_0().Value(-val1);
-				dialog_slider_1().Value(-val0);
-				dialog_draw();
-			}
-		}
 	}
 	*/
 
@@ -196,21 +80,31 @@ namespace winrt::GraphPaper::implementation
 		if (sender == mfi_edit_poly_close()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
 				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
 				main_draw();
-				xcvd_is_enabled();
 			}
 		}
 		else if (sender == mfi_edit_poly_open()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
 				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
 				main_draw();
-				xcvd_is_enabled();
 			}
 		}
 	}
 
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		const auto str_arc_start{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": "};
+		const auto str_arc_end{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_end") + L": " };
+		const auto str_arc_rot{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot") + L": " };
+		const auto str_arc_sweep_direction{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction") };
+		const auto str_arc_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize") };
+		const auto str_arc_counter_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize") };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_edit_arc") };
+
 		ShapeArc* t;	// 編集する円弧図形
 		if (m_event_shape_prev != nullptr &&
 			typeid(*m_event_shape_prev) == typeid(ShapeArc)) {
@@ -287,6 +181,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto val3 = dialog_check_box().IsChecked();
 			//const auto vis3 = dialog_check_box().Visibility();
 			//const auto vis3 = dialog_radio_buttons().Visibility();
+			wchar_t buf[32];
 
 			dialog_slider_0().Minimum(0.0);
 			dialog_slider_0().Maximum(45.0);
@@ -295,11 +190,13 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_0().Visibility(Visibility::Visible);
 			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				dialog_slider_0().Value(a_start);
-				edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", a_start);
+				swprintf_s(buf, L"%f°", a_start);
+				dialog_slider_0().Header(box_value(str_arc_start + buf));
 			}
 			else {
 				dialog_slider_0().Value(-a_end);
-				edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", -a_end);
+				swprintf_s(buf, L"%f°", -a_end);
+				dialog_slider_0().Header(box_value(str_arc_start + buf));
 			}
 			dialog_slider_1().Minimum(-45.0);
 			dialog_slider_1().Maximum(0.0);
@@ -307,11 +204,13 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				dialog_slider_1().Value(a_end);
-				edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end", a_end);
+				swprintf_s(buf, L"%f°", a_end);
+				dialog_slider_1().Header(box_value(str_arc_end + buf));
 			}
 			else {
 				dialog_slider_1().Value(-a_start);
-				edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end" , -a_start);
+				swprintf_s(buf, L"%f°", -a_start);
+				dialog_slider_1().Header(box_value(str_arc_end + buf));
 			}
 			dialog_slider_1().Visibility(Visibility::Visible);
 			dialog_slider_2().Minimum(-44.5);
@@ -319,15 +218,13 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_2().TickFrequency(0.5);
 			dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 			dialog_slider_2().Value(a_rot);
-			edit_arc_slider_set_header(dialog_slider_2(), L"str_arc_rot", a_rot);
+			swprintf_s(buf, L"%f°", a_rot);
+			dialog_slider_2().Header(box_value(str_arc_rot + buf));
 			dialog_slider_2().Visibility(Visibility::Visible);
 
-			dialog_radio_btns().Header(
-				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction")));
-			dialog_radio_btn_0().Content(
-				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize")));
-			dialog_radio_btn_1().Content(
-				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize")));
+			dialog_radio_btns().Header(box_value(str_arc_sweep_direction));
+			dialog_radio_btn_0().Content(box_value(str_arc_clockwize));
+			dialog_radio_btn_1().Content(box_value(str_arc_counter_clockwize));
 			dialog_radio_btns().Visibility(Visibility::Visible);
 			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				dialog_radio_btns().SelectedIndex(0);
@@ -335,54 +232,56 @@ namespace winrt::GraphPaper::implementation
 			else {
 				dialog_radio_btns().SelectedIndex(1);
 			}
-			cd_dialog_prop().Title(
-				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot")));
+			cd_dialog_prop().Title(box_value(str_title));
 			{
 				const auto revoker0{
-					dialog_slider_0().ValueChanged(
-						winrt::auto_revoke,
-						[this](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-							const float val = static_cast<float>(args.NewValue());
-							edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", val);
-							D2D1_SWEEP_DIRECTION dir;
-							m_prop_page.back()->get_arc_dir(dir);
-							if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-								if (m_prop_page.back()->set_arc_start(val)) {
-									dialog_draw();
-								}
-							}
-							else {
-								if (m_prop_page.back()->set_arc_end(-val)) {
-									dialog_draw();
-								}
+					dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arc_start](auto, auto args) {
+						// (IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+						const float val = static_cast<float>(args.NewValue());
+						wchar_t buf[32];
+						swprintf_s(buf, L"%f°", val);
+						dialog_slider_0().Header(box_value(str_arc_start + buf));
+						D2D1_SWEEP_DIRECTION dir;
+						m_prop_page.back()->get_arc_dir(dir);
+						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+							if (m_prop_page.back()->set_arc_start(val)) {
+								dialog_draw();
 							}
 						}
-					)
+						else {
+							if (m_prop_page.back()->set_arc_end(-val)) {
+								dialog_draw();
+							}
+						}
+					})
 				};
 				const auto revoker1{
-					dialog_slider_1().ValueChanged(winrt::auto_revoke,
-						[this](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-							const float val = static_cast<float>(args.NewValue());
-							edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end", val);
-							D2D1_SWEEP_DIRECTION dir;
-							m_prop_page.back()->get_arc_dir(dir);
-							if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-								if (m_prop_page.back()->set_arc_end(val)) {
-									dialog_draw();
-								}
-							}
-							else {
-								if (m_prop_page.back()->set_arc_start(-val)) {
-									dialog_draw();
-								}
+					dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arc_end](auto, auto args) {
+						// (IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+						const float val = static_cast<float>(args.NewValue());
+						wchar_t buf[32];
+						swprintf_s(buf, L"%f°", val);
+						dialog_slider_1().Header(box_value(str_arc_end + buf));
+						D2D1_SWEEP_DIRECTION dir;
+						m_prop_page.back()->get_arc_dir(dir);
+						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+							if (m_prop_page.back()->set_arc_end(val)) {
+								dialog_draw();
 							}
 						}
-					)
+						else {
+							if (m_prop_page.back()->set_arc_start(-val)) {
+								dialog_draw();
+							}
+						}
+					})
 				};
 				const auto revoker2{
-					dialog_slider_2().ValueChanged(winrt::auto_revoke, [this](auto, auto args) {
+					dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arc_rot](auto, auto args) {
 						const float val = static_cast<float>(args.NewValue());
-						edit_arc_slider_set_header(dialog_slider_2(), L"str_arc_rot", val);
+						wchar_t buf[32];
+						swprintf_s(buf, L"%f°", val);
+						dialog_slider_2().Header(box_value(str_arc_rot + buf));
 						m_prop_page.back()->set_arc_rot(val);
 						dialog_draw();
 					})
@@ -390,8 +289,7 @@ namespace winrt::GraphPaper::implementation
 				const auto revoker3{
 					dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
 						if (dialog_radio_btns().SelectedIndex() == 0) {
-							if (m_prop_page.back()->set_arc_dir(
-								D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+							if (m_prop_page.back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 								const auto val0 = dialog_slider_0().Value();
 								const auto val1 = dialog_slider_1().Value();
 								dialog_slider_0().Value(-val1);
@@ -400,8 +298,7 @@ namespace winrt::GraphPaper::implementation
 							}
 						}
 						else if (dialog_radio_btns().SelectedIndex() == 1) {
-							if (m_prop_page.back()->set_arc_dir(
-								D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+							if (m_prop_page.back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 								const auto val0 = dialog_slider_0().Value();
 								const auto val1 = dialog_slider_1().Value();
 								dialog_slider_0().Value(-val1);
@@ -425,7 +322,8 @@ namespace winrt::GraphPaper::implementation
 					s->get_arc_rot(new_val);
 					ustack_push_set<UNDO_T::ARC_ROT>(new_val);
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}

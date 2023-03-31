@@ -749,10 +749,10 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_italic}" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal" x:Uid="rmfi_font_style_normal" Click="font_style_normal_click" IsChecked="True" Text="Normal" GroupName="gn_font_style"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal" x:Uid="rmfi_font_style_normal" Click="font_style_click" IsChecked="True" Text="Normal" GroupName="gn_font_style"/>
 					<MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_oblique" x:Uid="rmfi_font_style_oblique" Click="font_style_oblique_click" Text="Normal" GroupName="gn_font_style"/>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_italic" x:Uid="rmfi_font_style_italic" Click="font_style_italic_click" Text="Normal" GroupName="gn_font_style"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_oblique" x:Uid="rmfi_font_style_oblique" Click="font_style_click" Text="Normal" GroupName="gn_font_style"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_italic" x:Uid="rmfi_font_style_italic" Click="font_style_click" Text="Normal" GroupName="gn_font_style"/>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 文字列の整列 -->
@@ -926,24 +926,24 @@
 						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
                 <!-- 色の基数 -->
-                <MenuFlyoutSubItem x:Name="mfsi_color_notation" x:Uid="mfsi_color_notation" Text="Color Base Number">
+                <MenuFlyoutSubItem x:Name="mfsi_color_code" x:Uid="mfsi_color_code" Text="Color Code">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
 							Glyph="{StaticResource glyph_color}" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_notation_dec" x:Uid="rmfi_color_notation_dec" IsChecked="True" 
-						Click="color_base_n_click" Text="Decimal" GroupName="gn_color_notation" />
+						x:Name="rmfi_color_code_dec" x:Uid="rmfi_color_code_dec" IsChecked="True" 
+						Click="color_code_click" Text="Decimal" GroupName="gn_color_code" />
 					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_color_notation_hex" x:Uid="rmfi_color_notation_hex"
-						Click="color_base_n_click" Text="Hexadecimal" GroupName="gn_color_notation" />
+						x:Name="rmfi_color_code_hex" x:Uid="rmfi_color_code_hex"
+						Click="color_code_click" Text="Hexadecimal" GroupName="gn_color_code" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_notation_real" x:Uid="rmfi_color_notation_real"
-						Click="color_base_n_click" Text="Real" GroupName="gn_color_notation" />
+						x:Name="rmfi_color_code_real" x:Uid="rmfi_color_code_real"
+						Click="color_code_click" Text="Real" GroupName="gn_color_code" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_color_notation_pct" x:Uid="rmfi_color_notation_pct"
-						Click="color_base_n_click" Text="Percent" GroupName="gn_color_notation" />
+						x:Name="rmfi_color_code_pct" x:Uid="rmfi_color_code_pct"
+						Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>

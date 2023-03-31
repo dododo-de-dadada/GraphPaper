@@ -33,10 +33,7 @@ namespace winrt::GraphPaper::implementation
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
 	// 方眼を表示する.
-	static void page_draw_grid(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
-		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		/*const float p_scale,*/ const D2D1_SIZE_F g_size);
+	static void page_draw_grid(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len, const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset, const D2D1_SIZE_F g_size);
 
 	//-------------------------------
 	// 待機カーソルを表示する.
@@ -54,31 +51,31 @@ namespace winrt::GraphPaper::implementation
 
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_BASE_N c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
+	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	//-------------------------------
 	// 色成分を文字列に変換する.
-	// c_base	色の基数
+	// c_code	色の基数
 	// c_val	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	//-------------------------------
-	void conv_col_to_str(const COLOR_BASE_N c_base, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(const COLOR_CODE c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の基数が 10 進数か判定する.
-		if (c_base == COLOR_BASE_N::DEC) {
+		if (c_code == COLOR_CODE::DEC) {
 			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_val));
 		}
 		// 色の基数が 16 進数か判定する.
-		else if (c_base == COLOR_BASE_N::HEX) {
+		else if (c_code == COLOR_CODE::HEX) {
 			swprintf_s(t_buf, t_len, L"x%02X", static_cast<uint32_t>(std::round(c_val)));
 		}
 		// 色の基数が実数か判定する.
-		else if (c_base == COLOR_BASE_N::REAL) {
+		else if (c_code == COLOR_CODE::REAL) {
 			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
 		}
 		// 色の基数がパーセントか判定する.
-		else if (c_base == COLOR_BASE_N::PCT) {
+		else if (c_code == COLOR_CODE::PCT) {
 			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {

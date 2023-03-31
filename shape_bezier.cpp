@@ -67,8 +67,7 @@ namespace winrt::GraphPaper::implementation
 		auto b_len = bezi_len_by_param(c, 0.0, 1.0, SIMPSON_CNT);
 		if (b_len >= FLT_MIN) {
 
-			// 矢じるしの先端のオフセット, または曲線の長さ, 
-			// どちらか短い方で, 助変数を求める.
+			// 矢じるしの先端の位置と, 曲線の長さの, どちらか短い方で, 助変数を求める.
 			const auto t = bezi_param_by_len(c, min(b_len, a_size.m_offset));
 
 			// 助変数をもとに曲線の接線ベクトルを得る.

@@ -196,10 +196,11 @@ namespace winrt::GraphPaper::implementation
 			const double text_w = std::fabs(m_pos.x) - 2.0 * m_text_pad.width;
 			const double text_h = std::fabs(m_pos.y) - 2.0 * m_text_pad.height;
 			const UINT32 text_len = wchar_len(m_text);
+			const FLOAT max_w = static_cast<FLOAT>(max(text_w, 0.0));
+			const FLOAT max_h = static_cast<FLOAT>(max(text_h, 0.0));
 			winrt::check_hresult(
-				dwrite_factory->CreateTextLayout(
-					m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)),
-					static_cast<FLOAT>(max(text_h, 0.0)), m_dwrite_text_layout.put()));
+				dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), max_h, max_h, m_dwrite_text_layout.put())
+			);
 
 			// 文字列フォーマットを破棄する.
 			t_format = nullptr;

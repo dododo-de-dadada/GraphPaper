@@ -443,10 +443,11 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_append(s);
 		ustack_push_select(s);
 		ustack_push_null();
-		m_event_shape_prev = s;
+		ustack_is_enable();
 		xcvd_is_enabled();
 		main_bbox_update(s);
 		main_panel_size();
+		m_event_shape_prev = s;
 		main_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 		if (summary_is_visible()) {
@@ -482,8 +483,9 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_append(s);
 			ustack_push_select(s);
 			ustack_push_null();
-			m_event_shape_prev = s;
+			ustack_is_enable();
 			xcvd_is_enabled();
+			m_event_shape_prev = s;
 			main_bbox_update(s);
 			main_panel_size();
 			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
@@ -540,9 +542,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
+			ustack_is_enable();
+			//xcvd_is_enabled();
 			main_bbox_update();
 			main_panel_size();
-			xcvd_is_enabled();
 		}
 	}
 
@@ -590,9 +593,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
+			ustack_is_enable();
+			//xcvd_is_enabled();
 			main_bbox_update();
 			main_panel_size();
-			xcvd_is_enabled();
 		}
 	}
 
@@ -1052,28 +1056,31 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				Shape* s;
-				const uint32_t anc = slist_hit_test(
-					m_main_page.m_shape_list, m_event_pos_pressed, s);
+				const uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (anc == ANC_TYPE::ANC_PAGE) {
 					ustack_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
 						ustack_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
-						xcvd_is_enabled();
+						ustack_is_enable();
+						//xcvd_is_enabled();
 					}
 					else if (m_event_anc_pressed == ANC_TYPE::ANC_TEXT) {
 						ustack_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
-						xcvd_is_enabled();
+						ustack_is_enable();
+						//xcvd_is_enabled();
 					}
 					else if (m_event_anc_pressed == ANC_TYPE::ANC_STROKE) {
 						ustack_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
 						ustack_push_null();
-						xcvd_is_enabled();
+						ustack_is_enable();
+						//xcvd_is_enabled();
 					}
 				}
 			}

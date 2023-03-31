@@ -437,7 +437,8 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_style = ustack_push_set<UNDO_T::DASH_STYLE>(new_style);
 				if (flag_patt || flag_width || flag_style) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -457,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「破線の形式」のサブ項目が選択された.
 	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		D2D1_DASH_STYLE d_style;
+		D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(-1);
 		if (sender == rmfi_dash_style_solid()) {
 			d_style = D2D1_DASH_STYLE_SOLID;
 		}
@@ -473,14 +474,14 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_dash_style_dash_dot_dot()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
 		}
-		else {
-			return;
-		}
-		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			main_draw();
+		if (d_style != static_cast<D2D1_DASH_STYLE>(-1)) {
+			mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+			if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
+				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
+				main_draw();
+			}
 		}
 		status_bar_set_pos();
 	}
@@ -541,7 +542,7 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「太さ」のサブ項目が選択された.
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		float s_width;
+		float s_width = -1.0f;
 		if (sender == rmfi_stroke_width_0px()) {
 			s_width = 0.0f;
 		}
@@ -557,15 +558,14 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_stroke_width_4px()) {
 			s_width = 4.0f;
 		}
-		else {
-			auto _{ winrt::hresult_not_implemented() };
-			return;
-		}
-		stroke_width_is_checked(s_width);
-		if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			main_draw();
+		if (s_width >= 0.0f) {
+			stroke_width_is_checked(s_width);
+			if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
+				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
+				main_draw();
+			}
 		}
 		status_bar_set_pos();
 	}
@@ -626,7 +626,8 @@ namespace winrt::GraphPaper::implementation
 				stroke_width_is_checked(new_val);
 				if (ustack_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}

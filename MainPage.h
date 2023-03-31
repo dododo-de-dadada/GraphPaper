@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 色の基数
 	//-------------------------------
-	enum struct COLOR_BASE_N : uint32_t {
+	enum struct COLOR_CODE : uint32_t {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		REAL,	// 実数
@@ -102,10 +102,10 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_BASE_N c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept;
+	void conv_col_to_str(const COLOR_CODE c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	// 色成分を文字列に変換する.
-	template <size_t Z> inline void conv_col_to_str(const COLOR_BASE_N c_code, const double c_val, wchar_t(&t_buf)[Z]) noexcept
+	template <size_t Z> inline void conv_col_to_str(const COLOR_CODE c_code, const double c_val, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_col_to_str(c_code, c_val, Z, t_buf);
 	}
@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_BASE_N m_color_base_n = COLOR_BASE_N::DEC;	// 色成分の書式
+		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 		float m_main_scale = 1.0f;	// メインページの拡大率
 		bool m_snap_grid = true;	// 点を方眼にくっつける.
 		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点を点にくっつける間隔
@@ -520,12 +520,14 @@ namespace winrt::GraphPaper::implementation
 		void font_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::FONT_COLOR>(); }
 		// 書体メニューの「書体名」が選択された.
 		IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「字体」のサブ項目が選択された.
+		void font_style_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「字体」>「イタリック体」が選択された.
-		void font_style_italic_click(IInspectable const&, RoutedEventArgs const&);
+		//void font_style_italic_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「字体」>「標準」が選択された.
-		void font_style_normal_click(IInspectable const&, RoutedEventArgs const&);
+		//void font_style_normal_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「字体」>「斜体」が選択された.
-		void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
+		//void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体の大きさ」が選択された.
 		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体の幅」が選択された.
@@ -540,17 +542,6 @@ namespace winrt::GraphPaper::implementation
 		void font_weight_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体の太さ」のサブ項目に印をつける
 		void font_weight_is_checked(const DWRITE_FONT_WEIGHT val);
-
-		//-------------------------------
-		// MainPage_grid.cpp
-		// 方眼
-		//-------------------------------
-
-		//-------------------------------
-		// MainPage_snap.cpp
-		// 点を方眼にくっつける, 点と点をくっつける
-		//-------------------------------
-
 
 		//-------------------------------
 		// MainPage_group.cpp
@@ -632,9 +623,9 @@ namespace winrt::GraphPaper::implementation
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「色の基数」に印をつける.
-		void color_base_n_is_checked(const COLOR_BASE_N c_base);
+		void color_code_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の基数」のサブ項目が選択された.
-		void color_base_n_click(IInspectable const& sender, RoutedEventArgs const&);
+		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -715,11 +706,6 @@ namespace winrt::GraphPaper::implementation
 		void select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_page.cpp
-		// ページの大きさ, 色
-		//-------------------------------
-
-		//-------------------------------
 		// MainPage_layout.cpp
 		// レイアウト
 		//-------------------------------
@@ -756,7 +742,6 @@ namespace winrt::GraphPaper::implementation
 		void page_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&);
 		// ページの大きさダイアログのコンボボックスの選択が変更された.
 		void page_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
-
 
 		//-------------------------------
 		// MainPage_background.cpp

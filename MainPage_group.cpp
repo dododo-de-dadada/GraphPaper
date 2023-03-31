@@ -89,6 +89,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_remove(g);
 		}
 		ustack_push_null();
+		ustack_is_enable();
 		xcvd_is_enabled();
 		main_draw();
 		status_bar_set_pos();

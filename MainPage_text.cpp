@@ -77,6 +77,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			ustack_push_null();
+			ustack_is_enable();
 			main_panel_size();
 			main_draw();
 		}
@@ -86,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」が選択された.
 	void MainPage::text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		DWRITE_PARAGRAPH_ALIGNMENT val;
+		DWRITE_PARAGRAPH_ALIGNMENT val = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1);
 		if (sender == rmfi_text_align_top()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 		}
@@ -96,15 +97,14 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_text_align_mid()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
-		else {
-			winrt::hresult_not_implemented{};
-			return;
-		}
-		text_align_vert_is_checked(val);
-		if (ustack_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			main_draw();
+		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
+			text_align_vert_is_checked(val);
+			if (ustack_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
+				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
+				main_draw();
+			}
 		}
 		status_bar_set_pos();
 	}
@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「文字列のそろえ」が選択された.
 	void MainPage::text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		DWRITE_TEXT_ALIGNMENT val;
+		DWRITE_TEXT_ALIGNMENT val = static_cast<DWRITE_TEXT_ALIGNMENT>(-1);
 		if (sender == rmfi_text_align_left()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
 		}
@@ -137,15 +137,14 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_text_align_just()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
-		else {
-			winrt::hresult_not_implemented();
-			return;
-		}
-		text_align_horz_is_checked(val);
-		if (ustack_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			main_draw();
+		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
+			text_align_horz_is_checked(val);
+			if (ustack_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
+				ustack_push_null();
+				ustack_is_enable();
+				//xcvd_is_enabled();
+				main_draw();
+			}
 		}
 		status_bar_set_pos();
 	}
@@ -227,7 +226,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_text_line_sp(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -317,7 +317,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_text_pad(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					ustack_is_enable();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 			}

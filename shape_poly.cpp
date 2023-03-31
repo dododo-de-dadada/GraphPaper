@@ -534,7 +534,7 @@ namespace winrt::GraphPaper::implementation
 		const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size,
 		D2D1_POINT_2F barb[], D2D1_POINT_2F& tip) noexcept
 	{
-		double a_offset = a_size.m_offset;	// 矢じりの先端のオフセット
+		double a_offset = a_size.m_offset;	// 矢じりの先端の位置
 		for (size_t i = p_cnt - 1; i > 0; i--) {
 
 			// 頂点間の差分から矢軸とその長さを求める.
@@ -547,11 +547,11 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 
-			// 矢軸の長さが矢じるし先端のオフセットより短いか判定する.
+			// 矢軸の長さが矢じるし先端の位置より短いか判定する.
 			if (a_len < a_offset) {
 				// 次の差分があるか判定する.
 				if (i > 1) {
-					// オフセットを矢軸の長さだけ短くする.
+					// 先端の位置を矢軸の長さだけ短くする.
 					a_offset -= a_len;
 					continue;
 				}

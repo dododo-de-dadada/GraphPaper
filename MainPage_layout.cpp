@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
 					ustack_push_null();
 					ustack_is_enable();
-					xcvd_is_enabled();
+					//xcvd_is_enabled();
 					main_draw();
 				}
 
@@ -569,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_image_keep_aspect = true;
 		m_len_unit = LEN_UNIT::PIXEL;
-		m_color_base_n = COLOR_BASE_N::DEC;
+		m_color_code = COLOR_CODE::DEC;
 		m_main_scale = 1.0f;
 		m_snap_grid = true;
 		m_snap_point = SNAP_INTERVAL_DEF_VAL;
@@ -591,7 +591,7 @@ namespace winrt::GraphPaper::implementation
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
-		color_base_n_is_checked(m_color_base_n);
+		color_code_is_checked(m_color_code);
 		zoom_is_cheched(m_main_scale);
 		status_bar_is_checked(m_status_bar);
 		tmfi_snap_grid().IsChecked(m_snap_grid);

@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		//          width
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から返しまでの長さ
-		float m_offset;		// 先端のずらし量
+		float m_offset;		// 先端の位置
 	};
 	constexpr ARROW_SIZE ARROW_SIZE_DEFVAL{ 7.0, 16.0, 0.0 };	// 矢じるしの大きさの既定値
 	constexpr float ARROW_SIZE_MAX = 127.5f;	// 矢じるしの各大きさの最大値
