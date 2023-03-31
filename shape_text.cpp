@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 			const FLOAT max_w = static_cast<FLOAT>(max(text_w, 0.0));
 			const FLOAT max_h = static_cast<FLOAT>(max(text_h, 0.0));
 			winrt::check_hresult(
-				dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), max_h, max_h, m_dwrite_text_layout.put())
+				dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), max_w, max_h, m_dwrite_text_layout.put())
 			);
 
 			// 文字列フォーマットを破棄する.

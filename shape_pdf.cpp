@@ -1207,7 +1207,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				arc_get_pos_arrow(
-					m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_sweep_dir,
+					m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, //m_sweep_dir,
 					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);

@@ -1120,7 +1120,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeArc::arc_get_pos_arrow(
 		const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad,
 		const double deg_start, const double deg_end, const double deg_rot,
-		const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[])
+		/*const D2D1_SWEEP_DIRECTION dir,*/ const ARROW_SIZE a_size, D2D1_POINT_2F arrow[])
 	{
 		D2D1_POINT_2F start{};	// ベジェ曲線の始点
 		D2D1_BEZIER_SEGMENT b_seg{};	// ベジェ曲線の制御点
@@ -1195,7 +1195,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1_POINT_2F arrow[3];
 					arc_get_pos_arrow(
 						m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot,
-						m_sweep_dir, m_arrow_size, arrow);
+						/*m_sweep_dir,*/ m_arrow_size, arrow);
 					winrt::com_ptr<ID2D1GeometrySink> sink;
 					const ARROW_STYLE a_style{ m_arrow_style };
 					// ジオメトリパスを作成する.

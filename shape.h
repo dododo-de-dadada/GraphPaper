@@ -401,10 +401,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		virtual void draw(void) = 0;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/)
-		{
-			return 0;
-		}
+		virtual size_t export_pdf(const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& /*dt_writer*/) noexcept {}
 		// 円弧の方向を得る
@@ -420,9 +417,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じるしの形式を得る.
 		virtual bool get_arrow_style(ARROW_STYLE&/*val*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
-		virtual void get_bound(
-			const D2D1_POINT_2F/*a_lt*/, const D2D1_POINT_2F/*a_rb*/, D2D1_POINT_2F&/*b_lt*/,
-			D2D1_POINT_2F&/*b_rb*/) const noexcept {}
+		virtual void get_bound(const D2D1_POINT_2F/*a_lt*/, const D2D1_POINT_2F/*a_rb*/, D2D1_POINT_2F&/*b_lt*/, D2D1_POINT_2F&/*b_rb*/) const noexcept {}
 		// 図形を囲む領域の左上点を得る.
 		virtual void get_bound_lt(D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 角丸半径を得る.
@@ -455,8 +450,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_emph(GRID_EMPH&/*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
 		virtual bool get_grid_show(GRID_SHOW&/*val*/) const noexcept { return false; }
-		// 方眼に合わせるを得る.
-		//virtual bool get_snap_grid(bool&/*val*/) const noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool get_image_opacity(float&/*val*/) const noexcept { return false; }
 		// 線分の結合の尖り制限を得る.
@@ -466,9 +459,7 @@ namespace winrt::GraphPaper::implementation
 		// 多角形の終端を得る.
 		virtual bool get_poly_closed(bool& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(
-			const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept
-		{ return false; }
+		virtual bool get_pos_nearest(const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept { return false; }
 		// 部位の点を得る.
 		virtual	void get_pos_anc(const uint32_t/*anc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 開始点を得る.
@@ -477,8 +468,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// ページの余白を得る.
 		virtual bool get_page_margin(D2D1_RECT_F&/*val*/) const noexcept { return false; }
-		// ページ倍率を得る.
-		//virtual bool get_page_scale(float&/*val*/) const noexcept { return false; }
 		// ページの大きさを得る.
 		virtual bool get_page_size(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 端の形式を得る.
@@ -488,11 +477,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る
 		virtual bool get_stroke_width(float&/*val*/) const noexcept { return false; }
 		// 段落のそろえを得る.
-		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT&/*val*/) const noexcept
-		{ return false; }
+		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT&/*val*/) const noexcept { return false; }
 		// 文字列のそろえを得る.
-		virtual bool get_text_align_horz(DWRITE_TEXT_ALIGNMENT&/*val*/) const noexcept 
-		{ return false; }
+		virtual bool get_text_align_horz(DWRITE_TEXT_ALIGNMENT&/*val*/) const noexcept { return false; }
 		// 文字列を得る.
 		virtual bool get_text_content(wchar_t*&/*val*/) const noexcept { return false; }
 		// 行間を得る.
@@ -504,11 +491,9 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F/*t*/) const noexcept
-		{ return ANC_TYPE::ANC_PAGE; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*t*/) const noexcept { return ANC_TYPE::ANC_PAGE; }
 		// 矩形に含まれるか判定する.
-		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept
-		{ return false; }
+		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
@@ -593,8 +578,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT/*val*/) noexcept
 		{ return false; }
 		// 値を文字列のそろえに格納する.
-		virtual bool set_text_align_horz(
-			const DWRITE_TEXT_ALIGNMENT/*val*/) noexcept { return false; }
+		virtual bool set_text_align_horz(const DWRITE_TEXT_ALIGNMENT/*val*/) noexcept { return false; }
 		// 値を文字列に格納する.
 		virtual bool set_text_content(wchar_t* const/*val*/) noexcept { return false; }
 		// 値を行間に格納する.
@@ -694,9 +678,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		virtual void draw(void) final override;
 		// 図形を囲む領域を得る.
-		virtual void get_bound(
-			const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/,
-			D2D1_POINT_2F& /*b_rb*/) const noexcept final override;
+		virtual void get_bound(const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/, D2D1_POINT_2F& /*b_rb*/) const noexcept final override;
 		// 図形を囲む領域の左上点を得る.
 		virtual void get_bound_lt(D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 画像の不透明度を得る.
@@ -1671,7 +1653,7 @@ namespace winrt::GraphPaper::implementation
 		static bool arc_get_pos_arrow(
 			const D2D1_POINT_2F vec, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad,
 			const double deg_start, const double deg_end, const double deg_rot,
-			const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+			/*const D2D1_SWEEP_DIRECTION dir,*/ const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く
 		virtual void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.

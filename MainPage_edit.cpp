@@ -45,35 +45,19 @@ namespace winrt::GraphPaper::implementation
 			tx_edit_text().SelectAll();
 			ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
 			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-				auto text = wchar_cpy(tx_edit_text().Text().c_str());
-				ustack_push_set<UNDO_T::TEXT_CONTENT>(s, text);
+				ustack_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
 				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 				if (m_text_fit_frame_to_text) {
 					ustack_push_position(s, ANC_TYPE::ANC_SE);
-					//s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
 				ustack_push_null();
 				ustack_is_enable();
-				//xcvd_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
 	}
-
-	//------------------------------
-	// 値をスライダーのヘッダーに格納する.
-	// S	スライダーの番号
-	// val	格納する値
-	/*
-	static void edit_arc_slider_set_header(Slider const& slider, wchar_t *res, const float val)
-	{
-		wchar_t buf[128];
-		swprintf_s(buf, 128, L"%s: %f°", ResourceLoader::GetForCurrentView().GetString(res).data(), val);
-		slider.Header(box_value(winrt::hstring(buf)));
-	}
-	*/
 
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -81,7 +65,6 @@ namespace winrt::GraphPaper::implementation
 			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
 				ustack_push_null();
 				ustack_is_enable();
-				//xcvd_is_enabled();
 				main_draw();
 			}
 		}
@@ -89,7 +72,6 @@ namespace winrt::GraphPaper::implementation
 			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
 				ustack_push_null();
 				ustack_is_enable();
-				//xcvd_is_enabled();
 				main_draw();
 			}
 		}
@@ -287,7 +269,8 @@ namespace winrt::GraphPaper::implementation
 					})
 				};
 				const auto revoker3{
-					dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
+					dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
+						// (IInspectable const&, SelectionChangedEventArgs const&)
 						if (dialog_radio_btns().SelectedIndex() == 0) {
 							if (m_prop_page.back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 								const auto val0 = dialog_slider_0().Value();
