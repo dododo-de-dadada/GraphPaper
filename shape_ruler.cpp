@@ -305,7 +305,8 @@ namespace winrt::GraphPaper::implementation
 	// Žš–Ê‚ð“¾‚é (Žg—pŒã‚Í Release ‚·‚é).
 	bool ShapeRuler::get_font_face(IDWriteFontFace3*& face) const noexcept
 	{
-		return text_get_font_face<IDWriteTextFormat>(
+		return text_get_font_face(
+		//return text_get_font_face<IDWriteTextFormat>(
 			m_dwrite_text_format.get(), m_font_family, DWRITE_FONT_WEIGHT_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, face);
 	}

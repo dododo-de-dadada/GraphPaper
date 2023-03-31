@@ -53,9 +53,7 @@ namespace winrt::GraphPaper::implementation
 	// pressed	押された位置
 	// released	離された位置
 	//------------------------------
-	static void event_pos_snap_to(
-		const SHAPE_LIST& slist, const bool boxed, const float interval, const bool g_snap,
-		const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released)
+	static void event_pos_snap_to(const SHAPE_LIST& slist, const bool boxed, const float interval, const bool g_snap, const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released)
 	{
 		D2D1_POINT_2F box[4]{	// 押された位置と離された位置で囲まれた方形の頂点
 			pressed, { released.x, pressed.y }, released, { pressed.x, released.y },
@@ -476,7 +474,8 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			if (fit_text) {
-				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				//s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
@@ -506,10 +505,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_finish_deforming(void)
 	{
-		const auto g_snap = m_main_page.m_snap_grid;
+		//const auto g_snap = m_main_page.m_snap_grid;
+		const auto g_snap = m_snap_grid;
 		if (g_snap && m_snap_point >= FLT_MIN) {
 			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
-			const auto p_scale = m_main_page.m_page_scale;
+			const auto p_scale = m_main_scale;
+			//const auto p_scale = m_main_page.m_page_scale;
 			D2D1_POINT_2F p;
 			D2D1_POINT_2F d;
 			pt_round(m_event_pos_curr, m_main_page.m_grid_base + 1.0, p);
@@ -532,8 +533,10 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, 0.0f, m_image_keep_aspect);
 		}
 		else if (m_snap_point >= FLT_MIN) {
-			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_page.m_page_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, m_snap_point / m_main_page.m_page_scale, m_image_keep_aspect);
+			//slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_page.m_page_scale, m_event_pos_curr);
+			//m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, m_snap_point / m_main_page.m_page_scale, m_image_keep_aspect);
+			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_scale, m_event_pos_curr);
+			m_event_shape_pressed->set_pos_anc(m_event_pos_curr, m_event_anc_pressed, m_snap_point / m_main_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -548,10 +551,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_finish_moving(void)
 	{
-		const auto g_snap = m_main_page.m_snap_grid;
+		const auto g_snap = m_snap_grid;
+		//const auto g_snap = m_main_page.m_snap_grid;
 		const auto interval = m_snap_point;
 		const auto g_base = m_main_page.m_grid_base;
-		const auto p_scale = m_main_page.m_page_scale;
+		//const auto p_scale = m_main_page.m_page_scale;
+		const auto p_scale = m_main_scale;
 
 		// 方眼にくっつける, かつ頂点にくっつける.
 		if (g_snap && interval >= FLT_MIN) {
@@ -680,7 +685,8 @@ namespace winrt::GraphPaper::implementation
 			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			D2D1_POINT_2F pos;	// 近傍への位置ベクトル
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
-			if (pt_abs2(pos) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
+			if (pt_abs2(pos) * m_main_scale > m_event_click_dist * raw_dpi / log_dpi) {
+			//if (pt_abs2(pos) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
 				event_set_cursor();
@@ -716,7 +722,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
 			// 差分がクリックの判定距離を超えるか判定する.
-			if (pt_abs2(pos) > m_event_click_dist / m_main_page.m_page_scale) {
+			if (pt_abs2(pos) > m_event_click_dist / m_main_scale) {
+			//if (pt_abs2(pos) > m_event_click_dist / m_main_page.m_page_scale) {
 				// 作図ツールが選択ツール以外か判定する.
 				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 					// 矩形選択している状態に遷移する.
@@ -779,6 +786,8 @@ namespace winrt::GraphPaper::implementation
 			cap_style_is_checked(m_main_page.m_stroke_cap);
 			dash_style_is_checked(m_main_page.m_dash_style);
 			font_style_is_checked(m_main_page.m_font_style);
+			font_stretch_is_checked(m_main_page.m_font_stretch);
+			font_weight_is_checked(m_main_page.m_font_weight);
 			join_style_is_checked(m_main_page.m_join_style);
 			stroke_width_is_checked(m_main_page.m_stroke_width);
 			text_align_horz_is_checked(m_main_page.m_text_align_horz);
@@ -854,7 +863,9 @@ namespace winrt::GraphPaper::implementation
 		// 引数の値をポンインターの現在位置に格納する.
 		// ポインターのイベント発生時間を得る.
 		// ポインターの拡張情報を得る.
-		const SwapChainPanel& swap_chain_panel = sender.as<SwapChainPanel>();
+		const SwapChainPanel& swap_chain_panel{
+			sender.as<SwapChainPanel>()
+		};
 		swap_chain_panel.CapturePointer(args.Pointer());
 		const uint64_t t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
 		const PointerPointProperties& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
@@ -905,8 +916,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_pos_pressed = m_event_pos_curr;
 		// 作図ツールが選択ツールか判定する.
 		if (m_drawing_tool == DRAWING_TOOL::SELECT || m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed,
-				m_event_shape_pressed);
+			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 			// 押されたのが図形の外側か判定する.
 			if (m_event_anc_pressed == ANC_TYPE::ANC_PAGE) {
 				m_event_shape_pressed = nullptr;
@@ -974,8 +984,7 @@ namespace winrt::GraphPaper::implementation
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 			const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			// 差分がクリックの判定時間以下, かつ押された図形が文字列図形か判定する.
-			if (t_stamp - m_event_time_pressed <= c_time &&
-				m_event_shape_pressed != nullptr) {
+			if (t_stamp - m_event_time_pressed <= c_time && m_event_shape_pressed != nullptr) {
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					edit_text_click_async(nullptr, nullptr);
 				}
@@ -1011,12 +1020,15 @@ namespace winrt::GraphPaper::implementation
 						m_drawing_tool == DRAWING_TOOL::RULER ||
 						m_drawing_tool == DRAWING_TOOL::TEXT
 					);
-					const float interval = m_snap_point / m_main_page.m_page_scale;
+					const float interval = m_snap_point / m_main_scale;
+					//const float interval = m_snap_point / m_main_page.m_page_scale;
 					const double g_len = max(m_main_page.m_grid_base, 0.0) + 1.0;
-					event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_main_page.m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
+					//event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_main_page.m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
+					event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
 				// 方眼に合わせるか判定する.
-				else if (m_main_page.m_snap_grid) {
+				//else if (m_main_page.m_snap_grid) {
+				else if (m_snap_grid) {
 					// 押された位置よ離された位置を方眼の大きさで丸める.
 					const double g_len = max(m_main_page.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
@@ -1097,8 +1109,7 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(curs);
 		}
 		// 作図ツールが選択ツール以外かつ状態が右ボタン押下でない.
-		else if (m_drawing_tool != DRAWING_TOOL::SELECT &&
-			m_event_state != EVENT_STATE::PRESS_RBTN) {
+		else if (m_drawing_tool != DRAWING_TOOL::SELECT && m_event_state != EVENT_STATE::PRESS_RBTN) {
 			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 		}
 		// 描画の排他制御をロックできないか判定する.
@@ -1157,8 +1168,7 @@ namespace winrt::GraphPaper::implementation
 							typeid(*s) == typeid(ShapeArc)
 							) {
 							// 図形の部位が, 頂点の数を超えないか判定する.
-							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 +
-								static_cast<ShapePath*>(s)->m_pos.size() + 1) {
+							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_pos.size() + 1) {
 								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 								break;
 							}
@@ -1176,7 +1186,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_set_position(PointerRoutedEventArgs const& args)
 	{
-		const auto p_scale = m_main_page.m_page_scale;
+		const auto p_scale = m_main_scale;
+		//const auto p_scale = m_main_page.m_page_scale;
 		// 境界ボックスの左上点にスクロールの値を加え, 表示されている左上点を得る.
 		D2D1_POINT_2F q;
 		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), q);
@@ -1209,19 +1220,23 @@ namespace winrt::GraphPaper::implementation
 		if (mod == VirtualKeyModifiers::Control) {
 			// 拡大縮小
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
-			if (w_delta > 0 &&
-				m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
-				m_main_page.m_page_scale *= 1.1f;
-				zoom_is_cheched(m_main_page.m_page_scale);
+			if (w_delta > 0 && m_main_scale < 16.f / 1.1f - FLT_MIN) {
+			//if (w_delta > 0 && m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
+				//m_main_page.m_page_scale *= 1.1f;
+				//zoom_is_cheched(m_main_page.m_page_scale);
+				m_main_scale *= 1.1f;
+				zoom_is_cheched(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();
 				status_bar_set_zoom();
 			}
-			else if (w_delta < 0 &&
-				m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
-				m_main_page.m_page_scale /= 1.1f;
-				zoom_is_cheched(m_main_page.m_page_scale);
+			else if (w_delta < 0 && m_main_scale > 0.25f * 1.1f + FLT_MIN) {
+			//else if (w_delta < 0 && m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
+				//m_main_page.m_page_scale /= 1.1f;
+				//zoom_is_cheched(m_main_page.m_page_scale);
+				m_main_scale /= 1.1f;
+				zoom_is_cheched(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();
@@ -1232,7 +1247,8 @@ namespace winrt::GraphPaper::implementation
 		else if (mod == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
-			const auto p_scale = m_main_page.m_page_scale;
+			const auto p_scale = m_main_scale;
+			//const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, p_scale)) {
 				main_draw();
 				status_bar_set_pos();
@@ -1242,7 +1258,8 @@ namespace winrt::GraphPaper::implementation
 		else if (mod == VirtualKeyModifiers::None) {
 			// 縦スクロール.
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
-			const auto p_scale = m_main_page.m_page_scale;
+			const auto p_scale = m_main_scale;
+			//const auto p_scale = m_main_page.m_page_scale;
 			if (event_scroll_by_wheel_delta(sb_vert(), w_delta, p_scale)) {
 				main_draw();
 				status_bar_set_pos();

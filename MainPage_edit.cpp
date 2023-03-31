@@ -50,8 +50,8 @@ namespace winrt::GraphPaper::implementation
 				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 				if (m_text_fit_frame_to_text) {
 					ustack_push_position(s, ANC_TYPE::ANC_SE);
-					s->fit_frame_to_text(
-						m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+					//s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -101,15 +101,15 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", val);
 			D2D1_SWEEP_DIRECTION dir;
-			m_prop_page.m_shape_list.back()->get_arc_dir(dir);
+			m_prop_page.back()->get_arc_dir(dir);
 			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				if (m_prop_page.m_shape_list.back()->set_arc_start(val)) {
-					prop_dialog_draw();
+				if (m_prop_page.back()->set_arc_start(val)) {
+					dialog_draw();
 				}
 			}
 			else {
-				if (m_prop_page.m_shape_list.back()->set_arc_end(-val)) {
-					prop_dialog_draw();
+				if (m_prop_page.back()->set_arc_end(-val)) {
+					dialog_draw();
 				}
 			}
 		}
@@ -117,23 +117,23 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end", val);
 			D2D1_SWEEP_DIRECTION dir;
-			m_prop_page.m_shape_list.back()->get_arc_dir(dir);
+			m_prop_page.back()->get_arc_dir(dir);
 			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				if (m_prop_page.m_shape_list.back()->set_arc_end(val)) {
-					prop_dialog_draw();
+				if (m_prop_page.back()->set_arc_end(val)) {
+					dialog_draw();
 				}
 			}
 			else {
-				if (m_prop_page.m_shape_list.back()->set_arc_start(-val)) {
-					prop_dialog_draw();
+				if (m_prop_page.back()->set_arc_start(-val)) {
+					dialog_draw();
 				}
 			}
 		}
 		else if constexpr (S == 2) {
 			const float val = static_cast<float>(args.NewValue());
 			edit_arc_slider_set_header(dialog_slider_2(), L"str_arc_rot", val);
-			m_prop_page.m_shape_list.back()->set_arc_rot(val);
-			prop_dialog_draw();
+			m_prop_page.back()->set_arc_rot(val);
+			dialog_draw();
 
 		}
 	}
@@ -143,24 +143,24 @@ namespace winrt::GraphPaper::implementation
 		IInspectable const&, SelectionChangedEventArgs const& args)
 	{
 		if (dialog_radio_btns().SelectedIndex() == 0) {
-			if (m_prop_page.m_shape_list.back()->set_arc_dir(
+			if (m_prop_page.back()->set_arc_dir(
 				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 				const auto val0 = dialog_slider_0().Value();
 				const auto val1 = dialog_slider_1().Value();
 				dialog_slider_0().Value(-val1);
 				dialog_slider_1().Value(-val0);
-				prop_dialog_draw();
+				dialog_draw();
 			}
 			auto items = args.AddedItems();
 		}
 		else if (dialog_radio_btns().SelectedIndex() == 1) {
-			if (m_prop_page.m_shape_list.back()->set_arc_dir(
+			if (m_prop_page.back()->set_arc_dir(
 				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 				const auto val0 = dialog_slider_0().Value();
 				const auto val1 = dialog_slider_1().Value();
 				dialog_slider_0().Value(-val1);
 				dialog_slider_1().Value(-val0);
-				prop_dialog_draw();
+				dialog_draw();
 			}
 		}
 	}
@@ -169,23 +169,23 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::edit_arc_checkbox_checked(IInspectable const&, RoutedEventArgs const&)
 	{
 		if constexpr (S == 0) {
-			if (m_prop_page.m_shape_list.back()->set_arc_dir(
+			if (m_prop_page.back()->set_arc_dir(
 				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 				const auto val0 = dialog_slider_0().Value();
 				const auto val1 = dialog_slider_1().Value();
 				dialog_slider_0().Value(-val1);
 				dialog_slider_1().Value(-val0);
-				prop_dialog_draw();
+				dialog_draw();
 			}
 		}
 		else if constexpr (S == 1) {
-			if (m_prop_page.m_shape_list.back()->set_arc_dir(
+			if (m_prop_page.back()->set_arc_dir(
 				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 				const auto val0 = dialog_slider_0().Value();
 				const auto val1 = dialog_slider_1().Value();
 				dialog_slider_0().Value(-val1);
 				dialog_slider_1().Value(-val0);
-				prop_dialog_draw();
+				dialog_draw();
 			}
 		}
 	}
@@ -247,8 +247,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_SWEEP_DIRECTION a_dir;
 			t->get_arc_dir(a_dir);
 
-			const auto samp_w = scp_prop_panel().Width();
-			const auto samp_h = scp_prop_panel().Height();
+			const auto samp_w = scp_dialog_panel().Width();
+			const auto samp_h = scp_dialog_panel().Height();
 			const auto ctr = samp_w * 0.5;
 			const auto mar = samp_w * 0.125;
 			const auto rx = (samp_w - mar) * 0.5;
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				dialog_radio_btns().SelectedIndex(1);
 			}
-			cd_setting_dialog().Title(
+			cd_dialog_prop().Title(
 				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot")));
 			{
 				const auto revoker0{
@@ -345,15 +345,15 @@ namespace winrt::GraphPaper::implementation
 							const float val = static_cast<float>(args.NewValue());
 							edit_arc_slider_set_header(dialog_slider_0(), L"str_arc_start", val);
 							D2D1_SWEEP_DIRECTION dir;
-							m_prop_page.m_shape_list.back()->get_arc_dir(dir);
+							m_prop_page.back()->get_arc_dir(dir);
 							if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-								if (m_prop_page.m_shape_list.back()->set_arc_start(val)) {
-									prop_dialog_draw();
+								if (m_prop_page.back()->set_arc_start(val)) {
+									dialog_draw();
 								}
 							}
 							else {
-								if (m_prop_page.m_shape_list.back()->set_arc_end(-val)) {
-									prop_dialog_draw();
+								if (m_prop_page.back()->set_arc_end(-val)) {
+									dialog_draw();
 								}
 							}
 						}
@@ -365,15 +365,15 @@ namespace winrt::GraphPaper::implementation
 							const float val = static_cast<float>(args.NewValue());
 							edit_arc_slider_set_header(dialog_slider_1(), L"str_arc_end", val);
 							D2D1_SWEEP_DIRECTION dir;
-							m_prop_page.m_shape_list.back()->get_arc_dir(dir);
+							m_prop_page.back()->get_arc_dir(dir);
 							if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-								if (m_prop_page.m_shape_list.back()->set_arc_end(val)) {
-									prop_dialog_draw();
+								if (m_prop_page.back()->set_arc_end(val)) {
+									dialog_draw();
 								}
 							}
 							else {
-								if (m_prop_page.m_shape_list.back()->set_arc_start(-val)) {
-									prop_dialog_draw();
+								if (m_prop_page.back()->set_arc_start(-val)) {
+									dialog_draw();
 								}
 							}
 						}
@@ -383,36 +383,36 @@ namespace winrt::GraphPaper::implementation
 					dialog_slider_2().ValueChanged(winrt::auto_revoke, [this](auto, auto args) {
 						const float val = static_cast<float>(args.NewValue());
 						edit_arc_slider_set_header(dialog_slider_2(), L"str_arc_rot", val);
-						m_prop_page.m_shape_list.back()->set_arc_rot(val);
-						prop_dialog_draw();
+						m_prop_page.back()->set_arc_rot(val);
+						dialog_draw();
 					})
 				};
 				const auto revoker3{
 					dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
 						if (dialog_radio_btns().SelectedIndex() == 0) {
-							if (m_prop_page.m_shape_list.back()->set_arc_dir(
+							if (m_prop_page.back()->set_arc_dir(
 								D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 								const auto val0 = dialog_slider_0().Value();
 								const auto val1 = dialog_slider_1().Value();
 								dialog_slider_0().Value(-val1);
 								dialog_slider_1().Value(-val0);
-								prop_dialog_draw();
+								dialog_draw();
 							}
 						}
 						else if (dialog_radio_btns().SelectedIndex() == 1) {
-							if (m_prop_page.m_shape_list.back()->set_arc_dir(
+							if (m_prop_page.back()->set_arc_dir(
 								D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 								const auto val0 = dialog_slider_0().Value();
 								const auto val1 = dialog_slider_1().Value();
 								dialog_slider_0().Value(-val1);
 								dialog_slider_1().Value(-val0);
-								prop_dialog_draw();
+								dialog_draw();
 							}
 						}
 					})
 				};
-				if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
-					s = m_prop_page.m_shape_list.back();
+				if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+					s = m_prop_page.back();
 					// ’ˆÓ: ‡”Ô‚ª OK ‚©‚Ç‚¤‚©.
 					D2D1_SWEEP_DIRECTION new_dir;
 					s->get_arc_dir(new_dir);

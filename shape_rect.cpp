@@ -371,15 +371,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域の左上位置を得る.
-	// val	領域の左上位置
+	// 図形を囲む矩形の左上点を得る.
+	// val	左上点
 	void ShapeRect::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		val.x = (0.0f <= m_pos.x ? m_start.x : m_start.x + m_pos.x);
 		val.y = (0.0f <= m_pos.y ? m_start.y : m_start.y + m_pos.y);
 	}
 
-	// 開始位置を得る
+	// 始点を得る
+	// val	始点
 	// 戻り値	つねに true
 	bool ShapeRect::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
@@ -594,7 +595,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeStroke::write(dt_writer);
 
-		// 開始位置
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
 		dt_writer.WriteSingle(m_pos.x);

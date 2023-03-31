@@ -332,7 +332,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形の大きさは元画像と同じにする.
 		const float img_w = static_cast<float>(bmp.PixelWidth());
 		const float img_h = static_cast<float>(bmp.PixelHeight());
-		const float scale = m_main_page.m_page_scale;
+		//const float scale = m_main_page.m_page_scale;
+		const float scale = m_main_scale;
 		D2D1_POINT_2F pos{
 			static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
 			static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
@@ -352,8 +353,10 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
-		const double grid_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-		const float snap_point = m_snap_point / m_main_page.m_page_scale;
+		//const double grid_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+		const double grid_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+		//const float snap_point = m_snap_point / m_main_page.m_page_scale;
+		const float snap_point = m_snap_point / m_main_scale;
 		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, snap_point);
 		s->set_pos_start(pos);
 
@@ -462,7 +465,8 @@ namespace winrt::GraphPaper::implementation
 			unselect_all();
 
 			// パネルの大きさで文字列図形を作成する,.
-			const float scale = m_main_page.m_page_scale;
+			const float scale = m_main_scale;
+			//const float scale = m_main_page.m_page_scale;
 			const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
 			const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
 			const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
@@ -471,7 +475,8 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.m_page_size.height); // ページの表示されている高さ
 			const float lt_x = m_main_bbox_lt.x;
 			const float lt_y = m_main_bbox_lt.y;
-			const double g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+			//const double g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+			const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
 			const float v_stick = m_snap_point / scale;
 			ShapeText* t = new ShapeText(
 				D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h },

@@ -1,7 +1,7 @@
-//-------------------------------
-// MainPage_prop.cpp
-// 設定ダイアログ
-//-------------------------------
+//------------------------------
+// MainPage_stroke.cpp
+// 線枠
+//------------------------------
 #include "pch.h"
 #include "MainPage.h"
 
@@ -9,210 +9,634 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// ふつうは次の順序で呼ばれる.
-	// 1. opend
-	// 2. size_changed
-	// 3. loaded
-	// 4. scale_changed
-	// 5. closed
-	// ちなみに, unloaded は呼ばれない.
-	// ところが, デバッグを続けていると, たまに,
-	// 1. size_changed
-	// 2. opened
-	// 3. loaded
-	// あるいは,
-	// 1. size_changed
-	// 2. loaded
-	// 3. opened
-	// の順番で呼ばれることがある.
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::Foundation::Uri;
-	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
-	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
-	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-	using winrt::Windows::Storage::FileAccessMode;
-	using winrt::Windows::UI::Xaml::Window;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-//#ifdef _DEBUG
-//	enum struct DEBUG_DIALOG {
-//		NIL,
-//		LOADED,
-//		OPENED,
-//		CLOSED,
-//		UNLOADED,
-//		SIZE_CHANGED,
-//		SCALE_CHANGED
-//	} debug_dialog[124]{};
-//	int debug_dialog_cnt = 0;
-//#endif
+	// 見本の図形を作成する.
+	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
 
-	// 属性ダイアログの図形を表示する.
-	void MainPage::prop_dialog_draw(void)
+	// 見本の図形を作成する.
+	// p_width	見本を表示するパネルの幅
+	// p_height	見本を表示するパネルの高さ
+	// page	見本を表示するシート
+	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
-		if (!scp_prop_panel().IsLoaded()) {
-			return;
-		}
-		if (!m_mutex_draw.try_lock()) {
-			// ロックできない場合
-			return;
-		}
-		// ひな型に描画に必要な変数を格納する.
-		m_prop_page.begin_draw(m_prop_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
-		m_prop_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
-		m_prop_d2d.m_d2d_context->BeginDraw();
-		m_prop_d2d.m_d2d_context->Clear(m_background_color);
-		const D2D1_RECT_F w_rect{
-			0, 0, m_prop_d2d.m_logical_width, m_prop_d2d.m_logical_height
+		const auto mar = p_width * 0.125;	// 余白
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
-		if (m_background_show) {
-			// 背景パターンを描画する,
-			m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
-		}
-		Shape::m_d2d_color_brush->SetColor(m_prop_page.m_page_color);
-		m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
-
-		const float offset = static_cast<FLOAT>(std::fmod(
-			m_prop_page.m_page_size.width * 0.5, m_prop_page.m_grid_base + 1.0));
-		m_prop_page.m_grid_offset.x = offset;
-		m_prop_page.m_grid_offset.y = offset;
-		m_prop_page.m_page_margin.left = 0.0f;
-		m_prop_page.m_page_margin.top = 0.0f;
-		m_prop_page.m_page_margin.right = 0.0f;
-		m_prop_page.m_page_margin.bottom = 0.0f;
-		m_prop_page.draw();
-		winrt::check_hresult(
-			m_prop_d2d.m_d2d_context->EndDraw()
-		);
-		m_prop_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
-		m_prop_d2d.Present();
-		m_mutex_draw.unlock();
-	}
-
-	// 属性ダイアログのリストがロードされた.
-	void MainPage::prop_dialog_list_loaded(IInspectable const&, RoutedEventArgs const&)
-	{
-		// 選択された行が表示されるようスクロールする.
-		const auto item = lv_dialog_list().SelectedItem();
-		if (item != nullptr) {
-			lv_dialog_list().ScrollIntoView(item);
-		}
-	}
-
-	// 属性ダイアログが開いた.
-	void MainPage::prop_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
-	{
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::OPENED;
-//#endif
-	}
-
-	// 属性ダイアログが閉じた.
-	void MainPage::prop_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
-	{
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::CLOSED;
-//		debug_dialog_cnt = 0;
-//		if (debug_dialog[0] != DEBUG_DIALOG::OPENED) {
-//			__debugbreak();
-//		}
-//#endif
-	}
-
-	// 属性ダイアログがアンロードされた
-	void MainPage::prop_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
-	{
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;
-//#endif
-		m_prop_d2d.Trim();
-	}
-
-	// 属性の画像を読み込む
-	// p_width	パネルの幅
-	// p_height	パネルの高さ
-	IAsyncAction MainPage::prop_image_load_async(const float p_width, const float p_height)
-	{
-		bool ok;
-		winrt::apartment_context context;
-		co_await winrt::resume_background();
-		try {
-			const StorageFile file{
-				co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" })
-			};
-			const IRandomAccessStream stream{
-				co_await file.OpenAsync(FileAccessMode::Read)
-			};
-			const BitmapDecoder decoder{
-				co_await BitmapDecoder::CreateAsync(stream)
-			};
-			const SoftwareBitmap bitmap{
-				co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight)
-			};
-			const D2D1_POINT_2F pos{
-				static_cast<FLOAT>(p_width * 0.125), static_cast<FLOAT>(p_height * 0.125)
-			};
-			const D2D1_SIZE_F size{
-				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
-			};
-			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_prop_page.m_image_opac);
-			bitmap.Close();
-
-			m_prop_page.m_shape_list.push_back(s);
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * mar), static_cast<FLOAT>(p_height - 2.0 * mar)
+		};
+		page.m_shape_list.push_back(new ShapeLine(start, pos, &page));
+		page.back()->set_select(true);
 #if defined(_DEBUG)
-			debug_leak_cnt++;
+		debug_leak_cnt++;
 #endif
-			ok = true;
-		}
-		catch (winrt::hresult_error&) {
-			ok = false;
-		}
-		co_await context;
-		if (ok) {
-			prop_dialog_draw();
-		}
 	}
 
-	// 属性のスワップチェーンパネルが読み込まれた.
-	void MainPage::prop_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+	// 属性メニューの「端の形式」が選択された.
+	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender != scp_prop_panel()) {
+		CAP_STYLE new_val;
+		if (sender == rmfi_cap_style_flat()) {
+			new_val = CAP_STYLE_FLAT;
+		}
+		else if (sender == rmfi_cap_style_square()) {
+			new_val = CAP_STYLE_SQUARE;
+		}
+		else if (sender == rmfi_cap_style_round()) {
+			new_val = CAP_STYLE_ROUND;
+		}
+		else if (sender == rmfi_cap_style_triangle()) {
+			new_val = CAP_STYLE_TRIANGLE;
+		}
+		else {
+			winrt::hresult_not_implemented();
+		}
+		cap_style_is_checked(new_val);
+		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// 属性メニューの「端の形式」に印をつける.
+	// s_cap	端の形式
+	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
+	{
+		rmfi_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
+		rmfi_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
+		rmfi_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
+		rmfi_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
+	}
+
+	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
+	IAsyncAction MainPage::join_miter_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
+		const auto str_join_miter_limit{ ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") + L": " };
+		const auto str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") };
+		wchar_t buf[32];
+
+		m_prop_page.set_attr_to(&m_main_page);
+		const auto unit = m_len_unit;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
+		float j_limit;
+		m_prop_page.get_join_miter_limit(j_limit);
+		j_limit -= 1.0f;
+
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(j_limit);
+		dialog_slider_0().Visibility(Visibility::Visible);
+		//join_slider_set_header<0>(j_limit);
+		swprintf_s(buf, L"%.1lf", static_cast<double>(j_limit) + 1.0);
+		dialog_slider_0().Header(box_value(str_join_miter_limit + buf));
+
+		float s_width;
+		m_prop_page.get_stroke_width(s_width);
+
+		dialog_slider_1().Minimum(0.0);
+		dialog_slider_1().Maximum(MAX_VALUE);
+		dialog_slider_1().TickFrequency(TICK_FREQ);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(s_width);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		//join_slider_set_header<1>(s_width);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
+		dialog_slider_1().Header(box_value(str_stroke_width + buf));
+
+		const auto samp_w = scp_dialog_panel().Width();
+		const auto samp_h = scp_dialog_panel().Height();
+		const auto mar = samp_w * 0.125;
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
+		};
+		POLY_OPTION p_opt{ 3, true, true, false, true };
+		auto s = new ShapePoly(start, pos, &m_prop_page, p_opt);
+		const float offset = static_cast<float>(samp_h / 16.0);
+		const float samp_x = static_cast<float>(samp_w * 0.25);
+		const float samp_y = static_cast<float>(samp_h * 0.5);
+		s->set_select(true);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_snap_point, false);
+		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_snap_point, false);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_snap_point, false);
+		m_prop_page.m_shape_list.push_back(s);
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+
+		cd_dialog_prop().Title(box_value(str_title));
+		m_mutex_event.lock();
+		{
+			const auto revoker0{
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_join_miter_limit](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					wchar_t buf[32];
+					const float val = static_cast<float>(args.NewValue());
+					swprintf_s(buf, L"%.1lf", static_cast<double>(val) + 1.0);
+					dialog_slider_0().Header(box_value(str_join_miter_limit + buf));
+					if (m_prop_page.back()->set_join_miter_limit(val + 1.0f)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker1{
+				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_stroke_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					wchar_t buf[32];
+					const float val = static_cast<float>(args.NewValue());
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_1().Header(box_value(str_stroke_width + buf));
+					if (m_prop_page.back()->set_stroke_width(val)) {
+						dialog_draw();
+					}
+				})
+			};
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+				float new_limit;
+				float new_width;
+				m_prop_page.back()->get_join_miter_limit(new_limit);
+				m_prop_page.back()->get_stroke_width(new_width);
+				const bool limit_changed = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
+				const bool width_changed = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+				if (limit_changed || width_changed) {
+					ustack_push_null();
+					ustack_is_enable();
+					main_draw();
+				}
+			}
+		}
+		slist_clear(m_prop_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		m_mutex_event.unlock();
+	}
+
+	// 属性メニューの「破線の配置」が選択された.
+	IAsyncAction MainPage::dash_pat_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_mutex_event.lock();
+		// まず, ダイアログページの属性を, メインページと同じにする.
+		m_prop_page.set_attr_to(&m_main_page);
+		// 見本図形の作成
+		const auto p_width = scp_dialog_panel().Width();
+		const auto p_height = scp_dialog_panel().Height();
+		const auto mar = p_width * 0.125;
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * mar), static_cast<FLOAT>(p_height - 2.0 * mar)
+		};
+		m_prop_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_prop_page));
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
+		const winrt::hstring str_dash_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_len") + L": " };
+		const winrt::hstring str_dash_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_gap") + L": " };
+		const winrt::hstring str_dot_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_len") + L": " };
+		const winrt::hstring str_dot_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_gap") + L": " };
+		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
+		DASH_PAT d_patt;
+		m_prop_page.get_dash_pat(d_patt);
+		float s_width;
+		m_prop_page.get_stroke_width(s_width);
+		D2D1_DASH_STYLE d_style;
+		m_prop_page.get_dash_style(d_style);
+
+		const auto unit = m_len_unit;
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
+		wchar_t buf[32];
+
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(d_patt.m_[0]);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, d_patt.m_[0], dpi, g_len, buf);
+		dialog_slider_0().Header(box_value(str_dash_len + buf));
+
+		dialog_slider_1().Minimum(0.0);
+		dialog_slider_1().Maximum(MAX_VALUE);
+		dialog_slider_1().TickFrequency(TICK_FREQ);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(d_patt.m_[1]);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, d_patt.m_[1], dpi, g_len, buf);
+		dialog_slider_1().Header(box_value(str_dash_gap + buf));
+
+		dialog_slider_2().Minimum(0.0);
+		dialog_slider_2().Maximum(MAX_VALUE);
+		dialog_slider_2().TickFrequency(TICK_FREQ);
+		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_2().Value(d_patt.m_[2]);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, d_patt.m_[2], dpi, g_len, buf);
+		dialog_slider_2().Header(box_value(str_dot_len + buf));
+
+		dialog_slider_3().Minimum(0.0);
+		dialog_slider_3().Maximum(MAX_VALUE);
+		dialog_slider_3().TickFrequency(TICK_FREQ);
+		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_3().Value(d_patt.m_[3]);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, d_patt.m_[3], dpi, g_len, buf);
+		dialog_slider_3().Header(box_value(str_dot_gap + buf));
+
+		dialog_slider_4().Minimum(0.0);
+		dialog_slider_4().Maximum(MAX_VALUE);
+		dialog_slider_4().TickFrequency(TICK_FREQ);
+		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_4().Value(s_width);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
+		dialog_slider_4().Header(box_value(str_stroke_width + buf));
+
+		dialog_combo_box().Header(box_value(mfsi_dash_style().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dot().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot_dot().Text()));
+		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+			dialog_combo_box().SelectedIndex(0);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+			dialog_combo_box().SelectedIndex(1);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+			dialog_combo_box().SelectedIndex(2);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+			dialog_combo_box().SelectedIndex(3);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
+		dialog_slider_4().Visibility(Visibility::Visible);
+		dialog_combo_box().Visibility(Visibility::Visible);
+		cd_dialog_prop().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_dash_patern")));
+		{
+			const auto revoker0{
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_dash_len](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PAT patt;
+					m_prop_page.back()->get_dash_pat(patt);
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_0().Header(box_value(str_dash_len + buf));
+					patt.m_[0] = static_cast<FLOAT>(val);
+					if (m_prop_page.back()->set_dash_pat(patt)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker1{
+				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_dash_gap](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PAT patt;
+					m_prop_page.back()->get_dash_pat(patt);
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_1().Header(box_value(str_dash_gap + buf));
+					patt.m_[1] = static_cast<FLOAT>(val);
+					if (m_prop_page.back()->set_dash_pat(patt)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker2{
+				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_dot_len](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PAT patt;
+					m_prop_page.back()->get_dash_pat(patt);
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_2().Header(box_value(str_dot_len + buf));
+					patt.m_[2] = static_cast<FLOAT>(val);
+					if (m_prop_page.back()->set_dash_pat(patt)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker3{
+				dialog_slider_3().ValueChanged(winrt::auto_revoke, [this, str_dot_gap](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PAT patt;
+					m_prop_page.back()->get_dash_pat(patt);
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_3().Header(box_value(str_dot_gap + buf));
+					patt.m_[3] = static_cast<FLOAT>(val);
+					if (m_prop_page.back()->set_dash_pat(patt)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker4{
+				dialog_slider_4().ValueChanged(winrt::auto_revoke, [this, str_stroke_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_4().Header(box_value(str_stroke_width + buf));
+					if (m_prop_page.back()->set_stroke_width(val)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker5{
+				dialog_combo_box().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
+					if (dialog_combo_box().SelectedIndex() == 0) {
+						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH)) {
+							dialog_slider_0().Visibility(Visibility::Visible);
+							dialog_slider_1().Visibility(Visibility::Visible);
+							dialog_slider_2().Visibility(Visibility::Collapsed);
+							dialog_slider_3().Visibility(Visibility::Collapsed);
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 1) {
+						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DOT)) {
+							dialog_slider_0().Visibility(Visibility::Collapsed);
+							dialog_slider_1().Visibility(Visibility::Collapsed);
+							dialog_slider_2().Visibility(Visibility::Visible);
+							dialog_slider_3().Visibility(Visibility::Visible);
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 2) {
+						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT)) {
+							dialog_slider_0().Visibility(Visibility::Visible);
+							dialog_slider_1().Visibility(Visibility::Visible);
+							dialog_slider_2().Visibility(Visibility::Visible);
+							dialog_slider_3().Visibility(Visibility::Visible);
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 3) {
+						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT_DOT)) {
+							dialog_slider_0().Visibility(Visibility::Visible);
+							dialog_slider_1().Visibility(Visibility::Visible);
+							dialog_slider_2().Visibility(Visibility::Visible);
+							dialog_slider_3().Visibility(Visibility::Visible);
+							dialog_draw();
+						}
+					}
+				})
+			};
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+				DASH_PAT new_patt;
+				float new_width;
+				D2D1_DASH_STYLE new_style;
+				m_prop_page.back()->get_dash_pat(new_patt);
+				m_prop_page.back()->get_stroke_width(new_width);
+				m_prop_page.back()->get_dash_style(new_style);
+				dash_style_is_checked(new_style);
+				const bool flag_patt = ustack_push_set<UNDO_T::DASH_PAT>(new_patt);
+				const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+				const bool flag_style = ustack_push_set<UNDO_T::DASH_STYLE>(new_style);
+				if (flag_patt || flag_width || flag_style) {
+					ustack_push_null();
+					xcvd_is_enabled();
+					main_draw();
+				}
+			}
+		}
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_3().Visibility(Visibility::Collapsed);
+		dialog_slider_4().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Items().Clear();
+		status_bar_set_pos();
+		slist_clear(m_prop_page.m_shape_list);
+		m_mutex_event.unlock();
+	}
+
+	// 属性メニューの「破線の形式」のサブ項目が選択された.
+	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		D2D1_DASH_STYLE d_style;
+		if (sender == rmfi_dash_style_solid()) {
+			d_style = D2D1_DASH_STYLE_SOLID;
+		}
+		else if (sender == rmfi_dash_style_dash()) {
+			d_style = D2D1_DASH_STYLE_DASH;
+		}
+		else if (sender == rmfi_dash_style_dot()) {
+			d_style = D2D1_DASH_STYLE_DOT;
+		}
+		else if (sender == rmfi_dash_style_dash_dot()) {
+			d_style = D2D1_DASH_STYLE_DASH_DOT;
+		}
+		else if (sender == rmfi_dash_style_dash_dot_dot()) {
+			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
+		}
+		else {
 			return;
 		}
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::LOADED;
-//#endif
-//		prop_dialog_draw();
+		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+		if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
+			ustack_push_null();
+			xcvd_is_enabled();
+			main_draw();
+		}
+		status_bar_set_pos();
 	}
 
-	// 属性のスワップチェーンパネルの寸法が変わった.
-	void MainPage::prop_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
+	// 属性メニューの「破線の形式」に印をつける.
+	// d_style	破線の形式
+	void MainPage::dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		if (sender != scp_prop_panel()) {
+		rmfi_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+
+		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+	}
+
+	// 属性メニューの「線の結合の形式」が選択された.
+	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		D2D1_LINE_JOIN new_val;
+		if (sender == rmfi_join_style_bevel()) {
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
+		}
+		else if (sender == rmfi_join_style_miter()) {
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
+		}
+		else if (sender == rmfi_join_style_miter_or_bevel()) {
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
+		}
+		else if (sender == rmfi_join_style_round()) {
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
+		}
+		else {
+			winrt::hresult_not_implemented();
 			return;
 		}
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SIZE_CHANGED;
-//#endif
-		m_prop_d2d.SetSwapChainPanel(scp_prop_panel());
-		const float w = args.NewSize().Width;
-		const float h = args.NewSize().Height;
-		m_prop_page.m_page_size.width = w;
-		m_prop_page.m_page_size.height = h;
-		m_prop_d2d.SetLogicalSize2({ w, h });
-		prop_dialog_draw();
+		join_style_is_checked(new_val);
+		if (ustack_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
 	}
 
-	// 属性のスワップチェーンパネルの倍率が変わった.
-	void MainPage::prop_panel_scale_changed(IInspectable const&, IInspectable const&)
+	// 属性メニューの「線の結合」のサブ項目に印をつける.
+	// s_join	線の結合
+	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
-//#ifdef _DEBUG
-//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SCALE_CHANGED;
-//#endif
-		const float x = scp_prop_panel().CompositionScaleX();
-		const float y = scp_prop_panel().CompositionScaleY();
-		m_prop_d2d.SetCompositionScale(x, y);
+		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER || val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+	}
 
-		prop_dialog_draw();
+	// 属性メニューの「太さ」のサブ項目が選択された.
+	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		float s_width;
+		if (sender == rmfi_stroke_width_0px()) {
+			s_width = 0.0f;
+		}
+		else if (sender == rmfi_stroke_width_1px()) {
+			s_width = 1.0f;
+		}
+		else if (sender == rmfi_stroke_width_2px()) {
+			s_width = 2.0f;
+		}
+		else if (sender == rmfi_stroke_width_3px()) {
+			s_width = 3.0f;
+		}
+		else if (sender == rmfi_stroke_width_4px()) {
+			s_width = 4.0f;
+		}
+		else {
+			auto _{ winrt::hresult_not_implemented() };
+			return;
+		}
+		stroke_width_is_checked(s_width);
+		if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
+			ustack_push_null();
+			xcvd_is_enabled();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	void MainPage::stroke_width_is_checked(const float s_width) noexcept
+	{
+		rmfi_stroke_width_0px().IsChecked(s_width == 0.0f);
+		rmfi_stroke_width_1px().IsChecked(s_width == 1.0f);
+		rmfi_stroke_width_2px().IsChecked(s_width == 2.0f);
+		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
+		rmfi_stroke_width_4px().IsChecked(s_width == 4.0f);
+		rmfi_stroke_width_other().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
+	}
+
+	// 属性メニューの「太さ」>「その他」が選択された.
+	IAsyncAction MainPage::stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
+		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": "};
+		const winrt::hstring str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") };
+		m_prop_page.set_attr_to(&m_main_page);
+		stroke_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_prop_page);
+		float s_width;
+		m_prop_page.get_stroke_width(s_width);
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0f;
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, s_width, dpi, g_len, buf);
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().StepFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::StepValues);
+		dialog_slider_0().Value(s_width);
+		dialog_slider_0().Header(box_value(str_stroke_width + buf));
+		dialog_slider_0().Visibility(Visibility::Visible);
+
+		cd_dialog_prop().Title(box_value(str_title));
+		m_mutex_event.lock();
+		{
+			const auto revoker0{
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_stroke_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_prop_page.m_grid_base + 1.0f;
+					const float val = static_cast<float>(args.NewValue());
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+					dialog_slider_0().Header(box_value(str_stroke_width + buf));
+					if (m_prop_page.back()->set_stroke_width(val)) {
+						dialog_draw();
+					}
+				})
+			};
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+				float new_val;
+				m_prop_page.back()->get_stroke_width(new_val);
+				stroke_width_is_checked(new_val);
+				if (ustack_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
+					ustack_push_null();
+					xcvd_is_enabled();
+					main_draw();
+				}
+			}
+		}
+		slist_clear(m_prop_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_0().StepFrequency(1.0);
+		dialog_slider_0().Maximum(255.0);
+		m_mutex_event.unlock();
+
 	}
 
 }

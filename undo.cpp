@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::TEXT_PAR_ALIGN>::UndoValue(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& val);
+	template UndoValue<UNDO_T::TEXT_ALIGN_P>::UndoValue(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& val);
 	template UndoValue<UNDO_T::TEXT_ALIGN_T>::UndoValue(Shape* s, const DWRITE_TEXT_ALIGNMENT& val);
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(Shape* s, wchar_t* const& val);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(Shape* s, const float& val);
@@ -298,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::FONT_WEIGHT ||
 			U == UNDO_T::JOIN_STYLE ||
 			U == UNDO_T::GRID_SHOW ||
-			U == UNDO_T::TEXT_PAR_ALIGN ||
+			U == UNDO_T::TEXT_ALIGN_P ||
 			U == UNDO_T::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_ALIGN_T>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_T::TEXT_PAR_ALIGN>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_T::TEXT_ALIGN_P>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(DataReader const& dt_reader);
@@ -538,7 +538,7 @@ namespace winrt::GraphPaper::implementation
 		s->set_stroke_width(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_PAR_ALIGN>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val)
+	void UndoValue<UNDO_T::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val)
 	{
 		s->set_text_align_vert(val);
 	}
@@ -728,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 		return s->get_stroke_width(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_PAR_ALIGN>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_ALIGN_P>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
 	{
 		return s->get_text_align_vert(val);
 	}
@@ -785,7 +785,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::FONT_WEIGHT ||
 			U == UNDO_T::GRID_SHOW ||
 			U == UNDO_T::JOIN_STYLE ||
-			U == UNDO_T::TEXT_PAR_ALIGN ||
+			U == UNDO_T::TEXT_ALIGN_P ||
 			U == UNDO_T::TEXT_ALIGN_T) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}

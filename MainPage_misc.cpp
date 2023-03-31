@@ -16,15 +16,15 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		tb_version().Visibility(Visibility::Visible);
-		const auto def_text = cd_setting_dialog().DefaultButton();
-		const auto pri_text = cd_setting_dialog().PrimaryButtonText();
-		const auto close_text = cd_setting_dialog().CloseButtonText();
-		cd_setting_dialog().PrimaryButtonText(L"");
-		cd_setting_dialog().CloseButtonText(L"OK");
-		cd_setting_dialog().Title(box_value(L"GraphPaper"));
+		const auto def_text = cd_dialog_prop().DefaultButton();
+		const auto pri_text = cd_dialog_prop().PrimaryButtonText();
+		const auto close_text = cd_dialog_prop().CloseButtonText();
+		cd_dialog_prop().PrimaryButtonText(L"");
+		cd_dialog_prop().CloseButtonText(L"OK");
+		cd_dialog_prop().Title(box_value(L"GraphPaper"));
 
-		const auto samp_w = scp_prop_panel().Width();
-		const auto samp_h = scp_prop_panel().Height();
+		const auto samp_w = scp_dialog_panel().Width();
+		const auto samp_h = scp_dialog_panel().Height();
 
 		constexpr uint32_t misc_min = 3;
 		constexpr uint32_t misc_max = 12;
@@ -50,11 +50,11 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		m_mutex_event.lock();
-		co_await cd_setting_dialog().ShowAsync();
+		co_await cd_dialog_prop().ShowAsync();
 
-		cd_setting_dialog().PrimaryButtonText(pri_text);
-		cd_setting_dialog().CloseButtonText(close_text);
-		cd_setting_dialog().DefaultButton(def_text);
+		cd_dialog_prop().PrimaryButtonText(pri_text);
+		cd_dialog_prop().CloseButtonText(close_text);
+		cd_dialog_prop().DefaultButton(def_text);
 		tb_version().Visibility(Visibility::Collapsed);
 		slist_clear(m_prop_page.m_shape_list);
 		status_bar_set_pos();
@@ -65,21 +65,21 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::color_base_n_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == rmfi_color_notation_pct()) {
-			m_color_notation = COLOR_BASE_N::PCT;
+			m_color_base_n = COLOR_BASE_N::PCT;
 		}
 		else if (sender == rmfi_color_notation_dec()) {
-			m_color_notation = COLOR_BASE_N::DEC;
+			m_color_base_n = COLOR_BASE_N::DEC;
 		}
 		else if (sender == rmfi_color_notation_hex()) {
-			m_color_notation = COLOR_BASE_N::HEX;
+			m_color_base_n = COLOR_BASE_N::HEX;
 		}
 		else if (sender == rmfi_color_notation_real()) {
-			m_color_notation = COLOR_BASE_N::REAL;
+			m_color_base_n = COLOR_BASE_N::REAL;
 		}
 		else {
 			winrt::hresult_not_implemented();
 		}
-		color_base_n_is_checked(m_color_notation);
+		color_base_n_is_checked(m_color_base_n);
 		status_bar_set_pos();
 	}
 
@@ -143,7 +143,8 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「点を方眼にくっつける」が選択された.
 	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_main_page.m_snap_grid = tmfi_snap_grid().IsChecked();
+		m_snap_grid = tmfi_snap_grid().IsChecked();
+		//m_main_page.m_snap_grid = tmfi_snap_grid().IsChecked();
 		status_bar_set_pos();
 	}
 
@@ -218,8 +219,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		zoom_is_cheched(scale);
-		if (scale != m_main_page.m_page_scale) {
-			m_main_page.m_page_scale = scale;
+		//if (scale != m_main_page.m_page_scale) {
+		//	m_main_page.m_page_scale = scale;
+		if (scale != m_main_scale) {
+			m_main_scale = scale;
 			main_panel_size();
 			main_draw();
 			status_bar_set_zoom();

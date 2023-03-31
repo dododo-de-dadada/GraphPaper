@@ -24,14 +24,12 @@
     <ClCompile Include="MainPage_arrow.cpp" />
     <ClCompile Include="MainPage_display.cpp" />
     <ClCompile Include="MainPage_file.cpp" />
-    <ClCompile Include="MainPage_fill.cpp" />
     <ClCompile Include="MainPage_font.cpp" />
-    <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_event.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />
-    <ClCompile Include="MainPage_stroke.cpp" />
+    <ClCompile Include="MainPage_prop.cpp" />
     <ClCompile Include="MainPage_summary.cpp" />
     <ClCompile Include="MainPage_find.cpp" />
     <ClCompile Include="MainPage_thread.cpp" />
@@ -52,15 +50,12 @@
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="shape_ruler.cpp" />
-    <ClCompile Include="MainPage_prop.cpp" />
+    <ClCompile Include="MainPage_dialog.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_status.cpp" />
     <ClCompile Include="shape_page.cpp" />
-    <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="shape_path.cpp" />
-    <ClCompile Include="MainPage_join.cpp" />
     <ClCompile Include="MainPage_text.cpp" />
-    <ClCompile Include="MainPage_dash.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="MainPage_image.cpp" />
     <ClCompile Include="shape_svg.cpp" />
@@ -71,7 +66,6 @@
     <ClCompile Include="shape_arc.cpp" />
     <ClCompile Include="MainPage_edit.cpp" />
     <ClCompile Include="MainPage_import.cpp" />
-    <ClCompile Include="MainPage_background.cpp" />
     <ClCompile Include="MainPage_layout.cpp" />
     <ClCompile Include="MainPage_color.cpp" />
   </ItemGroup>

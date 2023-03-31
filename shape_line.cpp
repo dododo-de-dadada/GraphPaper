@@ -140,12 +140,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 指定された部位の位置を得る.
+	// 指定された部位の点を得る.
 	// anc	図形の部位
-	// val	得られた位置
+	// val	得られた点
 	void ShapeLine::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		// 図形の部位が「図形の外部」または「開始点」ならば, 開始位置を得る.
+		// 図形の部位が「図形の外部」または「開始点」ならば, 始点を得る.
 		if (anc == ANC_TYPE::ANC_P0) {
 			val = m_start;
 		}
@@ -155,15 +155,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域の左上位置を得る.
-	// val	領域の左上位置
+	// 図形を囲む矩形の左上点を得る.
+	// val	左上点
 	void ShapeLine::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		val.x = m_pos[0].x < 0.0 ? m_start.x + m_pos[0].x : m_start.x;
 		val.y = m_pos[0].y < 0.0 ? m_start.y + m_pos[0].y : m_start.y;
 	}
 
-	// 開始位置を得る
+	// 始点を得る
+	// val	始点
 	// 戻り値	つねに true
 	bool ShapeLine::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
@@ -171,14 +172,12 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 図形を囲む領域を得る.
-	// a_lt	元の領域の左上位置.
-	// a_rb	元の領域の右下位置.
-	// b_lt	囲む領域の左上位置.
-	// b_rb	囲む領域の右下位置.
-	void ShapeLine::get_bound(
-		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
-		D2D1_POINT_2F& b_rb) const noexcept
+	// 図形を囲む矩形を得る.
+	// a_lt	元の矩形の左上点.
+	// a_rb	元の矩形の右下点.
+	// b_lt	矩形の左上点.
+	// b_rb	矩形の右下点.
+	void ShapeLine::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
 		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
 		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
@@ -441,11 +440,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeArrow::write(dt_writer);
 
-		// 開始位置
+		// 始点
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
 
-		// 次の位置への差分
+		// 次の点への位置ベクトル
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
 		for (const D2D1_POINT_2F vec : m_pos) {
 			dt_writer.WriteSingle(vec.x);

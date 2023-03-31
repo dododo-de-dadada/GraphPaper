@@ -172,7 +172,8 @@ namespace winrt::GraphPaper::implementation
 			const double by = wb.Y;
 			const double px = m_main_bbox_lt.x;
 			const double py = m_main_bbox_lt.y;
-			const double ps = m_main_page.m_page_scale;
+			//const double ps = m_main_page.m_page_scale;
+			const double ps = m_main_scale;
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
 			const float g_len = m_main_page.m_grid_base + 1.0f;
@@ -350,7 +351,8 @@ namespace winrt::GraphPaper::implementation
 		if (status_and(m_status_bar, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
 			constexpr auto FMT_ZOOM = L"%.f%%";	// î{ó¶ÇÃèëéÆ
 			wchar_t buf[32];
-			swprintf_s(buf, 31, FMT_ZOOM, m_main_page.m_page_scale * 100.0);
+			swprintf_s(buf, 31, FMT_ZOOM, m_main_scale * 100.0f);
+			//swprintf_s(buf, 31, FMT_ZOOM, m_main_page.m_page_scale * 100.0);
 			tk_status_bar_zoom().Text(buf);
 			if (sp_status_bar_zoom().Visibility() != Visibility::Visible) {
 				sp_status_bar_zoom().Visibility(Visibility::Visible);

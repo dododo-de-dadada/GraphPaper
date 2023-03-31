@@ -409,7 +409,7 @@ namespace winrt::GraphPaper::implementation
 		return found;
 	}
 
-	// 開始位置を得る.
+	// 始点を得る.
 	bool ShapeImage::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
 		val = m_start;

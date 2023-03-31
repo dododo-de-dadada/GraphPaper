@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Slider;
 
 	//------------------------------
-	// 線枠メニューの「矢じるしの寸法...」が選択された.
+	// 属性メニューの「矢じるしの寸法...」が選択された.
 	//------------------------------
 	IAsyncAction MainPage::arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -92,8 +92,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Header(box_value(str_arrow_length + buf));
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, a_size.m_offset, dpi, g_len, buf);
 		dialog_slider_2().Header(box_value(str_arrow_offset + buf));
-		const auto samp_w = scp_prop_panel().Width();
-		const auto samp_h = scp_prop_panel().Height();
+		const auto samp_w = scp_dialog_panel().Width();
+		const auto samp_h = scp_dialog_panel().Height();
 		const auto mar = samp_w * 0.125;
 		const D2D1_POINT_2F start{	// 始点
 			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 
-		cd_setting_dialog().Title(box_value(str_title));
+		cd_dialog_prop().Title(box_value(str_title));
 		{
 			const auto revoker0{
 				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arrow_width](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
@@ -115,13 +115,13 @@ namespace winrt::GraphPaper::implementation
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_arrow_width + buf));
 					a_size.m_width = static_cast<FLOAT>(val);
-					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						prop_dialog_draw();
+					if (m_prop_page.back()->set_arrow_size(a_size)) {
+						dialog_draw();
 					}
 				})
 			};
@@ -132,13 +132,13 @@ namespace winrt::GraphPaper::implementation
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_1().Header(box_value(str_arrow_length + buf));
 					a_size.m_length = static_cast<FLOAT>(val);
-					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						prop_dialog_draw();
+					if (m_prop_page.back()->set_arrow_size(a_size)) {
+						dialog_draw();
 					}
 				})
 			};
@@ -149,35 +149,35 @@ namespace winrt::GraphPaper::implementation
 					const auto g_len = m_prop_page.m_grid_base + 1.0f;
 					const float val = static_cast<float>(args.NewValue());
 					ARROW_SIZE a_size;
-					m_prop_page.m_shape_list.back()->get_arrow_size(a_size);
+					m_prop_page.back()->get_arrow_size(a_size);
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_2().Header(box_value(str_arrow_offset + buf));
 					a_size.m_offset = static_cast<FLOAT>(val);
-					if (m_prop_page.m_shape_list.back()->set_arrow_size(a_size)) {
-						prop_dialog_draw();
+					if (m_prop_page.back()->set_arrow_size(a_size)) {
+						dialog_draw();
 					}
 				})
 			};
 			const auto revoker3{
 				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
 					if (dialog_radio_btns().SelectedIndex() == 0) {
-						if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
-							prop_dialog_draw();
+						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+							dialog_draw();
 						}
 					}
 					else if (dialog_radio_btns().SelectedIndex() == 1) {
-						if (m_prop_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
-							prop_dialog_draw();
+						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+							dialog_draw();
 						}
 					}
 				})
 			};
-			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				ARROW_SIZE new_size;
 				ARROW_STYLE new_style;
-				m_prop_page.m_shape_list.back()->get_arrow_size(new_size);
-				m_prop_page.m_shape_list.back()->get_arrow_style(new_style);
+				m_prop_page.back()->get_arrow_size(new_size);
+				m_prop_page.back()->get_arrow_style(new_style);
 				arrow_style_is_checked(new_style);
 				const bool flag_size = ustack_push_set<UNDO_T::ARROW_SIZE>(new_size);
 				const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
@@ -205,19 +205,17 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Value(val2);
 		dialog_slider_2().Visibility(vis2);
 		dialog_radio_btns().Visibility(Visibility::Collapsed);
-		//dialog_combo_box().Visibility(Visibility::Collapsed);
-		//dialog_combo_box().Items().Clear();
 		slist_clear(m_prop_page.m_shape_list);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
 
 	//------------------------------
-	// 線枠メニューの「矢じるしの形式」のサブ項目が選択された.
+	// 属性メニューの「矢じるしの形式」のサブ項目が選択された.
 	//------------------------------
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		ARROW_STYLE a_style;
+		ARROW_STYLE a_style = static_cast<ARROW_STYLE>(-1);
 		if (sender == rmfi_arrow_style_none()) {
 			a_style = ARROW_STYLE::NONE;
 		}
@@ -227,28 +225,34 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_arrow_style_filled()) {
 			a_style = ARROW_STYLE::FILLED;
 		}
-		else {
-			return;
-		}
-		arrow_style_is_checked(a_style);
-		if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			main_draw();
+		if (a_style != static_cast<ARROW_STYLE>(-1)) {
+			arrow_style_is_checked(a_style);
+			if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
+				ustack_push_null();
+				xcvd_is_enabled();
+				main_draw();
+			}
 		}
 		status_bar_set_pos();
 	}
 
 	//------------------------------
-	// 線枠メニューの「矢じるしの形式」に印をつける.
+	// 属性メニューの「矢じるしの形式」に印をつける.
 	// a_style	矢じるしの形式
 	//------------------------------
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
-		rmfi_arrow_style_none().IsChecked(val == ARROW_STYLE::NONE);
-		rmfi_arrow_style_opened().IsChecked(val == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_filled().IsChecked(val == ARROW_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
+		if (val == ARROW_STYLE::NONE) {
+			rmfi_arrow_style_none().IsChecked(true);
+		}
+		else if (val == ARROW_STYLE::OPENED) {
+			rmfi_arrow_style_opened().IsChecked(true);
+			mfi_arrow_size().IsEnabled(true);
+		}
+		else if (val == ARROW_STYLE::FILLED) {
+			rmfi_arrow_style_filled().IsChecked(true);
+			mfi_arrow_size().IsEnabled(true);
+		}
 	}
 
 }

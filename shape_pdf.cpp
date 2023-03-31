@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 		const float rx = (m_pos.x >= 0.0f ? m_corner_radius.x : -m_corner_radius.x);	// ‚¾‰~‚Ì x •ûŒü‚Ì”¼Œa
 		const float ry = (m_pos.y >= 0.0f ? m_corner_radius.y : -m_corner_radius.y);	// ‚¾‰~‚Ì y •ûŒü‚Ì”¼Œa
 
-		// ã•Ó‚ÌŠJnˆÊ’u‚ÉˆÚ“®.
+		// ã•Ó‚Ìn“_.
 		swprintf_s(buf,
 			L"%f %f m\n",
 			m_start.x + rx, -(m_start.y) + ty

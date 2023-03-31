@@ -52,7 +52,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
-		const auto g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+		//const auto g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+		const auto g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -100,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		text_align_vert_is_checked(val);
-		if (ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(val)) {
+		if (ustack_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			main_draw();
@@ -193,10 +194,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Visible);
 
 		text_create_sample_shape(
-			static_cast<float>(scp_prop_panel().Width()), 
-			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
+			static_cast<float>(scp_dialog_panel().Width()), 
+			static_cast<float>(scp_dialog_panel().Height()), m_prop_page);
 
-		cd_setting_dialog().Title(box_value(str_title));
+		cd_dialog_prop().Title(box_value(str_title));
 		m_mutex_event.lock();
 		{
 			const auto revoker0{
@@ -215,15 +216,15 @@ namespace winrt::GraphPaper::implementation
 							wcscpy_s(buf, str_def_val.data());
 						}
 						dialog_slider_0().Header(box_value(str_text_line_sp + buf));
-						if (m_prop_page.m_shape_list.back()->set_text_line_sp(val)) {
-							prop_dialog_draw();
+						if (m_prop_page.back()->set_text_line_sp(val)) {
+							dialog_draw();
 						}
 					}
 				)
 			};
-			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_prop_page.m_shape_list.back()->get_text_line_sp(samp_val);
+				m_prop_page.back()->get_text_line_sp(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();
@@ -271,10 +272,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		text_create_sample_shape(
-			static_cast<float>(scp_prop_panel().Width()),
-			static_cast<float>(scp_prop_panel().Height()), m_prop_page);
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_prop_page);
 
-		cd_setting_dialog().Title(box_value(str_title));
+		cd_dialog_prop().Title(box_value(str_title));
 		m_mutex_event.lock();
 		{
 			const auto revoker0{
@@ -287,10 +288,10 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
 					D2D1_SIZE_F pad;
-					m_prop_page.m_shape_list.back()->get_text_pad(pad);
+					m_prop_page.back()->get_text_pad(pad);
 					pad.width = static_cast<FLOAT>(val);
-					if (m_prop_page.m_shape_list.back()->set_text_pad(pad)) {
-						prop_dialog_draw();
+					if (m_prop_page.back()->set_text_pad(pad)) {
+						dialog_draw();
 					}
 				})
 			};
@@ -304,16 +305,16 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_vert + buf));
 					D2D1_SIZE_F pad;
-					m_prop_page.m_shape_list.back()->get_text_pad(pad);
+					m_prop_page.back()->get_text_pad(pad);
 					pad.height = static_cast<FLOAT>(val);
-					if (m_prop_page.m_shape_list.back()->set_text_pad(pad)) {
-						prop_dialog_draw();
+					if (m_prop_page.back()->set_text_pad(pad)) {
+						dialog_draw();
 					}
 				})
 			};
-			if (co_await cd_setting_dialog().ShowAsync() == ContentDialogResult::Primary) {
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
-				m_prop_page.m_shape_list.back()->get_text_pad(samp_val);
+				m_prop_page.back()->get_text_pad(samp_val);
 				if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					ustack_push_null();
 					xcvd_is_enabled();

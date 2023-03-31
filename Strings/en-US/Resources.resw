@@ -221,89 +221,81 @@
     <value>Length Unit</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="str_font_stretch" xml:space="preserve">
-    <value>Font Stretch</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_font_stretch_condensed" xml:space="preserve">
+  <data name="rmfi_font_stretch_condensed.Text" xml:space="preserve">
     <value>Condensed</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_expanded" xml:space="preserve">
+  <data name="rmfi_font_stretch_expanded.Text" xml:space="preserve">
     <value>Expanded</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_extra_condensed" xml:space="preserve">
+  <data name="rmfi_font_stretch_extra_condensed.Text" xml:space="preserve">
     <value>Extra Condensed</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_extra_expanded" xml:space="preserve">
+  <data name="rmfi_font_stretch_extra_expanded.Text" xml:space="preserve">
     <value>Extra Expanded</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_normal" xml:space="preserve">
+  <data name="rmfi_font_stretch_normal.Text" xml:space="preserve">
     <value>Normal</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_semi_condensed" xml:space="preserve">
+  <data name="rmfi_font_stretch_semi_condensed.Text" xml:space="preserve">
     <value>Semi Condensed</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_semi_expanded" xml:space="preserve">
+  <data name="rmfi_font_stretch_semi_expanded.Text" xml:space="preserve">
     <value>Semi Expanded</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_ultra_condensed" xml:space="preserve">
+  <data name="srmfi_font_stretch_ultra_condensed.Text" xml:space="preserve">
     <value>Ultra Condensed</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_stretch_ultra_expanded" xml:space="preserve">
+  <data name="rmfi_font_stretch_ultra_expanded.Text" xml:space="preserve">
     <value>Ultra Expanded</value>
-    <comment>ListViewItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_black" xml:space="preserve">
-    <value>Black</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_black.Text" xml:space="preserve">
+    <value>Black (900)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_bold" xml:space="preserve">
-    <value>Bold</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_bold.Text" xml:space="preserve">
+    <value>Bold (700)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_demi_bold" xml:space="preserve">
-    <value>Demi Bold</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_semi_bold.Text" xml:space="preserve">
+    <value>Semi Bold (600)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_extra_black" xml:space="preserve">
-    <value>Extra Black</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_extra_black.Text" xml:space="preserve">
+    <value>Extra Black (950)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_extra_bold" xml:space="preserve">
-    <value>Extra Bold</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_extra_bold.Text" xml:space="preserve">
+    <value>Extra Bold (800)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_extra_light" xml:space="preserve">
-    <value>Extra Light</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_extra_light.Text" xml:space="preserve">
+    <value>Extra Light (200)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_light" xml:space="preserve">
-    <value>Light</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_light.Text" xml:space="preserve">
+    <value>Light (300)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_medium" xml:space="preserve">
-    <value>Medium</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_medium.Text" xml:space="preserve">
+    <value>Medium (500)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_normal" xml:space="preserve">
-    <value>Normal</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_normal.Text" xml:space="preserve">
+    <value>Normal (400)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_font_weight_semi_light" xml:space="preserve">
-    <value>Semi Light</value>
-    <comment>ListViewItem</comment>
-  </data>
-  <data name="str_font_weight_thin" xml:space="preserve">
-    <value>Thin</value>
-    <comment>ListViewItem</comment>
+  <data name="rmfi_font_weight_thin.Text" xml:space="preserve">
+    <value>Thin (100)</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mbi_edit.Title" xml:space="preserve">
     <value>Edit</value>
@@ -405,13 +397,13 @@
     <value>Font Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_font_stretch.Text" xml:space="preserve">
-    <value>Font Stretch...</value>
-    <comment>MenuFlyoutItem</comment>
+  <data name="mfsi_font_stretch.Text" xml:space="preserve">
+    <value>Font Stretch</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_font_weight.Text" xml:space="preserve">
-    <value>Font Weight...</value>
-    <comment>MenuFlyoutItem</comment>
+  <data name="mfsi_font_weight.Text" xml:space="preserve">
+    <value>Font Weight</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_grid_len_con.Text" xml:space="preserve">
     <value>Condense</value>
@@ -815,10 +807,6 @@
   </data>
   <data name="str_font_size" xml:space="preserve">
     <value>Font Size</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_font_weight" xml:space="preserve">
-    <value>Font Weight</value>
     <comment>String</comment>
   </data>
   <data name="str_font_family" xml:space="preserve">
@@ -1245,5 +1233,9 @@
   <data name="str_arc_sweep_direction" xml:space="preserve">
     <value>Sweep Direction</value>
     <comment>String</comment>
+  </data>
+  <data name="mfsi_edit_poly_end.Text" xml:space="preserve">
+    <value>Edit Polygon End</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
 </root>

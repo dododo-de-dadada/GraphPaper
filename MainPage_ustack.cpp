@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_T::STROKE_WIDTH:
 			u = new UndoValue<UNDO_T::STROKE_WIDTH>(dt_reader);
 			break;
-		case UNDO_T::TEXT_PAR_ALIGN:
-			u = new UndoValue<UNDO_T::TEXT_PAR_ALIGN>(dt_reader);
+		case UNDO_T::TEXT_ALIGN_P:
+			u = new UndoValue<UNDO_T::TEXT_ALIGN_P>(dt_reader);
 			break;
 		case UNDO_T::TEXT_ALIGN_T:
 			u = new UndoValue<UNDO_T::TEXT_ALIGN_T>(dt_reader);
@@ -328,7 +328,7 @@ namespace winrt::GraphPaper::implementation
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoValue<UNDO_T::ARROW_STYLE>)) {
-			// 線枠メニューの「矢じるしの形式」に印をつける.
+			// 属性メニューの「矢じるしの形式」に印をつける.
 			ARROW_STYLE val;
 			m_main_page.get_arrow_style(val);
 			arrow_style_is_checked(val);
@@ -338,6 +338,18 @@ namespace winrt::GraphPaper::implementation
 			DWRITE_FONT_STYLE val;
 			m_main_page.get_font_style(val);
 			font_style_is_checked(val);
+		}
+		else if (u_type == typeid(UndoValue<UNDO_T::FONT_WEIGHT>)) {
+			// 書体メニューの「字体」に印をつける.
+			DWRITE_FONT_WEIGHT val;
+			m_main_page.get_font_weight(val);
+			font_weight_is_checked(val);
+		}
+		else if (u_type == typeid(UndoValue<UNDO_T::FONT_STRETCH>)) {
+			// 書体メニューの「字体」に印をつける.
+			DWRITE_FONT_STRETCH val;
+			m_main_page.get_font_stretch(val);
+			font_stretch_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -387,7 +399,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.get_text_align_horz(val);
 			text_align_horz_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_PAR_ALIGN>)) {
+		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
 			m_main_page.get_text_align_vert(val);
 			text_align_vert_is_checked(val);
@@ -610,7 +622,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_WIDTH>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAR_ALIGN>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_LINE_SP>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::TEXT_PAD>(D2D1_SIZE_F const& val);

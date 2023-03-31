@@ -29,14 +29,14 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_PIXEL_UNIT = L"%.1lf px";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3lf g";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3lf grid";	// グリッド単位の書式
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
 	// 方眼を表示する.
 	static void page_draw_grid(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
 		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		const float p_scale, const D2D1_SIZE_F g_size);
+		/*const float p_scale,*/ const D2D1_SIZE_F g_size);
 
 	//-------------------------------
 	// 待機カーソルを表示する.
@@ -423,7 +423,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ひな型に描画に必要な変数を格納する.
-		const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
+		//const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
+		const auto p_scale = max(m_main_scale, 0.0f);
 		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), p_scale);
 
 		// 描画環境を保存, 描画を開始する.

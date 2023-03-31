@@ -65,8 +65,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 図形を囲む領域の左上位置を得る.
-	// val	領域の左上位置
+	// 図形を囲む矩形の左上点を得る.
+	// val	左上点
 	//------------------------------
 	void ShapeGroup::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
@@ -74,9 +74,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 開始位置を得る.
-	// val	開始位置
-	// グループ図形の場合, 開始位置は図形を囲む領域の左上位置.
+	// 始点を得る.
+	// val	始点
+	// グループ図形の場合, 始点は図形を囲む矩形の左上点.
 	//------------------------------
 	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 値を開始位置に格納する. 他の部位の位置も動く.
+	// 値を始点に格納する. 他の部位の位置も動く.
 	// val	格納する値
 	// 戻り値	変更されたなら true
 	//------------------------------

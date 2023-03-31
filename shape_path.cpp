@@ -192,12 +192,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 
-	// 指定された部位の位置を得る.
-// anc	図形の部位
-// val	得られた位置
+	// 指定された部位の点を得る.
+	// anc	図形の部位
+	// val	得られた点
 	void ShapePath::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		// 図形の部位が「図形の外部」または「開始点」ならば, 開始位置を得る.
+		// 図形の部位が「図形の外部」または「始点」ならば, 始点を得る.
 		if (anc == ANC_TYPE::ANC_PAGE || anc == ANC_TYPE::ANC_P0) {
 			val = m_start;
 		}
@@ -287,10 +287,10 @@ namespace winrt::GraphPaper::implementation
 	void ShapePath::write(const DataWriter& dt_writer) const
 	{
 		ShapeArrow::write(dt_writer);
-		// 開始位置
+		// 始点
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
-		// 次の位置への差分
+		// 次の点への位置ベクトル
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
 		for (const D2D1_POINT_2F vec : m_pos) {
 			dt_writer.WriteSingle(vec.x);

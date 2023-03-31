@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 	static void page_draw_grid(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
 		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		const float p_scale, const D2D1_SIZE_F g_size);
+		/*const float p_scale,*/ const D2D1_SIZE_F g_size);
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// target	レンダーターゲット
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
-				m_page_scale,
+				//m_page_scale,
 				g_size);
 		}
 
@@ -338,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
-				m_page_scale,
+				//m_page_scale,
 				g_size);
 		}
 	}
@@ -350,10 +350,11 @@ namespace winrt::GraphPaper::implementation
 	static void page_draw_grid(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
 		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		const float p_scale, const D2D1_SIZE_F g_size)
+		/*const float p_scale,*/ const D2D1_SIZE_F g_size)
 	{
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT g_width = static_cast<FLOAT>(1.0 / p_scale);	// 方眼の太さ
+		//const FLOAT g_width = static_cast<FLOAT>(1.0 / p_scale);	// 方眼の太さ
+		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		brush->SetColor(g_color);
@@ -497,11 +498,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼に合わせるを得る.
+	/*
 	bool ShapePage::get_snap_grid(bool& val) const noexcept
 	{
 		val = m_snap_grid;
 		return true;
 	}
+	*/
 
 	// ページの色を得る.
 	bool ShapePage::get_page_color(D2D1_COLOR_F& val) const noexcept
@@ -511,11 +514,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページ倍率を得る.
+	/*
 	bool ShapePage::get_page_scale(float& val) const noexcept
 	{
 		val = m_page_scale;
 		return true;
 	}
+	*/
 
 	// ページの大きさを得る.
 	bool ShapePage::get_page_size(D2D1_SIZE_F& val) const noexcept
@@ -643,7 +648,7 @@ namespace winrt::GraphPaper::implementation
 			m_grid_show = g_show;
 		}
 		// 方眼に合わせる.
-		m_snap_grid = dt_reader.ReadBoolean();
+		//m_snap_grid = dt_reader.ReadBoolean();
 		// ページの色
 		const D2D1_COLOR_F p_color{
 			dt_reader.ReadSingle(),
@@ -656,10 +661,12 @@ namespace winrt::GraphPaper::implementation
 			m_page_color = p_color;
 		}
 		// ページの倍率
+		/*
 		const float page_scale = dt_reader.ReadSingle();
 		if (page_scale >= 0.25f && page_scale <= 4.0f) {
 			m_page_scale = page_scale;
 		}
+		*/
 		// ページの大きさ
 		const D2D1_SIZE_F p_size{
 			dt_reader.ReadSingle(),
@@ -835,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_LIGHT ||
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL ||
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM ||
-			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_DEMI_BOLD ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD ||
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD ||
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
 			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK ||
@@ -1022,6 +1029,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼に合わせるに格納する.
+	/*
 	bool ShapePage::set_snap_grid(const bool val) noexcept
 	{
 		if (m_snap_grid != val) {
@@ -1030,6 +1038,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
+	*/
 
 	// 値を, 表示, 方眼, 補助線の各色に格納する
 	bool ShapePage::set_page_color(const D2D1_COLOR_F& val) noexcept
@@ -1042,6 +1051,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をページの倍率に格納する.
+	/*
 	bool ShapePage::set_page_scale(const float val) noexcept
 	{
 		if (!equal(m_page_scale,val)) {
@@ -1050,6 +1060,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
+	*/
 
 	// 値を表示の大きさに格納する.
 	bool ShapePage::set_page_size(const D2D1_SIZE_F val) noexcept
@@ -1186,7 +1197,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_color(m_grid_color);
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
-		s->get_snap_grid(m_snap_grid);
+		//s->get_snap_grid(m_snap_grid);
 		s->get_image_opacity(m_image_opac);
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
@@ -1218,14 +1229,14 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の表示
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		// 方眼に合わせる
-		dt_writer.WriteBoolean(m_snap_grid);
+		//dt_writer.WriteBoolean(m_snap_grid);
 		// ページの色
 		dt_writer.WriteSingle(m_page_color.r);
 		dt_writer.WriteSingle(m_page_color.g);
 		dt_writer.WriteSingle(m_page_color.b);
 		dt_writer.WriteSingle(m_page_color.a);
 		// ページの拡大率
-		dt_writer.WriteSingle(m_page_scale);
+		//dt_writer.WriteSingle(m_page_scale);
 		// ページの大きさ
 		dt_writer.WriteSingle(m_page_size.width);
 		dt_writer.WriteSingle(m_page_size.height);

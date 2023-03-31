@@ -208,11 +208,14 @@ namespace winrt::GraphPaper::implementation
 			if (m_dwrite_text_layout.try_as(t3)) {
 				// 文字の幅, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
 				winrt::check_hresult(
-					t3->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
+					t3->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len })
+				);
 				winrt::check_hresult(
-					t3->SetTextAlignment(m_text_align_horz));
+					t3->SetTextAlignment(m_text_align_horz)
+				);
 				winrt::check_hresult(
-					t3->SetParagraphAlignment(m_text_align_vert));
+					t3->SetParagraphAlignment(m_text_align_vert)
+				);
 
 				// 行間を文字列レイアウトに格納する.
 				DWRITE_LINE_SPACING new_sp;
@@ -258,16 +261,19 @@ namespace winrt::GraphPaper::implementation
 			winrt::com_ptr<IDWriteTextLayout3> t3;
 			if (m_dwrite_text_layout.try_as(t3)) {
 				const uint32_t text_len = wchar_len(m_text);
+				DWRITE_TEXT_RANGE range{ 0, text_len };
 				bool updated = false;
 
 				// 書体名が変更されたなら文字列レイアウトに格納する.
 				const UINT32 n_size = t3->GetFontFamilyNameLength() + 1;
 				std::vector<WCHAR> font_family(n_size);
 				winrt::check_hresult(
-					t3->GetFontFamilyName(font_family.data(), n_size));
+					t3->GetFontFamilyName(font_family.data(), n_size)
+				);
 				if (wcscmp(font_family.data(), m_font_family) != 0) {
 					winrt::check_hresult(
-						t3->SetFontFamilyName(m_font_family, DWRITE_TEXT_RANGE{ 0, text_len }));
+						t3->SetFontFamilyName(m_font_family, range)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -278,10 +284,12 @@ namespace winrt::GraphPaper::implementation
 				// 書体の大きさが変更されたなら文字列レイアウトに格納する.
 				FLOAT font_size;
 				winrt::check_hresult(
-					t3->GetFontSize(0, &font_size));
+					t3->GetFontSize(0, &font_size, &range)
+				);
 				if (!equal(font_size, m_font_size)) {
 					winrt::check_hresult(
-						t3->SetFontSize(m_font_size, DWRITE_TEXT_RANGE{ 0, text_len }));
+						t3->SetFontSize(m_font_size, range)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -290,10 +298,12 @@ namespace winrt::GraphPaper::implementation
 				// 書体の幅が変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_STRETCH font_stretch;
 				winrt::check_hresult(
-					t3->GetFontStretch(0, &font_stretch));
+					t3->GetFontStretch(0, &font_stretch, &range)
+				);
 				if (!equal(font_stretch, m_font_stretch)) {
 					winrt::check_hresult(
-						t3->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
+						t3->SetFontStretch(m_font_stretch, range)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -302,10 +312,12 @@ namespace winrt::GraphPaper::implementation
 				// 書体の字体が変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_STYLE font_style;
 				winrt::check_hresult(
-					t3->GetFontStyle(0, &font_style));
+					t3->GetFontStyle(0, &font_style, &range)
+				);
 				if (!equal(font_style, m_font_style)) {
 					winrt::check_hresult(
-						t3->SetFontStyle(m_font_style, DWRITE_TEXT_RANGE{ 0, text_len }));
+						t3->SetFontStyle(m_font_style, range)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -314,10 +326,12 @@ namespace winrt::GraphPaper::implementation
 				// 書体の太さが変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_WEIGHT font_weight;
 				winrt::check_hresult(
-					t3->GetFontWeight(0, &font_weight));
+					t3->GetFontWeight(0, &font_weight, &range)
+				);
 				if (!equal(font_weight, m_font_weight)) {
 					winrt::check_hresult(
-						t3->SetFontWeight(m_font_weight, DWRITE_TEXT_RANGE{ 0, text_len }));
+						t3->SetFontWeight(m_font_weight, range)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -829,17 +843,20 @@ namespace winrt::GraphPaper::implementation
 			UINT32 length_en_us = 0;
 			UINT32 length_local = 0;
 			winrt::check_hresult(
-				localized_name->GetStringLength(index_en_us, &length_en_us));
+				localized_name->GetStringLength(index_en_us, &length_en_us)
+			);
 			winrt::check_hresult(
-				localized_name->GetStringLength(index_local, &length_local));
+				localized_name->GetStringLength(index_local, &length_local)
+			);
 
 			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
 			s_available_fonts[i] = new wchar_t[length_en_us + 1 + length_local + 1];
 			winrt::check_hresult(
-				localized_name->GetString(index_en_us, s_available_fonts[i], length_en_us + 1));
+				localized_name->GetString(index_en_us, s_available_fonts[i], length_en_us + 1)
+			);
 			winrt::check_hresult(
-				localized_name->GetString(index_local, s_available_fonts[i] + length_en_us + 1,
-					length_local + 1));
+				localized_name->GetString(index_local, s_available_fonts[i] + length_en_us + 1, length_local + 1)
+			);
 
 			// ローカライズされた書体名と書体を破棄する.
 			localized_name = nullptr;
@@ -1013,17 +1030,14 @@ namespace winrt::GraphPaper::implementation
 
 	bool ShapeText::get_font_face(IDWriteFontFace3*& face) const noexcept
 	{
-		return text_get_font_face<IDWriteTextLayout>(
-			m_dwrite_text_layout.get(), m_font_family, m_font_weight, m_font_stretch, m_font_style,
-			face);
+		return text_get_font_face(m_dwrite_text_layout.get(), m_font_family, m_font_weight, m_font_stretch, m_font_style, face);
 	}
 
 	static wchar_t* text_read_text(DataReader const& dt_reader)
 	{
 		const int text_len = dt_reader.ReadUInt32();
 		wchar_t* text = new wchar_t[text_len + 1];
-		dt_reader.ReadBytes(
-			winrt::array_view(reinterpret_cast<uint8_t*>(text), 2 * text_len));
+		dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(text), 2 * text_len));
 		text[text_len] = L'\0';
 		return reinterpret_cast<wchar_t*>(text);
 	}
@@ -1089,7 +1103,7 @@ namespace winrt::GraphPaper::implementation
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_LIGHT ||
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL ||
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM ||
-			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_DEMI_BOLD ||
+			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD ||
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD ||
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
 			m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK ||
@@ -1179,10 +1193,7 @@ namespace winrt::GraphPaper::implementation
 	// 字面を得る.
 	// T	文字列フォーマットまたは文字列レイアウトのいずれか.
 	template <typename T>
-	bool text_get_font_face(
-		T* src, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
-		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
-		noexcept
+	bool text_get_font_face(T* src, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face) noexcept
 	{
 		bool ret = false;
 
@@ -1216,11 +1227,11 @@ namespace winrt::GraphPaper::implementation
 		return ret;
 	}
 	template bool text_get_font_face<IDWriteTextFormat>(
-		IDWriteTextFormat* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
+		IDWriteTextFormat* src, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
 		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
 		noexcept;
 	template bool text_get_font_face<IDWriteTextLayout>(
-		IDWriteTextLayout* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
+		IDWriteTextLayout* src, const wchar_t* family, const DWRITE_FONT_WEIGHT weight,
 		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
 		noexcept;
 }

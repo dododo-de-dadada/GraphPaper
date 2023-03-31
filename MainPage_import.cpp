@@ -60,7 +60,8 @@ namespace winrt::GraphPaper::implementation
 			};
 
 			// •\¦‚³‚ê‚½•”•ª‚Ì’†S‚ÌˆÊ’u‚ğ‹‚ß‚é.
-			const double scale = m_main_page.m_page_scale;
+			const double scale = m_main_scale;
+			//const double scale = m_main_page.m_page_scale;
 			const double win_x = sb_horz().Value();
 			const double win_y = sb_vert().Value();
 			const double win_w = scp_main_panel().ActualWidth();

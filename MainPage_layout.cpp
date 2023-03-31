@@ -5,14 +5,341 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::Storage::CreationCollisionOption;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::TextBlock;
 	using winrt::Windows::UI::Xaml::Setter;
 
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
+	// 背景パターンの画像ブラシを得る.
+	void MainPage::background_get_brush()
+	{
+		// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
+		// WIC ファクトリは ShapeImage が確保しているものを使用する.
+		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
+		winrt::check_hresult(
+			ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
+		);
+		// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
+		UINT f_cnt;
+		winrt::check_hresult(
+			wic_decoder->GetFrameCount(&f_cnt)
+		);
+		// 最後のフレームを得る.
+		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
+		winrt::check_hresult(
+			wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
+		);
+		wic_decoder = nullptr;
+		// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
+		winrt::check_hresult(
+			ShapeImage::wic_factory->CreateFormatConverter(m_wic_background.put())
+		);
+		// WIC フォーマットコンバーターに, 得たフレームを格納する.
+		winrt::check_hresult(
+			m_wic_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA,
+				WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
+		);
+		wic_frame = nullptr;
+	}
+
+	// 背景色の項目に印をつける
+	void MainPage::background_color_is_checked(const bool checker_board, const D2D1_COLOR_F& color)
+	{
+		if (checker_board) {
+			tmfi_background_pattern().IsChecked(true);
+		}
+		else {
+			tmfi_background_pattern().IsChecked(false);
+		}
+		if (equal(color, COLOR_BLACK)) {
+			rmfi_background_black().IsChecked(true);
+		}
+		else {
+			rmfi_background_white().IsChecked(true);
+		}
+	}
+
+	// 背景パターンがクリックされた.
+	void MainPage::background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		if (sender == tmfi_background_pattern()) {
+			if (m_background_show != tmfi_background_pattern().IsChecked()) {
+				m_background_show = tmfi_background_pattern().IsChecked();
+				main_draw();
+			}
+		}
+		else if (sender == rmfi_background_white()) {
+			if (!equal(m_background_color, COLOR_WHITE)) {
+				m_background_color = COLOR_WHITE;
+				main_draw();
+			}
+		}
+		else if (sender == rmfi_background_black()) {
+			if (!equal(m_background_color, COLOR_BLACK)) {
+				m_background_color = COLOR_BLACK;
+				main_draw();
+			}
+		}
+	}
+
+	// レイアウトメニューの「方眼の強調」が選択された.
+	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		GRID_EMPH val;
+		if (sender == rmfi_grid_emph_1()) {
+			val = GRID_EMPH_0;
+		}
+		else if (sender == rmfi_grid_emph_2()) {
+			val = GRID_EMPH_2;
+		}
+		else if (sender == rmfi_grid_emph_3()) {
+			val = GRID_EMPH_3;
+		}
+		else {
+			winrt::hresult_not_implemented();
+		}
+		grid_emph_is_checked(val);
+		GRID_EMPH g_emph;
+		m_main_page.get_grid_emph(g_emph);
+		if (!equal(g_emph, val)) {
+			ustack_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// レイアウトメニューの「方眼の強調」に印をつける.
+	// g_emph	方眼の強調
+	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
+	{
+		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+	}
+
+	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
+	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
+		const auto str_grid_length{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") };
+		m_prop_page.set_attr_to(&m_main_page);
+		const auto dpi = m_prop_d2d.m_logical_dpi;
+		const auto g_len = m_prop_page.m_grid_base + 1.0;
+		float g_base;
+		m_prop_page.get_grid_base(g_base);
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, g_base + 1.0f, dpi, g_len, buf);
+
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(g_base);
+		dialog_slider_0().Header(box_value(str_grid_length + buf));
+		dialog_slider_0().Visibility(Visibility::Visible);
+
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_pixel().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_inch().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_milli().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_point().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_len_unit_grid().Text()));
+		if (m_len_unit == LEN_UNIT::PIXEL) {
+			dialog_combo_box().SelectedIndex(0);
+		}
+		else if (m_len_unit == LEN_UNIT::INCH) {
+			dialog_combo_box().SelectedIndex(1);
+		}
+		else if (m_len_unit == LEN_UNIT::MILLI) {
+			dialog_combo_box().SelectedIndex(2);
+		}
+		else if (m_len_unit == LEN_UNIT::POINT) {
+			dialog_combo_box().SelectedIndex(3);
+		}
+		else if (m_len_unit == LEN_UNIT::GRID) {
+			dialog_combo_box().SelectedIndex(4);
+		}
+		dialog_combo_box().Visibility(Visibility::Visible);
+
+		cd_dialog_prop().Title(box_value(str_title));
+		m_mutex_event.lock();
+		{
+			const auto revoker0{
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const auto unit = m_len_unit;
+					const auto dpi = m_prop_d2d.m_logical_dpi;
+					const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+					const float val = static_cast<float>(args.NewValue());
+					wchar_t buf[32];
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val + 1.0f, dpi, g_len, buf);
+					dialog_slider_0().Header(box_value(str_grid_length + buf));
+					if (m_prop_page.set_grid_base(val)) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker1{
+				dialog_combo_box().SelectionChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, SelectionChangedEventArgs const&) {
+					if (dialog_combo_box().SelectedIndex() == 0) {
+						if (m_len_unit != LEN_UNIT::PIXEL) {
+							m_len_unit = LEN_UNIT::PIXEL;
+							const auto unit = m_len_unit;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
+							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+							const auto val = m_prop_page.m_grid_base + 1.0f;
+							wchar_t buf[32];
+							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+							dialog_slider_0().Header(box_value(str_grid_length + buf));
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 1) {
+						if (m_len_unit != LEN_UNIT::INCH) {
+							m_len_unit = LEN_UNIT::INCH;
+							const auto unit = m_len_unit;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
+							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+							const auto val = m_prop_page.m_grid_base + 1.0f;
+							wchar_t buf[32];
+							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+							dialog_slider_0().Header(box_value(str_grid_length + buf));
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 2) {
+						if (m_len_unit != LEN_UNIT::MILLI) {
+							m_len_unit = LEN_UNIT::MILLI;
+							const auto unit = m_len_unit;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
+							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+							const auto val = m_prop_page.m_grid_base + 1.0f;
+							wchar_t buf[32];
+							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+							dialog_slider_0().Header(box_value(str_grid_length + buf));
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 3) {
+						if (m_len_unit != LEN_UNIT::POINT) {
+							m_len_unit = LEN_UNIT::POINT;
+							const auto unit = m_len_unit;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
+							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+							const auto val = m_prop_page.m_grid_base + 1.0f;
+							wchar_t buf[32];
+							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
+							dialog_slider_0().Header(box_value(str_grid_length + buf));
+						}
+					}
+					else if (dialog_combo_box().SelectedIndex() == 4) {
+						if (m_len_unit != LEN_UNIT::GRID) {
+							m_len_unit = LEN_UNIT::GRID;
+							const auto unit = m_len_unit;
+							const auto dpi = m_prop_d2d.m_logical_dpi;
+							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+							const auto val = m_prop_page.m_grid_base + 1.0f;
+							wchar_t buf[32];
+							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val , dpi, g_len, buf);
+							dialog_slider_0().Header(box_value(str_grid_length + buf));
+						}
+					}
+
+				})
+			};
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+				float setting_val;
+				float page_val;
+
+				m_main_page.get_grid_base(page_val);
+				m_prop_page.get_grid_base(setting_val);
+				if (!equal(page_val, setting_val)) {
+					ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
+					ustack_push_null();
+					ustack_is_enable();
+					xcvd_is_enabled();
+					main_draw();
+				}
+
+			}
+		}
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Items().Clear();
+		dialog_combo_box().Visibility(Visibility::Collapsed);
+		status_bar_set_pos();
+		m_mutex_event.unlock();
+	}
+
+	// レイアウトメニューの「方眼の大きさ」>「狭める」が選択された.
+	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		float g_base;
+		m_main_page.get_grid_base(g_base);
+		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
+		if (val >= 1.0f) {
+			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
+	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		float g_base;
+		m_main_page.get_grid_base(g_base);
+		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
+		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
+			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// レイアウトメニューの「方眼の表示」>「最背面」が選択された.
+	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		GRID_SHOW new_val;
+		if (sender == rmfi_grid_show_back()) {
+			new_val = GRID_SHOW::BACK;
+		}
+		else if (sender == rmfi_grid_show_front()) {
+			new_val = GRID_SHOW::FRONT;
+		}
+		else if (sender == rmfi_grid_show_hide()) {
+			new_val = GRID_SHOW::HIDE;
+		}
+		else {
+			winrt::hresult_not_implemented();
+			return;
+		}
+		grid_show_is_checked(new_val);
+		if (m_main_page.m_grid_show != new_val) {
+			ustack_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
+			ustack_push_null();
+			ustack_is_enable();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// レイアウトメニューの「方眼の表示」に印をつける.
+	// g_show	方眼の表示
+	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
+	{
+		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
+		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
+		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
+	}
 	// レイアウトメニューの「レイアウトをリセット」が選択された.
 	// データを保存したファイルがある場合, それを削除する.
 	IAsyncAction MainPage::layout_reset_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -76,6 +403,14 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_font_style(f_style);
 		font_style_is_checked(f_style);
 
+		DWRITE_FONT_STRETCH f_stretch;
+		m_main_page.get_font_stretch(f_stretch);
+		font_stretch_is_checked(f_stretch);
+
+		DWRITE_FONT_WEIGHT f_weight;
+		m_main_page.get_font_weight(f_weight);
+		font_weight_is_checked(f_weight);
+
 		D2D1_DASH_STYLE s_style;
 		m_main_page.get_dash_style(s_style);
 		dash_style_is_checked(s_style);
@@ -104,13 +439,13 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_show(g_show);
 		grid_show_is_checked(g_show);
 
-		bool g_snap;
-		m_main_page.get_snap_grid(g_snap);
-		tmfi_snap_grid().IsChecked(g_snap);
+		//bool g_snap;
+		//m_main_page.get_snap_grid(g_snap);
+		//tmfi_snap_grid().IsChecked(g_snap);
 
-		float scale;
-		m_main_page.get_page_scale(scale);
-		zoom_is_cheched(scale);
+		//float scale;
+		//m_main_page.get_page_scale(scale);
+		//zoom_is_cheched(scale);
 	}
 
 	// レイアウトを既定値に戻す.
@@ -208,13 +543,14 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
 			m_main_page.set_fill_color(COLOR_WHITE);
 			m_main_page.set_font_color(COLOR_BLACK);
+			m_main_page.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
 			m_main_page.set_grid_base(GRID_LEN_DEFVAL - 1.0);
 			m_main_page.set_grid_color(grid_color);
 			m_main_page.set_grid_emph(GRID_EMPH_0);
 			m_main_page.set_grid_show(GRID_SHOW::BACK);
-			m_main_page.set_snap_grid(true);
+			//m_main_page.set_snap_grid(true);
 			m_main_page.set_page_color(COLOR_WHITE);
-			m_main_page.set_page_scale(1.0);
+			//m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
 			m_main_page.set_page_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -226,17 +562,434 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_join_miter_limit(JOIN_MITER_LIMIT_DEFVAL);
 			m_main_page.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_main_page.set_stroke_width(1.0);
-			m_main_page.set_text_align_vert(
-				DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_main_page.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_page.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_main_page.set_text_line_sp(0.0);
 			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
 		}
+		m_image_keep_aspect = true;
 		m_len_unit = LEN_UNIT::PIXEL;
-		m_color_notation = COLOR_BASE_N::DEC;
+		m_color_base_n = COLOR_BASE_N::DEC;
+		m_main_scale = 1.0f;
+		m_snap_grid = true;
 		m_snap_point = SNAP_INTERVAL_DEF_VAL;
 		m_status_bar = STATUS_BAR_DEF_VAL;
 		m_background_show = false;
 		m_background_color = COLOR_WHITE;
+
+		arrow_style_is_checked(m_main_page.m_arrow_style);
+		font_style_is_checked(m_main_page.m_font_style);
+		font_stretch_is_checked(m_main_page.m_font_stretch);
+		font_weight_is_checked(m_main_page.m_font_weight);
+		grid_emph_is_checked(m_main_page.m_grid_emph);
+		grid_show_is_checked(m_main_page.m_grid_show);
+		cap_style_is_checked(m_main_page.m_stroke_cap);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
+		dash_style_is_checked(m_main_page.m_dash_style);
+		join_style_is_checked(m_main_page.m_join_style);
+		text_align_horz_is_checked(m_main_page.m_text_align_horz);
+		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+		image_keep_aspect_is_checked(m_image_keep_aspect);
+		len_unit_is_checked(m_len_unit);
+		color_base_n_is_checked(m_color_base_n);
+		zoom_is_cheched(m_main_scale);
+		status_bar_is_checked(m_status_bar);
+		tmfi_snap_grid().IsChecked(m_snap_grid);
+		background_color_is_checked(m_background_show, m_background_color);
 	}
+
+	//------------------------------
+// レイアウトメニューの「ページの大きさ」が選択された
+//------------------------------
+	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_prop_page.set_attr_to(&m_main_page);
+
+		if (m_len_unit == LEN_UNIT::GRID) {
+			cb_len_unit().SelectedItem(box_value(cbi_len_unit_grid()));
+		}
+		else if (m_len_unit == LEN_UNIT::INCH) {
+			cb_len_unit().SelectedItem(box_value(cbi_len_unit_inch()));
+		}
+		else if (m_len_unit == LEN_UNIT::MILLI) {
+			cb_len_unit().SelectedItem(box_value(cbi_len_unit_milli()));
+		}
+		else if (m_len_unit == LEN_UNIT::POINT) {
+			cb_len_unit().SelectedItem(box_value(cbi_len_unit_point()));
+		}
+		else {
+			cb_len_unit().SelectedItem(box_value(cbi_len_unit_pixel()));
+		}
+
+		const double g_len = m_main_page.m_grid_base + 1.0;
+		const double dpi = m_main_d2d.m_logical_dpi;
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
+		tx_page_size_width().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
+		tx_page_size_height().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.left, dpi, g_len, buf);
+		tx_page_margin_left().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.top, dpi, g_len, buf);
+		tx_page_margin_top().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.right, dpi, g_len, buf);
+		tx_page_margin_right().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.bottom, dpi, g_len, buf);
+		tx_page_margin_bottom().Text(buf);
+
+		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
+		// プライマリーボタンは使用可能にしておく.
+		cd_page_size_dialog().IsPrimaryButtonEnabled(true);
+		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
+		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
+
+			if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_inch().IsSelected()) {
+				m_len_unit = LEN_UNIT::INCH;
+			}
+			else if (cbi_len_unit_milli().IsSelected()) {
+				m_len_unit = LEN_UNIT::MILLI;
+			}
+			else if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_point().IsSelected()) {
+				m_len_unit = LEN_UNIT::POINT;
+			}
+			else {
+				m_len_unit = LEN_UNIT::PIXEL;
+			}
+			len_unit_is_checked(m_len_unit);
+
+			float new_left;
+			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
+				co_return;
+			}
+			float new_top;
+			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				co_return;
+			}
+			float new_right;
+			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				co_return;
+			}
+			float new_bottom;
+			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				co_return;
+			}
+			// 表示の縦横の長さの値をピクセル単位の値に変換する.
+			D2D1_RECT_F p_mar{
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
+			};
+
+			float new_width;
+			if (swscanf_s(tx_page_size_width().Text().c_str(), L"%f", &new_width) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_width/Header");
+				co_return;
+			}
+			float new_height;
+			if (swscanf_s(tx_page_size_height().Text().c_str(), L"%f", &new_height) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_height/Header");
+				co_return;
+			}
+			D2D1_SIZE_F p_size{
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
+			};
+
+			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
+			const bool flag_mar = !equal(p_mar, m_main_page.m_page_margin);
+			if (flag_size || flag_mar) {
+				if (flag_size) {
+					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+				}
+				if (flag_mar) {
+					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+				}
+				ustack_push_null();
+				ustack_is_enable();
+				main_bbox_update();
+				main_panel_size();
+				main_draw();
+				status_bar_set_pos();
+				status_bar_set_grid();
+				status_bar_set_page();
+				status_bar_set_unit();
+			}
+		}
+		else if (d_result == ContentDialogResult::Secondary) {
+			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
+
+			if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_inch().IsSelected()) {
+				m_len_unit = LEN_UNIT::INCH;
+			}
+			else if (cbi_len_unit_milli().IsSelected()) {
+				m_len_unit = LEN_UNIT::MILLI;
+			}
+			else if (cbi_len_unit_grid().IsSelected()) {
+				m_len_unit = LEN_UNIT::GRID;
+			}
+			else if (cbi_len_unit_point().IsSelected()) {
+				m_len_unit = LEN_UNIT::POINT;
+			}
+			else {
+				m_len_unit = LEN_UNIT::PIXEL;
+			}
+			len_unit_is_checked(m_len_unit);
+
+			float new_left;
+			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
+				co_return;
+			}
+			float new_top;
+			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				co_return;
+			}
+			float new_right;
+			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				co_return;
+			}
+			float new_bottom;
+			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				co_return;
+			}
+			// 長さの値をピクセル単位の値に変換する.
+			D2D1_RECT_F p_mar{	// ページの余白
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
+			};
+
+			// リスト中の図形を囲む矩形を得る.
+			D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
+			//D2D1_POINT_2F b_size;
+			slist_bound_shape(m_main_page.m_shape_list, b_lt, b_rb);
+
+			// 矩形の大きさがゼロ,なら中断する.
+			if (b_rb.x - b_lt.x < 1.0F || b_rb.y - b_lt.y < 1.0F) {
+				co_return;
+			}
+
+			// 左上点の座標のいずれかが負ならば, 原点となるよう矩形を移動する.
+			float dx = 0.0f;	// 矩形を移動した距離
+			float dy = 0.0f;	// 矩形を移動した距離
+			if (b_lt.x < 0.0F) {
+				dx = -b_lt.x;
+				b_lt.x = 0.0F;
+				b_rb.x += dx;
+			}
+			if (b_lt.y < 0.0F) {
+				dy = -b_lt.y;
+				b_lt.y = 0.0F;
+				b_rb.y += dy;
+			}
+
+			// 左上点の値を, 図形を取り囲むパディングとみなし,
+			// 左上点の座標のいずれかが正ならば, その分だけ右下点を右下に移動する.
+			if (b_lt.x > 0.0f) {
+				b_rb.x += b_lt.x;
+			}
+			if (b_lt.y > 0.0f) {
+				b_rb.y += b_lt.y;
+			}
+
+			// 右下点に余白を加えた値がページの大きさとなる.
+			D2D1_SIZE_F p_size{	// ページの大きさ.
+				new_left + b_rb.x + new_right,
+				new_top + b_rb.y + new_bottom
+			};
+
+			// ページの大きさ, 余白, いずれかが異なる.
+			// あるいは矩形が移動したなら
+			const bool size_changed = !equal(p_size, m_main_page.m_page_size);
+			const bool mar_chanfed = !equal(p_mar, m_main_page.m_page_margin);
+			if (size_changed || mar_chanfed || dx > 0.0f || dy > 0.0f) {
+				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
+				if (dx > 0.0f || dy > 0.0f) {
+					constexpr auto ANY = true;
+					ustack_push_move({ dx, dy }, ANY);
+				}
+				// ページの大きさが異なるなら, 更新する.
+				if (size_changed) {
+					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+				}
+				// ページの余白が異なるなら, 更新する.
+				if (mar_chanfed) {
+					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+				}
+				ustack_push_null();
+				ustack_is_enable();
+				main_bbox_update();
+				main_panel_size();
+				main_draw();
+				status_bar_set_grid();
+				status_bar_set_page();
+			}
+			status_bar_set_unit();
+		}
+		status_bar_set_pos();
+	}
+
+	// ページの大きさダイアログのテキストボックスの値が変更された.
+	void MainPage::page_size_value_changed(IInspectable const& sender, NumberBoxValueChangedEventArgs const&)
+	{
+		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
+		const auto g_len = m_main_page.m_grid_base + 1.0;
+		double w = tx_page_size_width().Value();
+		double h = tx_page_size_height().Value();
+		double l = tx_page_margin_left().Value();
+		double t = tx_page_margin_top().Value();
+		double r = tx_page_margin_right().Value();
+		double b = tx_page_margin_bottom().Value();
+		LEN_UNIT u;
+		if (cbi_len_unit_grid().IsSelected()) {
+			u = LEN_UNIT::GRID;
+		}
+		else if (cbi_len_unit_inch().IsSelected()) {
+			u = LEN_UNIT::INCH;
+		}
+		else if (cbi_len_unit_milli().IsSelected()) {
+			u = LEN_UNIT::MILLI;
+		}
+		else if (cbi_len_unit_point().IsSelected()) {
+			u = LEN_UNIT::POINT;
+		}
+		else {
+			u = LEN_UNIT::PIXEL;
+		}
+		if (u != LEN_UNIT::PIXEL) {
+			w = conv_len_to_pixel(u, w, dpi, g_len);
+			h = conv_len_to_pixel(u, h, dpi, g_len);
+			l = conv_len_to_pixel(u, l, dpi, g_len);
+			t = conv_len_to_pixel(u, t, dpi, g_len);
+			r = conv_len_to_pixel(u, r, dpi, g_len);
+			b = conv_len_to_pixel(u, b, dpi, g_len);
+		}
+		if (w >= 1.0 && w <= PAGE_SIZE_MAX && l + r <= w - 1.0 &&
+			h >= 1.0 && h <= PAGE_SIZE_MAX && t + b <= h - 1.0) {
+			cd_page_size_dialog().IsPrimaryButtonEnabled(true);
+		}
+		else {
+			cd_page_size_dialog().IsPrimaryButtonEnabled(false);
+		}
+	}
+
+	// ページの大きさダイアログのコンボボックスの選択が変更された.
+	void MainPage::page_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	{
+		LEN_UNIT old_unit = LEN_UNIT::PIXEL;
+		for (const auto i : args.RemovedItems()) {
+			if (i == cbi_len_unit_grid()) {
+				old_unit = LEN_UNIT::GRID;
+			}
+			else if (i == cbi_len_unit_inch()) {
+				old_unit = LEN_UNIT::INCH;
+			}
+			else if (i == cbi_len_unit_milli()) {
+				old_unit = LEN_UNIT::MILLI;
+			}
+			else if (i == cbi_len_unit_pixel()) {
+				old_unit = LEN_UNIT::PIXEL;
+			}
+			else if (i == cbi_len_unit_point()) {
+				old_unit = LEN_UNIT::POINT;
+			}
+			else {
+				return;
+			}
+		}
+		LEN_UNIT new_unit = LEN_UNIT::PIXEL;
+		for (const auto i : args.AddedItems()) {
+			if (i == cbi_len_unit_grid()) {
+				new_unit = LEN_UNIT::GRID;
+			}
+			else if (i == cbi_len_unit_inch()) {
+				new_unit = LEN_UNIT::INCH;
+			}
+			else if (i == cbi_len_unit_milli()) {
+				new_unit = LEN_UNIT::MILLI;
+			}
+			else if (i == cbi_len_unit_pixel()) {
+				new_unit = LEN_UNIT::PIXEL;
+			}
+			else if (i == cbi_len_unit_point()) {
+				new_unit = LEN_UNIT::POINT;
+			}
+			else {
+				return;
+			}
+		}
+		if (old_unit != new_unit) {
+			const double dpi = m_main_d2d.m_logical_dpi;
+			const double g_len = m_main_page.m_grid_base + 1.0;
+			double val;
+			if (swscanf_s(tx_page_size_width().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_size_width().Text(buf);
+			}
+			if (swscanf_s(tx_page_size_height().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_size_height().Text(buf);
+			}
+			if (swscanf_s(tx_page_margin_left().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_margin_left().Text(buf);
+			}
+			if (swscanf_s(tx_page_margin_top().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_margin_top().Text(buf);
+			}
+			if (swscanf_s(tx_page_margin_right().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_margin_right().Text(buf);
+			}
+			if (swscanf_s(tx_page_margin_bottom().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_margin_bottom().Text(buf);
+			}
+		}
+	}
+
 }

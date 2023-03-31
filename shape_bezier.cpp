@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 矢じりの返しと先端の位置を得る
-	// b_start	曲線の開始位置
+	// b_start	曲線の始点
 	// b_seg	曲線の制御点
 	// a_size	矢じるしの寸法
 	// arrow[3]	計算された返しの端点と先端点
@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 曲線の矢じるしのジオメトリを作成する.
 	// d_factory	D2D ファクトリ
-	// start	曲線の開始位置
+	// start	曲線の始点
 	// b_seg	曲線の制御点
 	// a_style	矢じるしの種別
 	// a_size	矢じるしの寸法
@@ -432,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(test, m_start, tp);
-		// 判定される点によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
+		// 判定される点によって精度が落ちないよう, 曲線の始点が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F cp[4];
 		cp[0].x = cp[0].y = 0.0;
 		pt_add(cp[0], m_pos[0], cp[1]);

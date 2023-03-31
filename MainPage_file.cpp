@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 		cd_edit_text_dialog().Hide();
 		cd_message_dialog().Hide();
 		cd_snap_point().Hide();
-		cd_setting_dialog().Hide();
+		cd_dialog_prop().Hide();
 		cd_page_size_dialog().Hide();
 
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
@@ -346,13 +346,24 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_finish_reading(void)
 	{
 		xcvd_is_enabled();
-		drawing_tool_is_checked(m_drawing_tool);
-		drawing_poly_opt_is_checked(m_drawing_poly_opt);
-		color_base_n_is_checked(m_color_notation);
-		status_bar_is_checked(m_status_bar);
-		len_unit_is_checked(m_len_unit);
+		arrow_style_is_checked(m_main_page.m_arrow_style);
+		font_style_is_checked(m_main_page.m_font_style);
+		font_stretch_is_checked(m_main_page.m_font_stretch);
+		font_weight_is_checked(m_main_page.m_font_weight);
+		grid_emph_is_checked(m_main_page.m_grid_emph);
+		grid_show_is_checked(m_main_page.m_grid_show);
+		cap_style_is_checked(m_main_page.m_stroke_cap);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
+		dash_style_is_checked(m_main_page.m_dash_style);
+		join_style_is_checked(m_main_page.m_join_style);
+		text_align_horz_is_checked(m_main_page.m_text_align_horz);
+		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
-		layout_is_checked();
+		len_unit_is_checked(m_len_unit);
+		color_base_n_is_checked(m_color_base_n);
+		zoom_is_cheched(m_main_scale);
+		status_bar_is_checked(m_status_bar);
+		tmfi_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);
 
 		wchar_t* unavailable_font;	// 無効な書体名
@@ -518,7 +529,9 @@ namespace winrt::GraphPaper::implementation
 
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_notation = static_cast<COLOR_BASE_N>(dt_reader.ReadUInt16());
+			m_color_base_n = static_cast<COLOR_BASE_N>(dt_reader.ReadUInt16());
+m_main_scale = dt_reader.ReadSingle();
+m_snap_grid = dt_reader.ReadBoolean();
 			m_snap_point = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
@@ -891,7 +904,9 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(1.0f);
 			// その他
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_notation));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_base_n));
+dt_writer.WriteSingle(m_main_scale);
+dt_writer.WriteBoolean(m_snap_grid);
 			dt_writer.WriteSingle(m_snap_point);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);
@@ -982,12 +997,9 @@ namespace winrt::GraphPaper::implementation
 		// 結果を返し終了する.
 		co_return hres;
 	}
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
 
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::file_new_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -1017,10 +1029,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{
-			const IInspectable sel_back_color = Resources().TryLookup(
-				box_value(L"SystemAccentColor"));
-			const IInspectable sel_text_color = Resources().TryLookup(
-				box_value(L"SystemColorHighlightTextColor"));
+			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
+			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
 				conv_uwp_to_color(
 					unbox_value<Color>(sel_back_color), ShapeText::s_text_selected_background);
