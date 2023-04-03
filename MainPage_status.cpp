@@ -53,75 +53,87 @@ namespace winrt::GraphPaper::implementation
 		if (sender == tmfi_status_bar_pos()) {
 			const bool is_checked = tmfi_status_bar_pos().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
-			tmfi_status_bar_pos_2().IsChecked(is_checked);
+			//tmfi_status_bar_pos_2().IsChecked(is_checked);
 		}
+		/*
 		else if (sender == tmfi_status_bar_pos_2()) {
 			const bool is_checked = tmfi_status_bar_pos_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
 			tmfi_status_bar_pos().IsChecked(is_checked);
 		}
+		*/
 		else if (sender == tmfi_status_bar_grid()) {
 			const bool is_checked = tmfi_status_bar_grid().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
-			tmfi_status_bar_grid_2().IsChecked(is_checked);
+			//tmfi_status_bar_grid_2().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
+		/*
 		else if (sender == tmfi_status_bar_grid_2()) {
 			const bool is_checked = tmfi_status_bar_grid_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
 			tmfi_status_bar_grid().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
+		*/
 		else if (sender == tmfi_status_bar_page()) {
 			const bool is_checked = tmfi_status_bar_page().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
-			tmfi_status_bar_page_2().IsChecked(is_checked);
+			//tmfi_status_bar_page_2().IsChecked(is_checked);
 			status_bar_set_page();
 		}
+		/*
 		else if (sender == tmfi_status_bar_page_2()) {
 			const bool is_checked = tmfi_status_bar_page_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
 			tmfi_status_bar_page().IsChecked(is_checked);
 			status_bar_set_page();
 		}
+		*/
 		else if (sender == tmfi_status_bar_zoom()) {
 			const bool is_checked = tmfi_status_bar_zoom().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
-			tmfi_status_bar_zoom_2().IsChecked(is_checked);
+			//tmfi_status_bar_zoom_2().IsChecked(is_checked);
 			status_bar_set_zoom();
 		}
+		/*
 		else if (sender == tmfi_status_bar_zoom_2()) {
 			const bool is_checked = tmfi_status_bar_zoom_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
 			tmfi_status_bar_zoom().IsChecked(is_checked);
 			status_bar_set_zoom();
 		}
+		*/
 		else if (sender == tmfi_status_bar_draw()) {
 			const bool is_checked = tmfi_status_bar_draw().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
-			tmfi_status_bar_draw_2().IsChecked(is_checked);
+			//tmfi_status_bar_draw_2().IsChecked(is_checked);
 			status_bar_set_draw();
 		}
+		/*
 		else if (sender == tmfi_status_bar_draw_2()) {
 			const bool is_checked = tmfi_status_bar_draw_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
 			tmfi_status_bar_draw().IsChecked(is_checked);
 			status_bar_set_draw();
 		}
+		*/
 		else if (sender == tmfi_status_bar_unit()) {
 			const bool is_checked = tmfi_status_bar_unit().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
-			tmfi_status_bar_unit_2().IsChecked(is_checked);
+			//tmfi_status_bar_unit_2().IsChecked(is_checked);
 			status_bar_set_unit();
 		}
+		/*
 		else if (sender == tmfi_status_bar_unit_2()) {
 			const bool is_checked = tmfi_status_bar_unit_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
 			tmfi_status_bar_unit().IsChecked(is_checked);
 			status_bar_set_unit();
 		}
+		*/
 		else {
-			winrt::hresult_not_implemented();
+			auto _{ winrt::hresult_not_implemented() };
 		}
 		if (m_status_bar == static_cast<STATUS_BAR>(0)) {
 			if (sp_status_bar_panel().Visibility() == Visibility::Visible) {
@@ -146,12 +158,14 @@ namespace winrt::GraphPaper::implementation
 		tmfi_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
 		tmfi_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
 		tmfi_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		/*
 		tmfi_status_bar_pos_2().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
 		tmfi_status_bar_grid_2().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
 		tmfi_status_bar_page_2().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
 		tmfi_status_bar_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
 		tmfi_status_bar_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
 		tmfi_status_bar_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		*/
 	}
 
 	// ポインターの位置をステータスバーに格納する.
@@ -172,17 +186,14 @@ namespace winrt::GraphPaper::implementation
 			const double by = wb.Y;
 			const double px = m_main_bbox_lt.x;
 			const double py = m_main_bbox_lt.y;
-			//const double ps = m_main_page.m_page_scale;
 			const double ps = m_main_scale;
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
 			const float g_len = m_main_page.m_grid_base + 1.0f;
 			wchar_t buf_x[32];
 			wchar_t buf_y[32];
-			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
-			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
+			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
+			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
 			tk_status_bar_pos_x().Text(buf_x);
 			tk_status_bar_pos_y().Text(buf_y);
 			if (sp_status_bar_pos().Visibility() != Visibility::Visible) {

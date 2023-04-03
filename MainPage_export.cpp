@@ -905,7 +905,8 @@ D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_STRAIGHT
 				target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
-					target->EndDraw());
+					target->EndDraw()
+				);
 				target->RestoreDrawingState(Shape::m_state_block.get());
 				m_mutex_draw.unlock();
 

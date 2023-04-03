@@ -62,9 +62,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const auto len2 = wcslen(buf);
-		export_svg_stroke(
-			buf + len2, len - len2, width, color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, cap, join,
-			miter_limit);
+		export_svg_stroke(buf + len2, len - len2, width, color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, cap, join, miter_limit);
 
 		const auto len3 = wcslen(buf);
 		wcscpy_s(buf + len3, len - len3, L"/>\n");
@@ -253,9 +251,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		// 線・枠を出力
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		// だ円を閉じる.
@@ -331,18 +327,14 @@ namespace winrt::GraphPaper::implementation
 		);
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barb[2];
 			D2D1_POINT_2F tip;
 			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barb, tip)) {
-				export_svg_arrow(
-					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
-					m_join_style, m_join_miter_limit, barb, tip);
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -378,9 +370,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteString(L"\" ");
 
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -391,11 +381,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (ShapePoly::poly_get_pos_arrow(
-				d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
-				export_svg_arrow(
-					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
-					m_join_style, m_join_miter_limit, barb, tip);
+			if (ShapePoly::poly_get_pos_arrow(d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -608,14 +595,6 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG タグとして書き込む.
 	void ShapeText::export_svg(DataWriter const& dt_writer) noexcept
 	{
-		static constexpr wchar_t* SVG_STYLE[] = {
-			L"normal", L"oblique", L"italic"
-		};
-		static constexpr wchar_t* SVG_STRETCH[] = {
-			L"normal", L"ultra-condensed", L"extra-condensed",
-			L"condensed", L"semi-condensed", L"normal", L"semi-expanded",
-			L"expanded", L"extra-expanded", L"ultra-expanded"
-		};
 		// 線・枠の色も塗りつぶしの色も, 書体の色も無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) &&
 			!is_opaque(m_fill_color) && !is_opaque(m_font_color)) {
@@ -627,6 +606,45 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_dwrite_text_layout == nullptr) {
 			create_text_layout();
+		}
+
+		wchar_t* f_style;
+		if (m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
+			f_style = L"oblique";
+		}
+		else if (m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
+			f_style = L"italic";
+		}
+		else {
+			f_style = L"normal";
+		}
+		wchar_t* f_stretch;
+		if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
+			f_stretch = L"extra-condensed";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
+			f_stretch = L"condensed";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
+			f_stretch = L"semi-condensed";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
+			f_stretch = L"normal";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
+			f_stretch = L"semi-expanded";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
+			f_stretch = L"expanded";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
+			f_stretch = L"extra-expanded";
+		}
+		else if (m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
+			f_stretch = L"ultra-expanded";
+		}
+		else {
+			f_stretch = L"normal";
 		}
 
 		wchar_t buf[1024];
@@ -642,8 +660,8 @@ namespace winrt::GraphPaper::implementation
 			L"stroke-width=\"0\" stroke=\"none\" >\n",
 			m_font_size,
 			m_font_family,
-			SVG_STYLE[static_cast<uint32_t>(m_font_style)],
-			SVG_STRETCH[static_cast<uint32_t>(m_font_style)],
+			f_style,
+			f_stretch,
 			static_cast<uint32_t>(m_font_weight)
 		);
 		dt_writer.WriteString(buf);
@@ -688,9 +706,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"</g>\n");
 	}
 
+	// 方眼を表示する.
 	void ShapePage::export_svg(const DataWriter& dt_writer) noexcept
 	{
-		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページの内余白の分を除く)
+		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページから余白を除いた分)
 			m_page_size.width - (m_page_margin.left + m_page_margin.right),
 			m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
 		};
@@ -709,9 +728,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];
 		dt_writer.WriteString(L"<!-- Grids -->\n");
 		dt_writer.WriteString(L"<g ");
-		export_svg_stroke(
-			buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
-			CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
+		export_svg_stroke(buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{}, CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L">\n");
 
@@ -770,11 +787,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		wchar_t buf[1024];
 		D2D1_POINT_2F p[5]{};
-		if (is_opaque(m_fill_color) || 
-			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
+		const bool exists_fill = is_opaque(m_fill_color);
+		const bool exists_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
+
+		if (exists_fill || exists_stroke) {
 			get_verts(p);
 		}
-		if (is_opaque(m_fill_color)) {
+		if (exists_fill) {
 			// A rx ry x-axis-rotation large-arc-flag sweep-flag x y
 			// rx	X 軸方向の半径
 			// ry	Y 軸方向の半径
@@ -799,7 +818,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+		if (exists_stroke) {
 			swprintf_s(buf,
 				L"<path d=\"M %f %f "
 				L"A %f %f %f %d %d %f %f "
@@ -812,9 +831,7 @@ namespace winrt::GraphPaper::implementation
 				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);
-			export_svg_stroke(
-				buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-				m_join_style, m_join_miter_limit);
+			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::NONE) {

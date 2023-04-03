@@ -345,6 +345,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
+		ustack_is_enable();
 		xcvd_is_enabled();
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
@@ -602,12 +603,9 @@ m_snap_grid = dt_reader.ReadBoolean();
 		co_return hres;
 	}
 
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, false>(
-		StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, true>(
-		StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<true, false>(
-		StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, false>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, true>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<true, false>(StorageFile s_file) noexcept;
 
 	//-------------------------------
 	// ストレージファイルを最近使ったファイルに登録する.

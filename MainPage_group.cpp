@@ -39,6 +39,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_select(g);
 		ustack_push_null();
+		ustack_is_enable();
 		xcvd_is_enabled();
 		main_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.

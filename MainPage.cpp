@@ -93,9 +93,7 @@ namespace winrt::GraphPaper::implementation
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列
 	//-------------------------------
-	template <bool B> void conv_len_to_str(
-		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
-		const uint32_t t_len, wchar_t *t_buf) noexcept
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
@@ -153,9 +151,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する (単位つき).
-	template void conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-		const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len,
-		const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template void conv_len_to_str<LEN_UNIT_NAME_APPEND>(const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さををピクセル単位の値に変換する.
 	// 変換された値は, 0.5 ピクセル単位に丸められる.
@@ -219,10 +215,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			auto const& disp{ DisplayInformation::GetForCurrentView() };
 			m_token_dpi_changed = disp.DpiChanged({ this, &MainPage::display_dpi_changed });
-			m_token_orientation_changed = disp.OrientationChanged(
-				{ this, &MainPage::display_orientation_changed });
-			m_token_contents_invalidated = disp.DisplayContentsInvalidated(
-				{ this, &MainPage::display_contents_invalidated });
+			m_token_orientation_changed = disp.OrientationChanged({ this, &MainPage::display_orientation_changed });
+			m_token_contents_invalidated = disp.DisplayContentsInvalidated({ this, &MainPage::display_contents_invalidated });
 		}
 
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
@@ -243,6 +237,16 @@ namespace winrt::GraphPaper::implementation
 			background_get_brush();
 		}
 
+		// ステータスバーのコンテキストメニューを設定する
+		{
+			/*
+			MenuFlyout popup{};
+			for (const auto item : mfsi_status_bar().Items()) {
+				popup.Items().Append(item);
+			}
+			sp_status_bar_panel().ContextFlyout(popup);
+			*/
+		}
 		auto _{ file_new_click_async(nullptr, nullptr) };
 	}
 

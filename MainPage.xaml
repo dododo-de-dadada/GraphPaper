@@ -854,6 +854,61 @@
                 <!-- ページの色 -->
                 <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
                 <MenuFlyoutSeparator />
+                <!-- 拡大率 -->
+                <MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Icon="Zoom" Text="Zoom">
+                    <!--
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
+					<MenuFlyoutSeparator />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_100" Click="mfi_page_zoom_100_click" Icon="Zoom" Text="Reset">
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					-->
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_025" Click="zoom_click" Icon="ZoomOut" Text="25%" />
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_050" Click="zoom_click" Icon="ZoomOut" Text="50%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_075" Click="zoom_click" Icon="ZoomOut" Text="75%" />
+                    <muxc:RadioMenuFlyoutItem 
+                        x:Name="rmfi_page_zoom_100" Click="zoom_click" Icon="Zoom" Text="100%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number1" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_150" Click="zoom_click" Icon="ZoomIn" Text="150%" />
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_200" Click="zoom_click" Icon="ZoomIn" Text="200%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number2" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_300" Click="zoom_click" Icon="ZoomIn" Text="300%">
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number3" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_page_zoom_400" Click="zoom_click" Icon="ZoomIn" Text="400%" >
+                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number4" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
+                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
                 <!-- 背景パターン -->
                 <MenuFlyoutSubItem x:Uid="mfsi_background_pattern" Text="Background Pattern">
                     <MenuFlyoutSubItem.Icon>
@@ -945,7 +1000,8 @@
 						x:Name="rmfi_color_code_pct" x:Uid="rmfi_color_code_pct"
 						Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
+                <!-- ステータスバー -->
+                <MenuFlyoutSubItem x:Name="mfsi_status_bar" x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -969,61 +1025,6 @@
 					<ToggleMenuFlyoutItem
 						x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom"
 						Click="status_bar_click" Text="Page Scale" />
-				</MenuFlyoutSubItem>
-				<!-- 拡大率メニュー -->
-                <MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Icon="Zoom" Text="Zoom">
-					<!--
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
-					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Uid="mfi_page_zoom_100" Click="mfi_page_zoom_100_click" Icon="Zoom" Text="Reset">
-						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
-						</MenuFlyoutItem.KeyboardAccelerators>
-					</MenuFlyoutItem>
-					-->
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_025" Click="zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_050" Click="zoom_click" Icon="ZoomOut" Text="50%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_075" Click="zoom_click" Icon="ZoomOut" Text="75%" />
-					<muxc:RadioMenuFlyoutItem 
-                        x:Name="rmfi_page_zoom_100" Click="zoom_click" Icon="Zoom" Text="100%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_150" Click="zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_200" Click="zoom_click" Icon="ZoomIn" Text="200%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_300" Click="zoom_click" Icon="ZoomIn" Text="300%">
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_400" Click="zoom_click" Icon="ZoomIn" Text="400%" >
-						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
-							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
-						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<ToggleMenuFlyoutItem
@@ -1126,8 +1127,11 @@
 			<ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 		</RelativePanel>
 		<!-- ステータスバー -->
-		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" 
+                    PointerReleased="event_released"
+                    >
 			<!-- ステータスバーコンテキストメニュー -->
+            <!--
 			<StackPanel.ContextFlyout>
 				<MenuFlyout>
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
@@ -1138,7 +1142,10 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
 				</MenuFlyout>
 			</StackPanel.ContextFlyout>
-			<StackPanel x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal">
+            -->
+            <!-- ContextFlyout を処理するため event_released を設定 -->
+			<StackPanel
+                x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal" >
 				<TextBlock  Margin="0,0,0,0" Text="draw:"/>
 				<PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
 					<PathIcon.RenderTransform>
@@ -1171,7 +1178,6 @@
 				<TextBlock x:Uid="tk_status_bar_zoom" Text="z:"/>
 				<TextBlock x:Name="tk_status_bar_zoom" Text="0"/>
 			</StackPanel>
-			<!--<TextBlock x:Name="tk_misc_status_bar_cnt" Margin="0,0,4,0" Text="0"/> -->
 		</StackPanel>
 		<!-- 文字列入力ダイアログ -->
 		<ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">

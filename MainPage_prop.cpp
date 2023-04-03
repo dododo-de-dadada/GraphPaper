@@ -1,6 +1,6 @@
 //------------------------------
-// MainPage_stroke.cpp
-// 線枠
+// MainPage_prop.cpp
+// 図形の属性 (破線, 線の太さ, 端点, 線の結合)
 //------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -77,9 +77,9 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
 	IAsyncAction MainPage::join_miter_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		//using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		//using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		const auto str_join_miter_limit{ ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") + L": " };
@@ -192,7 +192,15 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「破線の配置」が選択された.
 	IAsyncAction MainPage::dash_pat_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_mutex_event.lock();
+
+		const winrt::hstring str_dash_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_len") + L": " };
+		const winrt::hstring str_dash_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_gap") + L": " };
+		const winrt::hstring str_dot_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_len") + L": " };
+		const winrt::hstring str_dot_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_gap") + L": " };
+		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
 		// まず, ダイアログページの属性を, メインページと同じにする.
 		m_prop_page.set_attr_to(&m_main_page);
 		// 見本図形の作成
@@ -209,13 +217,6 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		constexpr auto MAX_VALUE = 127.5;
-		constexpr auto TICK_FREQ = 0.5;
-		const winrt::hstring str_dash_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_len") + L": " };
-		const winrt::hstring str_dash_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_gap") + L": " };
-		const winrt::hstring str_dot_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_len") + L": " };
-		const winrt::hstring str_dot_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_gap") + L": " };
-		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
 		DASH_PAT d_patt;
 		m_prop_page.get_dash_pat(d_patt);
 		float s_width;

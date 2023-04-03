@@ -19,6 +19,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Window;
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSeparator;
 	using winrt::Windows::UI::ViewManagement::UISettings;
+	using winrt::Windows::UI::Input::PointerUpdateKind;
 
 	static auto const& CURS_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
 	static auto const& CURS_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
@@ -209,8 +210,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	最も近い頂点への位置ベクトル
 	// 戻り値	見つかったなら true
 	//------------------------------
-	static bool event_get_nearby_point(
-		const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& pos) noexcept
+	static bool event_get_nearby_point(const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& pos) noexcept
 	{
 		float dd = interval * interval;
 		bool flag = false;
@@ -281,9 +281,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形の消去フラグがない,
 			// または図形が元に戻す操作スタックに含まれる,
 			// または図形がやり直し操作スタックに含まれる,　か判定する.
-			if (!t->is_deleted() ||
-				event_ustack_contain_shape(ustack, t) ||
-				event_ustack_contain_shape(rstack, t)) {
+			if (!t->is_deleted() || event_ustack_contain_shape(ustack, t) || event_ustack_contain_shape(rstack, t)) {
 				continue;
 			}
 			// 上記のいずれでもない図形を消去リストに追加する.
@@ -462,8 +460,7 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// pos	対角点への位置ベクトル
 	//------------------------------
-	IAsyncAction MainPage::event_finish_creating_text_async(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
+	IAsyncAction MainPage::event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
 	{
 		const auto fit_text = m_text_fit_frame_to_text;
 		tx_edit_text().Text(L"");
@@ -566,9 +563,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos{};	// 近傍への位置ベクトル
 			if (event_get_nearby_grid(m_main_page.m_shape_list, g_base + 1.0f, pos)) {
 				D2D1_POINT_2F v_pos{};	// 頂点への位置ベクトル
-				if (event_get_nearby_point(
-					m_main_page.m_shape_list, interval / p_scale, v_pos) &&
-					pt_abs2(v_pos) < pt_abs2(pos)) {
+				if (event_get_nearby_point(m_main_page.m_shape_list, interval / p_scale, v_pos) && pt_abs2(v_pos) < pt_abs2(pos)) {
 					// 方眼と頂点のどちらか短い方の距離を, 差分に得る.
 					pos = v_pos;
 				}
@@ -586,8 +581,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点にくっつける
 		else if (interval >= FLT_MIN) {
 			D2D1_POINT_2F pos{};	// 頂点との差分
-			if (event_get_nearby_point(
-				m_main_page.m_shape_list, interval / p_scale, pos)) {
+			if (event_get_nearby_point(m_main_page.m_shape_list, interval / p_scale, pos)) {
 				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		}
@@ -772,13 +766,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_show_popup(void)
 	{
 		Shape* pressed;
-		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr,
-			pressed);
+		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, pressed);
 
 		MenuFlyout popup{};
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
-		if (pressed == nullptr ||
-			anc_pressed == ANC_TYPE::ANC_PAGE) {
+		if (pressed == nullptr || anc_pressed == ANC_TYPE::ANC_PAGE) {
 			for (const auto item : mbi_layout().Items()) {
 				popup.Items().Append(item);
 			}
@@ -841,7 +833,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		popup.Closed([=](IInspectable const&, IInspectable const&) {
 			ContextFlyout(nullptr);
-			});
+		});
 		ContextFlyout(popup);
 	}
 
@@ -947,6 +939,21 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
+		if (sender == sp_status_bar_panel()) {
+			const PointerPointProperties& prop = args.GetCurrentPoint(sp_status_bar_panel()).Properties();
+			if (prop.PointerUpdateKind() == PointerUpdateKind::RightButtonReleased) {
+				if (ContextFlyout() != nullptr) {
+					ContextFlyout(nullptr);
+				}
+				MenuFlyout popup{};
+				popup.Items().Append(mfsi_status_bar());
+				popup.Closed([=](auto, auto) {
+					ContextFlyout(nullptr);
+					});
+				ContextFlyout(popup);
+			}
+			return;
+		}
 //#if defined(_DEBUG)
 		if (sender != scp_main_panel()) {
 			return;

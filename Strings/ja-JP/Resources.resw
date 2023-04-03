@@ -229,7 +229,7 @@
     <value>広め</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="srmfi_font_stretch_extra_condensed.Text" xml:space="preserve">
+  <data name="rmfi_font_stretch_extra_condensed.Text" xml:space="preserve">
     <value>超狭め</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

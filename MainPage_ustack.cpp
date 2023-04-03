@@ -244,6 +244,7 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 			if (flag) {
+				ustack_is_enable();
 				xcvd_is_enabled();
 				main_bbox_update();
 				main_panel_size();
@@ -308,6 +309,7 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_ucnt--;
 				m_ustack_rcnt++;
 			}
+			ustack_is_enable();
 			xcvd_is_enabled();
 			main_bbox_update();
 			main_panel_size();

@@ -35,12 +35,12 @@
 // MainPage_select.cpp	図形の選択
 // MainPage_page.cpp	ページの設定の保存とリセット
 // MainPage_status.cpp	ステータスバー
-// MainPage_prop.cpp	属性 (破線, 線の太さ, 端点, 線の結合)
+// MainPage_prop.cpp	図形の属性 (破線, 線の太さ, 端点, 線の結合)
 // MainPage_summary.cpp	図形の一覧
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_ustack.cpp	元に戻すとやり直し操作
-// MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
+// MainPage_xcvd.cpp	切り取り (x) とコピー (c), 貼り付け (v), 削除 (d)
 //------------------------------
 #include <ppltasks.h>
 #include <winrt/Windows.ApplicationModel.ExtendedExecution.h>
@@ -260,6 +260,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
 
+		float m_main_scale = 1.0f;	// メインページの拡大率
+
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
 		bool m_background_show = false;	// 背景の市松模様を表示
@@ -278,10 +280,9 @@ namespace winrt::GraphPaper::implementation
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_main_scale = 1.0f;	// メインページの拡大率
+		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の表記
 		bool m_snap_grid = true;	// 点を方眼にくっつける.
-		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点を点にくっつける間隔
+		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点と点をくっつける間隔
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
 
@@ -981,6 +982,8 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_shape(void);
 		// 文字列を貼り付ける.
 		IAsyncAction xcvd_paste_text(void);
+		// 貼り付ける点を得る
+		void xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept;
 
 		void Page_Loaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{

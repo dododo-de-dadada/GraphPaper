@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_xcvd.cpp
-// 切り取りとコピー
+// 切り取り (x) とコピー (c), 貼り付け (v), 削除 (d)
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -23,12 +23,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
-	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
+	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
 	// 貼り付ける位置を求める.
-	static void xcvd_paste_pos(
-		D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len,
-		const float snap_point);
+	static void xcvd_get_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q, const SHAPE_LIST& slist, const double grid_len, const float interval);
 
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
@@ -294,12 +292,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::xcvd_paste_image(void)
 	{
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
-		winrt::apartment_context context;
-
 		unselect_all();
 
-		// resume_background する前に UI から値を得る.
+		// resume_background する前に UI 要素から値を得る.
 		const float win_w = static_cast<float>(scp_main_panel().ActualWidth());
 		const float win_h = static_cast<float>(scp_main_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
@@ -308,6 +303,7 @@ namespace winrt::GraphPaper::implementation
 		const float lt_y = m_main_bbox_lt.y;
 
 		// resume_background しないと GetBitmapAsync が失敗することがある.
+		winrt::apartment_context context;
 		co_await winrt::resume_background();
 
 		// クリップボードからビットマップ SoftwareBitmap を取り出す.
@@ -350,11 +346,8 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
-		//const double grid_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-		const double grid_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-		//const float snap_point = m_snap_point / m_main_page.m_page_scale;
-		const float snap_point = m_snap_point / m_main_scale;
-		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, snap_point);
+		const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+		xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / m_main_scale);
 		s->set_pos_start(pos);
 
 		{
@@ -434,10 +427,10 @@ namespace winrt::GraphPaper::implementation
 					m_mutex_draw.unlock();
 					ustack_push_null();
 					ustack_is_enable();
-					slist_pasted.clear();
 					xcvd_is_enabled();
 					main_panel_size();
 					main_draw();
+					slist_pasted.clear();
 					ok = true;
 				}
 			}
@@ -474,23 +467,19 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.m_page_size.height); // ページの表示されている高さ
 			const float lt_x = m_main_bbox_lt.x;
 			const float lt_y = m_main_bbox_lt.y;
-			//const double g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-			const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-			const float v_stick = m_snap_point / scale;
-			ShapeText* t = new ShapeText(
-				D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h },
-				wchar_cpy(text.c_str()), &m_main_page);
+			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif
 			// 枠を文字列に合わせる.
+			const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
 			t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{
 				static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
 				static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
 			};
-			xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, g_len, v_stick);
+			xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / scale);
 			t->set_pos_start(pos);
 			{
 				m_mutex_draw.lock();
@@ -518,37 +507,42 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 貼り付ける位置を求める.
-	// p	求める位置
+	// p	求める点
+	// q	貼り付けたい点
 	// g_len	方眼の大きさ
 	// interval	点に点をくっつける間隔
-	static void xcvd_paste_pos(
-		D2D1_POINT_2F& p, const SHAPE_LIST& slist, const double g_len, const float interval)
+	static void xcvd_get_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q, const SHAPE_LIST& slist, const double g_len, const float interval)
 	{
-		D2D1_POINT_2F v;	// 最も近い頂点
-		if (g_len >= 1.0f && interval >= FLT_MIN && slist_find_vertex_closest(slist, p, interval, v)) {
-			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
-			D2D1_POINT_2F g;	// 方眼の位置
-			pt_round(p, g_len, g);
-			D2D1_POINT_2F g_pos;	// 最も近い方眼への位置ベクトル
-			pt_sub(g, p, g_pos);
-			const double g_abs = pt_abs2(g_pos);
-			// 近傍の頂点との距離 (の自乗) を求める.
-			D2D1_POINT_2F v_pos;	// 最も近い頂点への位置ベクトル
-			pt_sub(v, p, v_pos);
-			const double v_abs = pt_abs2(v_pos);
-			if (g_abs < v_abs) {
+		D2D1_POINT_2F r;	// 最も近い点への位置ベクトル
+		if (g_len >= 1.0f && interval >= FLT_MIN && slist_find_vertex_closest(slist, q, interval, r)) {
+			pt_sub(r, q, r);
+			D2D1_POINT_2F g;	// 最も近い方眼への位置ベクトル
+			pt_round(q, g_len, g);
+			pt_sub(g, q, g);
+			if (pt_abs2(g) < pt_abs2(r)) {
 				p = g;
 			}
 			else {
-				p = v;
+				p = r;
 			}
 		}
 		else if (g_len >= 1.0f) {
-			pt_round(p, g_len, p);
+			pt_round(q, g_len, p);
 		}
 		else if (interval >= FLT_MIN) {
-			slist_find_vertex_closest(slist, p, interval, p);
+			slist_find_vertex_closest(slist, q, interval, p);
 		}
+		else {
+			p = q;
+		}
+	}
+
+	void MainPage::xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept
+	{
+		const auto& slist = m_main_page.m_shape_list;
+		const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+		const auto interval = m_snap_point / m_main_scale;
+		xcvd_get_paste_pos(p, q, slist, g_len, interval);
 	}
 
 }
