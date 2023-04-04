@@ -17,38 +17,29 @@ namespace winrt::GraphPaper::implementation
 	constexpr double T3 = 1.0;	// 区間の終端
 
 	// 曲線の矢じるしのジオメトリを作成する.
-	static void bezi_create_arrow_geom(
-		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg,
-		const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
-	static void bezi_get_convex(
-		const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
+	static void bezi_get_convex(const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
 
 	// 位置を曲線の端点が含むか判定する.
 	template<D2D1_CAP_STYLE S>
-	static bool bezi_hit_test_cap(
-		const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3],
-		const double e_width);
+	static bool bezi_hit_test_cap(const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3], const double e_width);
 
 	// 点が凸包に含まれるか判定する.
-	static bool bezi_in_convex(
-		const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
+	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
 
 	// 曲線上の助変数をもとに位置を求める.
-	static inline void bezi_point_by_param(
-		const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
+	static inline void bezi_point_by_param(const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
 
 	//------------------------------
-	// 矢じりの返しと先端の位置を得る
-	// b_start	曲線の始点
-	// b_seg	曲線の制御点
-	// a_size	矢じるしの寸法
-	// arrow[3]	計算された返しの端点と先端点
+	// 矢じりの返しと先端の点を得る
 	//------------------------------
 	bool ShapeBezier::bezi_get_pos_arrow(
-		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, 
-		D2D1_POINT_2F arrow[3]) noexcept
+		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg,	// 曲線の始点と制御点
+		const ARROW_SIZE a_size,	// 矢じるしの寸法
+		D2D1_POINT_2F arrow[3]	// 矢じりの返しと先端の点
+	) noexcept
 	{
 		POINT_2D seg[3]{};
 		POINT_2D c[4]{};	// 制御点
@@ -95,21 +86,19 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 曲線の矢じるしのジオメトリを作成する.
-	// d_factory	D2D ファクトリ
-	// start	曲線の始点
-	// b_seg	曲線の制御点
-	// a_style	矢じるしの種別
-	// a_size	矢じるしの寸法
-	// a_geo	矢じるしが追加されたジオメトリ
 	//------------------------------
 	static void bezi_create_arrow_geom(
-		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, 
-		const ARROW_STYLE a_style,const ARROW_SIZE a_size, ID2D1PathGeometry** a_geom)
+		ID2D1Factory3* const factory,	// D2D ファクトリ
+		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg,	// 曲線の始点と制御点
+		const ARROW_STYLE a_style,	// 矢じるしの種別
+		const ARROW_SIZE a_size,	// 矢じるしの寸法
+		ID2D1PathGeometry** a_geom	// 矢じるしのジオメトリ
+	)
 	{
 		D2D1_POINT_2F barb[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeBezier::bezi_get_pos_arrow(start, b_seg, a_size, barb)) {
+		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, barb)) {
 			// ジオメトリシンクに追加する.
 			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::FILLED ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :

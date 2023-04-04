@@ -58,13 +58,14 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// PDF のフォント辞書を出力する.
-	// o_num	オブジェクト番号
+	// n_pdf	PDF のオブジェクト番号
 	// f_type	字面の種類
 	// p_name	ポストスクリプト名
 	// dt_writer	出力先
 	//------------------------------
 	static size_t export_pdf_font_dict(
-		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
+		const int n_pdf,
+		const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
 		const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
@@ -78,13 +79,13 @@ namespace winrt::GraphPaper::implementation
 			L"/Encoding /Identity-H\n"
 			L"/DescendantFonts [%d 0 R]\n"
 			L">>\n",
-			o_num,
+			n_pdf,
 			//std::data(p_name),
 			// OpenType の場合 ポストスクリプト名+'-'+CMap 名で CIDFontType0
 			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
 			//std::data(p_name) : std::data(p_name + L"-UniJIS-UTF16-H"),
 			std::data(p_name) : std::data(p_name + L"-Identity-H"),
-			o_num + 1
+			n_pdf + 1
 		);
 		return dt_writer.WriteString(buf);
 	}
@@ -611,29 +612,21 @@ namespace winrt::GraphPaper::implementation
 					s->get_font_style(style);
 					IDWriteFontFace3* face;
 					t->get_font_face(face);
-					export_pdf_font_info(
-						face, t->m_text, wchar_len(t->m_text), t->m_font_family, f_met, f_type,
-						p_name, cid, gid, g_met, angle);
+					export_pdf_font_info(face, t->m_text, wchar_len(t->m_text), t->m_font_family, f_met, f_type, p_name, cid, gid, g_met, angle);
 
 					// フォント辞書
-					len = export_pdf_font_dict(
-						6 + 3 * text_cnt,
-						f_type, p_name, dt_writer);
+					len = export_pdf_font_dict(6 + 3 * text_cnt, f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					len = export_pdf_descendant_font_dict(
-						6 + 3 * text_cnt + 1, f_type, p_name, std::size(gid), std::data(gid),
-						std::data(g_met), f_met.designUnitsPerEm, dt_writer);
+					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1, f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					len = export_pdf_font_descriptor(
-						6 + 3 * text_cnt + 2,
-						p_name, stretch, weight, angle, f_met, dt_writer);
+					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2, p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					text_cnt++;
 				}
@@ -655,23 +648,18 @@ namespace winrt::GraphPaper::implementation
 						g_met, angle);
 
 					// フォント辞書
-					len = export_pdf_font_dict(
-						6 + 3 * text_cnt, f_type, p_name, dt_writer);
+					len = export_pdf_font_dict(6 + 3 * text_cnt, f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					len = export_pdf_descendant_font_dict(
-						6 + 3 * text_cnt + 1, f_type, p_name, std::size(gid), std::data(gid),
-						std::data(g_met), f_met.designUnitsPerEm, dt_writer);
+					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1, f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					len = export_pdf_font_descriptor(
-						6 + 3 * text_cnt + 2,
-						p_name, stretch, weight, angle, f_met, dt_writer);
+					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2, p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					text_cnt++;
 				}
@@ -764,10 +752,11 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// 画像としてストレージファイルに非同期に書き込む.
-	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(const StorageFile& image_file) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(
+		const StorageFile& image_file	// 書き込み先の画像ファイル
+	) noexcept
 	{
 		HRESULT hres = E_FAIL;
 
@@ -924,8 +913,7 @@ D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_STRAIGHT
 				// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
 				winrt::com_ptr<IWICImageEncoder> image_enc;
 				winrt::check_hresult(
-					ShapeImage::wic_factory->CreateImageEncoder(
-						dev.get(), image_enc.put())
+					ShapeImage::wic_factory->CreateImageEncoder(dev.get(), image_enc.put())
 				);
 				winrt::com_ptr<ID2D1Bitmap> d2d_image;
 				winrt::check_hresult(

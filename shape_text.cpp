@@ -17,12 +17,9 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_RANGE };	// 文字範囲の文字色
 
 	// ヒットテストの計量を作成する.
-	static void text_create_test_metrics(IDWriteTextLayout* text_lay, 
-		const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
+	static void text_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を作成する.
-	static void text_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len,
-		UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, 
-		UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
+	static void text_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
 	// 書体の計量を得る.
 	static void text_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
 
@@ -33,8 +30,12 @@ namespace winrt::GraphPaper::implementation
 	// test_met	ヒットテストの計量
 	// test_cnt	計量の要素数
 	//------------------------------
-	static void text_create_test_metrics(IDWriteTextLayout* text_lay, 
-		const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt)
+	static void text_create_test_metrics(
+		IDWriteTextLayout* text_lay, 
+		const DWRITE_TEXT_RANGE text_rng,
+		DWRITE_HIT_TEST_METRICS*& test_met,
+		UINT32& test_cnt
+	)
 	{
 		const uint32_t pos = text_rng.startPosition;
 		const uint32_t len = text_rng.length;
@@ -98,29 +99,21 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を得る.
-	// text_lay	文字列レイアウト
-	// text_len	文字列の長さ
-	// test_cnt	ヒットテストの計量の要素数
-	// test_met	ヒットテストの計量
-	// line_met 行の計量
-	// sele_cnt	選択された文字範囲の計量の要素数
-	// sele_met 選択された文字範囲の計量
-	// sele_rng	選択された文字範囲
 	//------------------------------
 	static void text_create_text_metrics(
-		IDWriteTextLayout* text_lay,
-		const uint32_t text_len,
-		UINT32& test_cnt,
-		DWRITE_HIT_TEST_METRICS*& test_met,
-		DWRITE_LINE_METRICS*& line_met,
-		UINT32& sele_cnt,
-		DWRITE_HIT_TEST_METRICS*& sele_met,
-		const DWRITE_TEXT_RANGE& sele_rng)
+		IDWriteTextLayout* text_lay,	// 文字列レイアウト
+		const uint32_t text_len,	// 文字列の長さ
+		UINT32& test_cnt,	// ヒットテストの計量の要素数
+		DWRITE_HIT_TEST_METRICS*& test_met,	// ヒットテストの計量
+		DWRITE_LINE_METRICS*& line_met,	// 行の計量
+		UINT32& sele_cnt,	// 選択された文字範囲の計量の要素数
+		DWRITE_HIT_TEST_METRICS*& sele_met,	// 選択された文字範囲の計量
+		const DWRITE_TEXT_RANGE& sele_rng	// 選択された文字範囲
+	)
 	{
 		if (text_lay != nullptr) {
 			// ヒットテストの計量を作成する.
-			text_create_test_metrics(text_lay, 
-				{ 0, text_len }, test_met, test_cnt);
+			text_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
 
 			// 行の計量を作成する.
 			UINT32 line_cnt;
@@ -130,18 +123,18 @@ namespace winrt::GraphPaper::implementation
 
 			// 選択された文字範囲の計量を作成する.
 			if (sele_rng.length > 0) {
-				text_create_test_metrics(text_lay,
-					sele_rng, sele_met, sele_cnt);
+				text_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
 			}
 		}
 	}
 
 	//------------------------------
 	// 枠を文字列に合わせる.
-	// g_len	方眼の大きさ (1 以上ならば方眼の大きさに合わせる)
 	// 戻り値	大きさが調整されたならば真.
 	//------------------------------
-	bool ShapeText::fit_frame_to_text(const float g_len) noexcept
+	bool ShapeText::fit_frame_to_text(
+		const float g_len	// 方眼の大きさ (この値が 1 以上ならばこの値に合わせる)
+	) noexcept
 	{
 		// 文字列の大きさを計算し, 枠に格納する.
 		D2D1_POINT_2F t_box{ 0.0f, 0.0f };	// 枠
@@ -402,8 +395,7 @@ namespace winrt::GraphPaper::implementation
 						new_sp.baseline = m_font_size + m_text_line_sp;
 					}
 					else {
-						const float descent = m_font_size * m_dwrite_font_metrics.descent /
-							m_dwrite_font_metrics.designUnitsPerEm;
+						const float descent = m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm;
 						new_sp.baseline = m_font_size + m_text_line_sp - descent;
 					}
 				}
@@ -416,7 +408,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (memcmp(&old_sp, &new_sp, sizeof(old_sp)) != 0) {
 					winrt::check_hresult(
-						t3->SetLineSpacing(&new_sp));
+						t3->SetLineSpacing(&new_sp)
+					);
 					if (!updated) {
 						updated = true;
 					}
@@ -437,8 +430,7 @@ namespace winrt::GraphPaper::implementation
 					for (uint32_t i = 0; i < m_dwrite_selected_cnt; i++) {
 						s_len += m_dwrite_selected_metrics[i].length;
 					}
-					if (m_dwrite_selected_metrics[0].textPosition != m_text_selected_range.startPosition ||
-						s_len != m_text_selected_range.length) {
+					if (m_dwrite_selected_metrics[0].textPosition != m_text_selected_range.startPosition || s_len != m_text_selected_range.length) {
 						if (!updated) {
 							updated = true;
 						}
@@ -447,9 +439,7 @@ namespace winrt::GraphPaper::implementation
 
 				if (updated) {
 					relese_metrics();
-					text_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text),
-						m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics,
-						m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
+					text_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
 				}
 			}
 		}

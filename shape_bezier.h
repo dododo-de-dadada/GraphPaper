@@ -12,14 +12,18 @@ namespace winrt::GraphPaper::implementation
 	constexpr uint32_t SIMPSON_CNT = 30;	// シンプソン法の回数
 
 	//------------------------------
-// double 型の値をもつ位置
-// ShapeBase, ShapeArc で使用する.
-//------------------------------
+	// double 型の値をもつ点
+	// ShapeBase で (ShapeArc でも) 使用する.
+	//------------------------------
 	struct POINT_2D {
-		double x;
-		double y;
-		// この位置を含むよう方形を拡張する.
-		inline void exp(POINT_2D& r_lt, POINT_2D& r_rb) const noexcept
+		double x;	// X 座標の値
+		double y;	// Y 座標の値
+
+		// この点を含むよう方形を拡張する.
+		inline void exp(
+			POINT_2D& r_lt,	// 方形の左上点
+			POINT_2D& r_rb	// 方形の右下点
+		) const noexcept
 		{
 			if (x < r_lt.x) {
 				r_lt.x = x;
@@ -34,7 +38,10 @@ namespace winrt::GraphPaper::implementation
 				r_rb.y = y;
 			}
 		}
-		inline POINT_2D nextafter(const double d) const noexcept
+		// すぐ次の浮動小数点数表現を得る.
+		inline POINT_2D nextafter(
+			const double d	// 正負の方向
+		) const noexcept
 		{
 			return POINT_2D{ std::nextafter(x, x + d), std::nextafter(y, y + d) };
 		}
@@ -102,11 +109,12 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 曲線上の助変数をもとに接線ベクトルを求める.
-	// c	制御点
-	// t	助変数
-	// v	t における接線ベクトル
 	//------------------------------
-	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t, POINT_2D& v) noexcept
+	static inline void bezi_tvec_by_param(
+		const POINT_2D c[4],	// 制御点
+		const double t,	// 助変数
+		POINT_2D& v	// t における接線ベクトル
+	) noexcept
 	{
 		const double a = -3.0 * (1.0 - t) * (1.0 - t);
 		const double b = 3.0 * (1.0 - t) * (1.0 - 3.0 * t);
@@ -117,11 +125,12 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 曲線上の助変数をもとに微分値を求める.
-	// c	制御点 (コントロールポイント)
-	// t	助変数
 	// 戻り値	求まった微分値
 	//------------------------------
-	static inline double bezi_deriv_by_param(const POINT_2D c[4], const double t) noexcept
+	static inline double bezi_deriv_by_param(
+		const POINT_2D c[4],	// 制御点 (コントロールポイント)
+		const double t	// 助変数
+	) noexcept
 	{
 		// 助変数をもとにベジェ曲線上の接線ベクトルを求め, その接線ベクトルの長さを返す.
 		POINT_2D v;	// t における接線ベクトル
@@ -130,27 +139,28 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
-	// t_min	小さい方の助変数
-	// t_max	大きい方の助変数
-	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept
+	// 戻り値	t_min < t_max なら true
+	static inline bool bezi_test_param(
+		const double t_min,	// 小さい方の助変数
+		const double t_max	// 大きい方の助変数
+	) noexcept
 	{
 		// 範囲の上限 t_max は 1+DBL_EPSILON より小 ?
 		// t_min より大きくて最も近い値は t_max より小 ?
-		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON &&
-			std::nextafter(t_min, t_min + 1.0) < t_max;
+		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON && std::nextafter(t_min, t_min + 1.0) < t_max;
 	}
 
 	//------------------------------
 	// 曲線上の助変数の区間をもとに長さを求める.
 	// シンプソン法を用いる.
-	// c	制御点
-	// t_min	区間の始端
-	// t_max	区間の終端
-	// s_cnt	シンプソン法の回数
 	// 戻り値	求まった長さ
 	//------------------------------
 	static double bezi_len_by_param(
-		const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
+		const POINT_2D c[4],	// 制御点
+		const double t_min,	// 区間の始端
+		const double t_max,	// 区間の終端
+		const uint32_t s_cnt	// シンプソン法の回数
+	) noexcept
 	{
 		double t_len;
 		uint32_t n;
@@ -209,11 +219,12 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 曲線上の長さをもとに助変数を求める.
-	// c	制御点
-	// len	長さ
 	// 戻り値	得られた助変数の値
 	//------------------------------
-	static double bezi_param_by_len(const POINT_2D c[4], const double len) noexcept
+	static double bezi_param_by_len(
+		const POINT_2D c[4],	// 制御点
+		const double len	// 曲線上の長さ
+	) noexcept
 	{
 		double t;	// 助変数
 		double d;	// 助変数の変分

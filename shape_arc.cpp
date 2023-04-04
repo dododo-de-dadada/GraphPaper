@@ -36,20 +36,16 @@ namespace winrt::GraphPaper::implementation
 		const double S, D2D1_POINT_2F& val) noexcept;
 
 	// 円弧をベジェ曲線で近似する.
-	// px, py	終点への位置ベクトル
-	// rx, ry	X 軸方向の半径と, Y 軸方向の半径.
-	// c, s	円弧の傾きのコサインとサイン.
-	// t_min, t_max 近似されたベジェ曲線の助変数の下限と上限
-	// b_start, b_seg	近似されたベジェ曲線の制御点.
-	// 
 	// 得られたベジェ曲線の始点と制御点は, だ円の中心点を原点とする座標で得られる.
 	// 助変数にちょうど 0-1 を与えると, 1/4 円弧が得られる.
 	// 助変数を外挿できるが, 近似精度は悪くなる.
-	//
 	static void arc_alter_bezier(
-		const double px, const double py, const double rx, const double ry, const double c,
-		const double s, const double t_min, const double t_max, D2D1_POINT_2F& b_start,
-		D2D1_BEZIER_SEGMENT& b_seg) noexcept
+		const double px, const double py,	// 終点への位置ベクトル
+		const double rx, const double ry,	// X 軸方向の半径と, Y 軸方向の半径.
+		const double c, const double s,	// 円弧の傾きのコサインとサイン.
+		const double t_min, const double t_max,	// 近似されたベジェ曲線の助変数の下限と上限
+		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg	// 近似されたベジェ曲線の始点と制御点.
+	) noexcept
 	{
 		const int qn = arc_quadrant_number(px, py, c, s);	// 象限の番号
 		/*
@@ -328,12 +324,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 円弧が含まれる象限を得る.
-	// px, py	円弧の始点から終点への位置ベクトル
-	// c, s	円弧の傾きのコサインとサイン (傾きは, 時計周りが正)
 	// 戻り値	象限の番号 (1,2,3,4). 終点ベクトルがゼロベクトルなら 0.
 	// ページの Y 軸は下向きだが, 向かって右上を第 1 象限とする.
-	inline static int arc_quadrant_number(const double px, const double py, const double c, const double s)
-		noexcept
+	inline static int arc_quadrant_number(
+		const double px, const double py,	// 円弧の始点から終点への位置ベクトル
+		const double c, const double s	// 円弧の傾きのコサインとサイン (傾きは, 時計周りが正)
+	) noexcept
 	{
 		// 円弧の, 始点から終点への位置ベクトルを, 円弧の傾きが 0 になるよう回転して戻す.
 		const double qx = c * px + s * py;
@@ -378,16 +374,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// だ円の中心点を得る.
-	// start	円弧の開始点
-	// end	円弧の終点
-	// rad	だ円の半径 (標準形における X 軸方向と Y 軸方向)
-	// c	cos(だ円の傾き)
-	// s	sin(だ円の傾き)
-	// dir	だ円の方向 (時計回り=true)
-	// val	得られた中心点.
 	static bool arc_center(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F end, const D2D1_SIZE_F rad, const double C,
-		const double S, D2D1_POINT_2F& val) noexcept
+		const D2D1_POINT_2F start, const D2D1_POINT_2F end,	// 円弧の開始点と終点
+		const D2D1_SIZE_F rad,	// だ円の半径 (標準形における X 軸方向と Y 軸方向)
+		const double C, const double S,	// 円弧の傾きのコサインとサイン.
+		D2D1_POINT_2F& val	// 得られた中心点.
+	) noexcept
 	{
 		// だ円の中心点を求める.
 		// A = 1 / (rx^2)
@@ -448,23 +440,17 @@ namespace winrt::GraphPaper::implementation
 		const double qy = end.y;
 		const double A = 1.0 / (rad.width * rad.width);
 		const double B = 1.0 / (rad.height * rad.height);
-		//const double C = cos(rot);
-		//const double S = sin(rot);
 		const double d = -2 * A * C * (C * px + S * py) - 2 * B * S * (S * px - C * py);
 		const double e = -2 * A * S * (C * px + S * py) + 2 * B * C * (S * px - C * py);
-		const double f = A * (C * px + S * py) * (C * px + S * py) + B * (S * px - C * py) *
-			(S * px - C * py);
+		const double f = A * (C * px + S * py) * (C * px + S * py) + B * (S * px - C * py) * (S * px - C * py);
 		const double g = -2 * A * C * (C * qx + S * qy) - 2 * B * S * (S * qx - C * qy);
 		const double h = -2 * A * S * (C * qx + S * qy) + 2 * B * C * (S * qx - C * qy);
-		const double i = A * (C * qx + S * qy) * (C * qx + S * qy) + B * (S * qx - C * qy) *
-			(S * qx - C * qy);
+		const double i = A * (C * qx + S * qy) * (C * qx + S * qy) + B * (S * qx - C * qy) * (S * qx - C * qy);
 		const double j = (g - d) / (e - h);
 		const double k = (i - f) / (e - h);
 		const double a = A * (C + S * j) * (C + S * j) + B * (S - C * j) * (S - C * j);
-		const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) *
-			(S * px - C * py + C * k);
-		const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B *
-			(S * px - C * py + C * k) * (S * px - C * py + C * k) - 1;
+		const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
+		const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k) - 1;
 		const double bb_4ac = b * b - 4 * a * c;
 		if (bb_4ac <= FLT_MIN) {
 			return false;
@@ -489,7 +475,10 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	void ShapeArc::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
+	void ShapeArc::get_pos_anc(
+		const uint32_t anc,	// 格納する図形の部位
+		D2D1_POINT_2F& val	// 格納する値
+	) const noexcept
 	{
 		if (anc == ANC_TYPE::ANC_P0) {
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
@@ -579,7 +568,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 頂点を得る.
+	// 点を得る.
 	size_t ShapeArc::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
 		constexpr double R[]{ 0.0, 90.0, 180.0, 270.0 };
@@ -858,7 +847,6 @@ namespace winrt::GraphPaper::implementation
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
-			//D2D1_POINT_2F start = m_start;
 			D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
 			};
@@ -903,7 +891,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	uint32_t ShapeArc::hit_test(const D2D1_POINT_2F t) const noexcept
+	uint32_t ShapeArc::hit_test(
+		const D2D1_POINT_2F t	// 判定する点
+	) const noexcept
 	{
 		D2D1_POINT_2F p[5];
 		get_verts(p);
@@ -919,6 +909,9 @@ namespace winrt::GraphPaper::implementation
 		else if (anc_hit_test(t, p[START], m_anc_width)) {
 			return ANC_TYPE::ANC_A_START;
 		}
+		else if (anc_hit_test(t, p[CENTER], m_anc_width)) {
+			return ANC_TYPE::ANC_FILL;
+		}
 		// 位置 t が, 扇形の内側にあるか判定する.
 		// 円弧の端点を s, e とする.
 		// 時計周りの場合, s と t の外積が 0 以上で,
@@ -926,14 +919,14 @@ namespace winrt::GraphPaper::implementation
 		const double rot = M_PI * m_angle_rot / 180.0;
 		const double c = cos(rot);
 		const double s = sin(rot);
-		const double sx = p[START].x - p[CENTER].x;
-		const double sy = p[START].y - p[CENTER].y;
-		const double ex = p[END].x - p[CENTER].x;
-		const double ey = p[END].y - p[CENTER].y;
-		const double tx = t.x - p[CENTER].x;
-		const double ty = t.y - p[CENTER].y;
-		const double st = sx * ty - sy * tx;
-		const double et = ex * ty - ey * tx;
+		const double sx = p[START].x - p[CENTER].x;	// 始点 (中心点が原点)
+		const double sy = p[START].y - p[CENTER].y;	// 始点 (中心点が原点)
+		const double ex = p[END].x - p[CENTER].x;	// 終点 (中心点が原点)
+		const double ey = p[END].y - p[CENTER].y;	// 終点 (中心点が原点)
+		const double tx = t.x - p[CENTER].x;	// 判定する点 (中心点が原点)
+		const double ty = t.y - p[CENTER].y;	// 判定する点 (中心点が原点)
+		const double st = sx * ty - sy * tx;	// 始点と判定する点の外積
+		const double et = ex * ty - ey * tx;	// 終点と判定する点の外積
 		const double rw = abs(m_radius.width);
 		const double rh = abs(m_radius.height);
 		if (st >= 0.0 && et <= 0.0) {
@@ -1079,16 +1072,16 @@ namespace winrt::GraphPaper::implementation
 	// 円弧をベジェ曲線で近似する.
 	// ただし, だ円の中心点と始点, 終点がなす角度が 90 度以上, 開けば開くほどズレる.
 	void ShapeArc::alter_bezier(
-		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept
+		D2D1_POINT_2F& b_start,	// 曲線の始点
+		D2D1_BEZIER_SEGMENT& b_seg	// 曲線の制御点
+	) const noexcept
 	{
 		const double rot = M_PI * m_angle_rot / 180.0;
 		const double c = cos(rot);
 		const double s = sin(rot);
 		const double t_min = 0.0 + m_angle_start / 90.0;
 		const double t_max = 1.0 + m_angle_end / 90.0;
-		arc_alter_bezier(
-			m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, b_start,
-			b_seg);
+		arc_alter_bezier(m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, b_start, b_seg);
 		//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 		//	arc_alter_bezier(
 		//		m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, true,
@@ -1111,27 +1104,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの返しと先端の位置を得る
-	// pos	始点からの終点ベクトル.
-	// ctr	円弧がなすだ円の中心点
-	// rad	X 軸方向の半径と, Y 軸方向の半径.
-	// rot	だ円の傾き (時計回りのラジアン)
-	// a_size	矢じりの大きさ
-	// arrow	矢じりの返しと先端の位置
 	bool ShapeArc::arc_get_pos_arrow(
-		const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad,
-		const double deg_start, const double deg_end, const double deg_rot,
-		/*const D2D1_SWEEP_DIRECTION dir,*/ const ARROW_SIZE a_size, D2D1_POINT_2F arrow[])
+		const D2D1_POINT_2F pos,	// 始点からの終点ベクトル.
+		const D2D1_POINT_2F ctr,	// 円弧がなすだ円の中心点
+		const D2D1_SIZE_F rad,	//	標準形における X 軸方向の半径と, Y 軸方向の半径.
+		const double deg_start,	// 始点の角度
+		const double deg_end,	// 終点の角度
+		const double deg_rot,	// 円弧がなすだ円の傾き
+		const ARROW_SIZE a_size,	// 矢じりの大きさ
+		D2D1_POINT_2F arrow[]	// 矢じりの返しと先端の位置
+	)
 	{
 		D2D1_POINT_2F start{};	// ベジェ曲線の始点
 		D2D1_BEZIER_SEGMENT b_seg{};	// ベジェ曲線の制御点
 		const double rot = M_PI * deg_rot / 180.0;	// 円弧の傾き
 		const double t_min = 0.0 + deg_start / 90.0;	// 助変数の下限
 		const double t_max = 1.0 + deg_end / 90.0;	// 助変数の上限
-		//const double d = (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
 		const double c = cos(rot);
 		const double s = sin(rot);
-		arc_alter_bezier(
-			pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, /*d,*/ start, b_seg);
+		arc_alter_bezier(pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, start, b_seg);
 		if (ShapeBezier::bezi_get_pos_arrow(start, b_seg, a_size, arrow)) {
 			// 得られた各点は, だ円中心点を原点とする座標なので, もとの座標へ戻す.
 			arrow[0].x += ctr.x;
@@ -1193,9 +1184,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_d2d_arrow_geom == nullptr) {
 					// だ円の弧長を求めるのはしんどいので, ベジェで近似
 					D2D1_POINT_2F arrow[3];
-					arc_get_pos_arrow(
-						m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot,
-						/*m_sweep_dir,*/ m_arrow_size, arrow);
+					arc_get_pos_arrow(m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
 					winrt::com_ptr<ID2D1GeometrySink> sink;
 					const ARROW_STYLE a_style{ m_arrow_style };
 					// ジオメトリパスを作成する.
@@ -1237,9 +1226,11 @@ namespace winrt::GraphPaper::implementation
 			};
 			winrt::com_ptr<ID2D1GeometrySink> sink;
 			winrt::check_hresult(
-				factory->CreatePathGeometry(m_d2d_fill_geom.put()));
+				factory->CreatePathGeometry(m_d2d_fill_geom.put())
+			);
 			winrt::check_hresult(
-				m_d2d_fill_geom->Open(sink.put()));
+				m_d2d_fill_geom->Open(sink.put())
+			);
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			const auto f_begin = (is_opaque(m_fill_color) ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :

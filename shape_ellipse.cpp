@@ -9,8 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapeEllipse::draw(void)
 	{
@@ -24,20 +22,22 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ”¼Œa‚ğ‹‚ß‚é.
-		D2D1_POINT_2F rad;
-		pt_mul(m_pos, 0.5, rad);
-		// ’†S“_‚ğ‹‚ß‚é.
-		D2D1_POINT_2F c;
-		pt_add(m_start, rad, c);
+		const double rx = 0.5 * m_pos.x;
+		const double ry = 0.5 * m_pos.y;
 		// ‚¾‰~\‘¢‘Ì‚ÉŠi”[‚·‚é.
-		D2D1_ELLIPSE elli{ c, rad.x, rad.y };
+		D2D1_ELLIPSE elli{ 
+			D2D1_POINT_2F {
+				static_cast<FLOAT>(m_start.x + rx), static_cast<FLOAT>(m_start.y + ry)
+		},
+			static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
+		};
 		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_fill_color)) {
 			brush->SetColor(m_fill_color);
 			target->FillEllipse(elli, brush);
 		}
 		// ˜gü‚ÌF‚ª•s“§–¾‚©”»’è‚·‚é.
-		if (is_opaque(m_stroke_color)) {
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			brush->SetColor(m_stroke_color);
 			target->DrawEllipse(elli, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
@@ -56,30 +56,35 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// test	”»’è‚³‚ê‚é“_
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
-	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F test) const noexcept
+	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
-		const auto anc = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
+		const auto anc = rect_hit_test_anc(m_start, m_pos, t, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
 
 		// ”¼Œa‚ğ“¾‚é.
-		D2D1_POINT_2F rad;
-		pt_mul(m_pos, 0.5, rad);
+		//D2D1_POINT_2F r;
+		//pt_mul(m_pos, 0.5, r);
+		double rx = 0.5 * m_pos.x;
+		double ry = 0.5 * m_pos.y;
 		// ’†S“_‚ğ“¾‚é.
 		D2D1_POINT_2F ctr;
-		pt_add(m_start, rad, ctr);
-		rad.x = fabsf(rad.x);
-		rad.y = fabsf(rad.y);
-		if (is_opaque(m_stroke_color)) {
+		pt_add(m_start, rx, ry, ctr);
+		rx = fabsf(rx);
+		ry = fabsf(ry);
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 			const double s_width = max(static_cast<double>(m_stroke_width), m_anc_width);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
-			D2D1_POINT_2F r_outer;
-			pt_add(rad, s_width * 0.5, r_outer);
-			if (!pt_in_ellipse(test, ctr, r_outer.x, r_outer.y)) {
+			D2D1_POINT_2F r_outer{
+				rx + s_width * 0.5,
+				ry + s_width * 0.5
+			};
+			//pt_add(r, s_width * 0.5, r_outer);
+			if (!pt_in_ellipse(t, ctr, r_outer.x, r_outer.y)) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
 				// ANC_PAGE ‚ğ•Ô‚·.
 				return ANC_TYPE::ANC_PAGE;
@@ -97,13 +102,13 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_STROKE;
 			}
 			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
-			if (!pt_in_ellipse(test, ctr, r_inner.x, r_inner.y)) {
+			if (!pt_in_ellipse(t, ctr, r_inner.x, r_inner.y)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ‚¾‰~‚ÉˆÊ’u‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (pt_in_ellipse(test, ctr, rad.x, rad.y)) {
+			if (pt_in_ellipse(t, ctr, rx, ry)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}

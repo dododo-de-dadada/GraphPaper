@@ -804,8 +804,7 @@ namespace winrt::GraphPaper::implementation
 		// 方形の補助線を表示する.
 		void auxiliary_draw_rect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 多角形の補助線を表示する.
-		void auxiliary_draw_poly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
-			const POLY_OPTION& p_opt);
+		void auxiliary_draw_poly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
 		void auxiliary_draw_rrect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 四分円の補助線を表示する.
@@ -856,8 +855,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
 		// ページの色を得る.
 		virtual bool get_page_color(D2D1_COLOR_F& val) const noexcept final override;
-		// ページ倍率を得る.
-		//virtual bool get_page_scale(float& val) const noexcept final override;
 		// ページの大きさを得る.
 		virtual bool get_page_size(D2D1_SIZE_F& val) const noexcept final override;
 		// ページの余白を得る.
@@ -1404,9 +1401,8 @@ namespace winrt::GraphPaper::implementation
 		// 開始点を得る.
 		bool get_pos_start(D2D1_POINT_2F& val) const noexcept final override;
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(
-			const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
-		// 頂点を得る.
+		virtual bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
+		// 点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
 		// 図形が点を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept override;
@@ -1435,7 +1431,6 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	//struct ShapePath : ShapeLine {
 	struct ShapePath : ShapeArrow {
 		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
 		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
@@ -1451,17 +1446,14 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
-		// 図形を囲む領域を得る.
-		void get_bound(
-			const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
-			D2D1_POINT_2F& b_rb) const noexcept final override;
-		// 図形を囲む領域の左上位置を得る.
+		// 図形を囲む矩形を得る.
+		void get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept final override;
+		// 図形を囲む矩形の左上点を得る.
 		void get_bound_lt(D2D1_POINT_2F& val) const noexcept final override;
 		// 部位の位置を得る.
 		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
 		ShapePath(const Shape* page, const bool e_closed) :
-			//ShapeLine::ShapeLine(page, e_closed)
 			ShapeArrow::ShapeArrow(page)
 		{
 			page->get_fill_color(m_fill_color);
@@ -1469,14 +1461,14 @@ namespace winrt::GraphPaper::implementation
 				set_arrow_style(ARROW_STYLE::NONE);
 			}
 		}
+
 		// 図形を破棄する.
 		virtual ~ShapePath(void)
 		{
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
-			// ~ShapePath
-		}
+		}	// ~ShapePath
 
 		//------------------------------
 		// shape_path.cpp
@@ -1539,8 +1531,7 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		// 図形を作成する.
-		ShapePoly(
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt);
+		ShapePoly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
 		ShapePoly(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
@@ -1561,10 +1552,8 @@ namespace winrt::GraphPaper::implementation
 		// ベジェ曲線
 		//------------------------------
 
-		// 矢じりの返しと先端の位置を得る
-		static bool bezi_get_pos_arrow(
-			const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size,
-			D2D1_POINT_2F arrow[3]) noexcept;
+		// 矢じりの返しと先端の点を得る
+		static bool bezi_get_pos_arrow(const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
 		void draw(void) final override;
 		// 図形が点を含むか判定する.
@@ -1585,7 +1574,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧
 	struct ShapeArc : ShapePath {
-		// ラディアンなら精度が不足がちになるので度で保持する.
+		// ラディアンなら精度が不足がちになりそうだので「度」で保持する.
 		D2D1_SIZE_F m_radius{ 0.0f, 0.0f };	// 標準形にしたときの X 軸 Y 軸方向の半径
 		float m_angle_rot = 0.0f;	// 円弧の傾き (度)
 		float m_angle_start = 0.0f;	// 円弧の始点 (度)
@@ -1599,8 +1588,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			D2D1_POINT_2F p[5];
 			get_verts(p);
-			return pt_in_rect(p[0], lt, rb) && pt_in_rect(p[1], lt, rb) &&
-				pt_in_rect(p[2], lt, rb) && pt_in_rect(p[3], lt, rb) && pt_in_rect(p[4], lt, rb);
+			return pt_in_rect(p[0], lt, rb) && pt_in_rect(p[1], lt, rb) && pt_in_rect(p[2], lt, rb) && pt_in_rect(p[3], lt, rb) && pt_in_rect(p[4], lt, rb);
 		}
 
 		virtual bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
@@ -1650,10 +1638,7 @@ namespace winrt::GraphPaper::implementation
 		// 円弧をベジェ曲線で近似する.
 		void alter_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
-		static bool arc_get_pos_arrow(
-			const D2D1_POINT_2F vec, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad,
-			const double deg_start, const double deg_end, const double deg_rot,
-			/*const D2D1_SWEEP_DIRECTION dir,*/ const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+		static bool arc_get_pos_arrow(const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad, const double deg_start, const double deg_end, const double deg_rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く
 		virtual void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.
@@ -1722,7 +1707,6 @@ namespace winrt::GraphPaper::implementation
 
 			// 文字列レイアウトを破棄する.
 			if (m_dwrite_text_layout != nullptr) {
-				//m_dwrite_text_layout->Release();
 				m_dwrite_text_layout = nullptr;
 			}
 		} // ~ShapeStroke
@@ -1817,9 +1801,7 @@ namespace winrt::GraphPaper::implementation
 	// p	部位の位置
 	// target	描画ターゲット
 	// brush	色ブラシ
-	inline void anc_draw_circle(
-		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
-		noexcept
+	inline void anc_draw_circle(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept
 	{
 		const auto c_inner = Shape::m_anc_circle_inner;	// 内側の半径
 		const auto c_outer = Shape::m_anc_circle_outer;	// 外側の半径
@@ -1912,8 +1894,7 @@ namespace winrt::GraphPaper::implementation
 	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
 	{
-		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) &&
-			equal(a.m_offset, b.m_offset);
+		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}
 
 	// 線の端点が同じか判定する.
@@ -1925,8 +1906,7 @@ namespace winrt::GraphPaper::implementation
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
 	{
-		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && 
-			equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
+		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
 	}
 
 	// 位置が同じか判定する.
@@ -1938,8 +1918,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形が同じか判定する.
 	inline bool equal(const D2D1_RECT_F& a, const D2D1_RECT_F& b) noexcept
 	{
-		return equal(a.left, b.left) && equal(a.top, b.top) && equal(a.right, b.right) &&
-			equal(a.bottom, b.bottom);
+		return equal(a.left, b.left) && equal(a.top, b.top) && equal(a.right, b.right) && equal(a.bottom, b.bottom);
 	}
 
 	// 寸法が同じか判定する.
@@ -1975,8 +1954,7 @@ namespace winrt::GraphPaper::implementation
 	// 破線の配置が同じか判定する.
 	inline bool equal(const DASH_PAT& a, const DASH_PAT& b) noexcept
 	{
-		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) &&
-			equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
+		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
 	}
 
 	// 文字列が同じか判定する.
