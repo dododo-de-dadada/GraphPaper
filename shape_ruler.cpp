@@ -13,11 +13,11 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	”»’è‚³‚ê‚é“_
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_pos, t_pos, m_anc_width);
-		if (anc != ANC_TYPE::ANC_PAGE) {
-			return anc;
+		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, t_pos, m_loc_width);
+		if (loc != LOC_TYPE::LOC_PAGE) {
+			return loc;
 		}
-		if (is_opaque(m_stroke_color)) {
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dwrite_text_format->GetFontSize();
 			const bool x_ge_y = fabs(m_pos.x) >= fabs(m_pos.y);
@@ -45,24 +45,24 @@ namespace winrt::GraphPaper::implementation
 				};
 				if (x_ge_y) {
 					const D2D1_POINT_2F p_min{
-						static_cast<FLOAT>(p0.x - m_anc_width * 0.5), min(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x - m_loc_width * 0.5), min(p0.y, p1.y)
 					};
 					const D2D1_POINT_2F p_max{
-						static_cast<FLOAT>(p0.x + m_anc_width * 0.5f), max(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x + m_loc_width * 0.5f), max(p0.y, p1.y)
 					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				else {
 					const D2D1_POINT_2F p_min{
-						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - m_anc_width * 0.5)
+						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - m_loc_width * 0.5)
 					};
 					const D2D1_POINT_2F p_max{
-						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_anc_width * 0.5)
+						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_loc_width * 0.5)
 					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				// –Ú·‚è‚Ì’l‚ð•\Ž¦‚·‚é.
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				*/
 				if (pt_in_rect(t_pos, r_lt, r_rb)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 		}
@@ -119,10 +119,10 @@ namespace winrt::GraphPaper::implementation
 			*/
 			//if (pt_in_rect(t_pos, r_lt, r_rb)) {
 			if (pt_in_rect(t_pos, m_start, e_pos)) {
-				return ANC_TYPE::ANC_FILL;
+				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	void ShapeRuler::create_text_format(void)
@@ -237,8 +237,8 @@ namespace winrt::GraphPaper::implementation
 				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), r, brush);
 			}
 		}
-		if (m_anc_show && is_selected()) {
-			draw_anc();
+		if (m_loc_show && is_selected()) {
+			draw_loc();
 		}
 	}
 

@@ -235,8 +235,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
-		uint32_t m_event_anc_pressed = ANC_TYPE::ANC_PAGE;	// ポインターが押された図形の部位
-		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された位置
+		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
+		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
 
 		// 画像
-		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
+		bool m_image_keep_aspect = true;	// 画像の縦横比の維持/可変
 
 		// メインページ
 		ShapePage m_main_page;	// ページ
@@ -403,8 +403,8 @@ namespace winrt::GraphPaper::implementation
 		void event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがスワップチェーンパネルから出た.
 		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// 色を検出する.
-		void event_eyedropper_detect(const Shape* s, const uint32_t anc);
+		// 指定した部位の色を検出する.
+		void event_eyedropper_detect(const Shape* s, const uint32_t loc);
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 文字列図形の作成を終了する.
@@ -607,9 +607,9 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//-----------------------------
 
-		// 画像メニューの「画像の縦横比を維持」が選択された.
+		// 画像メニューの「画像の縦横比を保つ」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「画像の縦横比を維持」に印をつける.
+		// 画像メニューの「画像の縦横比を保つ」に印をつける.
 		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「原画像に戻す」が選択された.
 		void image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
@@ -934,8 +934,8 @@ namespace winrt::GraphPaper::implementation
 		void ustack_push_append(ShapeGroup* const g, Shape* const s);
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void ustack_push_order(Shape* const s, Shape* const t);
-		// 図形の頂点をスタックに保存する.
-		void ustack_push_position(Shape* const s, const uint32_t anc);
+		// 指定した部位の点をスタックに保存する.
+		void ustack_push_position(Shape* const s, const uint32_t loc);
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
 		void ustack_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.

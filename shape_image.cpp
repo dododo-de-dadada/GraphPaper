@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
 		// 選択された図形なら, 補助線と図形の部位を表示する.
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			brush->SetColor(COLOR_WHITE);
 			target->DrawRectangle(rect, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
@@ -270,10 +270,10 @@ namespace winrt::GraphPaper::implementation
 				{ m_start.x + m_view.width, m_start.y + m_view.height },
 				{ m_start.x, m_start.y + m_view.height },
 			};
-			anc_draw_square(a[0], target, brush);
-			anc_draw_square(a[1], target, brush);
-			anc_draw_square(a[2], target, brush);
-			anc_draw_square(a[3], target, brush);
+			loc_draw_square(a[0], target, brush);
+			loc_draw_square(a[1], target, brush);
+			loc_draw_square(a[2], target, brush);
+			loc_draw_square(a[3], target, brush);
 		}
 	}
 
@@ -337,37 +337,40 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 部位の位置を得る.
-	void ShapeImage::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
+	// 指定した部位の点を得る.
+	void ShapeImage::get_pos_loc(
+		const uint32_t loc,	// 部位
+		D2D1_POINT_2F& val	// 得られた値
+	) const noexcept
 	{
-		if (anc == ANC_TYPE::ANC_NW) {
+		if (loc == LOC_TYPE::LOC_NW) {
 			val = m_start;
 		}
-		else if (anc == ANC_TYPE::ANC_NORTH) {
+		else if (loc == LOC_TYPE::LOC_NORTH) {
 			val.x = m_start.x + m_view.width * 0.5f;
 			val.y = m_start.y;
 		}
-		else if (anc == ANC_TYPE::ANC_NE) {
+		else if (loc == LOC_TYPE::LOC_NE) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y;
 		}
-		else if (anc == ANC_TYPE::ANC_EAST) {
+		else if (loc == LOC_TYPE::LOC_EAST) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y + m_view.height * 0.5f;
 		}
-		else if (anc == ANC_TYPE::ANC_SE) {
+		else if (loc == LOC_TYPE::LOC_SE) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (anc == ANC_TYPE::ANC_SOUTH) {
+		else if (loc == LOC_TYPE::LOC_SOUTH) {
 			val.x = m_start.x + m_view.width * 0.5f;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (anc == ANC_TYPE::ANC_SW) {
+		else if (loc == LOC_TYPE::LOC_SW) {
 			val.x = m_start.x;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (anc == ANC_TYPE::ANC_WEST) {
+		else if (loc == LOC_TYPE::LOC_WEST) {
 			val.x = m_start.x;
 			val.y = m_start.y + m_view.height * 0.5f;
 		}
@@ -427,57 +430,58 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	// t	判定される点
-	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t) const noexcept
+	// 戻り値	点を含む部位
+	uint32_t ShapeImage::hit_test(
+		const D2D1_POINT_2F t	// 判定される点
+	) const noexcept
 	{
 		D2D1_POINT_2F p[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(p);
-		if (anc_hit_test(t, p[2], m_anc_width)) {
-			return ANC_TYPE::ANC_SE;
+		if (loc_hit_test(t, p[2], m_loc_width)) {
+			return LOC_TYPE::LOC_SE;
 		}
-		else if (anc_hit_test(t, p[3], m_anc_width)) {
-			return ANC_TYPE::ANC_SW;
+		else if (loc_hit_test(t, p[3], m_loc_width)) {
+			return LOC_TYPE::LOC_SW;
 		}
-		else if (anc_hit_test(t, p[1], m_anc_width)) {
-			return ANC_TYPE::ANC_NE;
+		else if (loc_hit_test(t, p[1], m_loc_width)) {
+			return LOC_TYPE::LOC_NE;
 		}
-		else if (anc_hit_test(t, p[0], m_anc_width)) {
-			return ANC_TYPE::ANC_NW;
+		else if (loc_hit_test(t, p[0], m_loc_width)) {
+			return LOC_TYPE::LOC_NW;
 		}
 		else {
-			const auto e_width = m_anc_width * 0.5;
+			const auto e_width = m_loc_width * 0.5;
 			D2D1_POINT_2F e[2];
 			e[0].x = p[0].x;
 			e[0].y = static_cast<FLOAT>(p[0].y - e_width);
 			e[1].x = p[1].x;
 			e[1].y = static_cast<FLOAT>(p[1].y + e_width);
 			if (pt_in_rect(t, e[0], e[1])) {
-				return ANC_TYPE::ANC_NORTH;
+				return LOC_TYPE::LOC_NORTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[1].x - e_width);
 			e[0].y = p[1].y;
 			e[1].x = static_cast<FLOAT>(p[2].x + e_width);
 			e[1].y = p[2].y;
 			if (pt_in_rect(t, e[0], e[1])) {
-				return ANC_TYPE::ANC_EAST;
+				return LOC_TYPE::LOC_EAST;
 			}
 			e[0].x = p[3].x;
 			e[0].y = static_cast<FLOAT>(p[3].y - e_width);
 			e[1].x = p[2].x;
 			e[1].y = static_cast<FLOAT>(p[2].y + e_width);
 			if (pt_in_rect(t, e[0], e[1])) {
-				return ANC_TYPE::ANC_SOUTH;
+				return LOC_TYPE::LOC_SOUTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[0].x - e_width);
 			e[0].y = p[0].y;
 			e[1].x = static_cast<FLOAT>(p[3].x + e_width);
 			e[1].y = p[3].y;
 			if (pt_in_rect(t, e[0], e[1])) {
-				return ANC_TYPE::ANC_WEST;
+				return LOC_TYPE::LOC_WEST;
 			}
 		}
 		if (p[0].x > p[2].x) {
@@ -492,9 +496,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (p[0].x <= t.x && t.x <= p[2].x &&
 			p[0].y <= t.y && t.y <= p[2].y) {
-			return ANC_TYPE::ANC_FILL;
+			return LOC_TYPE::LOC_FILL;
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	// 矩形に含まれるか判定する.
@@ -547,17 +551,22 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を, 部位の位置に格納する.
+	// 値を, 指定した部位の点に格納する.
 	// val	値
-	// anc	図形の部位
-	// keep_aspect	画像の縦横比を維持
-	bool ShapeImage::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float, const bool keep_aspect) noexcept
+	// loc	部位
+	// keep_aspect	画像の縦横比の維持/可変
+	bool ShapeImage::set_pos_loc(
+		const D2D1_POINT_2F val,	// 値
+		const uint32_t loc,	// 部位
+		const float,
+		const bool keep_aspect	// 画像の縦横比の維持/可変
+	) noexcept
 	{
 		D2D1_POINT_2F new_p;
 		pt_round(val, PT_ROUND, new_p);
 
 		bool flag = false;
-		if (anc == ANC_TYPE::ANC_NW) {
+		if (loc == LOC_TYPE::LOC_NW) {
 			// 画像の一部分でも表示されているか判定する.
 			// (画像がまったく表示されてない場合はスケールの変更は行わない.)
 			const float image_w = m_clip.right - m_clip.left;	// 表示されている画像の幅 (原寸)
@@ -592,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_NE) {
+		else if (loc == LOC_TYPE::LOC_NE) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -623,7 +632,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_SE) {
+		else if (loc == LOC_TYPE::LOC_SE) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -653,7 +662,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_SW) {
+		else if (loc == LOC_TYPE::LOC_SW) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -684,7 +693,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_NORTH) {
+		else if (loc == LOC_TYPE::LOC_NORTH) {
 			const float dy = (new_p.y - m_start.y);
 			if (fabs(dy) >= FLT_MIN) {
 				if (keep_aspect) {
@@ -706,7 +715,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_EAST) {
+		else if (loc == LOC_TYPE::LOC_EAST) {
 			const float dx = (new_p.x - (m_start.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
 				if (keep_aspect) {
@@ -728,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_SOUTH) {
+		else if (loc == LOC_TYPE::LOC_SOUTH) {
 			const float dy = (new_p.y - (m_start.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
 				if (keep_aspect) {
@@ -750,7 +759,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_WEST) {
+		else if (loc == LOC_TYPE::LOC_WEST) {
 			const float dx = (new_p.x - m_start.x);
 			if (fabs(dx) >= FLT_MIN) {
 				if (keep_aspect) {

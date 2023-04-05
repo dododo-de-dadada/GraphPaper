@@ -25,10 +25,10 @@ namespace winrt::GraphPaper::implementation
 		const double rx = 0.5 * m_pos.x;
 		const double ry = 0.5 * m_pos.y;
 		// ‚¾‰~\‘¢‘Ì‚ÉŠi”[‚·‚é.
-		D2D1_ELLIPSE elli{ 
+		const D2D1_ELLIPSE elli{ 
 			D2D1_POINT_2F {
 				static_cast<FLOAT>(m_start.x + rx), static_cast<FLOAT>(m_start.y + ry)
-		},
+			},
 			static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 		};
 		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
@@ -41,78 +41,63 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(m_stroke_color);
 			target->DrawEllipse(elli, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			// •â•ü‚ğ•`‚­
-			if (m_stroke_width >= Shape::m_anc_square_inner) {
+			if (m_stroke_width >= Shape::m_loc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawEllipse(elli, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawEllipse(elli, brush, m_aux_width, m_aux_style.get());
 			}
-			draw_anc();
+			draw_loc();
 		}
 	}
 
 	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
-	// test	”»’è‚³‚ê‚é“_
-	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
-	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t) const noexcept
+	// –ß‚è’l	“_‚ğŠÜ‚Ş•”ˆÊ
+	uint32_t ShapeEllipse::hit_test(
+		const D2D1_POINT_2F t	// ”»’è‚³‚ê‚é“_
+	) const noexcept
 	{
-		const auto anc = rect_hit_test_anc(m_start, m_pos, t, m_anc_width);
-		if (anc != ANC_TYPE::ANC_PAGE) {
-			return anc;
+		const auto loc = rect_loc_hit_test(m_start, m_pos, t, m_loc_width);
+		if (loc != LOC_TYPE::LOC_PAGE) {
+			return loc;
 		}
 
 		// ”¼Œa‚ğ“¾‚é.
-		//D2D1_POINT_2F r;
-		//pt_mul(m_pos, 0.5, r);
 		double rx = 0.5 * m_pos.x;
 		double ry = 0.5 * m_pos.y;
 		// ’†S“_‚ğ“¾‚é.
-		D2D1_POINT_2F ctr;
-		pt_add(m_start, rx, ry, ctr);
-		rx = fabsf(rx);
-		ry = fabsf(ry);
+		const D2D1_POINT_2F c{
+			static_cast<FLOAT>(m_start.x + rx),
+			static_cast<FLOAT>(m_start.y + ry)
+		};
+		rx = abs(rx);
+		ry = abs(ry);
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
-			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
-			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), m_anc_width);
-			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
-			D2D1_POINT_2F r_outer{
-				rx + s_width * 0.5,
-				ry + s_width * 0.5
-			};
-			//pt_add(r, s_width * 0.5, r_outer);
-			if (!pt_in_ellipse(t, ctr, r_outer.x, r_outer.y)) {
-				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
-				// ANC_PAGE ‚ğ•Ô‚·.
-				return ANC_TYPE::ANC_PAGE;
+			// ‚¾‰~‚ÌŠOŒa‚É‘Î‚µ, “_‚Ì“àŠO‚ğ”»’è‚·‚é.
+			const double s_width = static_cast<double>(max(m_stroke_width, m_loc_width));
+			const double ox = rx + s_width * 0.5;
+			const double oy = ry + s_width * 0.5;
+			if (!pt_in_ellipse(t, c, ox, oy)) {
+				// ŠO‘¤‚È‚ç LOC_PAGE ‚ğ•Ô‚·.
+				return LOC_TYPE::LOC_PAGE;
 			}
-			// ˆÊ’u‚ª‚¾‰~‚Ì˜gã‚É‚ ‚é‚©”»’è‚·‚é.
-			D2D1_POINT_2F r_inner;
-			// ŠOŒa‚©‚ç˜g‚Ì‘¾‚³‚ğˆø‚¢‚½’l‚ğ“àŒa‚ÉŠi”[‚·‚é.
-			pt_add(r_outer, -s_width, r_inner);
-			// “àŒa‚ª•‰”‚È‚ç,
-			// ANC_STROKE ‚ğ•Ô‚·.
-			if (r_inner.x <= 0.0f) {
-				return ANC_TYPE::ANC_STROKE;
-			}
-			if (r_inner.y <= 0.0f) {
-				return ANC_TYPE::ANC_STROKE;
-			}
-			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
-			if (!pt_in_ellipse(t, ctr, r_inner.x, r_inner.y)) {
-				return ANC_TYPE::ANC_STROKE;
+			// ‚¾‰~‚Ì“àŒa‚É‘Î‚µ, “_‚Ì“àŠO‚ğ”»’è‚·‚é.
+			const double ix = ox - s_width;
+			const double iy = oy - s_width;
+			if (ix <= 0.0 || iy <= 0.0 || !pt_in_ellipse(t, c, ix, iy)) {
+				// “àŒa‚ª•‰”, A‚Ü‚½‚Í“_‚ªŠO‘¤‚È‚ç LOC_STROKE ‚ğ•Ô‚·.
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
-			// ‚¾‰~‚ÉˆÊ’u‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (pt_in_ellipse(t, ctr, rx, ry)) {
-				return ANC_TYPE::ANC_FILL;
+			// ‚¾‰~‚É“_‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
+			if (pt_in_ellipse(t, c, rx, ry)) {
+				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 }

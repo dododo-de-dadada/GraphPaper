@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 
 		// é¿ê¸Ç…ñﬂÇ∑.
 		len += dt_writer.WriteString(L"[ ] 0 d\n");
-		if (style == ARROW_STYLE::FILLED) {
+		if (style == ARROW_STYLE::ARROW_FILLED) {
 			swprintf_s(buf,
 				L"%f %f %f rg\n",
 				stroke.r, stroke.g, stroke.b);
@@ -61,10 +61,10 @@ namespace winrt::GraphPaper::implementation
 			barb[1].x, -barb[1].y + page_size.height
 		);
 		len += dt_writer.WriteString(buf);
-		if (style == ARROW_STYLE::OPENED) {
+		if (style == ARROW_STYLE::ARROW_OPENED) {
 			len += dt_writer.WriteString(L"S\n");
 		}
-		else if (style == ARROW_STYLE::FILLED) {
+		else if (style == ARROW_STYLE::ARROW_FILLED) {
 			len += dt_writer.WriteString(L"b\n");	// b ÇÕÉpÉXÇï¬Ç∂Çƒ (B ÇÕï¬Ç∂Ç∏Ç…) ìhÇËÇ¬Ç‘Ç∑.
 		}
 		return len;
@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 			cmd
 		);
 		len += dt_writer.WriteString(buf);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
 			len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
@@ -299,7 +299,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barbs[3];
 			if (line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barbs, barbs[2])) {
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
@@ -353,7 +353,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		len += dt_writer.WriteString(cmd);
 
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
 			if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, barb, tip)) {
@@ -1169,8 +1169,8 @@ namespace winrt::GraphPaper::implementation
 		alter_bezier(start1, b_seg1);
 
 		D2D1_POINT_2F ctr{};
-		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
-			get_pos_anc(ANC_TYPE::ANC_A_CENTER, ctr);
+		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::ARROW_NONE) {
+			get_pos_loc(LOC_TYPE::LOC_A_CENTER, ctr);
 		}
 
 		size_t len = 0;
@@ -1204,7 +1204,7 @@ namespace winrt::GraphPaper::implementation
 				b_seg1.point3.x, -b_seg1.point3.y + page_size.height
 			);
 			len += dt_writer.WriteString(buf);
-			if (m_arrow_style != ARROW_STYLE::NONE) {
+			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
 				arc_get_pos_arrow(
 					m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, //m_sweep_dir,

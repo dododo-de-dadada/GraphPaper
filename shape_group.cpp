@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::draw(void)
 	{
 		// 選択フラグが立ってるか判定する.
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			D2D1_POINT_2F b_lt { FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
@@ -132,22 +132,21 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	//------------------------------
 	// 図形が点を含むか判定する.
-	// test	判定される点
-	// 戻り値	位置を含む図形の部位
-	//------------------------------
-	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F test) const noexcept
+	// 戻り値	点を含む部位
+	uint32_t ShapeGroup::hit_test(
+		const D2D1_POINT_2F t	// 判定される点
+	) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(test) != ANC_TYPE::ANC_PAGE) {
-				return ANC_TYPE::ANC_FILL;
+			if (s->hit_test(t) != LOC_TYPE::LOC_PAGE) {
+				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	//------------------------------

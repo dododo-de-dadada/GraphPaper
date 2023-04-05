@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_pos)) {
 			D2D1_POINT_2F se;
 			pt_add(m_start, t_box, se);
-			set_pos_anc(se, ANC_TYPE::ANC_SE, 0.0f, false);
+			set_pos_loc(se, LOC_TYPE::LOC_SE, 0.0f, false);
 			return true;
 		}
 		return false;
@@ -526,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 図形が選択されているなら, 文字列の補助線を表示する
-			if (m_anc_show && is_selected()) {
+			if (m_loc_show && is_selected()) {
 				const uint32_t d_cnt = Shape::m_aux_style->GetDashesCount();
 				if (d_cnt <= 0 || d_cnt > 6) {
 					return;
@@ -670,34 +670,33 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	// test	判定される点
-	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test) const noexcept
+	// t	判定される点
+	// 戻り値	点を含む部位
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
-		if (anc != ANC_TYPE::ANC_PAGE) {
-			return anc;
+		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, t, m_loc_width);
+		if (loc != LOC_TYPE::LOC_PAGE) {
+			return loc;
 		}
-		const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : 
+		const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
+			0.0f : 
 			(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
 		// 文字列の範囲の左上が原点になるよう, 判定される点を移動する.
 		D2D1_POINT_2F lt;
 		ShapeRect::get_bound_lt(lt);
-		pt_sub(test, lt, lt);
+		pt_sub(t, lt, lt);
 		pt_sub(lt, m_text_pad, lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const auto tl = m_dwrite_test_metrics[i].left;
 			const auto tw = m_dwrite_test_metrics[i].width;
 			const auto tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
-			if (pt_in_rect(
-				lt, D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size },
-				D2D1_POINT_2F{ tl + tw, tt + bl + descent })) {
-				return ANC_TYPE::ANC_TEXT;
+			if (pt_in_rect(lt, D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size }, D2D1_POINT_2F{ tl + tw, tt + bl + descent })) {
+				return LOC_TYPE::LOC_TEXT;
 			}
 		}
-		return ShapeRect::hit_test(test);
+		return ShapeRect::hit_test(t);
 	}
 
 	// 矩形に含まれるか判定する.
@@ -775,9 +774,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 有効な書体名の配列を設定する.
 	// DWriteFactory のシステムフォントコレクションから,
-	// 既定の地域・言語名に対応した書体名を得て,
-	// それらを配列に格納する.
-	// 'en-us' と GetUserDefaultLocaleName で得られたロケールと, 2 つの書体名を得る.
+	// 既定の地域・言語名に対応した書体名を得て, それらを配列に格納する.
+	// 'en-us' と GetUserDefaultLocaleName で得られる, 2 つのロケールそれぞれの書体名を得る.
 	// 次のように格納される.
 	// "ＭＳ ゴシック\0MS Gothic\0"
 	void ShapeText::set_available_fonts(void)
@@ -816,14 +814,16 @@ namespace winrt::GraphPaper::implementation
 			UINT32 index_local = 0;
 			BOOL exists = false;
 			winrt::check_hresult(
-				localized_name->FindLocaleName(L"en-us", &index_en_us, &exists));
+				localized_name->FindLocaleName(L"en-us", &index_en_us, &exists)
+			);
 			if (exists != TRUE) {
 				// en-us がない場合,
 				// 0 を位置に格納する.
 				index_en_us = 0;
 			}
 			winrt::check_hresult(
-				localized_name->FindLocaleName(lang, &index_local, &exists));
+				localized_name->FindLocaleName(lang, &index_local, &exists)
+			);
 			if (exists != TRUE) {
 				// 地域名がない場合,
 				// en_us を開始位置に格納する.
@@ -874,9 +874,6 @@ namespace winrt::GraphPaper::implementation
 		// 値が書体名と同じか判定する.
 		if (!equal(m_font_family, val)) {
 			m_font_family = val;
-			//if (m_dwrite_text_layout != nullptr) {
-			//	m_dwrite_text_layout = nullptr;
-			//}
 			return true;
 		}
 		return false;
@@ -897,9 +894,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_stretch != val) {
 			m_font_stretch = val;
-			//if (m_dwrite_text_layout != nullptr) {
-			//	m_dwrite_text_layout = nullptr;
-			//}
 			return true;
 		}
 		return false;
@@ -910,9 +904,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_style != val) {
 			m_font_style = val;
-			//if (m_dwrite_text_layout != nullptr) {
-			//	m_dwrite_text_layout = nullptr;
-			//}
 			return true;
 		}
 		return false;
@@ -923,9 +914,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_weight != val) {
 			m_font_weight = val;
-			//if (m_dwrite_text_layout != nullptr) {
-			//	m_dwrite_text_layout = nullptr;
-			//}
 			return true;
 		}
 		return false;
@@ -938,9 +926,7 @@ namespace winrt::GraphPaper::implementation
 			m_text = val;
 			m_text_selected_range.startPosition = 0;
 			m_text_selected_range.length = 0;
-			if (m_dwrite_text_layout != nullptr) {
-				m_dwrite_text_layout = nullptr;
-			}
+			m_dwrite_text_layout = nullptr;
 			return true;
 		}
 		return false;

@@ -43,43 +43,45 @@ namespace winrt::GraphPaper::implementation
 		return done;
 	}
 
-	// 値を, 部位の位置に格納する.
-	// val	値
-	// anc	図形の部位
-	// snap_point	他の点との間隔 (この値より離れた点は無視する)
-	bool ShapePath::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool /*keep_aspect*/) noexcept
+	// 値を, 指定した部位の点に格納する.
+	bool ShapePath::set_pos_loc(
+		const D2D1_POINT_2F val,	// 値
+		const uint32_t loc,	// 部位
+		const float snap_point,	// 
+		const bool /*keep_aspect*/
+	) noexcept
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_pos.size();	// 差分の数
-		if (anc >= ANC_TYPE::ANC_P0 && anc <= ANC_TYPE::ANC_P0 + d_cnt) {
+		if (loc >= LOC_TYPE::LOC_P0 && loc <= LOC_TYPE::LOC_P0 + d_cnt) {
 			D2D1_POINT_2F p[N_GON_MAX];	// 頂点の位置
-			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;	// 変更する頂点
+			const size_t l_cnt = loc - LOC_TYPE::LOC_P0;	// 変更する点の添え字
 			// 変更する頂点までの, 各頂点の位置を得る.
 			p[0] = m_start;
-			for (size_t i = 0; i < a_cnt; i++) {
+			for (size_t i = 0; i < l_cnt; i++) {
 				pt_add(p[i], m_pos[i], p[i + 1]);
 			}
 			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F d;
-			pt_sub(val, p[a_cnt], d);
+			pt_sub(val, p[l_cnt], d);
 			pt_round(d, PT_ROUND, d);
 			// 差分の長さがゼロより大きいか判定する.
 			if (pt_abs2(d) >= FLT_MIN) {
 				// 変更する頂点が最初の頂点か判定する.
-				if (a_cnt == 0) {
+				if (l_cnt == 0) {
 					// 最初の頂点の位置に変更分を加える.
 					pt_add(m_start, d, m_start);
 				}
 				else {
 					// 頂点の直前の差分に変更分を加える.
-					pt_add(m_pos[a_cnt - 1], d, m_pos[a_cnt - 1]);
+					pt_add(m_pos[l_cnt - 1], d, m_pos[l_cnt - 1]);
 				}
 				// 変更するのが最後の頂点以外か判定する.
-				if (a_cnt < d_cnt) {
+				if (l_cnt < d_cnt) {
 					// 次の頂点が動かないように,
 					// 変更する頂点の次の頂点への差分から変更分を引く.
-					pt_sub(m_pos[a_cnt], d, m_pos[a_cnt]);
+					pt_sub(m_pos[l_cnt], d, m_pos[l_cnt]);
 				}
 				if (!flag) {
 					flag = true;
@@ -88,30 +90,30 @@ namespace winrt::GraphPaper::implementation
 			// 限界距離がゼロでないか判定する.
 			if (snap_point >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
-				for (size_t i = a_cnt; i < d_cnt; i++) {
+				for (size_t i = l_cnt; i < d_cnt; i++) {
 					pt_add(p[i], m_pos[i], p[i + 1]);
 				}
 				const double dd = static_cast<double>(snap_point) * static_cast<double>(snap_point);
 				for (size_t i = 0; i < d_cnt + 1; i++) {
 					// 頂点が, 変更する頂点か判定する.
-					if (i == a_cnt) {
+					if (i == l_cnt) {
 						continue;
 					}
 					// 頂点と変更する頂点との距離が限界距離以上か判定する.
-					pt_sub(p[i], p[a_cnt], d);
+					pt_sub(p[i], p[l_cnt], d);
 					if (pt_abs2(d) >= dd) {
 						continue;
 					}
 					// 変更するのが最初の頂点か判定する.
-					if (a_cnt == 0) {
+					if (l_cnt == 0) {
 						pt_add(m_start, d, m_start);
 					}
 					else {
-						pt_add(m_pos[a_cnt - 1], d, m_pos[a_cnt - 1]);
+						pt_add(m_pos[l_cnt - 1], d, m_pos[l_cnt - 1]);
 					}
 					// 変更するのが最後の頂点以外か判定する.
-					if (a_cnt < d_cnt) {
-						pt_sub(m_pos[a_cnt], d, m_pos[a_cnt]);
+					if (l_cnt < d_cnt) {
+						pt_sub(m_pos[l_cnt], d, m_pos[l_cnt]);
 					}
 					if (!flag) {
 						flag = true;
@@ -192,20 +194,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 
-	// 指定された部位の点を得る.
-	// anc	図形の部位
-	// val	得られた点
-	void ShapePath::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
+	// 指定した部位の点を得る.
+	void ShapePath::get_pos_loc(
+		const uint32_t loc,	// 部位
+		D2D1_POINT_2F& val	// 得られた値
+	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「始点」ならば, 始点を得る.
-		if (anc == ANC_TYPE::ANC_PAGE || anc == ANC_TYPE::ANC_P0) {
+		if (loc == LOC_TYPE::LOC_PAGE || loc == LOC_TYPE::LOC_P0) {
 			val = m_start;
 		}
-		else if (anc > ANC_TYPE::ANC_P0) {
-			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;
-			if (a_cnt < m_pos.size() + 1) {
+		else if (loc > LOC_TYPE::LOC_P0) {
+			const size_t  l_cnt = loc - LOC_TYPE::LOC_P0;
+			if (l_cnt < m_pos.size() + 1) {
 				val = m_start;
-				for (size_t i = 0; i < a_cnt; i++) {
+				for (size_t i = 0; i < l_cnt; i++) {
 					pt_add(val, m_pos[i], val);
 				}
 			}

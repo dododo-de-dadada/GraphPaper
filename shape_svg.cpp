@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 		);
 
 		const auto len1 = wcslen(buf);
-		if (arrow == ARROW_STYLE::FILLED) {
+		if (arrow == ARROW_STYLE::ARROW_FILLED) {
 			export_svg_color(buf + len1, len - len1, color, L"fill");
 		}
 		else {
@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
 			export_svg_arrow(
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barb[2];
 			D2D1_POINT_2F tip;
 			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barb, tip)) {
@@ -378,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 
 		dt_writer.WriteString(L"/>\n");
 
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
 			if (ShapePoly::poly_get_pos_arrow(d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
@@ -834,7 +834,7 @@ namespace winrt::GraphPaper::implementation
 			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
-			if (m_arrow_style != ARROW_STYLE::NONE) {
+			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
 				arc_get_pos_arrow(
 					m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, //m_sweep_dir,

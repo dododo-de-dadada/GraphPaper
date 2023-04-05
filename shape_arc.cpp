@@ -475,12 +475,13 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	void ShapeArc::get_pos_anc(
-		const uint32_t anc,	// 格納する図形の部位
-		D2D1_POINT_2F& val	// 格納する値
+	// 指定した部位の点を得る.
+	void ShapeArc::get_pos_loc(
+		const uint32_t loc,	// 部位
+		D2D1_POINT_2F& val	// 得られた値
 	) const noexcept
 	{
-		if (anc == ANC_TYPE::ANC_P0) {
+		if (loc == LOC_TYPE::LOC_P0) {
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				val = m_start;
 			}
@@ -488,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 				pt_add(m_start, m_pos[0], val);
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_P0 + 1) {
+		else if (loc == LOC_TYPE::LOC_P0 + 1) {
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				pt_add(m_start, m_pos[0], val);
 			}
@@ -496,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 				val = m_start;
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_A_CENTER) {
+		else if (loc == LOC_TYPE::LOC_A_CENTER) {
 			const double r = M_PI * m_angle_rot / 180.0;
 			D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x,
@@ -504,7 +505,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			arc_center(m_start, end, m_radius, cos(r), sin(r), val);
 		}
-		else if (anc == ANC_TYPE::ANC_A_START) {
+		else if (loc == LOC_TYPE::LOC_A_START) {
 			constexpr double R[]{ 0.0, 90.0, 180.0, 270.0 };
 			const D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
@@ -535,7 +536,7 @@ namespace winrt::GraphPaper::implementation
 				//}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_A_END) {
+		else if (loc == LOC_TYPE::LOC_A_END) {
 			constexpr double R[]{ 0.0, 90.0, 180.0, 270.0 };
 			const D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
@@ -746,10 +747,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を, 指定した部位の点に格納する.
-	// snap_point	他の点との間隔 (この値より離れた点は無視する)
-	bool ShapeArc::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept
+	bool ShapeArc::set_pos_loc(
+		const D2D1_POINT_2F val,	// 値
+		const uint32_t loc,	// 部位
+		const float snap_point,	// 点と点をくっつける間隔
+		const bool keep_aspect	// 画像の縦横比の維持/可変
+	) noexcept
 	{
-		if (anc == ANC_TYPE::ANC_A_START) {
+		if (loc == LOC_TYPE::LOC_A_START) {
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
@@ -796,7 +801,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_A_END) {
+		else if (loc == LOC_TYPE::LOC_A_END) {
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
@@ -843,7 +848,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_A_CENTER) {
+		else if (loc == LOC_TYPE::LOC_A_CENTER) {
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
@@ -863,7 +868,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			if (ShapePath::set_pos_anc(val, anc, snap_point, keep_aspect)) {
+			if (ShapePath::set_pos_loc(val, loc, snap_point, keep_aspect)) {
 				const double rot = M_PI * m_angle_rot / 180.0;
 				const double c = cos(rot);
 				const double s = sin(rot);
@@ -891,26 +896,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
+	// 戻り値	点を含む部位
 	uint32_t ShapeArc::hit_test(
-		const D2D1_POINT_2F t	// 判定する点
+		const D2D1_POINT_2F t	// 判定される点
 	) const noexcept
 	{
 		D2D1_POINT_2F p[5];
 		get_verts(p);
-		if (anc_hit_test(t, p[AXIS2], m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 1;
+		if (loc_hit_test(t, p[AXIS2], m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 1;
 		}
-		else if (anc_hit_test(t, p[AXIS1], m_anc_width)) {
-			return ANC_TYPE::ANC_P0;
+		else if (loc_hit_test(t, p[AXIS1], m_loc_width)) {
+			return LOC_TYPE::LOC_P0;
 		}
-		else if (anc_hit_test(t, p[END], m_anc_width)) {
-			return ANC_TYPE::ANC_A_END;
+		else if (loc_hit_test(t, p[END], m_loc_width)) {
+			return LOC_TYPE::LOC_A_END;
 		}
-		else if (anc_hit_test(t, p[START], m_anc_width)) {
-			return ANC_TYPE::ANC_A_START;
+		else if (loc_hit_test(t, p[START], m_loc_width)) {
+			return LOC_TYPE::LOC_A_START;
 		}
-		else if (anc_hit_test(t, p[CENTER], m_anc_width)) {
-			return ANC_TYPE::ANC_FILL;
+		else if (loc_hit_test(t, p[CENTER], m_loc_width)) {
+			return LOC_TYPE::LOC_FILL;
 		}
 		// 位置 t が, 扇形の内側にあるか判定する.
 		// 円弧の端点を s, e とする.
@@ -933,22 +939,22 @@ namespace winrt::GraphPaper::implementation
 			// 線枠が可視で,
 			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 				// 判定される点が, 内側と外側のだ円の中にあるなら,
-				const double ew = max(m_stroke_width, m_anc_width) * 0.5;
+				const double ew = max(m_stroke_width, m_loc_width) * 0.5;
 				if (!pt_in_ellipse(tx, ty, rw - ew, rh - ew, rot)) {
 					if (pt_in_ellipse(tx, ty, rw + ew, rh + ew, rot)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				// 判定される点が, 内側のだ円の中にあるなら
 				else if (is_opaque(m_fill_color)) {
-					return ANC_TYPE::ANC_FILL;
+					return LOC_TYPE::LOC_FILL;
 				}
 			}
 			// 塗りつぶし色が不透明で,
 			else if (is_opaque(m_fill_color)) {
 				// 判定される点が, だ円の内にあるなら,
 				if (pt_in_ellipse(tx, ty, rw, rh, rot)) {
-					return ANC_TYPE::ANC_FILL;
+					return LOC_TYPE::LOC_FILL;
 				}
 			}
 		}
@@ -960,7 +966,7 @@ namespace winrt::GraphPaper::implementation
 			const double ew = m_stroke_width * 0.5;	// 辺の半分の幅.
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				if (pt_in_circle(tx - sx, ty - sy, ew)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else {
@@ -986,7 +992,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 + ox - oy), static_cast<FLOAT>(y0 + ox + oy) }
 					};
 					if (pt_in_poly(tx, ty, 4, quad)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
@@ -997,7 +1003,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 					};
 					if (pt_in_poly(tx, ty, 4, quad)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
@@ -1007,13 +1013,13 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
 					};
 					if (pt_in_poly(tx, ty, 3, tri)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 			}
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				if (pt_in_circle(tx - ex, ty - ey, ew)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else {
@@ -1040,7 +1046,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 					};
 					if (pt_in_poly(tx, ty, 4, quad)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
@@ -1051,7 +1057,7 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 + ex - oy), static_cast<FLOAT>(y0 + ox + oy) }
 					};
 					if (pt_in_poly(tx, ty, 4, quad)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
@@ -1061,12 +1067,12 @@ namespace winrt::GraphPaper::implementation
 						{ static_cast<FLOAT>(x0 - oy), static_cast<FLOAT>(y0 + ox) }
 					};
 					if (pt_in_poly(tx, ty, 3, tri)) {
-						return ANC_TYPE::ANC_STROKE;
+						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	// 円弧をベジェ曲線で近似する.
@@ -1180,7 +1186,7 @@ namespace winrt::GraphPaper::implementation
 				);
 				sink = nullptr;
 			}
-			if (m_arrow_style != ARROW_STYLE::NONE) {
+			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				if (m_d2d_arrow_geom == nullptr) {
 					// だ円の弧長を求めるのはしんどいので, ベジェで近似
 					D2D1_POINT_2F arrow[3];
@@ -1195,10 +1201,10 @@ namespace winrt::GraphPaper::implementation
 						m_d2d_arrow_geom->Open(sink.put())
 					);
 					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					const auto f_begin = (a_style == ARROW_STYLE::FILLED
+					const auto f_begin = (a_style == ARROW_STYLE::ARROW_FILLED
 						? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 						: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-					const auto f_end = (a_style == ARROW_STYLE::FILLED
+					const auto f_end = (a_style == ARROW_STYLE::ARROW_FILLED
 						? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
 						: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 					sink->BeginFigure(arrow[0], f_begin);
@@ -1252,20 +1258,20 @@ namespace winrt::GraphPaper::implementation
 			target->DrawGeometry(
 				m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
 			if (m_d2d_arrow_geom != nullptr) {
-				if (m_arrow_style == ARROW_STYLE::FILLED) {
+				if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
 					target->FillGeometry(m_d2d_arrow_geom.get(), brush);
 					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
 						m_d2d_arrow_stroke.get());
 				}
-				if (m_arrow_style == ARROW_STYLE::OPENED) {
+				if (m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
 					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
 						m_d2d_arrow_stroke.get());
 				}
 			}
 		}
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_anc_square_inner) {
+			if (m_stroke_width >= Shape::m_loc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
@@ -1281,11 +1287,11 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, m_aux_style.get());
 			// 図形の部位を描く.
-			anc_draw_rhombus(p[CENTER], target, brush);
-			anc_draw_circle(p[START], target, brush);
-			anc_draw_circle(p[END], target, brush);
-			anc_draw_square(p[AXIS1], target, brush);
-			anc_draw_square(p[AXIS2], target, brush);
+			loc_draw_rhombus(p[CENTER], target, brush);
+			loc_draw_circle(p[START], target, brush);
+			loc_draw_circle(p[END], target, brush);
+			loc_draw_square(p[AXIS1], target, brush);
+			loc_draw_square(p[AXIS2], target, brush);
 		}
 	}
 

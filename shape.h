@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_STROKE_TRANSFORM_TYPE::D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	};
 
-	// アンカーポイント (図形の部位)
+	// 部位
 	// 数の定まっていない多角形の頂点をあらわすため, enum struct でなく enum を用いる.
 	// 
 	//  NW    N    NE
@@ -129,27 +129,27 @@ namespace winrt::GraphPaper::implementation
 	//   @----@----@
 	//  SW    S    SE
 	//
-	enum ANC_TYPE : uint32_t {
-		ANC_PAGE,		// 図形の外部 (矢印カーソル)
-		ANC_FILL,		// 図形の内部 (移動カーソル)
-		ANC_STROKE,	// 線枠 (移動カーソル)
-		ANC_TEXT,		// 文字列 (移動カーソル)
-		ANC_NW,		// 方形の左上の頂点 (北西南東カーソル)
-		ANC_SE,		// 方形の右下の頂点 (北西南東カーソル)
-		ANC_NE,		// 方形の右上の頂点 (北東南西カーソル)
-		ANC_SW,		// 方形の左下の頂点 (北東南西カーソル)
-		ANC_NORTH,		// 方形の上辺の中点 (上下カーソル)
-		ANC_SOUTH,		// 方形の下辺の中点 (上下カーソル)
-		ANC_EAST,		// 方形の左辺の中点 (左右カーソル)
-		ANC_WEST,		// 方形の右辺の中点 (左右カーソル)
-		ANC_R_NW,		// 左上の角丸の中心点 (十字カーソル)
-		ANC_R_NE,		// 右上の角丸の中心点 (十字カーソル)
-		ANC_R_SE,		// 右下の角丸の中心点 (十字カーソル)
-		ANC_R_SW,		// 左下の角丸の中心点 (十字カーソル)
-		ANC_A_CENTER,	// 円弧の中心点
-		ANC_A_START,
-		ANC_A_END,
-		ANC_P0,	// パスの始点 (十字カーソル)
+	enum LOC_TYPE : uint32_t {
+		LOC_PAGE,		// 図形の外部 (矢印カーソル)
+		LOC_FILL,		// 図形の内部 (移動カーソル)
+		LOC_STROKE,	// 線枠 (移動カーソル)
+		LOC_TEXT,		// 文字列 (移動カーソル)
+		LOC_NW,		// 方形の左上の頂点 (北西南東カーソル)
+		LOC_SE,		// 方形の右下の頂点 (北西南東カーソル)
+		LOC_NE,		// 方形の右上の頂点 (北東南西カーソル)
+		LOC_SW,		// 方形の左下の頂点 (北東南西カーソル)
+		LOC_NORTH,		// 方形の上辺の中点 (上下カーソル)
+		LOC_SOUTH,		// 方形の下辺の中点 (上下カーソル)
+		LOC_EAST,		// 方形の左辺の中点 (左右カーソル)
+		LOC_WEST,		// 方形の右辺の中点 (左右カーソル)
+		LOC_R_NW,		// 左上の角丸の中心点 (十字カーソル)
+		LOC_R_NE,		// 右上の角丸の中心点 (十字カーソル)
+		LOC_R_SE,		// 右下の角丸の中心点 (十字カーソル)
+		LOC_R_SW,		// 左下の角丸の中心点 (十字カーソル)
+		LOC_A_CENTER,	// 円弧の中心点
+		LOC_A_START,	// 円弧の始点
+		LOC_A_END,	// 円弧の終点
+		LOC_P0,	// パスの始点 (十字カーソル)
 	};
 
 	// 矢じるしの大きさ
@@ -174,9 +174,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 矢じるしの形式
 	enum struct ARROW_STYLE : uint32_t {
-		NONE,	// なし
-		OPENED,	// 開いた矢じるし
-		FILLED	// 閉じた矢じるし
+		ARROW_NONE,	// 矢じるしなし
+		ARROW_OPENED,	// 開いた矢じるし
+		ARROW_FILLED	// 閉じた矢じるし
 	};
 
 	// 線分の端点
@@ -236,7 +236,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
 	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値 (システムリソースに値が無かった場合)
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{	// 方眼の色の既定値
-		COLOR_ACCENT.r, COLOR_ACCENT.g, COLOR_ACCENT.b, 192.0f / 255.0f };
+		COLOR_ACCENT.r, COLOR_ACCENT.g, COLOR_ACCENT.b, 192.0f / 255.0f
+	};
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
 	constexpr float JOIN_MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
 	constexpr D2D1_SIZE_F TEXT_PAD_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
@@ -256,14 +257,14 @@ namespace winrt::GraphPaper::implementation
 			);
 	};
 
-	// 図形の部位（円形）を表示する.
-	inline void anc_draw_circle(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
-	// 図形の部位（ひし型）を表示する.
-	inline void anc_draw_rhombus(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
-	// 図形の部位 (方形) を表示する.
-	inline void anc_draw_square(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
-	// 点が図形の部位に含まれるか判定する.
-	inline bool anc_hit_test(const D2D1_POINT_2F test, const D2D1_POINT_2F a, const double a_len) noexcept;
+	// 部位（円形）を表示する.
+	inline void loc_draw_circle(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
+	// 部位（ひし型）を表示する.
+	inline void loc_draw_rhombus(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
+	// 部位 (方形) を表示する.
+	inline void loc_draw_square(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept;
+	// 部位が点を含むか判定する.
+	inline bool loc_hit_test(const D2D1_POINT_2F t, const D2D1_POINT_2F loc, const double len) noexcept;
 	// 実数 (0.0...1.0) の色成分を整数 (0...255) に変換する.
 	inline uint32_t conv_color_comp(const double c) noexcept;
 	// 単精度浮動小数が同じか判定する.
@@ -318,8 +319,8 @@ namespace winrt::GraphPaper::implementation
 	// shape_rect.cpp
 	//------------------------------
 
-	// 方形の頂点と辺上の中間点のうち, どの部位に含まれるかを判定する.
-	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const D2D1_POINT_2F t, const double a_len) noexcept;
+	// 方形の頂点と中間点のうち, どの部位が点を含むか判定する.
+	uint32_t rect_loc_hit_test(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const D2D1_POINT_2F t, const double a_len) noexcept;
 
 	//------------------------------
 	// shape_slist.cpp
@@ -385,19 +386,19 @@ namespace winrt::GraphPaper::implementation
 		static winrt::com_ptr<ID2D1BitmapBrush> m_d2d_bitmap_brush;	// 背景の画像ブラシ (ターゲット依存)
 		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		static float m_aux_width;	// 補助線の太さ
-		static bool m_anc_show;	// 図形の部位を表示する.
-		static float m_anc_width;	// 図形の部位の大きさ
-		static float m_anc_square_inner;	// 図形の部位 (正方形) の内側の辺の半分の長さ
-		static float m_anc_square_outer;	// 図形の部位 (正方形) の外側の辺の半分の長さ
-		static float m_anc_circle_inner;	// 図形の部位 (円形) の内側の半径
-		static float m_anc_circle_outer;	// 図形の部位 (円形) の外側の半径
-		static float m_anc_rhombus_inner;	// 図形の部位 (ひし型) の中心から内側の頂点までの半分の長さ
-		static float m_anc_rhombus_outer;	// 図形の部位 (ひし型) の中心から外側の頂点までの半分の長さ
+		static bool m_loc_show;	// 部位を表示/非表示
+		static float m_loc_width;	// 部位の大きさ
+		static float m_loc_square_inner;	// 図形の部位 (正方形) の内側の辺の半分の長さ
+		static float m_loc_square_outer;	// 図形の部位 (正方形) の外側の辺の半分の長さ
+		static float m_loc_circle_inner;	// 図形の部位 (円形) の内側の半径
+		static float m_loc_circle_outer;	// 図形の部位 (円形) の外側の半径
+		static float m_loc_rhombus_inner;	// 図形の部位 (ひし型) の中心から内側の頂点までの半分の長さ
+		static float m_loc_rhombus_outer;	// 図形の部位 (ひし型) の中心から外側の頂点までの半分の長さ
 
 		// 図形を破棄する.
 		virtual ~Shape(void) noexcept {}	// 派生クラスのデストラクタを呼ぶために仮想化が必要.
-		// ひな型に描画に必要な変数を格納する.
-		void begin_draw(ID2D1RenderTarget* const target, const bool anc_show, IWICFormatConverter* const background, const double scale);
+		// 図形を描画する前に設定する.
+		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale);
 		// 図形を表示する.
 		virtual void draw(void) = 0;
 		// 図形をデータライターに PDF として書き込む.
@@ -460,9 +461,9 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_poly_closed(bool& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept { return false; }
-		// 部位の点を得る.
-		virtual	void get_pos_anc(const uint32_t/*anc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
-		// 開始点を得る.
+		// 指定した部位の点を得る.
+		virtual	void get_pos_loc(const uint32_t/*loc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
+		// 始点を得る.
 		virtual bool get_pos_start(D2D1_POINT_2F&/*val*/) const noexcept { return false; }
 		// ページの色を得る.
 		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
@@ -491,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F/*t*/) const noexcept { return ANC_TYPE::ANC_PAGE; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*t*/) const noexcept { return LOC_TYPE::LOC_PAGE; }
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -555,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 		// 多角形の終端を得る.
 		virtual bool set_poly_closed(const bool/*val*/) noexcept { return false; }
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F/*val*/, const uint32_t/*anc*/, const float/*snap_point*/, const bool/*keep_aspect*/) noexcept { return false; }
+		virtual bool set_pos_loc(const D2D1_POINT_2F/*val*/, const uint32_t/*anc*/, const float/*snap_point*/, const bool/*keep_aspect*/) noexcept { return false; }
 		// 値を始点に格納する. 他の部位の点も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F/*val*/) noexcept { return false; }
 		// 値をページの色に格納する.
@@ -687,8 +688,8 @@ namespace winrt::GraphPaper::implementation
 		bool get_pixcel(const D2D1_POINT_2F p, D2D1_COLOR_F& val) const noexcept;
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F /*p*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept final override;
-		// 部位の点を得る.
-		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F&/*val*/) const noexcept final override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t /*loc*/, D2D1_POINT_2F&/*val*/) const noexcept final override;
 		// 開始点を得る.
 		virtual bool get_pos_start(D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 頂点を得る.
@@ -704,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を画像の不透明度に格納する.
 		virtual bool set_image_opacity(const float val) noexcept final override;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept final override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept final override;
 		// 図形を作成する.
@@ -737,7 +738,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 矢じるし
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
-		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
+		ARROW_STYLE m_arrow_style = ARROW_STYLE::ARROW_NONE;	// 矢じるしの形式
 
 		// 塗りつぶし
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶし色
@@ -1103,8 +1104,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// データリーダーから図形を読み込む.
 		ShapeRect(DataReader const& dt_reader);
-		// 図形の部位を表示する.
-		void draw_anc(void);
+		// 部位を表示する.
+		void draw_loc(void);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 図形を囲む矩形を得る.
@@ -1121,8 +1122,8 @@ namespace winrt::GraphPaper::implementation
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
-		// 部位の点を得る.
-		virtual void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を囲む矩形の左上点を得る.
 		void get_bound_lt(D2D1_POINT_2F& val) const noexcept final override;
 		// 開始点を得る
@@ -1130,7 +1131,7 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F pos) noexcept;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 始点に値を格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept;
 		// 図形をデータライターに書き込む.
@@ -1232,12 +1233,12 @@ namespace winrt::GraphPaper::implementation
 		virtual void draw(void) final override;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept final override;
-		// 部位の位置を得る.
-		virtual void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept final override;
 		// 図形が点を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept final override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept final override;
 		// 図形を作成する.
 		ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
@@ -1254,7 +1255,7 @@ namespace winrt::GraphPaper::implementation
 	// 矢じるし
 	//------------------------------
 	struct ShapeArrow : ShapeStroke {
-		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
+		ARROW_STYLE m_arrow_style = ARROW_STYLE::ARROW_NONE;	// 矢じるしの形式
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
@@ -1351,10 +1352,10 @@ namespace winrt::GraphPaper::implementation
 				dt_reader.ReadSingle(),
 				dt_reader.ReadSingle()
 			};
-			if (m_arrow_style != ARROW_STYLE::NONE &&
-				m_arrow_style != ARROW_STYLE::OPENED &&
-				m_arrow_style != ARROW_STYLE::FILLED) {
-				m_arrow_style = ARROW_STYLE::NONE;
+			if (m_arrow_style != ARROW_STYLE::ARROW_NONE &&
+				m_arrow_style != ARROW_STYLE::ARROW_OPENED &&
+				m_arrow_style != ARROW_STYLE::ARROW_FILLED) {
+				m_arrow_style = ARROW_STYLE::ARROW_NONE;
 			}
 			if (m_arrow_size.m_width < 0.0f ||
 				m_arrow_size.m_length < 0.0f ||
@@ -1394,8 +1395,8 @@ namespace winrt::GraphPaper::implementation
 		virtual void draw(void) override;
 		// 図形を囲む矩形を得る.
 		virtual void get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept override;
-		// 部位の点を得る.
-		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t /*loc*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を囲む矩形の左上点を得る.
 		virtual void get_bound_lt(D2D1_POINT_2F& val) const noexcept override;
 		// 開始点を得る.
@@ -1409,7 +1410,7 @@ namespace winrt::GraphPaper::implementation
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する.
 		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
 		// 差分だけ移動する.
@@ -1443,22 +1444,22 @@ namespace winrt::GraphPaper::implementation
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
 		// 図形を囲む矩形を得る.
 		void get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept final override;
 		// 図形を囲む矩形の左上点を得る.
 		void get_bound_lt(D2D1_POINT_2F& val) const noexcept final override;
-		// 部位の位置を得る.
-		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t /*loc*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
 		ShapePath(const Shape* page, const bool e_closed) :
 			ShapeArrow::ShapeArrow(page)
 		{
 			page->get_fill_color(m_fill_color);
 			if (e_closed) {
-				set_arrow_style(ARROW_STYLE::NONE);
+				set_arrow_style(ARROW_STYLE::ARROW_NONE);
 			}
 		}
 
@@ -1557,7 +1558,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(void) final override;
 		// 図形が点を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
+		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 矩形に含まれるか判定する.
 		bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
 		// 図形を作成する.
@@ -1620,9 +1621,10 @@ namespace winrt::GraphPaper::implementation
 		// 円弧
 		//------------------------------
 
-		virtual void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
+		// 指定した部位の点を得る.
+		virtual void get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 指定した部位の点に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool keep_aspect) noexcept final override;
+		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 値を円弧の始点の角度に格納する.
@@ -1796,15 +1798,15 @@ namespace winrt::GraphPaper::implementation
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
 
-	// 図形の部位を円形で表示する.
-	// 円形は, 図形の補助的な変形に関わるアンカーを意味する.
-	// p	部位の位置
+	// 部位 (円形) を表示する.
+	// 円形は, 図形の補助的な変形に関わる部位を意味する.
+	// p	部位の点
 	// target	描画ターゲット
 	// brush	色ブラシ
-	inline void anc_draw_circle(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept
+	inline void loc_draw_circle(const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush) noexcept
 	{
-		const auto c_inner = Shape::m_anc_circle_inner;	// 内側の半径
-		const auto c_outer = Shape::m_anc_circle_outer;	// 外側の半径
+		const auto c_inner = Shape::m_loc_circle_inner;	// 内側の半径
+		const auto c_outer = Shape::m_loc_circle_outer;	// 外側の半径
 		const D2D1_ELLIPSE e_outer{	// 外側の円
 			p, static_cast<FLOAT>(c_outer), static_cast<FLOAT>(c_outer)
 		};
@@ -1817,20 +1819,20 @@ namespace winrt::GraphPaper::implementation
 		target->FillEllipse(e_inner, brush);
 	}
 
-	// 図形の部位をひし型で表示する.
+	// 部位 (ひし形) を表示する.
 	// ひし形は, 図形の移動は行なうが, 変形には関わらない補助的な部位を意味する.
-	// p	部位の位置
+	// p	部位の点
 	// target	描画ターゲット
 	// brush	色ブラシ
-	inline void anc_draw_rhombus(
+	inline void loc_draw_rhombus(
 		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 		noexcept
 	{
 		// パスジオメトリを使わず, 斜めの太い線分で代用する.
-		const double w_outer = 2.0 * Shape::m_anc_square_outer;
-		const double w_inner = 2.0 * Shape::m_anc_square_inner;
-		const double d_outer = Shape::m_anc_rhombus_outer;
-		const double d_inner = Shape::m_anc_rhombus_inner;
+		const double w_outer = 2.0 * Shape::m_loc_square_outer;
+		const double w_inner = 2.0 * Shape::m_loc_square_inner;
+		const double d_outer = Shape::m_loc_rhombus_outer;
+		const double d_inner = Shape::m_loc_rhombus_inner;
 		const D2D1_POINT_2F q_inner{
 			static_cast<FLOAT>(p.x - d_inner), static_cast<FLOAT>(p.y - d_inner)
 		};
@@ -1849,17 +1851,19 @@ namespace winrt::GraphPaper::implementation
 		target->DrawLine(q_inner, r_inner, brush, static_cast<FLOAT>(w_inner));
 	}
 
-	// 図形の部位を正方形で表示する.
-	// 正方形は, 図形の変形に関わる, いわゆるアンカーを意味する.
-	// p	部位の位置
+	// 部位 (正方形) を表示する.
+	// 正方形は, 図形の変形に関わる部位を意味する.
+	// p	部位の点
 	// target	描画ターゲット
 	// brush	色ブラシ
-	inline void anc_draw_square(
-		const D2D1_POINT_2F p, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
-		noexcept
+	inline void loc_draw_square(
+		const D2D1_POINT_2F p,
+		ID2D1RenderTarget* const target,
+		ID2D1SolidColorBrush* const brush
+	) noexcept
 	{
-		const double a_inner = Shape::m_anc_square_inner;
-		const double a_outer = Shape::m_anc_square_outer;
+		const double a_inner = Shape::m_loc_square_inner;
+		const double a_outer = Shape::m_loc_square_outer;
 		const D2D1_RECT_F s_inner{
 			static_cast<FLOAT>(p.x - a_inner), static_cast<FLOAT>(p.y - a_inner),
 			static_cast<FLOAT>(p.x + a_inner), static_cast<FLOAT>(p.y + a_inner)
@@ -1874,15 +1878,15 @@ namespace winrt::GraphPaper::implementation
 		target->FillRectangle(s_inner, brush);
 	}
 
-	// 図形の部位が点を含むか判定する.
-	// a	図形の部位の位置
-	// a_len	図形の部位の大きさ
-	inline bool anc_hit_test(
-		const D2D1_POINT_2F test, const D2D1_POINT_2F a, const double a_len) noexcept
+	// 部位が点を含むか判定する.
+	// t	判定される点
+	// loc	部位の点
+	// len	部位の大きさ
+	inline bool loc_hit_test(const D2D1_POINT_2F t, const D2D1_POINT_2F loc, const double len) noexcept
 	{
-		const double dx = static_cast<double>(test.x) - static_cast<double>(a.x);
-		const double dy = static_cast<double>(test.y) - static_cast<double>(a.y);
-		return -a_len * 0.5 <= dx && dx <= a_len * 0.5 && -a_len * 0.5 <= dy && dy <= a_len * 0.5;
+		const double x = static_cast<double>(t.x) - static_cast<double>(loc.x);
+		const double y = static_cast<double>(t.y) - static_cast<double>(loc.y);
+		return -len * 0.5 <= x && x <= len * 0.5 && -len * 0.5 <= y && y <= len * 0.5;
 	}
 
 	// 実数 (0.0...1.0) の色成分を整数 (0...255) に変換する.

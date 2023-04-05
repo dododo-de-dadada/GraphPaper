@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
-			m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
+			m_event_loc_pressed = LOC_TYPE::LOC_PAGE;
 		}
 		else if (sender == rmfi_drawing_rect()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);

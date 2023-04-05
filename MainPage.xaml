@@ -931,11 +931,22 @@
                         x:Name="rmfi_background_white" x:Uid="rmfi_background_white"
                         IsChecked="True" Click="background_pattern_click"
                         Text="Background White" GroupName="gn_background_color">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon
+								Data="{StaticResource data_white}" Height="16" Width="16"
+								HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                     <muxc:RadioMenuFlyoutItem
                         x:Name="rmfi_background_black" x:Uid="rmfi_background_black"
                         IsChecked="False" Click="background_pattern_click"
                         Text="Background Black" GroupName="gn_background_color">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon
+								Data="{StaticResource data_black}" Height="16" Width="16"
+								HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem

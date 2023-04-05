@@ -22,9 +22,9 @@ namespace winrt::GraphPaper::implementation
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bezi_get_convex(const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
 
-	// 位置を曲線の端点が含むか判定する.
+	// 曲線の端が点を含むか判定する.
 	template<D2D1_CAP_STYLE S>
-	static bool bezi_hit_test_cap(const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3], const double e_width);
+	static bool bezi_hit_test_cap(const D2D1_POINT_2F& t, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3], const double e_width);
 
 	// 点が凸包に含まれるか判定する.
 	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
@@ -100,10 +100,10 @@ namespace winrt::GraphPaper::implementation
 
 		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, barb)) {
 			// ジオメトリシンクに追加する.
-			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::FILLED ?
+			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::ARROW_FILLED ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-			const D2D1_FIGURE_END f_end = a_style == ARROW_STYLE::FILLED ?
+			const D2D1_FIGURE_END f_end = a_style == ARROW_STYLE::ARROW_FILLED ?
 				D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 				D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN;
 			winrt::check_hresult(
@@ -169,16 +169,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 位置を曲線の端が含むか判定する.
-	// test	判定される位置
-	// c[4]	凸包 (四辺形) の頂点の配列
-	// s[4]	凸包の辺のベクトル
-	// ew	凸包の辺の半分の太さ
+	// 曲線の端が点を含むか判定する.
 	// 戻り値	含むなら true
 	//------------------------------
 	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(
-		const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3],
-		const double ew)
+		const D2D1_POINT_2F& t,	// 判定される点	
+		const D2D1_POINT_2F c[4],	// 凸包 (四辺形) の頂点の配列
+		const D2D1_POINT_2F s[3],	// 凸包の辺のベクトル
+		const double ew	// 凸包の辺の半分の太さ
+	)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
@@ -193,13 +192,13 @@ namespace winrt::GraphPaper::implementation
 				if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 					pt_add(q[1], s_dir, q[2]);
 					pt_add(q[0], s_dir, q[3]);
-					if (pt_in_poly(test, 4, q)) {
+					if (pt_in_poly(t, 4, q)) {
 						return true;
 					}
 				}
 				else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 					pt_add(q[i], s_dir, q[2]);
-					if (pt_in_poly(test, 3, q)) {
+					if (pt_in_poly(t, 3, q)) {
 						return true;
 					}
 				}
@@ -213,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 				pt_add(c[0], ew, -ew, q[1]);
 				pt_add(c[0], ew, q[2]);
 				pt_add(c[0], -ew, ew, q[3]);
-				if (pt_in_poly(test, 4, q)) {
+				if (pt_in_poly(t, 4, q)) {
 					return true;
 				}
 			}
@@ -222,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 				pt_add(c[0], -ew, 0.0, q[1]);
 				pt_add(c[0], 0.0, ew, q[2]);
 				pt_add(c[0], ew, 0.0, q[3]);
-				if (pt_in_poly(test, 4, q)) {
+				if (pt_in_poly(t, 4, q)) {
 					return true;
 				}
 			}
@@ -240,13 +239,13 @@ namespace winrt::GraphPaper::implementation
 					if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 						pt_add(q[1], s_dir, q[2]);
 						pt_add(q[0], s_dir, q[3]);
-						if (pt_in_poly(test, 4, q)) {
+						if (pt_in_poly(t, 4, q)) {
 							return true;
 						}
 					}
 					else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 						pt_add(c[j], s_dir, q[2]);
-						if (pt_in_poly(test, 3, q)) {
+						if (pt_in_poly(t, 3, q)) {
 							return true;
 						}
 					}
@@ -319,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 			create_stroke_style(factory);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
-			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_stroke == nullptr) {
+			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
 			create_arrow_stroke();
 		}
 		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) || is_opaque(m_fill_color)) &&
@@ -346,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 			sink = nullptr;
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) {
+			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			if (!b_flag) {
 				pt_add(m_start, m_pos[0], b_seg.point1);
 				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
@@ -365,15 +364,15 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			brush->SetColor(m_stroke_color);
 			target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
-			if (m_arrow_style == ARROW_STYLE::FILLED) {
+			if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
 				target->FillGeometry(m_d2d_arrow_geom.get(), brush, nullptr);
 				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
-			else if (m_arrow_style == ARROW_STYLE::OPENED) {
+			else if (m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
 				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
 		}
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			if (!b_flag) {
 				pt_add(m_start, m_pos[0], b_seg.point1);
 				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
@@ -381,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 				b_flag = true;
 			}
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_anc_square_inner) {
+			if (m_stroke_width >= Shape::m_loc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
@@ -401,61 +400,60 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(b_seg.point2, b_seg.point3, brush, m_aux_width, m_aux_style.get());
 			// 図形の部位を描く.
-			anc_draw_circle(b_seg.point2, target, brush);
-			anc_draw_circle(b_seg.point1, target, brush);
-			anc_draw_square(m_start, target, brush);
-			anc_draw_square(b_seg.point3, target, brush);
+			loc_draw_circle(b_seg.point2, target, brush);
+			loc_draw_circle(b_seg.point1, target, brush);
+			loc_draw_square(m_start, target, brush);
+			loc_draw_square(b_seg.point3, target, brush);
 		}
 	}
 
-	//------------------------------
 	// 図形が点を含むか判定する.
-	// test	判定される点
-	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	//------------------------------
-	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F test) const noexcept
+	// 戻り値	点を含む部位
+	uint32_t ShapeBezier::hit_test(
+		const D2D1_POINT_2F t	// 判定される点
+	) const noexcept
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
-		const auto ew = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
-		pt_sub(test, m_start, tp);
+		pt_sub(t, m_start, tp);
 		// 判定される点によって精度が落ちないよう, 曲線の始点が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F cp[4];
 		cp[0].x = cp[0].y = 0.0;
 		pt_add(cp[0], m_pos[0], cp[1]);
 		pt_add(cp[1], m_pos[1], cp[2]);
 		pt_add(cp[2], m_pos[2], cp[3]);
-		if (anc_hit_test(tp, cp[3], m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 3;
+		if (loc_hit_test(tp, cp[3], m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 3;
 		}
-		if (anc_hit_test(tp, cp[2], m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 2;
+		if (loc_hit_test(tp, cp[2], m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 2;
 		}
-		if (anc_hit_test(tp, cp[1], m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 1;
+		if (loc_hit_test(tp, cp[1], m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 1;
 		}
-		if (anc_hit_test(tp, cp[0], m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 0;
+		if (loc_hit_test(tp, cp[0], m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 			if (pt_in_circle(tp.x, tp.y, ew)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 			if (pt_in_circle(tp, cp[3], ew)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(
 				tp, cp, m_pos.data(), ew)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(
 				tp, cp, m_pos.data(), ew)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -543,14 +541,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -566,10 +564,10 @@ namespace winrt::GraphPaper::implementation
 				// 分割された凸包のあいだにできた三角形は, 塗りつぶしの領域.
 				// この領域に点が含まれるか, 分割するたびに判定する.
 				// ただし 1 度でも含まれるなら, それ以上の判定は必要ない.
-				const POINT_2D t[3]{ 
+				const POINT_2D tri[3]{ 
 					c[0], c[9], c[3] 
 				};
-				f_test = bezi_in_convex(tp.x, tp.y, 3, t);
+				f_test = bezi_in_convex(tp.x, tp.y, 3, tri);
 			}
 			// 一方の組をプッシュする.
 			// 始点 (0) はスタックに残っているので, 
@@ -586,9 +584,9 @@ namespace winrt::GraphPaper::implementation
 			s_cnt += 6;
 		}
 		if (f_opaque && f_test) {
-			return ANC_TYPE::ANC_FILL;
+			return LOC_TYPE::LOC_FILL;
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	//------------------------------

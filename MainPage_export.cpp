@@ -221,24 +221,20 @@ namespace winrt::GraphPaper::implementation
 		return dt_writer.WriteString(buf);
 	}
 
-	//------------------------------
 	// フォントフェイスの情報を得る.
-	// face	フォントフェイス
-	// t	文字列
-	// t_len	文字列の長さ
-	// family	フォントファミリー
-	// f_met	書体の計量
-	// f_type	字面の形式
-	// p_name	書体のポストスクリプト名
-	// cid	CID の配列
-	// g_met	字形の計量
-	// angle	イタリックの最大角度 (ふつうがマイナス)
-	//------------------------------
 	static void export_pdf_font_info(
-		IDWriteFontFace3* face, const wchar_t *t, const size_t t_len, const wchar_t *family,
-		DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type,
-		winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, 
-		std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle)
+		IDWriteFontFace3* face,	// フォントフェイス
+		const wchar_t *t,	// 文字列
+		const size_t t_len,	// 文字列の長さ
+		const wchar_t *family,	// フォントファミリー
+		DWRITE_FONT_METRICS1& f_met,	// 書体の計量
+		DWRITE_FONT_FACE_TYPE& f_type,	// 字面の形式
+		winrt::hstring& p_name,	// 書体のポストスクリプト名
+		std::vector<uint16_t>& cid,	// CID の配列
+		std::vector<uint16_t>& gid,	// 字形の計量
+		std::vector<DWRITE_GLYPH_METRICS>& g_met,	// 字形の計量
+		FLOAT& angle	// イタリックの最大角度 (マイナスがいわゆる斜体)
+	)
 	{
 		// 書体の計量を得る.
 		face->GetMetrics(&f_met);
@@ -332,11 +328,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画像を PDF の XObject として書き出す.
-	static size_t export_pdf_image(const uint8_t* bgra,
-		const size_t o_width,
-		const size_t o_height,
-		const D2D1_RECT_F clip,
-		const int obj_num, DataWriter& dt_writer)
+	static size_t export_pdf_image(
+		const uint8_t* bgra,	// 画像データ
+		const size_t o_width,	// 出力幅
+		const size_t o_height,	// 出力高さ
+		const D2D1_RECT_F clip,	// クリッピング矩形
+		const int obj_num,	// PDF オブジェクト番号
+		DataWriter& dt_writer	// 出力先
+	)
 	{
 		// クリッピングしながら画像データをコピーする.
 		// PDF はアルファ値をサポートしておらず, 逆に WIC ビットマップは 3 バイトピクセルを

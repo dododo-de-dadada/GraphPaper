@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 				grid_color = GRID_COLOR_DEFVAL;
 			}
 			m_main_page.set_arrow_size(ARROW_SIZE_DEFVAL);
-			m_main_page.set_arrow_style(ARROW_STYLE::NONE);
+			m_main_page.set_arrow_style(ARROW_STYLE::ARROW_NONE);
 			m_main_page.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
 			m_main_page.set_fill_color(COLOR_WHITE);
 			m_main_page.set_font_color(COLOR_BLACK);

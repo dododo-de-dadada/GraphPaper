@@ -145,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 	// 形の操作
 	//------------------------------
 	struct UndoDeform : Undo {
-		uint32_t m_anc;	// 操作される部位
+		uint32_t m_loc;	// 操作される部位
 		D2D1_POINT_2F m_start;	// 変形前の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
@@ -154,8 +154,8 @@ namespace winrt::GraphPaper::implementation
 		void exec(void);
 		// データリーダーから操作を読み込む.
 		UndoDeform(DataReader const& dt_reader);
-		// 図形の形を保存する.
-		UndoDeform(Shape* const s, const uint32_t anc);
+		// 指定した部位の点を保存する.
+		UndoDeform(Shape* const s, const uint32_t loc);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};

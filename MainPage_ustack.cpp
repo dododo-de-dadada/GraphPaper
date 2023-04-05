@@ -437,12 +437,13 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
 	}
 
-	// 図形の形をスタックに保存する.
-	// s	保存する図形
-	// anc	図形の部位
-	void MainPage::ustack_push_position(Shape* const s, const uint32_t anc)
+	// 指定した部位の点をスタックに保存する.
+	void MainPage::ustack_push_position(
+		Shape* const s,	// 図形
+		const uint32_t loc	// 部位
+	)
 	{
-		m_ustack_undo.push_back(new UndoDeform(s, anc));
+		m_ustack_undo.push_back(new UndoDeform(s, loc));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.

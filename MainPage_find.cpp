@@ -496,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_T::TEXT_CONTENT>(s, text);
 			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 			if (m_text_fit_frame_to_text) {
-				ustack_push_position(s, ANC_TYPE::ANC_SE);
+				ustack_push_position(s, LOC_TYPE::LOC_SE);
 				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();

@@ -75,10 +75,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_radio_btn_0().Content(box_value(rmfi_arrow_style_opened().Text()));
 		dialog_radio_btn_1().Content(box_value(rmfi_arrow_style_filled().Text()));
 		dialog_radio_btns().Visibility(Visibility::Visible);
-		if (a_style == ARROW_STYLE::OPENED) {
+		if (a_style == ARROW_STYLE::ARROW_OPENED) {
 			dialog_radio_btns().SelectedIndex(0);
 		}
-		else if (a_style == ARROW_STYLE::FILLED) {
+		else if (a_style == ARROW_STYLE::ARROW_FILLED) {
 			dialog_radio_btns().SelectedIndex(1);
 		}
 
@@ -166,12 +166,12 @@ namespace winrt::GraphPaper::implementation
 				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
 					// (IInspectable const&, SelectionChangedEventArgs const&)
 					if (dialog_radio_btns().SelectedIndex() == 0) {
-						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::ARROW_OPENED)) {
 							dialog_draw();
 						}
 					}
 					else if (dialog_radio_btns().SelectedIndex() == 1) {
-						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+						if (m_prop_page.back()->set_arrow_style(ARROW_STYLE::ARROW_FILLED)) {
 							dialog_draw();
 						}
 					}
@@ -222,13 +222,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		ARROW_STYLE a_style = static_cast<ARROW_STYLE>(-1);
 		if (sender == rmfi_arrow_style_none()) {
-			a_style = ARROW_STYLE::NONE;
+			a_style = ARROW_STYLE::ARROW_NONE;
 		}
 		else if (sender == rmfi_arrow_style_opened()) {
-			a_style = ARROW_STYLE::OPENED;
+			a_style = ARROW_STYLE::ARROW_OPENED;
 		}
 		else if (sender == rmfi_arrow_style_filled()) {
-			a_style = ARROW_STYLE::FILLED;
+			a_style = ARROW_STYLE::ARROW_FILLED;
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
 			arrow_style_is_checked(a_style);
@@ -248,14 +248,14 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
-		if (val == ARROW_STYLE::NONE) {
+		if (val == ARROW_STYLE::ARROW_NONE) {
 			rmfi_arrow_style_none().IsChecked(true);
 		}
-		else if (val == ARROW_STYLE::OPENED) {
+		else if (val == ARROW_STYLE::ARROW_OPENED) {
 			rmfi_arrow_style_opened().IsChecked(true);
 			mfi_arrow_size().IsEnabled(true);
 		}
-		else if (val == ARROW_STYLE::FILLED) {
+		else if (val == ARROW_STYLE::ARROW_FILLED) {
 			rmfi_arrow_style_filled().IsChecked(true);
 			mfi_arrow_size().IsEnabled(true);
 		}

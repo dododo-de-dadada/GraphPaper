@@ -43,14 +43,14 @@ namespace winrt::GraphPaper::implementation
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
 				barb[0],
-				style == ARROW_STYLE::FILLED
+				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 				: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
 			);
 			sink->AddLine(tip);
 			sink->AddLine(barb[1]);
 			sink->EndFigure(
-				style == ARROW_STYLE::FILLED
+				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
 				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
 			);
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F end;	// 終点
 		pt_add(m_start, m_pos[0], end);
 		target->DrawLine(m_start, end, brush, s_width, s_style);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			if (m_d2d_arrow_stroke == nullptr) {
 				create_arrow_stroke();
 			}
@@ -117,15 +117,15 @@ namespace winrt::GraphPaper::implementation
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
-				if (m_arrow_style == ARROW_STYLE::FILLED) {
+				if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
 					target->FillGeometry(a_geom, brush);
 				}
 				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_stroke.get());
 			}
 		}
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_anc_square_inner) {
+			if (m_stroke_width >= Shape::m_loc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawLine(m_start, end, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
@@ -134,22 +134,23 @@ namespace winrt::GraphPaper::implementation
 			// 図形の部位を描く.
 			D2D1_POINT_2F mid;	// 中点
 			pt_mul_add(m_pos[0], 0.5, m_start, mid);
-			anc_draw_rhombus(mid, target, brush);
-			anc_draw_square(m_start, target, brush);
-			anc_draw_square(end, target, brush);
+			loc_draw_rhombus(mid, target, brush);
+			loc_draw_square(m_start, target, brush);
+			loc_draw_square(end, target, brush);
 		}
 	}
 
-	// 指定された部位の点を得る.
-	// anc	図形の部位
-	// val	得られた点
-	void ShapeLine::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
+	// 指定した部位の点を得る.
+	void ShapeLine::get_pos_loc(
+		const uint32_t loc,	// 部位
+		D2D1_POINT_2F& val	// 得られた点
+	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「開始点」ならば, 始点を得る.
-		if (anc == ANC_TYPE::ANC_P0) {
+		if (loc == LOC_TYPE::LOC_P0) {
 			val = m_start;
 		}
-		else if (anc == ANC_TYPE::ANC_P0 + 1) {
+		else if (loc == LOC_TYPE::LOC_P0 + 1) {
 			val.x = m_start.x + m_pos[0].x;
 			val.y = m_start.y + m_pos[0].y;
 		}
@@ -209,19 +210,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	// t	判定される点
-	// 戻り値	図形の部位
-	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t) const noexcept
+	// 戻り値	点を含む部位
+	uint32_t ShapeLine::hit_test(
+		const D2D1_POINT_2F t	// 判定される点
+	) const noexcept
 	{
 		D2D1_POINT_2F end;	// 終点
 		pt_add(m_start, m_pos[0], end);
-		if (anc_hit_test(t, end, m_anc_width)) {
-			return ANC_TYPE::ANC_P0 + 1;
+		if (loc_hit_test(t, end, m_loc_width)) {
+			return LOC_TYPE::LOC_P0 + 1;
 		}
-		if (anc_hit_test(t, m_start, m_anc_width)) {
-			return ANC_TYPE::ANC_P0;
+		if (loc_hit_test(t, m_start, m_loc_width)) {
+			return LOC_TYPE::LOC_P0;
 		}
-		const double e_width = 0.5 * max(m_stroke_width, m_anc_width);
+		const double e_width = 0.5 * max(m_stroke_width, m_loc_width);
 		if (equal(m_stroke_cap, CAP_STYLE_SQUARE)) {
 			D2D1_POINT_2F pos{ m_pos[0] };
 			const double abs2 = pt_abs2(pos);
@@ -239,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end, dx - ox, dy - oy, q[2]);
 			pt_add(end, dx + ox, dy + oy, q[3]);
 			if (pt_in_poly(t, 4, q)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
@@ -261,13 +263,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end, dx, dy, h[4]);
 			pt_add(end, ox, oy, h[5]);
 			if (pt_in_poly(t, 6, h)) {
-				return ANC_TYPE::ANC_STROKE;
+				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else {
 			if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 				if (pt_in_circle(t, m_start, e_width) || pt_in_circle(t, end, e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			D2D1_POINT_2F p{ m_pos[0] };
@@ -282,11 +284,11 @@ namespace winrt::GraphPaper::implementation
 				pt_add(end, -ox, -oy, q[2]);
 				pt_add(end, ox, oy, q[3]);
 				if (pt_in_poly(t, 4, q)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	// 矩形に含まれるか判定する.
@@ -326,14 +328,16 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を, 部位の位置に格納する.
-	// val	値
-	// anc	図形の部位
-	// snap_point	他の点との間隔 (この値より離れた点は無視する)
-	bool ShapeLine::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float snap_point, const bool /*keep_aspect*/) noexcept
+	// 値を, 指定した部位の点に格納する.
+	bool ShapeLine::set_pos_loc(
+		const D2D1_POINT_2F val,	// 値
+		const uint32_t loc,	// 部位
+		const float snap_point,
+		const bool /*keep_aspect*/
+	) noexcept
 	{
 		bool flag = false;
-		if (anc == ANC_TYPE::ANC_P0) {
+		if (loc == LOC_TYPE::LOC_P0) {
 			if (!equal(m_start, val)) {
 				const D2D1_POINT_2F end{
 					m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
@@ -344,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 		}
-		else if (anc == ANC_TYPE::ANC_P0 + 1) {
+		else if (loc == LOC_TYPE::LOC_P0 + 1) {
 			const D2D1_POINT_2F end{
 				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
 			};
@@ -356,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			if (snap_point > FLT_MIN && pt_abs2(m_pos[0]) <= snap_point * snap_point) {
-				if (anc == ANC_TYPE::ANC_P0) {
+				if (loc == LOC_TYPE::LOC_P0) {
 					m_start.x = m_start.x + m_pos[0].x;
 					m_start.y = m_start.y + m_pos[0].y;
 				}

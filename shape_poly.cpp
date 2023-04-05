@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < p_cnt; i++) {
 			// 判定される点が, 頂点の部位に含まれるか判定する.
-			if (anc_hit_test(t, q[i], a_len)) {
+			if (loc_hit_test(t, q[i], a_len)) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -342,12 +342,12 @@ namespace winrt::GraphPaper::implementation
 			pt_add(q[i], p[i], q[i + 1]);
 		}
 		// 判定される点が, 終点の部位に含まれるか判定する.
-		if (anc_hit_test(t, q[p_cnt], a_len)) {
+		if (loc_hit_test(t, q[p_cnt], a_len)) {
 			k = p_cnt;
 		}
 		// 頂点が見つかったか判定する.
 		if (k != -1) {
-			return ANC_TYPE::ANC_P0 + static_cast<uint32_t>(k);
+			return LOC_TYPE::LOC_P0 + static_cast<uint32_t>(k);
 		}
 		// 線が不透明か判定する.
 		if (s_opaque) {
@@ -357,9 +357,9 @@ namespace winrt::GraphPaper::implementation
 			if (n_cnt == 0) {
 				// ゼロならば, 判定される点が, 拡張する幅を半径とする円に含まれるか判定する.
 				if (pt_in_circle(t.x, t.y, e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
-				return ANC_TYPE::ANC_PAGE;
+				return LOC_TYPE::LOC_PAGE;
 			}
 			// 辺が閉じているか判定する.
 			if (e_closed) {
@@ -370,19 +370,19 @@ namespace winrt::GraphPaper::implementation
 			else if (equal(s_cap, CAP_STYLE_ROUND)) {
 				if (pt_in_circle(t.x, t.y, e_width) ||
 					pt_in_circle(t, q[p_cnt], e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, CAP_STYLE_SQUARE)) {
 				if (poly_test_cap_square(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, CAP_STYLE_TRIANGLE)) {
 				if (poly_test_cap_triangle(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			D2D1_POINT_2F s[N_GON_MAX][4 + 1];	// 太さ分拡張された辺 (+頂点)
@@ -476,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 調べる位置が, 拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t, 4, s[s_cnt++])) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
@@ -496,32 +496,32 @@ namespace winrt::GraphPaper::implementation
 				s[s_cnt][4] = q[p_cnt];
 				// 判定される点が拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t, 4, s[s_cnt++])) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 				if (poly_test_join_bevel(t, s_cnt, e_closed, s)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 				if (poly_test_join_miter(t, s_cnt, e_closed, e_width, s, s_limit, s_join)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 				if (poly_test_join_round(t, p_cnt + 1, q, e_width)) {
-					return ANC_TYPE::ANC_STROKE;
+					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 		}
 		if (f_opaque) {
 			if (pt_in_poly(t, p_cnt + 1, q)) {
-				return ANC_TYPE::ANC_FILL;
+				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	// 矢じりの返しと先端の位置を得る.
@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 			create_stroke_style(factory);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_stroke == nullptr) {
+			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
 			create_arrow_stroke();
 		}
 		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) ||
@@ -719,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
-			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) {
+			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			if (p_cnt == static_cast<size_t>(-1)) {
 				p_cnt = get_verts(p);
 			}
@@ -730,10 +730,10 @@ namespace winrt::GraphPaper::implementation
 				if (poly_get_pos_arrow(p_cnt, p, m_arrow_size, barb, tip)) {
 					winrt::com_ptr<ID2D1GeometrySink> sink;
 					// 矢じるしのパスジオメトリを作成する.
-					const auto a_begin = (m_arrow_style == ARROW_STYLE::FILLED ?
+					const auto a_begin = (m_arrow_style == ARROW_STYLE::ARROW_FILLED ?
 						D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
 						D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-					const auto a_end = (m_arrow_style == ARROW_STYLE::FILLED ?
+					const auto a_end = (m_arrow_style == ARROW_STYLE::ARROW_FILLED ?
 						D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 						D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 					winrt::check_hresult(
@@ -765,21 +765,21 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(p_geom, brush, m_stroke_width, m_d2d_stroke_style.get());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();	// 矢じるしのジオメトリ
-			if (a_geom != nullptr && m_arrow_style == ARROW_STYLE::OPENED) {
+			if (a_geom != nullptr && m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
 				target->DrawGeometry(a_geom, brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
-			else if (a_geom != nullptr && m_arrow_style == ARROW_STYLE::FILLED) {
+			else if (a_geom != nullptr && m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
 				target->FillGeometry(a_geom, brush, nullptr);
 				target->DrawGeometry(a_geom, brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
 		}
-		if (m_anc_show && is_selected()) {
+		if (m_loc_show && is_selected()) {
 			if (p_cnt == static_cast<size_t>(-1)) {
 				p_cnt = get_verts(p);
 			}
 			if (p_cnt != static_cast<size_t>(-1)) {
 				// 補助線を描く
-				if (m_stroke_width >= Shape::m_anc_square_inner) {
+				if (m_stroke_width >= Shape::m_loc_square_inner) {
 					const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
 					brush->SetColor(COLOR_WHITE);
 					target->DrawGeometry(p_geom, brush, 2.0f * m_aux_width, nullptr);
@@ -788,23 +788,20 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 図形の部位を描く.
 				for (size_t i = 0; i < p_cnt; i++) {
-					anc_draw_square(p[i], target, brush);
+					loc_draw_square(p[i], target, brush);
 				}
 			}
 		}
 	}
 
 	// 図形が点を含むか判定する.
-	// t_pos	判定される点
-	// a_len	アンカーの大きさ
-	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F test) const noexcept
+	// 戻り値	点を含む部位
+	uint32_t ShapePoly::hit_test(
+		const D2D1_POINT_2F t	// 判定される点
+	) const noexcept
 	{
-		D2D1_POINT_2F t;
-		pt_sub(test, m_start, t);
-		return poly_hit_test(
-			t, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end_closed,
-			m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_anc_width);
+		const D2D1_POINT_2F u{ t.x - m_start.x, t.y - m_start.y };
+		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end_closed, m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_loc_width);
 	}
 
 	// 矩形に含まれるか判定する.

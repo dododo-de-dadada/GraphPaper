@@ -303,13 +303,13 @@ namespace winrt::GraphPaper::implementation
 			if (i->is_deleted()) {
 				continue;
 			}
-			const uint32_t anc = i->hit_test(t);
-			if (anc != ANC_TYPE::ANC_PAGE) {
+			const uint32_t loc = i->hit_test(t);
+			if (loc != LOC_TYPE::LOC_PAGE) {
 				s = i;
-				return anc;
+				return loc;
 			}
 		}
-		return ANC_TYPE::ANC_PAGE;
+		return LOC_TYPE::LOC_PAGE;
 	}
 
 	// ƒŠƒXƒg‚É}Œ`‚ğ‘}“ü‚·‚é.

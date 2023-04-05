@@ -702,8 +702,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// –î‚¶‚é‚µ‚ÌŒ`Ž®
 		const ARROW_STYLE a_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
-		if (a_style == ARROW_STYLE::NONE || a_style == ARROW_STYLE::OPENED ||
-			a_style == ARROW_STYLE::FILLED) {
+		if (a_style == ARROW_STYLE::ARROW_NONE || a_style == ARROW_STYLE::ARROW_OPENED ||
+			a_style == ARROW_STYLE::ARROW_FILLED) {
 			m_arrow_style = a_style;
 		}
 		// ’[‚ÌŒ`Ž®
