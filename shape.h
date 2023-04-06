@@ -417,6 +417,10 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_size(ARROW_SIZE&/*val*/) const noexcept { return false; }
 		// 矢じるしの形式を得る.
 		virtual bool get_arrow_style(ARROW_STYLE&/*val*/) const noexcept { return false; }
+		// 矢じるしの返しの形式を得る
+		virtual bool get_arrow_cap(D2D1_CAP_STYLE&/*val*/) const noexcept { return false; }
+		// 矢じるしの先端の形式を得る.
+		virtual bool get_arrow_join(D2D1_LINE_JOIN&/*val*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(const D2D1_POINT_2F/*a_lt*/, const D2D1_POINT_2F/*a_rb*/, D2D1_POINT_2F&/*b_lt*/, D2D1_POINT_2F&/*b_rb*/) const noexcept {}
 		// 図形を囲む領域の左上点を得る.
@@ -511,6 +515,10 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_arrow_size(const ARROW_SIZE&/*val*/) noexcept { return false; }
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE/*val*/) noexcept { return false; }
+		// 値を矢じるしの返しの形式に格納する.
+		virtual bool set_arrow_cap(const D2D1_CAP_STYLE/*val*/) noexcept { return false; }
+		// 値を矢じるしの先端の形式に格納する.
+		virtual bool set_arrow_join(const D2D1_LINE_JOIN/*val*/) noexcept { return false; }
 		// 値を端の形式に格納する.
 		virtual bool set_stroke_cap(const CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を角丸半径に格納する.
@@ -739,6 +747,9 @@ namespace winrt::GraphPaper::implementation
 		// 矢じるし
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::ARROW_NONE;	// 矢じるしの形式
+		D2D1_CAP_STYLE m_arrow_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 矢じるしの返しの形式
+		D2D1_LINE_JOIN m_arrow_join = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;	// 矢じるしの先端の形式
+		float m_arrow_join_limit = JOIN_MITER_LIMIT_DEFVAL;	// 矢じるしの尖り制限
 
 		// 塗りつぶし
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶし色
@@ -816,6 +827,18 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_size(ARROW_SIZE& val) const noexcept final override;
 		// 矢じるしの形式を得る.
 		virtual bool get_arrow_style(ARROW_STYLE& val) const noexcept final override;
+		// 矢じるしの返しの形式を得る.
+		virtual bool get_arrow_cap(D2D1_CAP_STYLE& val) const noexcept final override
+		{
+			val = m_arrow_cap;
+			return true;
+		}
+		// 矢じるしの先端の形式を得る.
+		virtual bool get_arrow_join(D2D1_LINE_JOIN& val) const noexcept final override
+		{
+			val = m_arrow_join;
+			return true;
+		}
 		// 端の形式を得る.
 		virtual bool get_stroke_cap(CAP_STYLE& val) const noexcept final override;
 		// 破線の端の形式を得る.
@@ -878,6 +901,10 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
 		// 図形をデータリーダーから読み込む.
 		void read(DataReader const& dt_reader);
+		// 値を矢じるしの返しの形式に格納する.
+		virtual bool set_arrow_cap(const D2D1_CAP_STYLE val) noexcept final override;
+		// 値を矢じるしの先端の形式に格納する.
+		virtual bool set_arrow_join(const D2D1_LINE_JOIN val) noexcept final override;
 		// 値を矢じるしの寸法に格納する.
 		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
 		// 値を矢じるしの形式に格納する.
@@ -1257,6 +1284,9 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeArrow : ShapeStroke {
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::ARROW_NONE;	// 矢じるしの形式
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
+		D2D1_CAP_STYLE m_arrow_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 矢じるしの返しの形式
+		D2D1_LINE_JOIN m_arrow_join = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;	// 矢じるしの先端の形式
+		float m_arrow_join_limit = JOIN_MITER_LIMIT_DEFVAL;	// 矢じるしの尖り制限
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
@@ -1269,12 +1299,12 @@ namespace winrt::GraphPaper::implementation
 			if (factory == nullptr) {
 				return;
 			}
-			// 矢じるしの破線の形式はかならずソリッドとする.
+			// 矢じるしはかならずｊとする.
 			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
-				m_stroke_cap.m_start,	// startCap
-				m_stroke_cap.m_end,	// endCap
+				m_arrow_cap,	// startCap
+				m_arrow_cap,	// endCap
 				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
-				m_join_style,	// lineJoin
+				m_arrow_join,	// lineJoin
 				static_cast<FLOAT>(m_join_miter_limit),	// miterLimit
 				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 				0.0f	// dashOffset
@@ -1296,6 +1326,16 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_style(ARROW_STYLE& val) const noexcept final override
 		{
 			val = m_arrow_style;
+			return true;
+		}
+		virtual bool get_arrow_cap(D2D1_CAP_STYLE& val) const noexcept final override
+		{
+			val = m_arrow_cap;
+			return true;
+		}
+		virtual bool get_arrow_join(D2D1_LINE_JOIN& val) const noexcept final override
+		{
+			val = m_arrow_join;
 			return true;
 		}
 
@@ -1329,6 +1369,28 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 
+		// 値を矢じるしの返しの形式に格納する.
+		bool set_arrow_cap(const D2D1_CAP_STYLE val) noexcept override
+		{
+			if (m_arrow_cap != val) {
+				m_arrow_cap = val;
+				m_d2d_arrow_stroke = nullptr;
+				return true;
+			}
+			return false;
+		}
+
+		// 値を矢じるしの先端の形式に格納する.
+		bool set_arrow_join(const D2D1_LINE_JOIN val) noexcept override
+		{
+			if (m_arrow_join != val) {
+				m_arrow_join = val;
+				m_d2d_arrow_stroke = nullptr;
+				return true;
+			}
+			return false;
+		}
+
 		ShapeArrow(const Shape* page) :
 			ShapeStroke(page),
 			m_arrow_style([page]() {
@@ -1340,8 +1402,18 @@ namespace winrt::GraphPaper::implementation
 				ARROW_SIZE a_size;
 				page->get_arrow_size(a_size);
 				return a_size;
+			}()),
+			m_arrow_cap([page]() {
+				D2D1_CAP_STYLE a_cap;
+				page->get_arrow_cap(a_cap);
+				return a_cap;
+			}()),
+			m_arrow_join([page]() {
+				D2D1_LINE_JOIN a_join;
+				page->get_arrow_join(a_join);
+				return a_join;
 			}())
-		{}
+			{}
 
 		ShapeArrow(const DataReader& dt_reader) :
 			ShapeStroke(dt_reader)
@@ -1362,6 +1434,20 @@ namespace winrt::GraphPaper::implementation
 				m_arrow_size.m_offset < 0.0f) {
 				m_arrow_size = ARROW_SIZE_DEFVAL;
 			}
+			m_arrow_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
+			if (m_arrow_cap != D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT &&
+				m_arrow_cap != D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND &&
+				m_arrow_cap != D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE &&
+				m_arrow_cap != D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+				m_arrow_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
+			}
+			m_arrow_join = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
+			if (m_arrow_join != D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL &&
+				//m_arrow_join != D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER &&
+				m_arrow_join != D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+				m_arrow_join != D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+				m_arrow_join = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
+			}
 		}
 
 		void write(DataWriter const& dt_writer) const
@@ -1371,6 +1457,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_arrow_size.m_width);
 			dt_writer.WriteSingle(m_arrow_size.m_length);
 			dt_writer.WriteSingle(m_arrow_size.m_offset);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_cap));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_join));
 		}
 
 	};
@@ -1384,9 +1472,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 矢じるしの先端と返しの位置を求める.
-		static bool line_get_pos_arrow(
-			const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_pos, const ARROW_SIZE& a_size,
-			/*--->*/D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
+		static bool line_get_pos_arrow(const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_pos, const ARROW_SIZE& a_size, /*--->*/D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 		// 図形を作成する.
 		ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// データリーダーから図形を読み込む.

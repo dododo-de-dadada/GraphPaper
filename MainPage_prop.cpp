@@ -269,37 +269,37 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
 		dialog_slider_4().Header(box_value(str_stroke_width + buf));
 
-		dialog_combo_box().Header(box_value(mfsi_dash_style().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dot().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot_dot().Text()));
+		dialog_combo_box_0().Header(box_value(mfsi_dash_style().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dot().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash_dot().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash_dot_dot().Text()));
 		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
-			dialog_combo_box().SelectedIndex(0);
+			dialog_combo_box_0().SelectedIndex(0);
 			dialog_slider_0().Visibility(Visibility::Visible);
 			dialog_slider_1().Visibility(Visibility::Visible);
 		}
 		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-			dialog_combo_box().SelectedIndex(1);
+			dialog_combo_box_0().SelectedIndex(1);
 			dialog_slider_2().Visibility(Visibility::Visible);
 			dialog_slider_3().Visibility(Visibility::Visible);
 		}
 		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-			dialog_combo_box().SelectedIndex(2);
+			dialog_combo_box_0().SelectedIndex(2);
 			dialog_slider_0().Visibility(Visibility::Visible);
 			dialog_slider_1().Visibility(Visibility::Visible);
 			dialog_slider_2().Visibility(Visibility::Visible);
 			dialog_slider_3().Visibility(Visibility::Visible);
 		}
 		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			dialog_combo_box().SelectedIndex(3);
+			dialog_combo_box_0().SelectedIndex(3);
 			dialog_slider_0().Visibility(Visibility::Visible);
 			dialog_slider_1().Visibility(Visibility::Visible);
 			dialog_slider_2().Visibility(Visibility::Visible);
 			dialog_slider_3().Visibility(Visibility::Visible);
 		}
 		dialog_slider_4().Visibility(Visibility::Visible);
-		dialog_combo_box().Visibility(Visibility::Visible);
+		dialog_combo_box_0().Visibility(Visibility::Visible);
 		cd_dialog_prop().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_dash_patern")));
 		{
@@ -386,8 +386,8 @@ namespace winrt::GraphPaper::implementation
 				})
 			};
 			const auto revoker5{
-				dialog_combo_box().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
-					if (dialog_combo_box().SelectedIndex() == 0) {
+				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
+					if (dialog_combo_box_0().SelectedIndex() == 0) {
 						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH)) {
 							dialog_slider_0().Visibility(Visibility::Visible);
 							dialog_slider_1().Visibility(Visibility::Visible);
@@ -396,7 +396,7 @@ namespace winrt::GraphPaper::implementation
 							dialog_draw();
 						}
 					}
-					else if (dialog_combo_box().SelectedIndex() == 1) {
+					else if (dialog_combo_box_0().SelectedIndex() == 1) {
 						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DOT)) {
 							dialog_slider_0().Visibility(Visibility::Collapsed);
 							dialog_slider_1().Visibility(Visibility::Collapsed);
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 							dialog_draw();
 						}
 					}
-					else if (dialog_combo_box().SelectedIndex() == 2) {
+					else if (dialog_combo_box_0().SelectedIndex() == 2) {
 						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT)) {
 							dialog_slider_0().Visibility(Visibility::Visible);
 							dialog_slider_1().Visibility(Visibility::Visible);
@@ -414,7 +414,7 @@ namespace winrt::GraphPaper::implementation
 							dialog_draw();
 						}
 					}
-					else if (dialog_combo_box().SelectedIndex() == 3) {
+					else if (dialog_combo_box_0().SelectedIndex() == 3) {
 						if (m_prop_page.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT_DOT)) {
 							dialog_slider_0().Visibility(Visibility::Visible);
 							dialog_slider_1().Visibility(Visibility::Visible);
@@ -449,8 +449,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
-		dialog_combo_box().Visibility(Visibility::Collapsed);
-		dialog_combo_box().Items().Clear();
+		dialog_combo_box_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box_0().Items().Clear();
 		status_bar_set_pos();
 		slist_clear(m_prop_page.m_shape_list);
 		m_mutex_event.unlock();
@@ -507,9 +507,9 @@ namespace winrt::GraphPaper::implementation
 		if (sender == rmfi_join_style_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 		}
-		else if (sender == rmfi_join_style_miter()) {
-			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
-		}
+		//else if (sender == rmfi_join_style_miter()) {
+		//	new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
+		//}
 		else if (sender == rmfi_join_style_miter_or_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 		}
@@ -534,10 +534,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
 		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		//rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER || val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		//mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER || val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 	}
 
 	// 属性メニューの「太さ」のサブ項目が選択された.

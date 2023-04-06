@@ -70,24 +70,24 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Header(box_value(str_opacity + buf));
 		dialog_slider_0().Visibility(Visibility::Visible);
 
-		dialog_combo_box().Header(box_value(str_color_code));
-		dialog_combo_box().Items().Append(box_value(rmfi_color_code_dec().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_color_code_hex().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_color_code_real().Text()));
-		dialog_combo_box().Items().Append(box_value(rmfi_color_code_pct().Text()));
+		dialog_combo_box_0().Header(box_value(str_color_code));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_dec().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_hex().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_real().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_pct().Text()));
 		if (m_color_code == COLOR_CODE::DEC) {
-			dialog_combo_box().SelectedIndex(0);
+			dialog_combo_box_0().SelectedIndex(0);
 		}
 		else if (m_color_code == COLOR_CODE::HEX) {
-			dialog_combo_box().SelectedIndex(1);
+			dialog_combo_box_0().SelectedIndex(1);
 		}
 		else if (m_color_code == COLOR_CODE::REAL) {
-			dialog_combo_box().SelectedIndex(2);
+			dialog_combo_box_0().SelectedIndex(2);
 		}
 		else if (m_color_code == COLOR_CODE::PCT) {
-			dialog_combo_box().SelectedIndex(3);
+			dialog_combo_box_0().SelectedIndex(3);
 		}
-		dialog_combo_box().Visibility(Visibility::Visible);
+		dialog_combo_box_0().Visibility(Visibility::Visible);
 
 		cd_dialog_prop().Title(box_value(str_title));
 		{
@@ -106,18 +106,18 @@ namespace winrt::GraphPaper::implementation
 				)
 			};
 			const auto revoker4{
-				dialog_combo_box().SelectionChanged(winrt::auto_revoke, [this, str_opacity](IInspectable const&, SelectionChangedEventArgs const&) {
+				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this, str_opacity](IInspectable const&, SelectionChangedEventArgs const&) {
 					COLOR_CODE c_code;
-					if (dialog_combo_box().SelectedIndex() == 0) {
+					if (dialog_combo_box_0().SelectedIndex() == 0) {
 						c_code = COLOR_CODE::DEC;
 					}
-					else if (dialog_combo_box().SelectedIndex() == 1) {
+					else if (dialog_combo_box_0().SelectedIndex() == 1) {
 						c_code = COLOR_CODE::HEX;
 					}
-					else if (dialog_combo_box().SelectedIndex() == 2) {
+					else if (dialog_combo_box_0().SelectedIndex() == 2) {
 						c_code = COLOR_CODE::REAL;
 					}
-					else if (dialog_combo_box().SelectedIndex() == 3) {
+					else if (dialog_combo_box_0().SelectedIndex() == 3) {
 						c_code = COLOR_CODE::PCT;
 					}
 					else {
@@ -131,16 +131,16 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float new_val;
 				m_prop_page.back()->get_image_opacity(new_val);
-				if (dialog_combo_box().SelectedIndex() == 0) {
+				if (dialog_combo_box_0().SelectedIndex() == 0) {
 					m_color_code = COLOR_CODE::DEC;
 				}
-				else if (dialog_combo_box().SelectedIndex() == 1) {
+				else if (dialog_combo_box_0().SelectedIndex() == 1) {
 					m_color_code = COLOR_CODE::HEX;
 				}
-				else if (dialog_combo_box().SelectedIndex() == 2) {
+				else if (dialog_combo_box_0().SelectedIndex() == 2) {
 					m_color_code = COLOR_CODE::REAL;
 				}
-				else if (dialog_combo_box().SelectedIndex() == 3) {
+				else if (dialog_combo_box_0().SelectedIndex() == 3) {
 					m_color_code = COLOR_CODE::PCT;
 				}
 				color_code_is_checked(m_color_code);
@@ -153,8 +153,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		slist_clear(m_prop_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_combo_box().Visibility(Visibility::Collapsed);
-		dialog_combo_box().Items().Clear();
+		dialog_combo_box_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box_0().Items().Clear();
 		main_draw();
 		m_mutex_event.unlock();
 	}

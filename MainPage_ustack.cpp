@@ -606,6 +606,8 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_T::ARC_END>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::ARC_ROT>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::ARC_START>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARROW_CAP>(D2D1_CAP_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::ARROW_JOIN>(D2D1_LINE_JOIN const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::ARROW_SIZE>(ARROW_SIZE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::ARROW_STYLE>(ARROW_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::IMAGE_OPAC>(float const& val);

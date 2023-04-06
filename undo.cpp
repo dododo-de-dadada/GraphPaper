@@ -200,6 +200,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::ARC_END>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::ARC_ROT>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::ARC_START>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_T::ARROW_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
+	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(Shape* s, const D2D1_LINE_JOIN& val);
 	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(Shape* s, const ARROW_SIZE& val);
 	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(Shape* s, const ARROW_STYLE& val);
 	template UndoValue<UNDO_T::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
@@ -296,6 +298,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if constexpr (
 			U == UNDO_T::ARC_DIR ||
+			U == UNDO_T::ARROW_CAP ||
+			U == UNDO_T::ARROW_JOIN ||
 			U == UNDO_T::ARROW_STYLE ||
 			U == UNDO_T::DASH_CAP ||
 			U == UNDO_T::DASH_STYLE ||
@@ -349,6 +353,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::ARC_END>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARC_ROT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARC_START>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_T::ARROW_CAP>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::DASH_CAP>::UndoValue(DataReader const& dt_reader);
@@ -407,6 +413,16 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_T::ARC_START>::SET(Shape* const s, const float& val)
 	{
 		s->set_arc_start(val);
+	}
+
+	void UndoValue<UNDO_T::ARROW_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
+	{
+		s->set_arrow_cap(val);
+	}
+
+	void UndoValue<UNDO_T::ARROW_JOIN>::SET(Shape* const s, const D2D1_LINE_JOIN& val)
+	{
+		s->set_arrow_join(val);
 	}
 
 	void UndoValue<UNDO_T::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& val)
@@ -577,6 +593,16 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_T U> bool UndoValue<U>::GET(const Shape* s, U_TYPE<U>::type& val) noexcept
 	{
 		return false;
+	}
+
+	bool UndoValue<UNDO_T::ARROW_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
+	{
+		return s->get_arrow_cap(val);
+	}
+
+	bool UndoValue<UNDO_T::ARROW_JOIN>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept
+	{
+		return s->get_arrow_join(val);
 	}
 
 	bool UndoValue<UNDO_T::ARROW_SIZE>::GET(const Shape* s, ARROW_SIZE& val) noexcept
@@ -783,6 +809,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if constexpr (
 			U == UNDO_T::ARC_DIR ||
+			U == UNDO_T::ARROW_CAP ||
+			U == UNDO_T::ARROW_JOIN ||
 			U == UNDO_T::ARROW_STYLE ||
 			U == UNDO_T::DASH_CAP ||
 			U == UNDO_T::DASH_STYLE ||
@@ -795,9 +823,6 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::TEXT_ALIGN_T) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
-		//else if constexpr (U == UNDO_T::IMAGE_ASPECT) {
-		//	dt_writer.WriteBoolean(m_value);
-		//}
 		else if constexpr (
 			U == UNDO_T::ARROW_SIZE) {
 			dt_writer.WriteSingle(static_cast<ARROW_SIZE>(m_value).m_width);
@@ -885,8 +910,7 @@ namespace winrt::GraphPaper::implementation
 		const auto clip = s->m_clip;
 		const auto ratio = s->m_ratio;
 		const auto opac = s->m_opac;
-		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip) ||
-			!equal(ratio, m_ratio) || !equal(opac, m_opac);
+		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip) || !equal(ratio, m_ratio) || !equal(opac, m_opac);
 	}
 
 	// å≥Ç…ñﬂÇ∑ëÄçÏÇé¿çsÇ∑ÇÈ.

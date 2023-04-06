@@ -219,6 +219,9 @@ namespace winrt::GraphPaper::implementation
 		// 2. ファイルを書き込み中に終了を延長するための排他制御.
 		// 3. ファイルピッカーのボタンが押されてストレージファイルが得られるまでの間,
 		//    イベント処理させないための排他制御.
+		// ファイルピッカーなどが返値を戻すまで時間がかかる.
+		// その間にフォアグランドのスレッドが動作して, イベント処理が始まってしまう.
+		// co_await の返値が得られる前に, イベント処理をしないよう排他制御する必要がある.
 		std::atomic_bool m_summary_atomic{ false };	// 一覧の排他制御
 		std::mutex m_mutex_draw;	// 描画させないための排他制御
 		std::mutex m_mutex_exit;	// 終了を延長するための排他制御
@@ -443,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction file_exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
-		// ファイルメニューの「画像を図形としてインポートする」が選択された
+		// ファイルメニューの「画像をインポート」が選択された
 		IAsyncAction file_import_image_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「新規」が選択された
 		IAsyncAction file_new_click_async(IInspectable const&, RoutedEventArgs const&);

@@ -261,15 +261,15 @@ namespace winrt::GraphPaper::implementation
 		// UTF32 文字列からソートされた GID を得る.
 		gid.resize(utf32.size());
 		winrt::check_hresult(
-			face->GetGlyphIndices(
-				std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid)));
+			face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid))
+		);
 		std::sort(std::begin(gid), std::end(gid));
 
 		// GID 文字列から字形 (グリフ) の計量を得る.
 		g_met.resize(utf32.size());
 		winrt::check_hresult(
-			face->GetDesignGlyphMetrics(
-				std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met)));
+			face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met))
+		);
 		//face->Release();
 
 		// 字面からポストスクリプト名を得る.

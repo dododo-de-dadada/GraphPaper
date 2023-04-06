@@ -115,10 +115,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 直線の補助線を表示する.
-	// pressed	ポインターが押された位置
-	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_line(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
+		const D2D1_POINT_2F pressed,	// ポインターが押された位置
+		const D2D1_POINT_2F current	// ポインターの現在位置
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -139,11 +139,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の補助線を表示する.
-	// pressed	ポインターが押された位置
-	// current	ポインターの現在位置
-	// p_opt	多角形の選択肢
 	void ShapePage::auxiliary_draw_poly(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current, const POLY_OPTION& p_opt)
+		const D2D1_POINT_2F pressed,	// ポインターが押された位置
+		const D2D1_POINT_2F current,	// ポインターの現在位置
+		const POLY_OPTION& p_opt	// 多角形の選択肢
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -173,10 +173,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方形の補助線を表示する.
-	// pressed	ポインターが押された位置
-	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_rect(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
+		const D2D1_POINT_2F pressed,	// ポインターが押された位置
+		const D2D1_POINT_2F current	// ポインターの現在位置
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -200,10 +200,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 角丸方形の補助線を表示する.
-	// pressed	ポインターが押された位置
-	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_rrect(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
+		const D2D1_POINT_2F pressed,	// ポインターが押された位置
+		const D2D1_POINT_2F current	// ポインターの現在位置
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -244,8 +244,11 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&rr, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 	}
 
+	// 円弧の補助線を表示する.
 	void ShapePage::auxiliary_draw_arc(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
+		const D2D1_POINT_2F pressed,	// ポインターが押された位置
+		const D2D1_POINT_2F current	// ポインターの現在位置
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -271,15 +274,18 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1PathGeometry> geom;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 		winrt::check_hresult(
-			factory->CreatePathGeometry(geom.put()));
+			factory->CreatePathGeometry(geom.put())
+		);
 		winrt::check_hresult(
-			geom->Open(sink.put()));
+			geom->Open(sink.put())
+		);
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(pressed, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		sink->AddArc(arc);
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 		winrt::check_hresult(
-			sink->Close());
+			sink->Close()
+		);
 		sink = nullptr;
 		brush->SetColor(COLOR_WHITE);
 		target->DrawGeometry(geom.get(), brush, Shape::m_aux_width, nullptr);
@@ -497,30 +503,12 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 方眼に合わせるを得る.
-	/*
-	bool ShapePage::get_snap_grid(bool& val) const noexcept
-	{
-		val = m_snap_grid;
-		return true;
-	}
-	*/
-
 	// ページの色を得る.
 	bool ShapePage::get_page_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_page_color;
 		return true;
 	}
-
-	// ページ倍率を得る.
-	/*
-	bool ShapePage::get_page_scale(float& val) const noexcept
-	{
-		val = m_page_scale;
-		return true;
-	}
-	*/
 
 	// ページの大きさを得る.
 	bool ShapePage::get_page_size(D2D1_SIZE_F& val) const noexcept
@@ -660,20 +648,13 @@ namespace winrt::GraphPaper::implementation
 			p_color.b >= 0.0f && p_color.b <= 1.0f && p_color.a >= 0.0f && p_color.a <= 1.0f) {
 			m_page_color = p_color;
 		}
-		// ページの倍率
-		/*
-		const float page_scale = dt_reader.ReadSingle();
-		if (page_scale >= 0.25f && page_scale <= 4.0f) {
-			m_page_scale = page_scale;
-		}
-		*/
 		// ページの大きさ
 		const D2D1_SIZE_F p_size{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_size.width >= 1.0f && p_size.width <= PAGE_SIZE_MAX && p_size.height >= 1.0f &&
-			p_size.height <= PAGE_SIZE_MAX) {
+		if (p_size.width >= 1.0f && p_size.width <= PAGE_SIZE_MAX &&
+			p_size.height >= 1.0f && p_size.height <= PAGE_SIZE_MAX) {
 			m_page_size = p_size;
 		}
 		// ページの内余白
@@ -702,9 +683,26 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 矢じるしの形式
 		const ARROW_STYLE a_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
-		if (a_style == ARROW_STYLE::ARROW_NONE || a_style == ARROW_STYLE::ARROW_OPENED ||
+		if (a_style == ARROW_STYLE::ARROW_NONE ||
+			a_style == ARROW_STYLE::ARROW_OPENED ||
 			a_style == ARROW_STYLE::ARROW_FILLED) {
 			m_arrow_style = a_style;
+		}
+		// 矢じるしの返しの形式
+		const D2D1_CAP_STYLE a_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
+		if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT ||
+			a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE ||
+			a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND ||
+			a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			m_arrow_cap = a_cap;
+		}
+		// 矢じるしの先端の形式
+		const D2D1_LINE_JOIN a_join = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
+		if (a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
+			//a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+			a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL ||
+			a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+			m_arrow_join = a_join;
 		}
 		// 端の形式
 		const CAP_STYLE s_cap{
@@ -763,7 +761,7 @@ namespace winrt::GraphPaper::implementation
 		// 線の結合の形状
 		const D2D1_LINE_JOIN j_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
 		if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
-			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+			//j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL ||
 			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			m_join_style = j_style;
@@ -886,6 +884,26 @@ namespace winrt::GraphPaper::implementation
 			m_image_opac = i_opac;
 		}
 		ShapeText::is_available_font(m_font_family);
+	}
+
+	// 値を矢じるしの返しの形式に格納する.
+	bool ShapePage::set_arrow_cap(const D2D1_CAP_STYLE val) noexcept
+	{
+		if (!equal(m_arrow_cap, val)) {
+			m_arrow_cap = val;
+			return true;
+		}
+		return false;
+	}
+
+	// 値を矢じるしの先端の形式に格納する.
+	bool ShapePage::set_arrow_join(const D2D1_LINE_JOIN val) noexcept
+	{
+		if (!equal(m_arrow_join, val)) {
+			m_arrow_join = val;
+			return true;
+		}
+		return false;
 	}
 
 	// 値を矢じるしの寸法に格納する.
@@ -1027,18 +1045,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
-
-	// 値を方眼に合わせるに格納する.
-	/*
-	bool ShapePage::set_snap_grid(const bool val) noexcept
-	{
-		if (m_snap_grid != val) {
-			m_snap_grid = val;
-			return true;
-		}
-		return false;
-	}
-	*/
 
 	// 値を, 表示, 方眼, 補助線の各色に格納する
 	bool ShapePage::set_page_color(const D2D1_COLOR_F& val) noexcept
@@ -1183,6 +1189,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
+		s->get_arrow_cap(m_arrow_cap);
+		s->get_arrow_join(m_arrow_join);
 		s->get_dash_cap(m_dash_cap);
 		s->get_dash_pat(m_dash_pat);
 		s->get_dash_style(m_dash_style);
@@ -1197,7 +1205,6 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_color(m_grid_color);
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
-		//s->get_snap_grid(m_snap_grid);
 		s->get_image_opacity(m_image_opac);
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
@@ -1251,9 +1258,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_arrow_size.m_offset);
 		// 矢じるしの形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
-		// 角丸半径
-		//dt_writer.WriteSingle(m_corner_radius.x);
-		//dt_writer.WriteSingle(m_corner_radius.y);
+		// 矢じるしの返しの形式
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_cap));
+		// 矢じるしの先端の形式
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_join));
 		// 線の端の形式
 		dt_writer.WriteUInt32(m_stroke_cap.m_start);
 		dt_writer.WriteUInt32(m_stroke_cap.m_end);
@@ -1291,8 +1299,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_font_color.a);
 		// 書体名
 		const uint32_t font_family_len = wchar_len(m_font_family);
-		dt_writer.WriteUInt32(font_family_len);
 		const uint8_t* font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
+		dt_writer.WriteUInt32(font_family_len);
 		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
 		// 書体の大きさ
 		dt_writer.WriteSingle(m_font_size);

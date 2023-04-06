@@ -366,11 +366,11 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_file_export_as.Text" xml:space="preserve">
-    <value>エクスポートする...</value>
+    <value>エクスポート...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_file_import_image.Text" xml:space="preserve">
-    <value>画像をインポートする...</value>
+    <value>画像をインポート...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_file_open.Text" xml:space="preserve">
@@ -1102,23 +1102,25 @@
     <value>尖り制限...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <!--
   <data name="rmfi_join_style_miter.Text" xml:space="preserve">
     <value>尖り</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  -->
   <data name="rmfi_join_style_miter_or_bevel.Text" xml:space="preserve">
-    <value>尖り または 面取り</value>
+    <value>尖り</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_join_style_round.Text" xml:space="preserve">
     <value>丸まり</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfs_cap_style.Text" xml:space="preserve">
+  <data name="mfsi_cap_style.Text" xml:space="preserve">
     <value>端の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfs_join_style.Text" xml:space="preserve">
+  <data name="mfsi_join_style.Text" xml:space="preserve">
     <value>線の結合の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

@@ -30,9 +30,13 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.lock();
 		ARROW_SIZE a_size;
 		ARROW_STYLE a_style;
+		D2D1_CAP_STYLE a_cap;
+		D2D1_LINE_JOIN a_join;
 		m_prop_page.set_attr_to(&m_main_page);
 		m_prop_page.get_arrow_size(a_size);
 		m_prop_page.get_arrow_style(a_style);
+		m_prop_page.get_arrow_cap(a_cap);
+		m_prop_page.get_arrow_join(a_join);
 
 		const auto max0 = dialog_slider_0().Maximum();
 		const auto freq0 = dialog_slider_0().TickFrequency();
@@ -81,6 +85,44 @@ namespace winrt::GraphPaper::implementation
 		else if (a_style == ARROW_STYLE::ARROW_FILLED) {
 			dialog_radio_btns().SelectedIndex(1);
 		}
+
+		dialog_combo_box_0().Header(box_value(mfsi_cap_style().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_flat().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_square().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_round().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_triangle().Text()));
+		if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+			dialog_combo_box_0().SelectedIndex(0);
+		}
+		else if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+			dialog_combo_box_0().SelectedIndex(1);
+		}
+		else if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			dialog_combo_box_0().SelectedIndex(2);
+		}
+		else if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			dialog_combo_box_0().SelectedIndex(3);
+		}
+		dialog_combo_box_0().Visibility(Visibility::Visible);
+
+		dialog_combo_box_1().Header(box_value(mfsi_join_style().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_miter_or_bevel().Text()));
+		//dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_miter().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_round().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_bevel().Text()));
+		//if (a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+		//	dialog_combo_box_1().SelectedIndex(0);
+		//}
+		if(a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			dialog_combo_box_1().SelectedIndex(0);
+		}
+		else if (a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+			dialog_combo_box_1().SelectedIndex(1);
+		}
+		else if (a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+			dialog_combo_box_1().SelectedIndex(2);
+		}
+		dialog_combo_box_1().Visibility(Visibility::Visible);
 
 		const auto unit = m_len_unit;
 		const auto dpi = m_prop_d2d.m_logical_dpi;
@@ -177,18 +219,64 @@ namespace winrt::GraphPaper::implementation
 					}
 				})
 			};
+			const auto revoker4{
+				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
+					// (IInspectable const&, SelectionChangedEventArgs const&)
+					const auto i = dialog_combo_box_0().SelectedIndex();
+					constexpr D2D1_CAP_STYLE CAP[]{
+						D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,
+						D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE,
+						D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND,
+						D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE
+					};
+					if (i >= 0 && i <= 3 && m_prop_page.back()->set_arrow_cap(CAP[i])) {
+						dialog_draw();
+					}
+				})
+			};
+			const auto revoker5{
+				dialog_combo_box_1().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
+					// (IInspectable const&, SelectionChangedEventArgs const&)
+					const auto index = dialog_combo_box_1().SelectedIndex();
+					if (index == 0) {
+						if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
+							dialog_draw();
+						}
+					}
+					else if (index == 1) {
+						if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND)) {
+							dialog_draw();
+						}
+					}
+					else if (index == 2) {
+						if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
+							dialog_draw();
+						}
+					}
+					//else if (dialog_combo_box_1().SelectedIndex() == 2) {
+					//	if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL)) {
+					//		dialog_draw();
+					//	}
+					//}
+				})
+			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				ARROW_SIZE new_size;
 				ARROW_STYLE new_style;
+				D2D1_CAP_STYLE new_cap;
+				D2D1_LINE_JOIN new_join;
 				m_prop_page.back()->get_arrow_size(new_size);
 				m_prop_page.back()->get_arrow_style(new_style);
+				m_prop_page.back()->get_arrow_cap(new_cap);
+				m_prop_page.back()->get_arrow_join(new_join);
 				arrow_style_is_checked(new_style);
 				const bool flag_size = ustack_push_set<UNDO_T::ARROW_SIZE>(new_size);
 				const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
-				if (flag_size || flag_style) {
+				const bool flag_cap = ustack_push_set<UNDO_T::ARROW_CAP>(new_cap);
+				const bool flag_join = ustack_push_set<UNDO_T::ARROW_JOIN>(new_join);
+				if (flag_size || flag_style || flag_cap || flag_join) {
 					ustack_push_null();
 					ustack_is_enable();
-					//xcvd_is_enabled();
 					main_draw();
 				}
 			}
@@ -211,6 +299,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(vis2);
 		dialog_radio_btns().Visibility(Visibility::Collapsed);
 		slist_clear(m_prop_page.m_shape_list);
+		dialog_combo_box_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box_0().Items().Clear();
+		dialog_combo_box_1().Visibility(Visibility::Collapsed);
+		dialog_combo_box_1().Items().Clear();
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}

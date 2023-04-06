@@ -17,30 +17,20 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::Buffer;
 	using winrt::Windows::Storage::Streams::InputStreamOptions;
 
-	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos);
+	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos);
 	static void export_svg_color(wchar_t* buf, const size_t len, const D2D1_COLOR_F color, const wchar_t* name);
-	static void export_svg_stroke(wchar_t* buf, const size_t len, const float width, const D2D1_COLOR_F& color, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const CAP_STYLE cap, const D2D1_LINE_JOIN join, const float limit);
+	static void export_svg_stroke(wchar_t* buf, const size_t len, const float width, const D2D1_COLOR_F& color, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_CAP_STYLE cap, const D2D1_LINE_JOIN join, const float limit);
 
 	//------------------------------
 	// バッファに矢じりを SVG タグとして書き込む.
-	// buf	出力先
-	// len	出力先の長さ
-	// arrow	矢じるしの形式
-	// width	線・枠の太さ	
-	// color	線・枠の色
-	// cap	線分の端点の形式
-	// join	線分の連結の形式
-	// miter_limit	尖り制限
-	// barbs[]	矢じりの返しの位置
-	// tip_pos	矢じりの先端の位置
 	//------------------------------
 	static void export_svg_arrow(
-		wchar_t* buf,	// 出力先
-		const size_t len,	// 出力先の長さ
+		wchar_t* buf,	// 出力先バッファ
+		const size_t len,	// バッファの長さ
 		const ARROW_STYLE arrow,	// 矢じるしの形式
 		const float width,	// 線・枠の太さ	
 		const D2D1_COLOR_F& color,	// 線・枠の色
-		const CAP_STYLE& cap,	// 線分の端点の形式
+		const D2D1_CAP_STYLE& cap,	// 線分の端点の形式
 		const D2D1_LINE_JOIN join,	// 線分の連結の形式
 		const float miter_limit,	// 尖り制限
 		const D2D1_POINT_2F barbs[],	// 矢じりの両端の位置
@@ -119,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_COLOR_F& color, 
 		const D2D1_DASH_STYLE dash, 
 		const DASH_PAT& patt, 
-		const CAP_STYLE cap, 
+		const D2D1_CAP_STYLE cap, 
 		const D2D1_LINE_JOIN join, 
 		const float limit
 	)
@@ -157,16 +147,16 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			const auto len3 = wcslen(buf);
-			if (equal(cap, CAP_STYLE_FLAT)) {
+			if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"butt\" ");
 			}
-			else if (equal(cap, CAP_STYLE_ROUND)) {
+			else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"round\" ");
 			}
-			else if (equal(cap, CAP_STYLE_SQUARE)) {
+			else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"square\" ");
 			}
-			else if (equal(cap, CAP_STYLE_TRIANGLE)) {
+			else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 				// SVG に三角はないので, かわりに stroke-linecap="butt"
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"butt\" ");
 			}
@@ -214,18 +204,15 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
-			export_svg_arrow(
-				buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
-				m_join_style, m_join_miter_limit, barbs, barbs[2]);
+			export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap,
+				m_arrow_join, m_arrow_join_limit, barbs, barbs[2]);
 			dt_writer.WriteString(buf);
 		}
 	}
@@ -251,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		// 線・枠を出力
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		// だ円を閉じる.
@@ -327,14 +314,14 @@ namespace winrt::GraphPaper::implementation
 		);
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barb[2];
 			D2D1_POINT_2F tip;
 			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barb, tip)) {
-				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barb, tip);
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -370,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteString(L"\" ");
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -382,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
 			if (ShapePoly::poly_get_pos_arrow(d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
-				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barb, tip);
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -410,9 +397,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -445,9 +430,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(
-			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap,
-			m_join_style, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -516,9 +499,7 @@ namespace winrt::GraphPaper::implementation
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
 
 			dt_writer.WriteString(L"<g ");
-			export_svg_stroke(buf, 1024,
-				1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, CAP_STYLE_FLAT,
-				D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
+			export_svg_stroke(buf, 1024, 1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_LINE_JOIN_MITER_OR_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
 			dt_writer.WriteString(buf);
 			swprintf_s(buf,
 				L"font-size=\"%f\" "
@@ -728,7 +709,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];
 		dt_writer.WriteString(L"<!-- Grids -->\n");
 		dt_writer.WriteString(L"<g ");
-		export_svg_stroke(buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{}, CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
+		export_svg_stroke(buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{}, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L">\n");
 
@@ -831,7 +812,7 @@ namespace winrt::GraphPaper::implementation
 				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);
-			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap, m_join_style, m_join_miter_limit);
+			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_pat, m_stroke_cap.m_start, m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
@@ -839,9 +820,7 @@ namespace winrt::GraphPaper::implementation
 				arc_get_pos_arrow(
 					m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, //m_sweep_dir,
 					m_arrow_size, arrow);
-				export_svg_arrow(
-					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
-					m_join_style, m_join_miter_limit, arrow, arrow[2]);
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, arrow, arrow[2]);
 				dt_writer.WriteString(buf);
 			}
 		}

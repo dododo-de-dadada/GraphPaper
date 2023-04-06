@@ -8,7 +8,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	Loaded="Page_Loaded"
 	mc:Ignorable="d">
-	<!-- x:Name はコードビハインドのためのオブジェクトをつくる. x:Uid はリソースの参照をつくる. -->
+	<!-- x:Name はコードビハインドのためのオブジェクト. x:Uid はリソースの参照. -->
 	<Page.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -27,31 +27,46 @@
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 		<!-- メインメニュー -->
-		<muxc:MenuBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
-					  Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
+		<muxc:MenuBar
+			Grid.Row="0"
+			Grid.Column="0"
+			Grid.ColumnSpan="2" 
+			Background="{ThemeResource AppBarBackgroundThemeBrush}"
+			Height="Auto">
 			<!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File" >
+				<!-- 新規 -->
 				<MenuFlyoutItem
-					x:Uid="mfi_new" Click="file_new_click_async" Icon="Page2" Text="New" >
+					x:Uid="mfi_new"
+					Click="file_new_click_async"
+					Icon="Page2" Text="New" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="N" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- 開く -->
 				<MenuFlyoutItem
-					x:Uid="mfi_file_open" Click="file_open_click_async" Icon="OpenFile"
-					Text="Open...">
+					x:Uid="mfi_file_open"
+					Click="file_open_click_async"
+					Icon="OpenFile" Text="Open...">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="O" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- 保存 -->
 				<MenuFlyoutItem
-					x:Uid="mfi_file_save" Click="file_save_click_async" Icon="Save" Text="Save" >
+					x:Uid="mfi_file_save"
+					Click="file_save_click_async"
+					Icon="Save" Text="Save" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="S" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- 名前をつけて保存 -->
 				<MenuFlyoutItem
-					x:Uid="mfi_file_save_as" Click="file_save_as_click_async" Text="Save As..." >
+					x:Uid="mfi_file_save_as"
+					Click="file_save_as_click_async"
+					Text="Save As..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}" 
@@ -61,15 +76,19 @@
 						<KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- 画像をインポート -->
 				<MenuFlyoutItem
-					x:Uid="mfi_file_import_image" Click="file_import_image_click_async"
+					x:Uid="mfi_file_import_image"
+					Click="file_import_image_click_async"
 					Icon="Import" Text="Import Image..." >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- エクスポート -->
 				<MenuFlyoutItem
-					x:Uid="mfi_file_export_as" Click="file_export_as_click_async"
+					x:Uid="mfi_file_export_as"
+					Click="file_export_as_click_async"
 					Text="Export As..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon
@@ -80,24 +99,27 @@
 						<KeyboardAccelerator Key="E" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+				<!-- ================ -->
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem
-					x:Uid="mfsi_file_recent" Text="Recent Files" >
+				<!-- 最近つかったファイル -->
+				<MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files" >
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
 							Glyph="{StaticResource glyph_recent}" />
 					</MenuFlyoutSubItem.Icon>
-					<MenuFlyoutItem
-						x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="" >
+                    <MenuFlyoutItem
+						x:Name="mfi_file_recent_1"
+                        Click="file_recent_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon
 								FontFamily="{StaticResource SymbolThemeFontFamily}" 
 								Glyph="{StaticResource glyph_dial1}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem
-						x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="" >
+                    <MenuFlyoutItem
+						x:Name="mfi_file_recent_2"
+                        Click="file_recent_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon
 								FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -105,7 +127,8 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<MenuFlyoutItem
-						x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="" >
+						x:Name="mfi_file_recent_3"
+                        Click="file_recent_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon
 								FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -113,7 +136,8 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<MenuFlyoutItem
-						x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="" >
+						x:Name="mfi_file_recent_4"
+                        Click="file_recent_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon
 								FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -121,7 +145,8 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<MenuFlyoutItem
-						x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="" >
+						x:Name="mfi_file_recent_5"
+                        Click="file_recent_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon
 								FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -129,7 +154,6 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSeparator />
 				<!---
 				<MenuFlyoutItem x:Name="mfi_print" x:Uid="mfi_print" Click="print_click_async" Icon="Print" Text="Print..." >
 					<MenuFlyoutItem.KeyboardAccelerators>
@@ -137,187 +161,219 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				-->
+				<!-- ================ -->
+				<MenuFlyoutSeparator />
+				<!-- 終了 -->
 				<MenuFlyoutItem
-					x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
+					x:Uid="mfi_exit"
+					Click="file_exit_click_async"
+					Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">
-                <!-- 元に戻す -->
+				<!-- 元に戻す -->
 				<MenuFlyoutItem
-					x:Name="mfi_undo" x:Uid="mfi_undo" Click="ustack_undo_click" Icon="Undo"
-					IsEnabled="False" Text="Undo" >
+					x:Name="mfi_undo" x:Uid="mfi_undo"
+                    Click="ustack_undo_click"
+                    Icon="Undo" Text="Undo" IsEnabled="False" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- やり直し -->
-                <MenuFlyoutItem
-					x:Name="mfi_redo" x:Uid="mfi_redo" Click="ustack_redo_click" Icon="Redo"
-					IsEnabled="False" Text="Redo" >
+				<!-- やり直し -->
+				<MenuFlyoutItem
+					x:Name="mfi_redo" x:Uid="mfi_redo"
+                    Click="ustack_redo_click"
+                    Icon="Redo" Text="Redo" IsEnabled="False" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Y" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- ================ -->
+				<!-- ================ -->
 				<MenuFlyoutSeparator />
-                <!-- 切り取り -->
-                <MenuFlyoutItem
-					x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="xcvd_cut_click_async"
-					Icon="Cut" IsEnabled="False" Text="Cut" >
+				<!-- 切り取り -->
+				<MenuFlyoutItem
+					x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut"
+                    Click="xcvd_cut_click_async"
+					Icon="Cut" Text="Cut" IsEnabled="False" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="X" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- コピー -->
+				<!-- コピー -->
 				<MenuFlyoutItem
-					x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="xcvd_copy_click_async"
-					Icon="Copy" IsEnabled="False" Text="Copy" >
+					x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy"
+                    Click="xcvd_copy_click_async"
+					Icon="Copy" Text="Copy" IsEnabled="False">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="C" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 貼り付け -->
-                <MenuFlyoutItem
-					x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="xcvd_paste_click"
-					Icon="Paste" IsEnabled="False" Text="Paste" >
+				<!-- 貼り付け -->
+				<MenuFlyoutItem
+					x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste"
+                    Click="xcvd_paste_click"
+					Icon="Paste" Text="Paste"  IsEnabled="False" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="V" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 削除 -->
+				<!-- 削除 -->
 				<MenuFlyoutItem
-					x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete" Click="xcvd_delete_click"
-					Icon="Delete" IsEnabled="False" Text="Delete" >
+					x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete"
+                    Click="xcvd_delete_click"
+					Icon="Delete" Text="Delete" IsEnabled="False" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="D" Modifiers="Control" />
 						<KeyboardAccelerator Key="Delete" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- ================ -->
-                <MenuFlyoutSeparator />
-                <!-- すべて選択 -->
-                <MenuFlyoutItem
-					x:Name="mfi_select_all" x:Uid="mfi_select_all" Click="select_all_click"
-					Icon="SelectAll" IsEnabled="False" Text="Select All" >
+				<!-- ================ -->
+				<MenuFlyoutSeparator />
+				<!-- すべて選択 -->
+				<MenuFlyoutItem
+					x:Name="mfi_select_all" x:Uid="mfi_select_all"
+                    Click="select_all_click"
+					Icon="SelectAll" Text="Select All" IsEnabled="False">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 並び替え -->
-                <MenuFlyoutSubItem x:Name="mfsi_order" x:Uid="mfsi_order" Text="Order">
+				<!-- 並び替え -->
+				<MenuFlyoutSubItem x:Name="mfsi_order" x:Uid="mfsi_order" Text="Order">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
 							Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
+					<!-- 最前面に移動 -->
 					<MenuFlyoutItem
 						x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front"
-						Click="order_bring_to_front_click" IsEnabled="false"
-						Text="Bring to Front" >
+						Click="order_bring_to_front_click"
+						Text="Bring to Front" IsEnabled="false">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="End" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
+					<!--  ひとつ前面に移動 -->
 					<MenuFlyoutItem
 						x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward"
-						Click="order_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+						Click="order_bring_forward_click"
+                        IsEnabled="false" Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
+					<!--  ひとつ背面に移動 -->
 					<MenuFlyoutItem
 						x:Name="mfi_send_backward" x:Uid="mfi_send_backward"
-						Click="order_send_backward_click" IsEnabled="false" Text="Send Backward" >
+						Click="order_send_backward_click"
+                        Text="Send Backward" IsEnabled="false" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
+					<!-- 最背面に移動 -->
 					<MenuFlyoutItem
 						x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back"
-						Click="order_send_to_back_click" IsEnabled="false" Text="Send to Back">
+						Click="order_send_to_back_click"
+                        Text="Send to Back" IsEnabled="false" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Home" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
-                <!-- ================ -->
-                <MenuFlyoutSeparator />
-                <!-- グループ化 -->
-                <MenuFlyoutItem
-					x:Name="mfi_group" x:Uid="mfi_group" Click="group_click" IsEnabled="false"
+				<!-- ================ -->
+				<MenuFlyoutSeparator />
+				<!-- グループ化 -->
+				<MenuFlyoutItem
+					x:Name="mfi_group" x:Uid="mfi_group"
+					Click="group_click"
+					IsEnabled="false"
 					Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_group}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_group}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="G" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- グループを解除 -->
-                <MenuFlyoutItem
-					x:Name="mfi_ungroup" x:Uid="mfi_ungroup" Click="ungroup_click"
-					IsEnabled="false" Text="Ungroup" >
+				<!-- グループを解除 -->
+				<MenuFlyoutItem
+					x:Name="mfi_ungroup" x:Uid="mfi_ungroup"
+					Click="ungroup_click"
+					Text="Ungroup" IsEnabled="false" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_ungroup}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</MenuFlyoutItem.Icon>
+							Data="{StaticResource data_ungroup}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="U" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- ================ -->
-                <MenuFlyoutSeparator />
-                <!-- 多角形の終端の編集 -->
-                <MenuFlyoutSubItem x:Name="mfsi_edit_poly_end" x:Uid="mfsi_edit_poly_end" Text="Edit Polygon End">
-                    <MenuFlyoutSubItem.Icon>
-                        <PathIcon
-							Data="{StaticResource data_end_open}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem
-						x:Name="mfi_edit_poly_open" x:Uid="mfi_edit_poly_open" Click="edit_poly_end_click"
+				<!-- ================ -->
+				<MenuFlyoutSeparator />
+				<!-- 多角形の終端の編集 -->
+				<MenuFlyoutSubItem x:Name="mfsi_edit_poly_end" x:Uid="mfsi_edit_poly_end" Text="Edit Polygon End">
+					<MenuFlyoutSubItem.Icon>
+						<PathIcon
+							Data="{StaticResource data_end_open}"
+							HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+					<MenuFlyoutItem
+						x:Name="mfi_edit_poly_open" x:Uid="mfi_edit_poly_open"
+                        Click="edit_poly_end_click"
 						Text="Open Polygon End" >
 						<MenuFlyoutItem.Icon>
 							<PathIcon
-								Data="{StaticResource data_end_open}" HorizontalAlignment="Center"
-								VerticalAlignment="Center" Width="16" Height="16" />
-						</MenuFlyoutItem.Icon>
+								Data="{StaticResource data_end_open}"
+ 								HorizontalAlignment="Center" VerticalAlignment="Center"
+								Width="16" Height="16" />
+                        </MenuFlyoutItem.Icon>
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="P" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<MenuFlyoutItem
-						x:Name="mfi_edit_poly_close" x:Uid="mfi_edit_poly_close" Click="edit_poly_end_click"
+						x:Name="mfi_edit_poly_close" x:Uid="mfi_edit_poly_close"
+                        Click="edit_poly_end_click"
 						Text="Close Polygon End" >
 						<MenuFlyoutItem.Icon>
 							<PathIcon
-								Data="{StaticResource data_end_closed}" HorizontalAlignment="Center"
-								VerticalAlignment="Center" Width="16" Height="16" />
-						</MenuFlyoutItem.Icon>
+								Data="{StaticResource data_end_closed}"
+ 								HorizontalAlignment="Center" VerticalAlignment="Center"
+								Width="16" Height="16" />
+                        </MenuFlyoutItem.Icon>
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="P" Modifiers="Control,Shift" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-                </MenuFlyoutSubItem>
-                <!-- 円弧の編集 -->
-                <MenuFlyoutItem
-					x:Name="mfi_edit_arc" x:Uid="mfi_edit_arc" Click="edit_arc_click_async"
+				</MenuFlyoutSubItem>
+				<!-- 円弧の編集 -->
+				<MenuFlyoutItem
+					x:Name="mfi_edit_arc" x:Uid="mfi_edit_arc"
+                    Click="edit_arc_click_async"
 					Text="Edit Arc" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_arc}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</MenuFlyoutItem.Icon>
+							Data="{StaticResource data_arc}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="R" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 文字列の編集 -->
-                <MenuFlyoutItem
-					x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click_async"
+				<!-- 文字列の編集 -->
+				<MenuFlyoutItem
+					x:Name="mfi_edit_text" x:Uid="mfi_edit_text"
+                    Click="edit_text_click_async"
 					Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon
@@ -328,9 +384,10 @@
 						<KeyboardAccelerator Key="E" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem
-					x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="find_text_click"
+				<!-- 文字列の検索/置換 -->
+				<MenuFlyoutItem
+					x:Name="mfi_find_text" x:Uid="mfi_find_text"
+                    Click="find_text_click"
 					Icon="Find" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="F" Modifiers="Control" />
@@ -341,111 +398,141 @@
 			<muxc:MenuBarItem x:Uid="mbi_drawing" AccessKey="D" Title="Drawing">
 				<!-- 選択ツール -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_selection_tool" x:Uid="rmfi_selection_tool"
-					Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True"
-					KeyboardAcceleratorTextOverride="Esc" Text="Selection Tool">
+					x:Name="rmfi_selection_tool" x:Uid="rmfi_selection_tool" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+					KeyboardAcceleratorTextOverride="Esc" Text="Selection Tool" IsChecked="True">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Escape" />
 					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_select}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_select}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<!-- 方形 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_rect" x:Uid="rmfi_drawing_rect"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
+					x:Name="rmfi_drawing_rect" x:Uid="rmfi_drawing_rect" GroupName="gn_tool_type"
+					Click="drawing_tool_click" Text="Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_rect}" HorizontalAlignment="Center" 
-							VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_rect}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- 角丸方形 -->
+                <muxc:RadioMenuFlyoutItem
+					x:Name="rmfi_drawing_rrect" x:Uid="rmfi_drawing_rrect" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Rounded Rectangle">
+					<muxc:RadioMenuFlyoutItem.Icon>
+						<PathIcon
+							Data="{StaticResource data_rrect}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+				</muxc:RadioMenuFlyoutItem>
+                <!-- 多角形 -->
+                <muxc:RadioMenuFlyoutItem
+					x:Name="rmfi_drawing_poly" x:Uid="rmfi_drawing_poly" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Quadrangle">
+					<muxc:RadioMenuFlyoutItem.Icon>
+						<PathIcon
+							Data="{StaticResource data_polygon}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+				</muxc:RadioMenuFlyoutItem>
+                <!-- だ円 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_rrect" x:Uid="rmfi_drawing_rrect"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
+					x:Name="rmfi_drawing_ellipse" x:Uid="rmfi_drawing_ellipse" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_rrect}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_ellipse}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- 円弧 -->
+                <muxc:RadioMenuFlyoutItem
+					x:Name="rmfi_drawing_arc" x:Uid="rmfi_drawing_arc" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Arc">
+					<muxc:RadioMenuFlyoutItem.Icon>
+						<PathIcon
+							Data="{StaticResource data_arc}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+				</muxc:RadioMenuFlyoutItem>
+                <!-- 直線 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_poly" x:Uid="rmfi_drawing_poly"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
+					x:Name="rmfi_drawing_line" x:Uid="rmfi_drawing_line" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Line" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_polygon}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
+							Data="{StaticResource data_line}"
+ 							HorizontalAlignment="Center" VerticalAlignment="Center"
+							Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- 曲線 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_ellipse" x:Uid="rmfi_drawing_ellipse"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
+					x:Name="rmfi_drawing_bezier" x:Uid="rmfi_drawing_bezier" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Curve" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_ellipse}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
+							Data="{StaticResource data_bezier}"
+							HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_arc" x:Uid="rmfi_drawing_arc"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Arc">
-					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon
-							Data="{StaticResource data_arc}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
-				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_line" x:Uid="rmfi_drawing_line"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
-					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon
-							Data="{StaticResource data_line}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
-				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_bezier" x:Uid="rmfi_drawing_bezier"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
-					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon
-							Data="{StaticResource data_bezier}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
-				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem 
-					x:Name="rmfi_drawing_text" x:Uid="rmfi_drawing_text"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
+                <!-- 文字列 -->
+                <muxc:RadioMenuFlyoutItem 
+					x:Name="rmfi_drawing_text" x:Uid="rmfi_drawing_text" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Text" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon 
-							Data="{StaticResource data_text}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
+							Data="{StaticResource data_text}"
+							HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- 定規 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_ruler" x:Uid="rmfi_drawing_ruler"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ruler" >
+					x:Name="rmfi_drawing_ruler" x:Uid="rmfi_drawing_ruler" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Ruler" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_ruler}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_ruler}"
+							HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- ================ -->
+                <MenuFlyoutSeparator />
+                <!-- 色の抽出 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_eyedropper" x:Uid="rmfi_tool_eyedropper"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Eyedropper" >
+					x:Name="rmfi_tool_eyedropper" x:Uid="rmfi_tool_eyedropper" GroupName="gn_tool_type"
+					Click="drawing_tool_click"
+                    Text="Eyedropper" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon 
-							Data="{StaticResource data_eyedropper}" HorizontalAlignment="Center"
-							VerticalAlignment="Center" Width="16" Height="16" />
-					</muxc:RadioMenuFlyoutItem.Icon>
+							Data="{StaticResource data_eyedropper}"
+							HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_drawing_poly_opt" Text="Polygon Option">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon 
@@ -625,26 +712,34 @@
 						Click="stroke_width_click_async" Text="Others..."
 						GroupName="gn_stroke_width" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
+                <MenuFlyoutSubItem
+                    x:Name="mfsi_cap_style" x:Uid="mfsi_cap_style"
+                    Text="Cap Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon
 							Data="{StaticResource data_cap_square}" HorizontalAlignment="Center"
 							VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat"
-						Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true"
-						Text="Flat" >
+						x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat" GroupName="gn_cap_style" 
+						Click="cap_style_click"
+                        Text="Flat" IsChecked="true">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_flat}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_square" x:Uid="rmfi_cap_style_square" Click="cap_style_click" GroupName="gn_cap_style" Text="Square" >
+					<muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_cap_style_square" x:Uid="rmfi_cap_style_square" GroupName="gn_cap_style" 
+                        Click="cap_style_click"
+                        Text="Square" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_square}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_round" x:Uid="rmfi_cap_style_round" Click="cap_style_click" GroupName="gn_cap_style" Text="Round" >
+					<muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_cap_style_round" x:Uid="rmfi_cap_style_round" GroupName="gn_cap_style"
+                        Click="cap_style_click"
+                        Text="Round" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_round}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -655,29 +750,47 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
+                <MenuFlyoutSubItem
+                    x:Name="mfsi_join_style" x:Uid="mfsi_join_style"
+                    Text="Join Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_join_bevel}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_round" x:Uid="rmfi_join_style_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" >
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_join_style_miter_or_bevel" x:Uid="rmfi_join_style_miter_or_bevel" GroupName="gn_join_style"
+                        Click="join_style_click" Text="Miter" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_join_miter}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_join_style_round" x:Uid="rmfi_join_style_round" GroupName="gn_join_style"
+                        Click="join_style_click" Text="Rounded" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_round}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_bevel" x:Uid="rmfi_join_style_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" >
+					<muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_join_style_bevel" x:Uid="rmfi_join_style_bevel" GroupName="gn_join_style"
+                        Click="join_style_click" Text="Beveled" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_bevel}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter" x:Uid="rmfi_join_style_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" >
+                    <!--
+					<muxc:RadioMenuFlyoutItem
+                        x:Name="rmfi_join_style_miter" x:Uid="rmfi_join_style_miter" GroupName="gn_join_style"
+                        Click="join_style_click" IsChecked="true" Text="Shape" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_miter}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter_or_bevel" x:Uid="rmfi_join_style_miter_or_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" >
-					</muxc:RadioMenuFlyoutItem>
+                    -->
 					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Name="mfi_join_miter_limit" x:Uid="mfi_join_miter_limit" Click="join_miter_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem
+                        x:Name="mfi_join_miter_limit" x:Uid="mfi_join_miter_limit"
+                        Click="join_miter_limit_click_async"
+                        Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 矢じるしメニュー -->
@@ -719,33 +832,33 @@
 			<muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 書体名 -->
 				<MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Font Family..." />
-                <!-- 書体の大きさ -->
-                <MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Font Size..." />
-                <!-- 書体の太さ -->
-                <MenuFlyoutSubItem x:Uid="mfsi_font_weight" Icon="Bold" Text="Font Weight" >
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_thin" x:Uid="rmfi_font_weight_thin" Click="font_weight_click" Text="Thin (100)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_light" x:Uid="rmfi_font_weight_extra_light" Click="font_weight_click" Text="Extra Light (200)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_light" x:Uid="rmfi_font_weight_light" Click="font_weight_click" Text="Light (300)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_normal" x:Uid="rmfi_font_weight_normal" Click="font_weight_click" Text="Normal (400)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_medium" x:Uid="rmfi_font_weight_medium" Click="font_weight_click" Text="Medium (500)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_semi_bold" x:Uid="rmfi_font_weight_semi_bold" Click="font_weight_click" Text="Semi Bold (600)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_bold" x:Uid="rmfi_font_weight_bold" Click="font_weight_click" Text="Bold (700)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_bold" x:Uid="rmfi_font_weight_extra_bold" Click="font_weight_click" Text="Extra Bold (800)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_black" x:Uid="rmfi_font_weight_black" Click="font_weight_click" Text="Black (900)" GroupName="gn_font_wieght"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_black" x:Uid="rmfi_font_weight_extra_black" Click="font_weight_click" Text="Extra Black (950)" GroupName="gn_font_wieght"/>
-                </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_font_stretch" Text="Font Stretch">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_ultra_condensed" x:Uid="rmfi_font_stretch_ultra_condensed" Click="font_stretch_click" Text="Ultra Condensed" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_extra_condensed" x:Uid="rmfi_font_stretch_extra_condensed" Click="font_stretch_click" Text="Extra Condensed" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_condensed" x:Uid="rmfi_font_stretch_condensed" Click="font_stretch_click" Text="Condensed" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_semi_condensed" x:Uid="rmfi_font_stretch_semi_condensed" Click="font_stretch_click" Text="Semi Condensed" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_normal" x:Uid="rmfi_font_stretch_normal" Click="font_stretch_click" Text="Normal" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_semi_expanded" x:Uid="rmfi_font_stretch_semi_expanded" Click="font_stretch_click" Text="Semi Expanded" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_expanded" x:Uid="rmfi_font_stretch_expanded" Click="font_stretch_click" Text="Expanded" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_extra_expanded" x:Uid="rmfi_font_stretch_extra_expanded" Click="font_stretch_click" Text="Extra Expanded" GroupName="gn_font_stretch"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_ultra_expanded" x:Uid="rmfi_font_stretch_ultra_expanded" Click="font_stretch_click" Text="Ultra Expanded" GroupName="gn_font_stretch"/>
-                </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
+				<!-- 書体の大きさ -->
+				<MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Font Size..." />
+				<!-- 書体の太さ -->
+				<MenuFlyoutSubItem x:Uid="mfsi_font_weight" Icon="Bold" Text="Font Weight" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_thin" x:Uid="rmfi_font_weight_thin" Click="font_weight_click" Text="Thin (100)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_light" x:Uid="rmfi_font_weight_extra_light" Click="font_weight_click" Text="Extra Light (200)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_light" x:Uid="rmfi_font_weight_light" Click="font_weight_click" Text="Light (300)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_normal" x:Uid="rmfi_font_weight_normal" Click="font_weight_click" Text="Normal (400)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_medium" x:Uid="rmfi_font_weight_medium" Click="font_weight_click" Text="Medium (500)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_semi_bold" x:Uid="rmfi_font_weight_semi_bold" Click="font_weight_click" Text="Semi Bold (600)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_bold" x:Uid="rmfi_font_weight_bold" Click="font_weight_click" Text="Bold (700)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_bold" x:Uid="rmfi_font_weight_extra_bold" Click="font_weight_click" Text="Extra Bold (800)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_black" x:Uid="rmfi_font_weight_black" Click="font_weight_click" Text="Black (900)" GroupName="gn_font_wieght"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_weight_extra_black" x:Uid="rmfi_font_weight_extra_black" Click="font_weight_click" Text="Extra Black (950)" GroupName="gn_font_wieght"/>
+				</MenuFlyoutSubItem>
+				<MenuFlyoutSubItem x:Uid="mfsi_font_stretch" Text="Font Stretch">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_ultra_condensed" x:Uid="rmfi_font_stretch_ultra_condensed" Click="font_stretch_click" Text="Ultra Condensed" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_extra_condensed" x:Uid="rmfi_font_stretch_extra_condensed" Click="font_stretch_click" Text="Extra Condensed" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_condensed" x:Uid="rmfi_font_stretch_condensed" Click="font_stretch_click" Text="Condensed" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_semi_condensed" x:Uid="rmfi_font_stretch_semi_condensed" Click="font_stretch_click" Text="Semi Condensed" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_normal" x:Uid="rmfi_font_stretch_normal" Click="font_stretch_click" Text="Normal" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_semi_expanded" x:Uid="rmfi_font_stretch_semi_expanded" Click="font_stretch_click" Text="Semi Expanded" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_expanded" x:Uid="rmfi_font_stretch_expanded" Click="font_stretch_click" Text="Expanded" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_extra_expanded" x:Uid="rmfi_font_stretch_extra_expanded" Click="font_stretch_click" Text="Extra Expanded" GroupName="gn_font_stretch"/>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_stretch_ultra_expanded" x:Uid="rmfi_font_stretch_ultra_expanded" Click="font_stretch_click" Text="Ultra Expanded" GroupName="gn_font_stretch"/>
+				</MenuFlyoutSubItem>
+				<MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_italic}" />
 					</MenuFlyoutSubItem.Icon>
@@ -784,30 +897,30 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
-                <!-- 段落の整列 -->
+				<!-- 段落の整列 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_text_align_vert" Text="Paragraph Alignment">
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_vert_click" IsChecked="True" Text="Top" GroupName="gn_text_align_vert" />
+						x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_vert_click" IsChecked="True" Text="Top" GroupName="gn_text_align_vert" />
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_vert_click" Text="Bottom" GroupName="gn_text_align_vert" />
+						x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_vert_click" Text="Bottom" GroupName="gn_text_align_vert" />
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_vert_click" Text="Middle" GroupName="gn_text_align_vert" />
+						x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_vert_click" Text="Middle" GroupName="gn_text_align_vert" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<MenuFlyoutItem x:Uid="mfi_text_pad" Click="text_pad_click_async" Text="Margin..." />
 				<MenuFlyoutItem
-                    x:Name="mfi_text_fit_frame_to_text" x:Uid="mfi_text_fit_frame_to_text"
-                    Click="text_fit_frame_to_text_click" Text="Fit Frame Size to Text" >
+					x:Name="mfi_text_fit_frame_to_text" x:Uid="mfi_text_fit_frame_to_text"
+					Click="text_fit_frame_to_text_click" Text="Fit Frame Size to Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon
-                            FontFamily="{StaticResource SymbolThemeFontFamily}"
-                            Glyph="{StaticResource glyph_fit_page}"/>
+							FontFamily="{StaticResource SymbolThemeFontFamily}"
+							Glyph="{StaticResource glyph_fit_page}"/>
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem
-                    x:Uid="mfi_font_color" Click="font_color_click" Icon="FontColor"
-                    Text="Font Color..." />
+					x:Uid="mfi_font_color" Click="font_color_click" Icon="FontColor"
+					Text="Font Color..." />
 			</muxc:MenuBarItem>
 			<!-- 画像メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_image" x:Uid="mbi_image" AccessKey="I" Title="Image">
@@ -835,14 +948,14 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show"/>
 				</MenuFlyoutSubItem>
-                <!-- 方眼の大きさ -->
-                <MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
+				<!-- 方眼の大きさ -->
+				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
 					<MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Grid Size..." />
 				</MenuFlyoutSubItem>
-                <!-- 方眼の色 -->
-                <MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click" Text="Grid Color..." />
+				<!-- 方眼の色 -->
+				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="Pattern 1" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Pattern 2" GroupName="gn_grid_emph" />
@@ -851,12 +964,12 @@
 				<MenuFlyoutSeparator />
 				<!-- ページの大きさ -->
 				<MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click_async" Text="Page Size..." />
-                <!-- ページの色 -->
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
-                <MenuFlyoutSeparator />
-                <!-- 拡大率 -->
-                <MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Icon="Zoom" Text="Zoom">
-                    <!--
+				<!-- ページの色 -->
+				<MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click" Text="Page Color..." />
+				<MenuFlyoutSeparator />
+				<!-- 拡大率 -->
+				<MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Icon="Zoom" Text="Zoom">
+					<!--
 					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
 					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
 					<MenuFlyoutSeparator />
@@ -867,94 +980,94 @@
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					-->
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_025" Click="zoom_click" Icon="ZoomOut" Text="25%" />
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_050" Click="zoom_click" Icon="ZoomOut" Text="50%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="Number0" Modifiers="Control"/>
-                            <KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
-                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_075" Click="zoom_click" Icon="ZoomOut" Text="75%" />
-                    <muxc:RadioMenuFlyoutItem 
-                        x:Name="rmfi_page_zoom_100" Click="zoom_click" Icon="Zoom" Text="100%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="Number1" Modifiers="Control"/>
-                            <KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
-                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_150" Click="zoom_click" Icon="ZoomIn" Text="150%" />
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_200" Click="zoom_click" Icon="ZoomIn" Text="200%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="Number2" Modifiers="Control"/>
-                            <KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
-                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_300" Click="zoom_click" Icon="ZoomIn" Text="300%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="Number3" Modifiers="Control"/>
-                            <KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
-                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_page_zoom_400" Click="zoom_click" Icon="ZoomIn" Text="400%" >
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="Number4" Modifiers="Control"/>
-                            <KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
-                        </muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
-                    </muxc:RadioMenuFlyoutItem>
-                </MenuFlyoutSubItem>
-                <!-- 背景パターン -->
-                <MenuFlyoutSubItem x:Uid="mfsi_background_pattern" Text="Background Pattern">
-                    <MenuFlyoutSubItem.Icon>
-                        <PathIcon
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_025" Click="zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_050" Click="zoom_click" Icon="ZoomOut" Text="50%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					</muxc:RadioMenuFlyoutItem>
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_075" Click="zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem 
+						x:Name="rmfi_page_zoom_100" Click="zoom_click" Icon="Zoom" Text="100%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
+						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					</muxc:RadioMenuFlyoutItem>
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_150" Click="zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_200" Click="zoom_click" Icon="ZoomIn" Text="200%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
+						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					</muxc:RadioMenuFlyoutItem>
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_300" Click="zoom_click" Icon="ZoomIn" Text="300%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
+						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					</muxc:RadioMenuFlyoutItem>
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_page_zoom_400" Click="zoom_click" Icon="ZoomIn" Text="400%" >
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
+						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					</muxc:RadioMenuFlyoutItem>
+				</MenuFlyoutSubItem>
+				<!-- 背景パターン -->
+				<MenuFlyoutSubItem x:Uid="mfsi_background_pattern" Text="Background Pattern">
+					<MenuFlyoutSubItem.Icon>
+						<PathIcon
 							Data="{StaticResource data_checker_board}" Height="16" Width="16"
 							HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </MenuFlyoutSubItem.Icon>
-                    <ToggleMenuFlyoutItem
-                        x:Name="tmfi_background_pattern" x:Uid="tmfi_background_pattern" 
-                        IsChecked="False" Click="background_pattern_click"
-                        Text="Show Checker Board Pattern">
-                        <ToggleMenuFlyoutItem.Icon>
-                            <PathIcon
+					</MenuFlyoutSubItem.Icon>
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_background_pattern" x:Uid="tmfi_background_pattern" 
+						IsChecked="False" Click="background_pattern_click"
+						Text="Show Checker Board Pattern">
+						<ToggleMenuFlyoutItem.Icon>
+							<PathIcon
 								Data="{StaticResource data_checker_board}" Height="16" Width="16"
 								HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <MenuFlyoutSeparator />
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_background_white" x:Uid="rmfi_background_white"
-                        IsChecked="True" Click="background_pattern_click"
-                        Text="Background White" GroupName="gn_background_color">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<MenuFlyoutSeparator />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_background_white" x:Uid="rmfi_background_white"
+						IsChecked="True" Click="background_pattern_click"
+						Text="Background White" GroupName="gn_background_color">
+						<muxc:RadioMenuFlyoutItem.Icon>
+							<PathIcon
 								Data="{StaticResource data_white}" Height="16" Width="16"
 								HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_background_black" x:Uid="rmfi_background_black"
-                        IsChecked="False" Click="background_pattern_click"
-                        Text="Background Black" GroupName="gn_background_color">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon
+						</muxc:RadioMenuFlyoutItem.Icon>
+					</muxc:RadioMenuFlyoutItem>
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_background_black" x:Uid="rmfi_background_black"
+						IsChecked="False" Click="background_pattern_click"
+						Text="Background Black" GroupName="gn_background_color">
+						<muxc:RadioMenuFlyoutItem.Icon>
+							<PathIcon
 								Data="{StaticResource data_black}" Height="16" Width="16"
 								HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
+						</muxc:RadioMenuFlyoutItem.Icon>
 
-                    </muxc:RadioMenuFlyoutItem>
-                </MenuFlyoutSubItem>
-                <MenuFlyoutItem
+					</muxc:RadioMenuFlyoutItem>
+				</MenuFlyoutSubItem>
+				<MenuFlyoutItem
 					x:Uid="mfi_layout_save" Click="layout_save_click_async" Text="Save Page Layout" Icon="SaveLocal" />
-                <MenuFlyoutItem
+				<MenuFlyoutItem
 					x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="layout_reset_click_async"
-                    Text="Reset Page Layout" />
-            </muxc:MenuBarItem>
+					Text="Reset Page Layout" />
+			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
 				<!-- 一覧 -->
@@ -968,7 +1081,7 @@
 						<KeyboardAccelerator Key="L" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-                <!-- 長さの単位 -->
+				<!-- 長さの単位 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
@@ -991,8 +1104,8 @@
 						x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid"
 						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
-                <!-- 色の基数 -->
-                <MenuFlyoutSubItem x:Name="mfsi_color_code" x:Uid="mfsi_color_code" Text="Color Code">
+				<!-- 色の基数 -->
+				<MenuFlyoutSubItem x:Name="mfsi_color_code" x:Uid="mfsi_color_code" Text="Color Code">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -1011,8 +1124,8 @@
 						x:Name="rmfi_color_code_pct" x:Uid="rmfi_color_code_pct"
 						Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
 				</MenuFlyoutSubItem>
-                <!-- ステータスバー -->
-                <MenuFlyoutSubItem x:Name="mfsi_status_bar" x:Uid="mfsi_status_bar" Text="Status Bar">
+				<!-- ステータスバー -->
+				<MenuFlyoutSubItem x:Name="mfsi_status_bar" x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -1118,8 +1231,8 @@
 				PointerReleased="event_released" PointerWheelChanged="event_wheel_changed"
 				RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True"
 				RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
-                Loaded="main_panel_loaded"
-                CompositionScaleChanged="main_panel_scale_changed"
+				Loaded="main_panel_loaded"
+				CompositionScaleChanged="main_panel_scale_changed"
 				SizeChanged="main_panel_size_changed">
 				<!--
 				通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
@@ -1139,10 +1252,10 @@
 		</RelativePanel>
 		<!-- ステータスバー -->
 		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" 
-                    PointerReleased="event_released"
-                    >
+					PointerReleased="event_released"
+					>
 			<!-- ステータスバーコンテキストメニュー -->
-            <!--
+			<!--
 			<StackPanel.ContextFlyout>
 				<MenuFlyout>
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
@@ -1153,12 +1266,15 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
 				</MenuFlyout>
 			</StackPanel.ContextFlyout>
-            -->
-            <!-- ContextFlyout を処理するため event_released を設定 -->
+			-->
+			<!-- ContextFlyout を処理するため event_released を設定 -->
 			<StackPanel
-                x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal" >
-				<TextBlock  Margin="0,0,0,0" Text="draw:"/>
-				<PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
+				x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal" >
+				<TextBlock  Margin="0,0,0,0" Text="Draw:"/>
+				<PathIcon
+                    x:Name="pi_tool_icon" Data="M0,0"
+                    Height="16"  Width="16"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
 					<PathIcon.RenderTransform>
 						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
 					</PathIcon.RenderTransform>
@@ -1166,27 +1282,27 @@
 				<Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_unit" Text="unit:"/>
+				<TextBlock x:Uid="tk_status_bar_unit" Text="Unit:"/>
 				<TextBlock x:Name="tk_status_bar_unit" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_pos" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_pos_x" Text="x:" />
+				<TextBlock x:Uid="tk_status_bar_pos_x" Text="X:" />
 				<TextBlock x:Name="tk_status_bar_pos_x" Margin="0,0,4,0" Text="0"/>
-				<TextBlock x:Uid="tk_status_bar_pos_y" Text="y:" />
+				<TextBlock x:Uid="tk_status_bar_pos_y" Text="Y:" />
 				<TextBlock x:Name="tk_status_bar_pos_y" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_grid" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_grid" Text="g:"/>
+				<TextBlock x:Uid="tk_status_bar_grid" Text="Grid:"/>
 				<TextBlock x:Name="tk_status_bar_grid" Text="0" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_page" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_page_w" Text="w:"/>
+				<TextBlock x:Uid="tk_status_bar_page_w" Text="W:"/>
 				<TextBlock x:Name="tk_status_bar_page_w" Margin="0,0,4,0" Text="0"/>
-				<TextBlock x:Uid="tk_status_bar_page_h" Text="h:"/>
+				<TextBlock x:Uid="tk_status_bar_page_h" Text="H:"/>
 				<TextBlock x:Name="tk_status_bar_page_h" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_zoom" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_zoom" Text="z:"/>
+				<TextBlock x:Uid="tk_status_bar_zoom" Text="Zoom:"/>
 				<TextBlock x:Name="tk_status_bar_zoom" Text="0"/>
 			</StackPanel>
 		</StackPanel>
@@ -1227,80 +1343,80 @@
 		<ContentDialog
 			x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close"
 			DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <muxc:NumberBox
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition />
+					<RowDefinition />
+					<RowDefinition />
+					<RowDefinition />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition />
+					<ColumnDefinition />
+					<ColumnDefinition />
+				</Grid.ColumnDefinitions>
+				<muxc:NumberBox
 					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,0,4,12"
-                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+					Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
-                    ValueChanged="page_size_value_changed" />
-                <muxc:NumberBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
+					ValueChanged="page_size_value_changed" />
+				<muxc:NumberBox
 					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="4,0,0,12"
-                    Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="0"
+					Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="0"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
-                    ValueChanged="page_size_value_changed" />
-                <muxc:NumberBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be between 1-32768"
+					ValueChanged="page_size_value_changed" />
+				<muxc:NumberBox
 					x:Name="tx_page_margin_top" x:Uid="tx_page_margin_top" Margin="0,0,0,12"
-                    Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"
+					Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Top Padding"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
-                    ValueChanged="page_size_value_changed" />
-                <muxc:NumberBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
+					ValueChanged="page_size_value_changed" />
+				<muxc:NumberBox
 					x:Name="tx_page_margin_left" x:Uid="tx_page_margin_left" Margin="0,0,4,12"
-                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
+					Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
-                    ValueChanged="page_size_value_changed" />
-                <muxc:NumberBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
+					ValueChanged="page_size_value_changed" />
+				<muxc:NumberBox
 					x:Name="tx_page_margin_right" x:Uid="tx_page_margin_right" Margin="4,0,0,12"
-                    Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="2"
+					Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="2"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Right Padding"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
-                    ValueChanged="page_size_value_changed" />
-                <muxc:NumberBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page width"
+					ValueChanged="page_size_value_changed" />
+				<muxc:NumberBox
 					x:Name="tx_page_margin_bottom" x:Uid="tx_page_margin_bottom" Margin="0,0,0,12"
-                    Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3"
+					Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3"
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
-                    SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
-                    PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
-                    ValueChanged="page_size_value_changed" />
-                <ComboBox
+					SmallChange="1" LargeChange="10" SpinButtonPlacementMode="Hidden"
+					PlaceholderText="NaN" ToolTipService.ToolTip="Must be less than page height"
+					ValueChanged="page_size_value_changed" />
+				<ComboBox
 					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,0,0,12"
-                    Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4"
+					Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4"
 					SelectionChanged="page_size_selection_changed">
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel"
 						IsSelected="True"/>
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_inch" x:Uid="cbi_len_unit_inch" Content="Inch"/>
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_milli" x:Uid="cbi_len_unit_milli" Content="Millimeter"/>
-                    <ComboBoxItem
+					<ComboBoxItem
 						x:Name="cbi_len_unit_point" x:Uid="cbi_len_unit_point" Content="Point"/>
-                    <ComboBoxItem
+					<ComboBoxItem
 						x:Name="cbi_len_unit_grid" x:Uid="cbi_len_unit_grid" Content="Grid" />
-                </ComboBox>
-            </Grid>
-        </ContentDialog>
+				</ComboBox>
+			</Grid>
+		</ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog
 			x:Name="cd_snap_point" x:Uid="cd_snap_point" CloseButtonText="Close"
@@ -1333,14 +1449,14 @@
 					RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True"
 					RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256"
-                    Loaded="dialog_list_loaded" />
+					Loaded="dialog_list_loaded" />
 				<Slider
 					x:Name="dialog_slider_0" x:Uid = "dialog_slider_0"
 					IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0"
 					RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True"
 					RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
 					Visibility="Collapsed" />
-                <Slider
+				<Slider
 					x:Name="dialog_slider_1" x:Uid = "dialog_slider_1"
 					IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0"
 					RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True"
@@ -1370,13 +1486,17 @@
 					IsChecked="False" Margin="0,0,0,4" RelativePanel.Below="dialog_slider_4"
 					RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
 				<ComboBox
-					x:Name="dialog_combo_box" x:Uid="dialog_combo_box" Header="Length Unit"
-					Margin="0,0,0,4" RelativePanel.Below="dialog_check_box"
-					RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
-				<muxc:RadioButtons
-					x:Name="dialog_radio_btns" MaxColumns="2"  Margin="0,0,0,4"
-					RelativePanel.Below="dialog_combo_box" RelativePanel.AlignLeftWithPanel="True"
-					Visibility="Collapsed" >
+					x:Name="dialog_combo_box_0" x:Uid="dialog_combo_box_0" Header="?"
+                    Margin="0,0,0,4" 
+					RelativePanel.AlignLeftWithPanel="True" RelativePanel.Below="dialog_check_box"
+                    Visibility="Collapsed" />
+                <ComboBox
+					x:Name="dialog_combo_box_1" x:Uid="dialog_combo_box_1" Header="?"
+                    Margin="0,0,0,4" 
+					RelativePanel.AlignLeftWithPanel="True" RelativePanel.Below="dialog_combo_box_0" Visibility="Collapsed" />
+                <muxc:RadioButtons
+					x:Name="dialog_radio_btns" MaxColumns="2" Margin="0,0,0,4"
+					RelativePanel.AlignLeftWithPanel="True" RelativePanel.Below="dialog_combo_box_1" Visibility="Collapsed" >
 					<!--
 					x:String などの UIElement でない要素のリストでは,
 					オブザベーションのタイミングかなんかでうまくチェックがつかなかったりする.

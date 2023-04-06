@@ -22,6 +22,12 @@ namespace winrt::GraphPaper::implementation
 	enum struct UNDO_T : uint32_t {
 		END = static_cast<uint32_t>(-1),	// 操作スタックの終端 (ファイル読み書きで使用)
 		NIL = 0,	// 操作の区切り (ファイル読み書きで使用)
+		ARC_DIR,	// 円弧の方向の操作
+		ARC_END,	// 円弧の終点の操作
+		ARC_ROT,	// 円弧の傾きの操作
+		ARC_START,	// 円弧の始点の操作
+		ARROW_CAP,	// 矢じるしの返しの形式の操作
+		ARROW_JOIN,	// 矢じるしの先端の形式の操作
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
@@ -53,10 +59,6 @@ namespace winrt::GraphPaper::implementation
 		PAGE_SIZE,	// ページの大きさの操作
 		PAGE_PAD,	// ページの内余白の操作
 		POLY_END,	// 多角形の端の操作
-		ARC_START,	// 円弧の始点の操作
-		ARC_END,	// 円弧の終点の操作
-		ARC_ROT,	// 円弧の傾きの操作
-		ARC_DIR,	// 円弧の方向の操作
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
@@ -81,6 +83,8 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::ARC_DIR> { using type = D2D1_SWEEP_DIRECTION; };
 	template <> struct U_TYPE<UNDO_T::ARC_END> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::ARC_ROT> { using type = float; };
+	template <> struct U_TYPE<UNDO_T::ARROW_CAP> { using type = D2D1_CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_T::ARROW_JOIN> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_T::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_T::ARROW_STYLE> { using type = ARROW_STYLE; };
 	template <> struct U_TYPE<UNDO_T::DASH_CAP> { using type = D2D1_CAP_STYLE; };

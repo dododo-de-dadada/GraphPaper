@@ -16,12 +16,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Window;
 
 	//-------------------------------
-	// ファイルメニューの「画像をインポートする...」が選択された.
+	// ファイルメニューの「画像をインポート」が選択された.
 	//-------------------------------
 	IAsyncAction MainPage::file_import_image_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// co_await してるにもかかわらず, ファイル開くピッカーが返値を戻すまで時間がかかる.
-		// その間フォアグランドのスレッドが動作してしまう.
 		m_mutex_event.lock();
 
 		// ファイルオープンピッカーを取得して開く.

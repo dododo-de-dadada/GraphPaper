@@ -10,9 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 矢じるしの D2D1 パスジオメトリを作成する.
-	static void line_create_arrow_geom(
-		ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
-		ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo);
+	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo);
 	// 矢じるしの D2D ストローク特性を作成する.
 	//static void line_create_arrow_stroke(
 	//	ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, 
@@ -20,15 +18,14 @@ namespace winrt::GraphPaper::implementation
 	//	ID2D1StrokeStyle** s_arrow_style);
 
 	// 矢じるしの D2D1 パスジオメトリを作成する
-	// factory	D2D ファクトリー
-	// start	軸の始点
-	// pos	軸の終端への位置ベクトル
-	// style	矢じるしの形式
-	// size	矢じるしの寸法
-	// geo	作成されたパスジオメトリ
 	static void line_create_arrow_geom(
-		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
-		ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
+		ID2D1Factory3* const factory,	// D2D ファクトリー
+		const D2D1_POINT_2F start,	// 矢軸の始点
+		const D2D1_POINT_2F pos,	// 矢軸の先端への位置ベクトル
+		ARROW_STYLE style,	// 矢じるしの形式
+		ARROW_SIZE& a_size,	// 矢じるしの大きさ
+		ID2D1PathGeometry** geo	// 作成されたパスジオメトリ
+	)
 	{
 		D2D1_POINT_2F barb[2];	// 矢じるしの返しの端点
 		D2D1_POINT_2F tip;	// 矢じるしの先端点
@@ -37,9 +34,11 @@ namespace winrt::GraphPaper::implementation
 		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barb, tip)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(
-				factory->CreatePathGeometry(geo));
+				factory->CreatePathGeometry(geo)
+			);
 			winrt::check_hresult(
-				(*geo)->Open(sink.put()));
+				(*geo)->Open(sink.put())
+			);
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
 				barb[0],
@@ -55,7 +54,8 @@ namespace winrt::GraphPaper::implementation
 				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
 			);
 			winrt::check_hresult(
-				sink->Close());
+				sink->Close()
+			);
 			sink = nullptr;
 		}
 	}
