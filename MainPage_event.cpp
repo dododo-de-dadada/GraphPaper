@@ -776,39 +776,39 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, pressed);
 
 		xcvd_is_enabled();
-		bool undo_visible = false;
+		int undo_visible = 0;
 		if (mfi_undo_2().IsEnabled()) {
 			mfi_undo_2().Visibility(Visibility::Visible);
-			undo_visible = true;
+			undo_visible++;
 		}
 		else {
 			mfi_undo_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_redo_2().IsEnabled()) {
 			mfi_redo_2().Visibility(Visibility::Visible);
-			undo_visible = true;
+			undo_visible++;
 		}
 		else {
 			mfi_redo_2().Visibility(Visibility::Collapsed);
 		}
-		bool xcvd_visible = false;
+		int xcvd_visible = 0;
 		if (mfi_xcvd_cut_2().IsEnabled()) {
 			mfi_xcvd_cut_2().Visibility(Visibility::Visible);
-			xcvd_visible = true;
+			xcvd_visible++;
 		}
 		else {
 			mfi_xcvd_cut_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_xcvd_copy_2().IsEnabled()) {
 			mfi_xcvd_copy_2().Visibility(Visibility::Visible);
-			xcvd_visible = true;
+			xcvd_visible++;
 		}
 		else {
 			mfi_xcvd_copy_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_xcvd_paste_2().IsEnabled()) {
 			mfi_xcvd_paste_2().Visibility(Visibility::Visible);
-			xcvd_visible = true;
+			xcvd_visible++;
 		}
 		else {
 			mfi_xcvd_paste_2().Visibility(Visibility::Collapsed);
@@ -820,91 +820,91 @@ namespace winrt::GraphPaper::implementation
 		else {
 			mfi_xcvd_delete_2().Visibility(Visibility::Collapsed);
 		}
-		if (undo_visible && xcvd_visible) {
+		if (undo_visible > 1 && xcvd_visible > 1) {
 			mfs_separator_undo_xcvd().Visibility(Visibility::Visible);
 		}
 		else {
 			mfs_separator_undo_xcvd().Visibility(Visibility::Collapsed);
 		}
-		bool select_visible = false;
+		int select_visible = 0;
 		if (mfi_select_all_2().IsEnabled()) {
 			mfi_select_all_2().Visibility(Visibility::Visible);
-			select_visible = true;
+			select_visible++;
 		}
 		else {
 			mfi_select_all_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfsi_order_2().IsEnabled()) {
 			mfsi_order_2().Visibility(Visibility::Visible);
-			select_visible = true;
+			select_visible++;
 		}
 		else {
 			mfsi_order_2().Visibility(Visibility::Collapsed);
 		}
-		if ((undo_visible || xcvd_visible) && select_visible) {
+		if (undo_visible + xcvd_visible > 1 && select_visible > 1) {
 			mfs_separator_xcvd_select().Visibility(Visibility::Visible);
 		}
 		else {
 			mfs_separator_xcvd_select().Visibility(Visibility::Collapsed);
 		}
-		bool group_visible = false;
+		int group_visible = 0;
 		if (mfi_group_2().IsEnabled()) {
 			mfi_group_2().Visibility(Visibility::Visible);
-			group_visible = true;
+			group_visible++;
 		}
 		else {
 			mfi_group_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_ungroup_2().IsEnabled()) {
 			mfi_ungroup_2().Visibility(Visibility::Visible);
-			group_visible = true;
+			group_visible++;
 		}
 		else {
 			mfi_ungroup_2().Visibility(Visibility::Collapsed);
 		}
-		if ((undo_visible || xcvd_visible || select_visible) && group_visible) {
+		if (undo_visible + xcvd_visible + select_visible > 1 && group_visible > 1) {
 			mfs_separator_select_group().Visibility(Visibility::Visible);
 		}
 		else {
 			mfs_separator_select_group().Visibility(Visibility::Collapsed);
 		}
-		bool edit_visible = false;
+		int edit_visible = 0;
 		if (mfsi_edit_poly_end_2().IsEnabled()) {
 			mfsi_edit_poly_end_2().Visibility(Visibility::Visible);
-			edit_visible = true;
+			edit_visible++;
 		}
 		else {
 			mfsi_edit_poly_end_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_edit_arc_2().IsEnabled()) {
 			mfi_edit_arc_2().Visibility(Visibility::Visible);
-			edit_visible = true;
+			edit_visible++;
 		}
 		else {
 			mfi_edit_arc_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_edit_text_2().IsEnabled()) {
 			mfi_edit_text_2().Visibility(Visibility::Visible);
-			edit_visible = true;
+			edit_visible++;
 		}
 		else {
 			mfi_edit_text_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_find_text_2().IsEnabled()) {
 			mfi_find_text_2().Visibility(Visibility::Visible);
-			edit_visible = true;
+			edit_visible++;
 		}
 		else {
 			mfi_find_text_2().Visibility(Visibility::Collapsed);
 		}
 		if (mfi_text_fit_frame_to_text_2().IsEnabled()) {
 			mfi_text_fit_frame_to_text_2().Visibility(Visibility::Visible);
-			edit_visible = true;
+			edit_visible++;
 		}
 		else {
 			mfi_text_fit_frame_to_text_2().Visibility(Visibility::Collapsed);
 		}
-		if ((undo_visible || xcvd_visible || select_visible || group_visible) && edit_visible) {
+		if (undo_visible + xcvd_visible + select_visible + group_visible > 1 && edit_visible > 1) {
 			mfs_separator_group_edit().Visibility(Visibility::Visible);
 		}
 		else {
@@ -913,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 		//MenuFlyout popup{};
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ªƒkƒ‹, ‚Ü‚½‚Í‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªŠO‘¤‚©”»’è‚·‚é.
 		if (pressed == nullptr || loc_pressed == LOC_TYPE::LOC_PAGE) {
-			if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
+			if (undo_visible + xcvd_visible + select_visible + group_visible + edit_visible > 1) {
 				mfs_separator_edit_stroke().Visibility(Visibility::Visible);
 			}
 			else {
@@ -972,13 +972,14 @@ namespace winrt::GraphPaper::implementation
 			text_align_vert_is_checked(m_main_page.m_text_align_vert);
 			layout_is_checked();
 
+			if (undo_visible + xcvd_visible + select_visible + group_visible + edit_visible > 1) {
+				mfs_separator_edit_stroke().Visibility(Visibility::Visible);
+			}
+			else {
+				mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
+			}
+
 			if (loc_pressed == LOC_TYPE::LOC_TEXT) {
-				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
-					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
-				}
-				else {
-					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
-				}
 				mfsi_dash_style_2().Visibility(Visibility::Collapsed);
 				mfi_dash_pat_2().Visibility(Visibility::Collapsed);
 				mfsi_stroke_width_2().Visibility(Visibility::Collapsed);
@@ -1009,13 +1010,6 @@ namespace winrt::GraphPaper::implementation
 				mfi_image_opac_2().Visibility(Visibility::Collapsed);
 			}
 			else if (typeid(*pressed) == typeid(ShapeImage)) {
-				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
-					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
-				}
-				else {
-					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
-				}
-
 				mfsi_dash_style_2().Visibility(Visibility::Collapsed);
 				mfi_dash_pat_2().Visibility(Visibility::Collapsed);
 				mfsi_stroke_width_2().Visibility(Visibility::Collapsed);
@@ -1046,13 +1040,6 @@ namespace winrt::GraphPaper::implementation
 				mfi_image_opac_2().Visibility(Visibility::Visible);
 			}
 			else {
-				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
-					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
-				}
-				else {
-					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
-				}
-
 				mfsi_dash_style_2().Visibility(Visibility::Visible);
 				mfi_dash_pat_2().Visibility(Visibility::Visible);
 				mfsi_stroke_width_2().Visibility(Visibility::Visible);
