@@ -24,6 +24,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
 	{
 		tmfi_image_keep_aspect().IsChecked(keep_aspect);
+		tmfi_image_keep_aspect_2().IsChecked(keep_aspect);
 	}
 
 	// 画像メニューの「原画像に戻す」が選択された.

@@ -11,6 +11,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::TextBlock;
+	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 	using winrt::Windows::UI::Xaml::Setter;
 
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
@@ -53,34 +54,39 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (checker_board) {
 			tmfi_background_pattern().IsChecked(true);
+			tmfi_background_pattern_2().IsChecked(true);
 		}
 		else {
 			tmfi_background_pattern().IsChecked(false);
+			tmfi_background_pattern_2().IsChecked(false);
 		}
 		if (equal(color, COLOR_BLACK)) {
 			rmfi_background_black().IsChecked(true);
+			rmfi_background_black_2().IsChecked(true);
 		}
 		else {
 			rmfi_background_white().IsChecked(true);
+			rmfi_background_white_2().IsChecked(true);
 		}
 	}
 
 	// 背景パターンがクリックされた.
 	void MainPage::background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == tmfi_background_pattern()) {
-			if (m_background_show != tmfi_background_pattern().IsChecked()) {
-				m_background_show = tmfi_background_pattern().IsChecked();
+		if (sender == tmfi_background_pattern() || sender == tmfi_background_pattern_2()) {
+			const auto toggle = sender.as<ToggleMenuFlyoutItem>();
+			if (m_background_show != toggle.IsChecked()) {
+				m_background_show = toggle.IsChecked();
 				main_draw();
 			}
 		}
-		else if (sender == rmfi_background_white()) {
+		else if (sender == rmfi_background_white() || sender == rmfi_background_white_2()) {
 			if (!equal(m_background_color, COLOR_WHITE)) {
 				m_background_color = COLOR_WHITE;
 				main_draw();
 			}
 		}
-		else if (sender == rmfi_background_black()) {
+		else if (sender == rmfi_background_black() || sender == rmfi_background_black_2()) {
 			if (!equal(m_background_color, COLOR_BLACK)) {
 				m_background_color = COLOR_BLACK;
 				main_draw();
@@ -92,13 +98,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_EMPH val;
-		if (sender == rmfi_grid_emph_1()) {
+		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
 			val = GRID_EMPH_0;
 		}
-		else if (sender == rmfi_grid_emph_2()) {
+		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
 			val = GRID_EMPH_2;
 		}
-		else if (sender == rmfi_grid_emph_3()) {
+		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
 			val = GRID_EMPH_3;
 		}
 		else {
@@ -121,8 +127,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
 		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
 		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
 		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -309,13 +318,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_SHOW new_val;
-		if (sender == rmfi_grid_show_back()) {
+		if (sender == rmfi_grid_show_back() || sender == rmfi_grid_show_back_2()) {
 			new_val = GRID_SHOW::BACK;
 		}
-		else if (sender == rmfi_grid_show_front()) {
+		else if (sender == rmfi_grid_show_front() || sender == rmfi_grid_show_front_2()) {
 			new_val = GRID_SHOW::FRONT;
 		}
-		else if (sender == rmfi_grid_show_hide()) {
+		else if (sender == rmfi_grid_show_hide() || sender == rmfi_grid_show_hide_2()) {
 			new_val = GRID_SHOW::HIDE;
 		}
 		else {
@@ -337,8 +346,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
+		rmfi_grid_show_back_2().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
+		rmfi_grid_show_front_2().IsChecked(g_show == GRID_SHOW::FRONT);
 		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
+		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 	// レイアウトメニューの「レイアウトをリセット」が選択された.
 	// データを保存したファイルがある場合, それを削除する.

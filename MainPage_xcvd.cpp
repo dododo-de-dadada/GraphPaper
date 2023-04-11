@@ -228,27 +228,45 @@ namespace winrt::GraphPaper::implementation
 			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
+		mfi_xcvd_cut_2().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
+		mfi_xcvd_copy_2().IsEnabled(exists_selected);
 		mfi_xcvd_paste().IsEnabled(exists_clipboard_data);
+		mfi_xcvd_paste_2().IsEnabled(exists_clipboard_data);
 		mfi_xcvd_delete().IsEnabled(exists_selected);
+		mfi_xcvd_delete_2().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
+		mfi_select_all_2().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
+		mfi_group_2().IsEnabled(exists_selected_2);
 		mfi_ungroup().IsEnabled(exists_selected_group);
+		mfi_ungroup_2().IsEnabled(exists_selected_group);
 		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 		// そうしないと, 子の項目の可否がただちに反映しない.
 		mfsi_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+		mfsi_edit_poly_end_2().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
 		mfi_edit_poly_open().IsEnabled(exists_selected_poly_close);
+		mfi_edit_poly_open_2().IsEnabled(exists_selected_poly_close);
 		mfi_edit_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_edit_poly_close_2().IsEnabled(exists_selected_poly_open);
 		mfi_edit_arc().IsEnabled(exists_selected_arc);
+		mfi_edit_arc_2().IsEnabled(exists_selected_arc);
 		mfi_edit_text().IsEnabled(exists_selected_text);
+		mfi_edit_text_2().IsEnabled(exists_selected_text);
 		mfi_find_text().IsEnabled(exists_text);
+		mfi_find_text_2().IsEnabled(exists_text);
 		mfi_text_fit_frame_to_text().IsEnabled(exists_selected_text);
+		mfi_text_fit_frame_to_text_2().IsEnabled(exists_selected_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
+		mfi_bring_forward_2().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);
+		mfi_bring_to_front_2().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);
+		mfi_send_to_back_2().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
+		mfi_send_backward_2().IsEnabled(enable_backward);
 		mfsi_order().IsEnabled(enable_forward || enable_backward);
-		//mfi_summary_list().IsEnabled(exists_undeleted);
+		mfsi_order_2().IsEnabled(enable_forward || enable_backward);
 		mfi_image_revert_to_original().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}

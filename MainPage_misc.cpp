@@ -178,41 +178,49 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::zoom_is_cheched(float scale)
 	{
 		rmfi_page_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_page_zoom_100_2().IsChecked(equal(scale, 1.0f));
 		rmfi_page_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_page_zoom_150_2().IsChecked(equal(scale, 1.5f));
 		rmfi_page_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_page_zoom_200_2().IsChecked(equal(scale, 2.0f));
 		rmfi_page_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_page_zoom_300_2().IsChecked(equal(scale, 3.0f));
 		rmfi_page_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_page_zoom_400_2().IsChecked(equal(scale, 4.0f));
 		rmfi_page_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_page_zoom_075_2().IsChecked(equal(scale, 0.75f));
 		rmfi_page_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_page_zoom_050_2().IsChecked(equal(scale, 0.5f));
 		rmfi_page_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_page_zoom_025_2().IsChecked(equal(scale, 0.25f));
 	}
 
 	// その他メニューの「ズーム」が選択された.
 	void MainPage::zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == rmfi_page_zoom_100()) {
+		if (sender == rmfi_page_zoom_100() || sender == rmfi_page_zoom_100_2()) {
 			scale = 1.0f;
 		}
-		else if (sender == rmfi_page_zoom_150()) {
+		else if (sender == rmfi_page_zoom_150() || sender == rmfi_page_zoom_150_2()) {
 			scale = 1.5f;
 		}
-		else if (sender == rmfi_page_zoom_200()) {
+		else if (sender == rmfi_page_zoom_200() || sender == rmfi_page_zoom_200_2()) {
 			scale = 2.0f;
 		}
-		else if (sender == rmfi_page_zoom_300()) {
+		else if (sender == rmfi_page_zoom_300() || sender == rmfi_page_zoom_300_2()) {
 			scale = 3.0f;
 		}
-		else if (sender == rmfi_page_zoom_400()) {
+		else if (sender == rmfi_page_zoom_400() || sender == rmfi_page_zoom_400_2()) {
 			scale = 4.0f;
 		}
-		else if (sender == rmfi_page_zoom_075()) {
+		else if (sender == rmfi_page_zoom_075() || sender == rmfi_page_zoom_075_2()) {
 			scale = 0.75f;
 		}
-		else if (sender == rmfi_page_zoom_050()) {
+		else if (sender == rmfi_page_zoom_050() || sender == rmfi_page_zoom_050_2()) {
 			scale = 0.5f;
 		}
-		else if (sender == rmfi_page_zoom_025()) {
+		else if (sender == rmfi_page_zoom_025() || sender == rmfi_page_zoom_025_2()) {
 			scale = 0.25f;
 		}
 		else {

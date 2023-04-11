@@ -313,13 +313,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style = static_cast<ARROW_STYLE>(-1);
-		if (sender == rmfi_arrow_style_none()) {
+		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
 			a_style = ARROW_STYLE::ARROW_NONE;
 		}
-		else if (sender == rmfi_arrow_style_opened()) {
+		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
 			a_style = ARROW_STYLE::ARROW_OPENED;
 		}
-		else if (sender == rmfi_arrow_style_filled()) {
+		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
 			a_style = ARROW_STYLE::ARROW_FILLED;
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
@@ -342,14 +342,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (val == ARROW_STYLE::ARROW_NONE) {
 			rmfi_arrow_style_none().IsChecked(true);
+			rmfi_arrow_style_none_2().IsChecked(true);
 		}
 		else if (val == ARROW_STYLE::ARROW_OPENED) {
 			rmfi_arrow_style_opened().IsChecked(true);
+			rmfi_arrow_style_opened_2().IsChecked(true);
 			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
 		}
 		else if (val == ARROW_STYLE::ARROW_FILLED) {
 			rmfi_arrow_style_filled().IsChecked(true);
+			rmfi_arrow_style_filled_2().IsChecked(true);
 			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
 		}
 	}
 

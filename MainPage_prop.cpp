@@ -40,16 +40,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_val;
-		if (sender == rmfi_cap_style_flat()) {
+		if (sender == rmfi_cap_style_flat() || sender == rmfi_cap_style_flat_2()) {
 			new_val = CAP_STYLE_FLAT;
 		}
-		else if (sender == rmfi_cap_style_square()) {
+		else if (sender == rmfi_cap_style_square() || sender == rmfi_cap_style_square_2()) {
 			new_val = CAP_STYLE_SQUARE;
 		}
-		else if (sender == rmfi_cap_style_round()) {
+		else if (sender == rmfi_cap_style_round() || sender == rmfi_cap_style_round_2()) {
 			new_val = CAP_STYLE_ROUND;
 		}
-		else if (sender == rmfi_cap_style_triangle()) {
+		else if (sender == rmfi_cap_style_triangle() || rmfi_cap_style_triangle_2()) {
 			new_val = CAP_STYLE_TRIANGLE;
 		}
 		else {
@@ -460,19 +460,19 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(-1);
-		if (sender == rmfi_dash_style_solid()) {
+		if (sender == rmfi_dash_style_solid() || sender == rmfi_dash_style_solid_2()) {
 			d_style = D2D1_DASH_STYLE_SOLID;
 		}
-		else if (sender == rmfi_dash_style_dash()) {
+		else if (sender == rmfi_dash_style_dash() || sender == rmfi_dash_style_dash_2()) {
 			d_style = D2D1_DASH_STYLE_DASH;
 		}
-		else if (sender == rmfi_dash_style_dot()) {
+		else if (sender == rmfi_dash_style_dot() || sender == rmfi_dash_style_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot()) {
+		else if (sender == rmfi_dash_style_dash_dot() || sender == rmfi_dash_style_dash_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot_dot()) {
+		else if (sender == rmfi_dash_style_dash_dot_dot() || sender == rmfi_dash_style_dash_dot_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
 		}
 		if (d_style != static_cast<D2D1_DASH_STYLE>(-1)) {
@@ -492,28 +492,34 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
 		rmfi_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_dash_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 		rmfi_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_dash_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
 		rmfi_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_dash_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
 		rmfi_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_dash_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
 		rmfi_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+		rmfi_dash_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
 
 		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		mfi_dash_pat_2().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 	}
 
 	// 属性メニューの「線の結合の形式」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_val;
-		if (sender == rmfi_join_style_bevel()) {
+		if (sender == rmfi_join_style_bevel() || sender == rmfi_join_style_bevel_2()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 		}
 		//else if (sender == rmfi_join_style_miter()) {
 		//	new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
 		//}
-		else if (sender == rmfi_join_style_miter_or_bevel()) {
+		else if (sender == rmfi_join_style_miter_or_bevel() || sender == rmfi_join_style_miter_or_bevel_2()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 		}
-		else if (sender == rmfi_join_style_round()) {
+		else if (sender == rmfi_join_style_round() || sender == rmfi_join_style_round_2()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 		}
 		else {
@@ -534,30 +540,32 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
 		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		//rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
 		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_miter_or_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		//mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER || val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_round_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
 		mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		mfi_join_miter_limit_2().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 	}
 
 	// 属性メニューの「太さ」のサブ項目が選択された.
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float s_width = -1.0f;
-		if (sender == rmfi_stroke_width_0px()) {
+		if (sender == rmfi_stroke_width_0px() || sender == rmfi_stroke_width_0px_2()) {
 			s_width = 0.0f;
 		}
-		else if (sender == rmfi_stroke_width_1px()) {
+		else if (sender == rmfi_stroke_width_1px() || sender == rmfi_stroke_width_1px_2()) {
 			s_width = 1.0f;
 		}
-		else if (sender == rmfi_stroke_width_2px()) {
+		else if (sender == rmfi_stroke_width_2px() || sender == rmfi_stroke_width_2px_2()) {
 			s_width = 2.0f;
 		}
-		else if (sender == rmfi_stroke_width_3px()) {
+		else if (sender == rmfi_stroke_width_3px() || sender == rmfi_stroke_width_3px_2()) {
 			s_width = 3.0f;
 		}
-		else if (sender == rmfi_stroke_width_4px()) {
+		else if (sender == rmfi_stroke_width_4px() || sender == rmfi_stroke_width_4px_2()) {
 			s_width = 4.0f;
 		}
 		if (s_width >= 0.0f) {
@@ -575,11 +583,17 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stroke_width_is_checked(const float s_width) noexcept
 	{
 		rmfi_stroke_width_0px().IsChecked(s_width == 0.0f);
+		rmfi_stroke_width_0px_2().IsChecked(s_width == 0.0f);
 		rmfi_stroke_width_1px().IsChecked(s_width == 1.0f);
+		rmfi_stroke_width_1px_2().IsChecked(s_width == 1.0f);
 		rmfi_stroke_width_2px().IsChecked(s_width == 2.0f);
+		rmfi_stroke_width_2px_2().IsChecked(s_width == 2.0f);
 		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
+		rmfi_stroke_width_3px_2().IsChecked(s_width == 3.0f);
 		rmfi_stroke_width_4px().IsChecked(s_width == 4.0f);
+		rmfi_stroke_width_4px_2().IsChecked(s_width == 4.0f);
 		rmfi_stroke_width_other().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
+		rmfi_stroke_width_other_2().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
 	}
 
 	// 属性メニューの「太さ」>「その他」が選択された.

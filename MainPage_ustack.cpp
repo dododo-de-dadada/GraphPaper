@@ -412,7 +412,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ustack_is_enable(void)
 	{
 		mfi_undo().IsEnabled(m_ustack_ucnt > 0);
+		mfi_undo_2().IsEnabled(m_ustack_ucnt > 0);
 		mfi_redo().IsEnabled(m_ustack_rcnt > 0);
+		mfi_redo_2().IsEnabled(m_ustack_rcnt > 0);
 	}
 
 	// 無効な操作の組をポップする.

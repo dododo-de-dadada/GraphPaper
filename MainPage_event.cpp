@@ -768,15 +768,194 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_show_popup(void)
 	{
+		// コンテキストメニューを解放する.
+		if (ContextFlyout() != nullptr) {
+			ContextFlyout(nullptr);
+		}
 		Shape* pressed;
 		const uint32_t loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, pressed);
 
-		MenuFlyout popup{};
+		xcvd_is_enabled();
+		bool undo_visible = false;
+		if (mfi_undo_2().IsEnabled()) {
+			mfi_undo_2().Visibility(Visibility::Visible);
+			undo_visible = true;
+		}
+		else {
+			mfi_undo_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_redo_2().IsEnabled()) {
+			mfi_redo_2().Visibility(Visibility::Visible);
+			undo_visible = true;
+		}
+		else {
+			mfi_redo_2().Visibility(Visibility::Collapsed);
+		}
+		bool xcvd_visible = false;
+		if (mfi_xcvd_cut_2().IsEnabled()) {
+			mfi_xcvd_cut_2().Visibility(Visibility::Visible);
+			xcvd_visible = true;
+		}
+		else {
+			mfi_xcvd_cut_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_xcvd_copy_2().IsEnabled()) {
+			mfi_xcvd_copy_2().Visibility(Visibility::Visible);
+			xcvd_visible = true;
+		}
+		else {
+			mfi_xcvd_copy_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_xcvd_paste_2().IsEnabled()) {
+			mfi_xcvd_paste_2().Visibility(Visibility::Visible);
+			xcvd_visible = true;
+		}
+		else {
+			mfi_xcvd_paste_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_xcvd_delete_2().IsEnabled()) {
+			mfi_xcvd_delete_2().Visibility(Visibility::Visible);
+			xcvd_visible = true;
+		}
+		else {
+			mfi_xcvd_delete_2().Visibility(Visibility::Collapsed);
+		}
+		if (undo_visible && xcvd_visible) {
+			mfs_separator_undo_xcvd().Visibility(Visibility::Visible);
+		}
+		else {
+			mfs_separator_undo_xcvd().Visibility(Visibility::Collapsed);
+		}
+		bool select_visible = false;
+		if (mfi_select_all_2().IsEnabled()) {
+			mfi_select_all_2().Visibility(Visibility::Visible);
+			select_visible = true;
+		}
+		else {
+			mfi_select_all_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfsi_order_2().IsEnabled()) {
+			mfsi_order_2().Visibility(Visibility::Visible);
+			select_visible = true;
+		}
+		else {
+			mfsi_order_2().Visibility(Visibility::Collapsed);
+		}
+		if ((undo_visible || xcvd_visible) && select_visible) {
+			mfs_separator_xcvd_select().Visibility(Visibility::Visible);
+		}
+		else {
+			mfs_separator_xcvd_select().Visibility(Visibility::Collapsed);
+		}
+		bool group_visible = false;
+		if (mfi_group_2().IsEnabled()) {
+			mfi_group_2().Visibility(Visibility::Visible);
+			group_visible = true;
+		}
+		else {
+			mfi_group_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_ungroup_2().IsEnabled()) {
+			mfi_ungroup_2().Visibility(Visibility::Visible);
+			group_visible = true;
+		}
+		else {
+			mfi_ungroup_2().Visibility(Visibility::Collapsed);
+		}
+		if ((undo_visible || xcvd_visible || select_visible) && group_visible) {
+			mfs_separator_select_group().Visibility(Visibility::Visible);
+		}
+		else {
+			mfs_separator_select_group().Visibility(Visibility::Collapsed);
+		}
+		bool edit_visible = false;
+		if (mfsi_edit_poly_end_2().IsEnabled()) {
+			mfsi_edit_poly_end_2().Visibility(Visibility::Visible);
+			edit_visible = true;
+		}
+		else {
+			mfsi_edit_poly_end_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_edit_arc_2().IsEnabled()) {
+			mfi_edit_arc_2().Visibility(Visibility::Visible);
+			edit_visible = true;
+		}
+		else {
+			mfi_edit_arc_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_edit_text_2().IsEnabled()) {
+			mfi_edit_text_2().Visibility(Visibility::Visible);
+			edit_visible = true;
+		}
+		else {
+			mfi_edit_text_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_find_text_2().IsEnabled()) {
+			mfi_find_text_2().Visibility(Visibility::Visible);
+			edit_visible = true;
+		}
+		else {
+			mfi_find_text_2().Visibility(Visibility::Collapsed);
+		}
+		if (mfi_text_fit_frame_to_text_2().IsEnabled()) {
+			mfi_text_fit_frame_to_text_2().Visibility(Visibility::Visible);
+			edit_visible = true;
+		}
+		else {
+			mfi_text_fit_frame_to_text_2().Visibility(Visibility::Collapsed);
+		}
+		if ((undo_visible || xcvd_visible || select_visible || group_visible) && edit_visible) {
+			mfs_separator_group_edit().Visibility(Visibility::Visible);
+		}
+		else {
+			mfs_separator_group_edit().Visibility(Visibility::Collapsed);
+		}
+		//MenuFlyout popup{};
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
 		if (pressed == nullptr || loc_pressed == LOC_TYPE::LOC_PAGE) {
-			for (const auto item : mbi_layout().Items()) {
-				popup.Items().Append(item);
+			if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
+				mfs_separator_edit_stroke().Visibility(Visibility::Visible);
 			}
+			else {
+				mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
+			}
+
+			mfsi_dash_style_2().Visibility(Visibility::Collapsed);
+			mfi_dash_pat_2().Visibility(Visibility::Collapsed);
+			mfsi_stroke_width_2().Visibility(Visibility::Collapsed);
+			mfsi_cap_style_2().Visibility(Visibility::Collapsed);
+			mfsi_join_style_2().Visibility(Visibility::Collapsed);
+			mfsi_arrow_style_2().Visibility(Visibility::Collapsed);
+			mfi_arrow_size_2().Visibility(Visibility::Collapsed);
+			mfi_stroke_color_2().Visibility(Visibility::Collapsed);
+			mfi_fill_color_2().Visibility(Visibility::Collapsed);
+
+			mfi_font_family_2().Visibility(Visibility::Collapsed);
+			mfi_font_size_2().Visibility(Visibility::Collapsed);
+			mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+			mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+			mfsi_font_stretch_2().Visibility(Visibility::Collapsed);
+			mfsi_font_style_2().Visibility(Visibility::Collapsed);
+			mfsi_text_align_horz_2().Visibility(Visibility::Collapsed);
+			mfsi_text_align_vert_2().Visibility(Visibility::Collapsed);
+			mfi_text_line_sp_2().Visibility(Visibility::Collapsed);
+			mfi_text_pad_2().Visibility(Visibility::Collapsed);
+			mfi_font_color_2().Visibility(Visibility::Collapsed);
+
+			tmfi_image_keep_aspect_2().Visibility(Visibility::Collapsed);
+			mfi_image_revert_to_original_2().Visibility(Visibility::Collapsed);
+			mfi_image_opac_2().Visibility(Visibility::Collapsed);
+
+			mfsi_grid_show_2().Visibility(Visibility::Visible);
+			mfsi_grid_len_2().Visibility(Visibility::Visible);
+			mfsi_grid_emph_2().Visibility(Visibility::Visible);
+			mfi_grid_color_2().Visibility(Visibility::Visible);
+			mfs_separator_grid_page().Visibility(Visibility::Visible);
+			mfi_page_size_2().Visibility(Visibility::Visible);
+			mfi_page_color_2().Visibility(Visibility::Visible);
+			mfs_separator_page_zoom().Visibility(Visibility::Visible);
+			mfsi_page_zoom_2().Visibility(Visibility::Visible);
+			mfsi_background_pattern_2().Visibility(Visibility::Visible);
 		}
 		else {
 			// 押された図形の属性値を表示に格納する.
@@ -791,8 +970,135 @@ namespace winrt::GraphPaper::implementation
 			stroke_width_is_checked(m_main_page.m_stroke_width);
 			text_align_horz_is_checked(m_main_page.m_text_align_horz);
 			text_align_vert_is_checked(m_main_page.m_text_align_vert);
+			layout_is_checked();
 
-			// 「編集」メニューをコンテキストメニューに追加
+			if (loc_pressed == LOC_TYPE::LOC_TEXT) {
+				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
+					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
+				}
+				else {
+					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
+				}
+				mfsi_dash_style_2().Visibility(Visibility::Collapsed);
+				mfi_dash_pat_2().Visibility(Visibility::Collapsed);
+				mfsi_stroke_width_2().Visibility(Visibility::Collapsed);
+				mfsi_cap_style_2().Visibility(Visibility::Collapsed);
+				mfsi_join_style_2().Visibility(Visibility::Collapsed);
+				mfs_separator_stroke_arrow().Visibility(Visibility::Collapsed);
+				mfsi_arrow_style_2().Visibility(Visibility::Collapsed);
+				mfi_arrow_size_2().Visibility(Visibility::Collapsed);
+				mfs_separator_arrow_color().Visibility(Visibility::Collapsed);
+				mfi_stroke_color_2().Visibility(Visibility::Collapsed);
+				mfi_fill_color_2().Visibility(Visibility::Collapsed);
+
+				mfi_font_family_2().Visibility(Visibility::Visible);
+				mfi_font_size_2().Visibility(Visibility::Visible);
+				mfsi_font_weight_2().Visibility(Visibility::Visible);
+				mfsi_font_weight_2().Visibility(Visibility::Visible);
+				mfsi_font_stretch_2().Visibility(Visibility::Visible);
+				mfsi_font_style_2().Visibility(Visibility::Visible);
+				mfs_separator_font_text().Visibility(Visibility::Visible);
+				mfsi_text_align_horz_2().Visibility(Visibility::Visible);
+				mfsi_text_align_vert_2().Visibility(Visibility::Visible);
+				mfi_text_line_sp_2().Visibility(Visibility::Visible);
+				mfi_text_pad_2().Visibility(Visibility::Visible);
+				mfi_font_color_2().Visibility(Visibility::Visible);
+
+				tmfi_image_keep_aspect_2().Visibility(Visibility::Collapsed);
+				mfi_image_revert_to_original_2().Visibility(Visibility::Collapsed);
+				mfi_image_opac_2().Visibility(Visibility::Collapsed);
+			}
+			else if (typeid(*pressed) == typeid(ShapeImage)) {
+				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
+					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
+				}
+				else {
+					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
+				}
+
+				mfsi_dash_style_2().Visibility(Visibility::Collapsed);
+				mfi_dash_pat_2().Visibility(Visibility::Collapsed);
+				mfsi_stroke_width_2().Visibility(Visibility::Collapsed);
+				mfsi_cap_style_2().Visibility(Visibility::Collapsed);
+				mfsi_join_style_2().Visibility(Visibility::Collapsed);
+				mfs_separator_stroke_arrow().Visibility(Visibility::Collapsed);
+				mfsi_arrow_style_2().Visibility(Visibility::Collapsed);
+				mfi_arrow_size_2().Visibility(Visibility::Collapsed);
+				mfs_separator_arrow_color().Visibility(Visibility::Collapsed);
+				mfi_stroke_color_2().Visibility(Visibility::Collapsed);
+				mfi_fill_color_2().Visibility(Visibility::Collapsed);
+
+				mfi_font_family_2().Visibility(Visibility::Collapsed);
+				mfi_font_size_2().Visibility(Visibility::Collapsed);
+				mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+				mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+				mfsi_font_stretch_2().Visibility(Visibility::Collapsed);
+				mfsi_font_style_2().Visibility(Visibility::Collapsed);
+				mfs_separator_font_text().Visibility(Visibility::Collapsed);
+				mfsi_text_align_horz_2().Visibility(Visibility::Collapsed);
+				mfsi_text_align_vert_2().Visibility(Visibility::Collapsed);
+				mfi_text_line_sp_2().Visibility(Visibility::Collapsed);
+				mfi_text_pad_2().Visibility(Visibility::Collapsed);
+				mfi_font_color_2().Visibility(Visibility::Collapsed);
+
+				tmfi_image_keep_aspect_2().Visibility(Visibility::Visible);
+				mfi_image_revert_to_original_2().Visibility(Visibility::Visible);
+				mfi_image_opac_2().Visibility(Visibility::Visible);
+			}
+			else {
+				if (undo_visible || xcvd_visible || select_visible || group_visible || edit_visible) {
+					mfs_separator_edit_stroke().Visibility(Visibility::Visible);
+				}
+				else {
+					mfs_separator_edit_stroke().Visibility(Visibility::Collapsed);
+				}
+
+				mfsi_dash_style_2().Visibility(Visibility::Visible);
+				mfi_dash_pat_2().Visibility(Visibility::Visible);
+				mfsi_stroke_width_2().Visibility(Visibility::Visible);
+				mfsi_cap_style_2().Visibility(Visibility::Visible);
+				mfsi_join_style_2().Visibility(Visibility::Visible);
+				if (typeid(*pressed) == typeid(ShapeArc) || typeid(*pressed) == typeid(ShapePoly) || typeid(*pressed) == typeid(ShapeBezier) || typeid(*pressed) == typeid(ShapeLine)) {
+					mfs_separator_stroke_arrow().Visibility(Visibility::Visible);
+					mfsi_arrow_style_2().Visibility(Visibility::Visible);
+					mfi_arrow_size_2().Visibility(Visibility::Visible);
+				}
+
+				mfs_separator_arrow_color().Visibility(Visibility::Visible);
+				mfi_stroke_color_2().Visibility(Visibility::Visible);
+				mfi_fill_color_2().Visibility(Visibility::Visible);
+
+				mfi_font_family_2().Visibility(Visibility::Collapsed);
+				mfi_font_size_2().Visibility(Visibility::Collapsed);
+				mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+				mfsi_font_weight_2().Visibility(Visibility::Collapsed);
+				mfsi_font_stretch_2().Visibility(Visibility::Collapsed);
+				mfsi_font_style_2().Visibility(Visibility::Collapsed);
+				mfs_separator_font_text().Visibility(Visibility::Collapsed);
+				mfsi_text_align_horz_2().Visibility(Visibility::Collapsed);
+				mfsi_text_align_vert_2().Visibility(Visibility::Collapsed);
+				mfi_text_line_sp_2().Visibility(Visibility::Collapsed);
+				mfi_text_pad_2().Visibility(Visibility::Collapsed);
+				mfi_font_color_2().Visibility(Visibility::Collapsed);
+
+				tmfi_image_keep_aspect_2().Visibility(Visibility::Collapsed);
+				mfi_image_revert_to_original_2().Visibility(Visibility::Collapsed);
+				mfi_image_opac_2().Visibility(Visibility::Collapsed);
+			}
+			mfsi_grid_show_2().Visibility(Visibility::Collapsed);
+			mfsi_grid_len_2().Visibility(Visibility::Collapsed);
+			mfsi_grid_emph_2().Visibility(Visibility::Collapsed);
+			mfi_grid_color_2().Visibility(Visibility::Collapsed);
+			mfs_separator_grid_page().Visibility(Visibility::Collapsed);
+			mfi_page_size_2().Visibility(Visibility::Collapsed);
+			mfi_page_color_2().Visibility(Visibility::Collapsed);
+			mfs_separator_page_zoom().Visibility(Visibility::Collapsed);
+			mfsi_page_zoom_2().Visibility(Visibility::Collapsed);
+			mfsi_background_pattern_2().Visibility(Visibility::Collapsed);
+		}
+		ContextFlyout(mf_context());
+		/*
+			// 「編集」メニューをコンテ\\キストメニューに追加
 			xcvd_is_enabled();
 			for (const auto item : mbi_edit().Items()) {
 				if (item.IsEnabled()) {
@@ -838,6 +1144,7 @@ namespace winrt::GraphPaper::implementation
 			ContextFlyout(nullptr);
 		});
 		ContextFlyout(popup);
+		*/
 	}
 
 	//------------------------------
@@ -942,21 +1249,21 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		if (sender == sp_status_bar_panel()) {
-			const PointerPointProperties& prop = args.GetCurrentPoint(sp_status_bar_panel()).Properties();
-			if (prop.PointerUpdateKind() == PointerUpdateKind::RightButtonReleased) {
-				if (ContextFlyout() != nullptr) {
-					ContextFlyout(nullptr);
-				}
-				MenuFlyout popup{};
-				popup.Items().Append(mfsi_status_bar());
-				popup.Closed([=](auto, auto) {
-					ContextFlyout(nullptr);
-					});
-				ContextFlyout(popup);
-			}
-			return;
-		}
+		//if (sender == sp_status_bar_panel()) {
+		//	const PointerPointProperties& prop = args.GetCurrentPoint(sp_status_bar_panel()).Properties();
+		//	if (prop.PointerUpdateKind() == PointerUpdateKind::RightButtonReleased) {
+		//		if (ContextFlyout() != nullptr) {
+		//			ContextFlyout(nullptr);
+		//		}
+		//		MenuFlyout popup{};
+		//		popup.Items().Append(mfsi_status_bar());
+		//		popup.Closed([=](auto, auto) {
+		//			ContextFlyout(nullptr);
+		//			});
+		//		ContextFlyout(popup);
+		//	}
+		//	return;
+		//}
 //#if defined(_DEBUG)
 		if (sender != scp_main_panel()) {
 			return;
@@ -1095,10 +1402,6 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			else {
-				// コンテキストメニューを解放する.
-				if (ContextFlyout() != nullptr) {
-					ContextFlyout(nullptr);
-				}
 				event_show_popup();
 			}
 		}

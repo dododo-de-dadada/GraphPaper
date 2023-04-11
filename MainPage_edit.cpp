@@ -61,14 +61,14 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == mfi_edit_poly_close()) {
+		if (sender == mfi_edit_poly_close() || sender == mfi_edit_poly_close_2()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
 				ustack_push_null();
 				ustack_is_enable();
 				main_draw();
 			}
 		}
-		else if (sender == mfi_edit_poly_open()) {
+		else if (sender == mfi_edit_poly_open() || sender == mfi_edit_poly_open_2()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
 				ustack_push_null();
 				ustack_is_enable();
