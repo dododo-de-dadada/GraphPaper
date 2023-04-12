@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 		}
 		else {
-			drawing_tool_click(rmfi_selection_tool(), nullptr);
+			drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
 		}
 	}
 
@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 		if (summary_is_visible()) {
 			summary_select_all();
 		}
-		xcvd_is_enabled();
+		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
 	}
@@ -156,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		xcvd_is_enabled();
+		xcvd_menu_is_enabled();
 		main_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
@@ -235,7 +235,7 @@ namespace winrt::GraphPaper::implementation
 		// コントロールキーが押されているか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
 			ustack_push_select(s);
-			xcvd_is_enabled();
+			xcvd_menu_is_enabled();
 			main_draw();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 			//}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
-				xcvd_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 			if (!s->is_selected()) {
 				unselect_all();
 				ustack_push_select(s);
-				xcvd_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {

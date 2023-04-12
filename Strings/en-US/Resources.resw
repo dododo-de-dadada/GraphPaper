@@ -165,7 +165,7 @@
     <value>Page Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_fit_frame_to_text.Content" xml:space="preserve">
+  <data name="ck_fit_text_frame.Content" xml:space="preserve">
     <value>Text Frame Fit Text</value>
     <comment>CheckBox</comment>
   </data>
@@ -177,131 +177,131 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_code_pct.Text" xml:space="preserve">
+  <data name="rmfi_menu_color_code_pct.Text" xml:space="preserve">
     <value>Percent</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
+  <data name="rmfi_menu_color_code_dec.Text" xml:space="preserve">
     <value>Decimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_real.Text" xml:space="preserve">
+  <data name="rmfi_menu_color_code_real.Text" xml:space="preserve">
     <value>Real Number</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
+  <data name="rmfi_menu_color_code_hex.Text" xml:space="preserve">
     <value>Hexdecimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_grid.Text" xml:space="preserve">
+  <data name="rmfi_menu_len_unit_grid.Text" xml:space="preserve">
     <value>Grid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_inch.Text" xml:space="preserve">
+  <data name="rmfi_menu_len_unit_inch.Text" xml:space="preserve">
     <value>Inch</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_milli.Text" xml:space="preserve">
+  <data name="rmfi_menu_len_unit_milli.Text" xml:space="preserve">
     <value>Millimeter</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_pixel.Text" xml:space="preserve">
+  <data name="rmfi_menu_len_unit_pixel.Text" xml:space="preserve">
     <value>Pixel</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_point.Text" xml:space="preserve">
+  <data name="rmfi_menu_len_unit_point.Text" xml:space="preserve">
     <value>Point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_color_code.Text" xml:space="preserve">
+  <data name="mfsi_menu_color_code.Text" xml:space="preserve">
     <value>Color Code</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_len_unit.Text" xml:space="preserve">
+  <data name="mfsi_menu_len_unit.Text" xml:space="preserve">
     <value>Length Unit</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_font_stretch_condensed.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_condensed.Text" xml:space="preserve">
     <value>Condensed</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_expanded.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_expanded.Text" xml:space="preserve">
     <value>Expanded</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_extra_condensed.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_extra_condensed.Text" xml:space="preserve">
     <value>Extra Condensed</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_extra_expanded.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_extra_expanded.Text" xml:space="preserve">
     <value>Extra Expanded</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_normal.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_normal.Text" xml:space="preserve">
     <value>Normal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_semi_condensed.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_semi_condensed.Text" xml:space="preserve">
     <value>Semi Condensed</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_semi_expanded.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_semi_expanded.Text" xml:space="preserve">
     <value>Semi Expanded</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="srmfi_font_stretch_ultra_condensed.Text" xml:space="preserve">
+  <data name="srmfi_menu_font_stretch_ultra_condensed.Text" xml:space="preserve">
     <value>Ultra Condensed</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_stretch_ultra_expanded.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_stretch_ultra_expanded.Text" xml:space="preserve">
     <value>Ultra Expanded</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_black.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_black.Text" xml:space="preserve">
     <value>Black (900)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_bold.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_bold.Text" xml:space="preserve">
     <value>Bold (700)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_semi_bold.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_semi_bold.Text" xml:space="preserve">
     <value>Semi Bold (600)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_extra_black.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_extra_black.Text" xml:space="preserve">
     <value>Extra Black (950)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_extra_bold.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_extra_bold.Text" xml:space="preserve">
     <value>Extra Bold (800)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_extra_light.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_extra_light.Text" xml:space="preserve">
     <value>Extra Light (200)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_light.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_light.Text" xml:space="preserve">
     <value>Light (300)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_medium.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_medium.Text" xml:space="preserve">
     <value>Medium (500)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_normal.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_normal.Text" xml:space="preserve">
     <value>Normal (400)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_weight_thin.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_weight_thin.Text" xml:space="preserve">
     <value>Thin (100)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mbi_edit.Title" xml:space="preserve">
+  <data name="mbi_menu_edit.Title" xml:space="preserve">
     <value>Edit</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_file.Title" xml:space="preserve">
+  <data name="mbi_menu_file.Title" xml:space="preserve">
     <value>File</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -309,131 +309,131 @@
     <value>Fill</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_font.Title" xml:space="preserve">
+  <data name="mbi_menu_font.Title" xml:space="preserve">
     <value>Font</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_layout.Title" xml:space="preserve">
+  <data name="mbi_menu_layout.Title" xml:space="preserve">
     <value>Layout</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_misc.Title" xml:space="preserve">
+  <data name="mbi_menu_misc.Title" xml:space="preserve">
     <value>&amp;Misc</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_properties.Title" xml:space="preserve">
+  <data name="mbi_menu_properties.Title" xml:space="preserve">
     <value>Properties</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_drawing.Title" xml:space="preserve">
+  <data name="mbi_menu_drawing.Title" xml:space="preserve">
     <value>Draw</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mfi_about_this.Text" xml:space="preserve">
+  <data name="mfi_menu_about_this.Text" xml:space="preserve">
     <value>About GraphPaper</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_arrow_size.Text" xml:space="preserve">
+  <data name="mfi_menu_arrow_size.Text" xml:space="preserve">
     <value>Arrowhead Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_bring_forward.Text" xml:space="preserve">
+  <data name="mfi_menu_bring_forward.Text" xml:space="preserve">
     <value>Bring Forward</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_bring_to_front.Text" xml:space="preserve">
+  <data name="mfi_menu_bring_to_front.Text" xml:space="preserve">
     <value>Bring to Front</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_copy.Text" xml:space="preserve">
+  <data name="mfi_menu_xcvd_copy.Text" xml:space="preserve">
     <value>Copy</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_cut.Text" xml:space="preserve">
+  <data name="mfi_menu_xcvd_cut.Text" xml:space="preserve">
     <value>Cut</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_delete.Text" xml:space="preserve">
+  <data name="mfi_menu_xcvd_delete.Text" xml:space="preserve">
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_edit_text.Text" xml:space="preserve">
+  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
     <value>Edit Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_exit.Text" xml:space="preserve">
+  <data name="mfi_menu_exit.Text" xml:space="preserve">
     <value>Exit</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_fill_color.Text" xml:space="preserve">
+  <data name="mfi_menu_fill_color.Text" xml:space="preserve">
     <value>Fill Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_export_as.Text" xml:space="preserve">
+  <data name="mfi_menu_export_as.Text" xml:space="preserve">
     <value>Export As...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_import_image.Text" xml:space="preserve">
+  <data name="mfi_menu_import_image.Text" xml:space="preserve">
     <value>Import Image...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_open.Text" xml:space="preserve">
+  <data name="mfi_menu_open.Text" xml:space="preserve">
     <value>Open...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_find_text.Text" xml:space="preserve">
+  <data name="mfi_menu_find_text.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_font_color.Text" xml:space="preserve">
+  <data name="mfi_menu_font_color.Text" xml:space="preserve">
     <value>Font Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_font_family.Text" xml:space="preserve">
+  <data name="mfi_menu_font_family.Text" xml:space="preserve">
     <value>Font Family...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_font_size.Text" xml:space="preserve">
+  <data name="mfi_menu_font_size.Text" xml:space="preserve">
     <value>Font Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_font_stretch.Text" xml:space="preserve">
+  <data name="mfsi_menu_font_stretch.Text" xml:space="preserve">
     <value>Font Stretch</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_font_weight.Text" xml:space="preserve">
+  <data name="mfsi_menu_font_weight.Text" xml:space="preserve">
     <value>Font Weight</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_grid_len_con.Text" xml:space="preserve">
+  <data name="mfi_menu_grid_len_con.Text" xml:space="preserve">
     <value>Condense</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_len_exp.Text" xml:space="preserve">
+  <data name="mfi_menu_grid_len_exp.Text" xml:space="preserve">
     <value>Expand</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_len.Text" xml:space="preserve">
+  <data name="mfi_menu_grid_len.Text" xml:space="preserve">
     <value>Grid Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_color.Text" xml:space="preserve">
+  <data name="mfi_menu_grid_color.Text" xml:space="preserve">
     <value>Grid Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_group.Text" xml:space="preserve">
+  <data name="mfi_menu_group.Text" xml:space="preserve">
     <value>Group</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_new.Text" xml:space="preserve">
+  <data name="mfi_menu_new.Text" xml:space="preserve">
     <value>New</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_color.Text" xml:space="preserve">
+  <data name="mfi_menu_page_color.Text" xml:space="preserve">
     <value>Page Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_size.Text" xml:space="preserve">
+  <data name="mfi_menu_page_size.Text" xml:space="preserve">
     <value>Page Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -441,39 +441,39 @@
     <value>Print...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_paste.Text" xml:space="preserve">
+  <data name="mfi_menu_xcvd_paste.Text" xml:space="preserve">
     <value>Paste</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_redo.Text" xml:space="preserve">
+  <data name="mfi_menu_redo.Text" xml:space="preserve">
     <value>Redo</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_save.Text" xml:space="preserve">
+  <data name="mfi_menu_save.Text" xml:space="preserve">
     <value>Save</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_save_as.Text" xml:space="preserve">
+  <data name="mfi_menu_save_as.Text" xml:space="preserve">
     <value>Save As...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_select_all.Text" xml:space="preserve">
+  <data name="mfi_menu_select_all.Text" xml:space="preserve">
     <value>Select All</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_send_backward.Text" xml:space="preserve">
+  <data name="mfi_menu_send_backward.Text" xml:space="preserve">
     <value>Send Backward</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_send_to_back.Text" xml:space="preserve">
+  <data name="mfi_menu_send_to_back.Text" xml:space="preserve">
     <value>Send to Back</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_color.Text" xml:space="preserve">
+  <data name="mfi_menu_stroke_color.Text" xml:space="preserve">
     <value>Stroke Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_dash_pat.Text" xml:space="preserve">
+  <data name="mfi_menu_dash_pat.Text" xml:space="preserve">
     <value>Dash Pattern...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -481,75 +481,75 @@
     <value>Stroke Width</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_stroke_width_other.Text" xml:space="preserve">
+  <data name="rmfi_menu_stroke_width_other.Text" xml:space="preserve">
     <value>Others...</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfi_summary_list.Text" xml:space="preserve">
+  <data name="mfi_menu_summary_list.Text" xml:space="preserve">
     <value>List Summary</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_sp.Text" xml:space="preserve">
+  <data name="mfi_menu_text_line_sp.Text" xml:space="preserve">
     <value>Line Space...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_pad.Text" xml:space="preserve">
+  <data name="mfi_menu_text_pad.Text" xml:space="preserve">
     <value>Padding...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_undo.Text" xml:space="preserve">
+  <data name="mbi_menu_undo.Text" xml:space="preserve">
     <value>Undo</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_ungroup.Text" xml:space="preserve">
+  <data name="mfi_menu_ungroup.Text" xml:space="preserve">
     <value>Ungroup</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_in.Text" xml:space="preserve">
+  <data name="mfi_layout_zoom_in.Text" xml:space="preserve">
     <value>In</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_out.Text" xml:space="preserve">
+  <data name="mfi_layout_zoom_out.Text" xml:space="preserve">
     <value>Out</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_100.Text" xml:space="preserve">
+  <data name="mfi_layout_zoom_100.Text" xml:space="preserve">
     <value>100%</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_arrow_style.Text" xml:space="preserve">
+  <data name="mfsi_menu_arrow_style.Text" xml:space="preserve">
     <value>Arrowhead Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_font_style.Text" xml:space="preserve">
+  <data name="mfsi_menu_font_style.Text" xml:space="preserve">
     <value>Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_grid_show.Text" xml:space="preserve">
+  <data name="mfsi_menu_grid_show.Text" xml:space="preserve">
     <value>Show Grid</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_grid_len.Text" xml:space="preserve">
+  <data name="mfsi_menu_grid_len.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_file_recent.Text" xml:space="preserve">
+  <data name="mfsi_menu_recent.Text" xml:space="preserve">
     <value>Recent Files</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_status_bar.Text" xml:space="preserve">
+  <data name="mfsi_menu_status_bar.Text" xml:space="preserve">
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_dash_style.Text" xml:space="preserve">
+  <data name="mfsi_menu_dash_style.Text" xml:space="preserve">
     <value>Dash Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_align_vert.Text" xml:space="preserve">
+  <data name="mfsi_menu_text_align_vert.Text" xml:space="preserve">
     <value>Paragraph Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_align_horz.Text" xml:space="preserve">
+  <data name="mfsi_menu_text_align_horz.Text" xml:space="preserve">
     <value>Text Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -557,135 +557,135 @@
     <value>Line Space</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_page_zoom.Text" xml:space="preserve">
+  <data name="mfsi_menu_layout_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_arrow_style_filled.Text" xml:space="preserve">
+  <data name="rmfi_menu_arrow_style_filled.Text" xml:space="preserve">
     <value>Filled</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_arrow_style_none.Text" xml:space="preserve">
+  <data name="rmfi_menu_arrow_style_none.Text" xml:space="preserve">
     <value>None</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_arrow_style_opened.Text" xml:space="preserve">
+  <data name="rmfi_menu_arrow_style_opened.Text" xml:space="preserve">
     <value>Opened</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_style_italic.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_style_italic.Text" xml:space="preserve">
     <value>Italic</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_style_normal.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_style_normal.Text" xml:space="preserve">
     <value>Normal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_style_oblique.Text" xml:space="preserve">
+  <data name="rmfi_menu_font_style_oblique.Text" xml:space="preserve">
     <value>Oblique</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_grid_show_back.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_show_back.Text" xml:space="preserve">
     <value>Back</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_grid_show_front.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_show_front.Text" xml:space="preserve">
     <value>Front</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_grid_show_hide.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_show_hide.Text" xml:space="preserve">
     <value>Hide</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_dash_style_dash.Text" xml:space="preserve">
+  <data name="rmfi_menu_dash_style_dash.Text" xml:space="preserve">
     <value>Dash</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_dash_style_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_menu_dash_style_dash_dot.Text" xml:space="preserve">
     <value>Dash Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_dash_style_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_menu_dash_style_dash_dot_dot.Text" xml:space="preserve">
     <value>Dash Dot Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_dash_style_dot.Text" xml:space="preserve">
+  <data name="rmfi_menu_dash_style_dot.Text" xml:space="preserve">
     <value>Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_dash_style_solid.Text" xml:space="preserve">
+  <data name="rmfi_menu_dash_style_solid.Text" xml:space="preserve">
     <value>Solid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_bot.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_bot.Text" xml:space="preserve">
     <value>Bottom</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_center.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_center.Text" xml:space="preserve">
     <value>Center</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_just.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_just.Text" xml:space="preserve">
     <value>Justified</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_left.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_left.Text" xml:space="preserve">
     <value>Left</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_mid.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_mid.Text" xml:space="preserve">
     <value>Middle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_right.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_right.Text" xml:space="preserve">
     <value>Right</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_top.Text" xml:space="preserve">
+  <data name="rmfi_menu_text_align_top.Text" xml:space="preserve">
     <value>Top</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_bezier.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_bezier.Text" xml:space="preserve">
     <value>Curve</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_ellipse.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_ellipse.Text" xml:space="preserve">
     <value>Ellipse</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_line.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_line.Text" xml:space="preserve">
     <value>Line</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly.Text" xml:space="preserve">
     <value>Polygon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_arc.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_arc.Text" xml:space="preserve">
     <value>Arc</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_rect.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_rect.Text" xml:space="preserve">
     <value>Rectangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_rrect.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_rrect.Text" xml:space="preserve">
     <value>Rounded Rect</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_ruler.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_ruler.Text" xml:space="preserve">
     <value>Ruler</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_eyedropper.Text" xml:space="preserve">
+  <data name="rmfi_menu_eyedropper.Text" xml:space="preserve">
     <value>Eyedropper</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_selection_tool.Text" xml:space="preserve">
+  <data name="rmfi_menu_selection_tool.Text" xml:space="preserve">
     <value>Selection Tool</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_text.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_text.Text" xml:space="preserve">
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -910,31 +910,31 @@
     <value>Do you want to save changes?</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_snap_grid.Text" xml:space="preserve">
+  <data name="tmfi_menu_snap_grid.Text" xml:space="preserve">
     <value>Snap Point to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_pos.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_grid.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_page.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_page.Text" xml:space="preserve">
     <value>Page Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_draw.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_draw.Text" xml:space="preserve">
     <value>Drawing Tool</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_unit.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_unit.Text" xml:space="preserve">
     <value>Unit Name</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -1002,79 +1002,79 @@
     <value>Paste as Shape</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_layout_reset.Text" xml:space="preserve">
+  <data name="mfi_menu_layout_reset.Text" xml:space="preserve">
     <value>Reset Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_layout_save.Text" xml:space="preserve">
+  <data name="mfi_menu_layout_save.Text" xml:space="preserve">
     <value>Save Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_grid_emph.Text" xml:space="preserve">
+  <data name="mfsi_menu_grid_emph.Text" xml:space="preserve">
     <value>Grid Emphasis</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_grid_emph_1.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_emph_1.Text" xml:space="preserve">
     <value>No emphasis</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_grid_emph_2.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_emph_2.Text" xml:space="preserve">
     <value>Emphasize 2nd</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_grid_emph_3.Text" xml:space="preserve">
+  <data name="rmfi_menu_grid_emph_3.Text" xml:space="preserve">
     <value>Emphasize 2nd and 10th</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_order.Text" xml:space="preserve">
+  <data name="mfsi_menu_order.Text" xml:space="preserve">
     <value>Order</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_text_fit_frame_to_text.Text" xml:space="preserve">
+  <data name="mfi_menu_fit_text_frame.Text" xml:space="preserve">
     <value>Fit Frame Size to Text</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_deca.Text" xml:space="preserve">
     <value>Decagon (10)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_hendeca.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_hendeca.Text" xml:space="preserve">
     <value>Hendecagon (11)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_dodeca.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_dodeca.Text" xml:space="preserve">
     <value>Hendecagon (12)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_di.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_di.Text" xml:space="preserve">
     <value>Digon (2)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_hept.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_hept.Text" xml:space="preserve">
     <value>Heptagon (7)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_hexa.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_hexa.Text" xml:space="preserve">
     <value>Hexagon (6)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_nona.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_nona.Text" xml:space="preserve">
     <value>Nonagon (9)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_octa.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_octa.Text" xml:space="preserve">
     <value>Octagon (8)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_pent.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_pent.Text" xml:space="preserve">
     <value>Pentagon (5)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_quad.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_quad.Text" xml:space="preserve">
     <value>Quadrilateral (4)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_tri.Text" xml:space="preserve">
+  <data name="rmfi_menu_drawing_poly_tri.Text" xml:space="preserve">
     <value>Triangle (3)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -1094,53 +1094,47 @@
     <value>Failed to paste the data.</value>
     <comment>String</comment>
   </data>
-  <data name="rmfi_join_style_bevel.Text" xml:space="preserve">
+  <data name="rmfi_menu_join_style_bevel.Text" xml:space="preserve">
     <value>Bevel</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  <data name="mfi_join_miter_limit.Text" xml:space="preserve">
+  <data name="mfi_menu_join_miter_limit.Text" xml:space="preserve">
     <value>Miter Limit...</value>
     <comment>MenyFlyoutItem</comment>
   </data>
-  <!--
-  <data name="rmfi_join_style_miter.Text" xml:space="preserve">
+  <data name="rmfi_menu_join_style_miter_or_bevel.Text" xml:space="preserve">
     <value>Miter</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  -->
-  <data name="rmfi_join_style_miter_or_bevel.Text" xml:space="preserve">
-    <value>Miter</value>
-    <comment>RadioMenyFlyoutItem</comment>
-  </data>
-  <data name="rmfi_join_style_round.Text" xml:space="preserve">
+  <data name="rmfi_menu_join_style_round.Text" xml:space="preserve">
     <value>Round</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  <data name="mfsi_cap_style.Text" xml:space="preserve">
+  <data name="mfsi_menu_cap_style.Text" xml:space="preserve">
     <value>Cap Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_join_style.Text" xml:space="preserve">
+  <data name="mfsi_menu_join_style.Text" xml:space="preserve">
     <value>Line Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_snap_point.Text" xml:space="preserve">
+  <data name="mfi_menu_snap_point.Text" xml:space="preserve">
     <value>Snap Point to Point Interval...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_style_flat.Text" xml:space="preserve">
+  <data name="rmfi_menu_cap_style_flat.Text" xml:space="preserve">
     <value>Flat</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_style_round.Text" xml:space="preserve">
+  <data name="rmfi_menu_cap_style_round.Text" xml:space="preserve">
     <value>Round</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_style_square.Text" xml:space="preserve">
+  <data name="rmfi_menu_cap_style_square.Text" xml:space="preserve">
     <value>Square</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_style_triangle.Text" xml:space="preserve">
+  <data name="rmfi_menu_cap_style_triangle.Text" xml:space="preserve">
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -1172,23 +1166,23 @@
     <value>Vertex Up</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="mbi_image.Title" xml:space="preserve">
+  <data name="mbi_menu_image.Title" xml:space="preserve">
     <value>Image</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mfi_image_opac.Text" xml:space="preserve">
+  <data name="mfi_menu_image_opac.Text" xml:space="preserve">
     <value>Image Opacity...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_image_revert_to_original.Text" xml:space="preserve">
-    <value>Revert to Original Image</value>
+  <data name="mfi_menu_image_revert.Text" xml:space="preserve">
+    <value>Revert Original Image</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="str_image_opac" xml:space="preserve">
     <value>Image Opacity</value>
     <comment>String</comment>
   </data>
-  <data name="tmfi_image_keep_aspect.Text" xml:space="preserve">
+  <data name="tmfi_menu_image_keep_aspect.Text" xml:space="preserve">
     <value>Keep Image Aspect Ratio</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -1236,12 +1230,32 @@
     <value>Sweep Direction</value>
     <comment>String</comment>
   </data>
-  <data name="str_edit_arc" xml:space="preserve">
-    <value>Edit Arc</value>
+  <data name="str_edit_arc_rotation" xml:space="preserve">
+    <value>Edit Arc Rotation</value>
     <comment>String</comment>
   </data>
-	<data name="mfsi_edit_poly_end.Text" xml:space="preserve">
+  <data name="mfsi_menu_edit_poly_end.Text" xml:space="preserve">
     <value>Edit Polygon End</value>
     <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfi_menu_edit_arc.Text" xml:space="preserve">
+    <value>Edit Arc Rotation</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfsi_menu_background_pattern.Text" xml:space="preserve">
+    <value>Background Pattern</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="rmfi_menu_background_black.Text" xml:space="preserve">
+    <value>Black Background</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="rmfi_menu_background_white.Text" xml:space="preserve">
+    <value>White Background</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="tmfi_menu_background_show.Text" xml:space="preserve">
+    <value>Show Checker Board Pattern</value>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
 </root>

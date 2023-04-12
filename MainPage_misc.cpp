@@ -64,16 +64,16 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「色の基数」のサブ項目が選択された.
 	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_color_code_pct()) {
+		if (sender == rmfi_menu_color_code_pct()) {
 			m_color_code = COLOR_CODE::PCT;
 		}
-		else if (sender == rmfi_color_code_dec()) {
+		else if (sender == rmfi_menu_color_code_dec()) {
 			m_color_code = COLOR_CODE::DEC;
 		}
-		else if (sender == rmfi_color_code_hex()) {
+		else if (sender == rmfi_menu_color_code_hex()) {
 			m_color_code = COLOR_CODE::HEX;
 		}
-		else if (sender == rmfi_color_code_real()) {
+		else if (sender == rmfi_menu_color_code_real()) {
 			m_color_code = COLOR_CODE::REAL;
 		}
 		else {
@@ -86,10 +86,10 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「色の基数」に印をつける.
 	void MainPage::color_code_is_checked(const COLOR_CODE val)
 	{
-		rmfi_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
-		rmfi_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
-		rmfi_color_code_real().IsChecked(val == COLOR_CODE::REAL);
-		rmfi_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
+		rmfi_menu_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_menu_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_menu_color_code_real().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_menu_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -97,19 +97,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto old_unit = m_len_unit;
 		LEN_UNIT new_val;
-		if (sender == rmfi_len_unit_grid()) {
+		if (sender == rmfi_menu_len_unit_grid()) {
 			new_val = LEN_UNIT::GRID;
 		}
-		else if (sender == rmfi_len_unit_inch()) {
+		else if (sender == rmfi_menu_len_unit_inch()) {
 			new_val = LEN_UNIT::INCH;
 		}
-		else if (sender == rmfi_len_unit_milli()) {
+		else if (sender == rmfi_menu_len_unit_milli()) {
 			new_val = LEN_UNIT::MILLI;
 		}
-		else if (sender == rmfi_len_unit_pixel()) {
+		else if (sender == rmfi_menu_len_unit_pixel()) {
 			new_val = LEN_UNIT::PIXEL;
 		}
-		else if (sender == rmfi_len_unit_point()) {
+		else if (sender == rmfi_menu_len_unit_point()) {
 			new_val = LEN_UNIT::POINT;
 		}
 		else {
@@ -128,11 +128,11 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「長さの単位」に印をつける.
 	void MainPage::len_unit_is_checked(const LEN_UNIT val)
 	{
-		rmfi_len_unit_grid().IsChecked(val == LEN_UNIT::GRID);
-		rmfi_len_unit_inch().IsChecked(val == LEN_UNIT::INCH);
-		rmfi_len_unit_milli().IsChecked(val == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel().IsChecked(val == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point().IsChecked(val == LEN_UNIT::POINT);
+		rmfi_menu_len_unit_grid().IsChecked(val == LEN_UNIT::GRID);
+		rmfi_menu_len_unit_inch().IsChecked(val == LEN_UNIT::INCH);
+		rmfi_menu_len_unit_milli().IsChecked(val == LEN_UNIT::MILLI);
+		rmfi_menu_len_unit_pixel().IsChecked(val == LEN_UNIT::PIXEL);
+		rmfi_menu_len_unit_point().IsChecked(val == LEN_UNIT::POINT);
 		cbi_len_unit_grid().IsSelected(val == LEN_UNIT::GRID);
 		cbi_len_unit_inch().IsSelected(val == LEN_UNIT::INCH);
 		cbi_len_unit_milli().IsSelected(val == LEN_UNIT::MILLI);
@@ -143,8 +143,8 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「点を方眼にくっつける」が選択された.
 	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_snap_grid = tmfi_snap_grid().IsChecked();
-		//m_main_page.m_snap_grid = tmfi_snap_grid().IsChecked();
+		m_snap_grid = tmfi_menu_snap_grid().IsChecked();
+		//m_main_page.m_snap_grid = tmfi_menu_snap_grid().IsChecked();
 		status_bar_set_pos();
 	}
 
@@ -177,50 +177,50 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「ズーム」のサブ項目に印をつける.
 	void MainPage::zoom_is_cheched(float scale)
 	{
-		rmfi_page_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_page_zoom_100_2().IsChecked(equal(scale, 1.0f));
-		rmfi_page_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_page_zoom_150_2().IsChecked(equal(scale, 1.5f));
-		rmfi_page_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_page_zoom_200_2().IsChecked(equal(scale, 2.0f));
-		rmfi_page_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_page_zoom_300_2().IsChecked(equal(scale, 3.0f));
-		rmfi_page_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_page_zoom_400_2().IsChecked(equal(scale, 4.0f));
-		rmfi_page_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_page_zoom_075_2().IsChecked(equal(scale, 0.75f));
-		rmfi_page_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_page_zoom_050_2().IsChecked(equal(scale, 0.5f));
-		rmfi_page_zoom_025().IsChecked(equal(scale, 0.25f));
-		rmfi_page_zoom_025_2().IsChecked(equal(scale, 0.25f));
+		rmfi_menu_layout_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_popup_layout_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_menu_layout_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_popup_layout_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_menu_layout_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_popup_layout_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_menu_layout_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_popup_layout_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_menu_layout_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_popup_layout_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_menu_layout_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_popup_layout_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_menu_layout_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_popup_layout_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_menu_layout_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_popup_layout_zoom_025().IsChecked(equal(scale, 0.25f));
 	}
 
 	// その他メニューの「ズーム」が選択された.
 	void MainPage::zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == rmfi_page_zoom_100() || sender == rmfi_page_zoom_100_2()) {
+		if (sender == rmfi_menu_layout_zoom_100() || sender == rmfi_popup_layout_zoom_100()) {
 			scale = 1.0f;
 		}
-		else if (sender == rmfi_page_zoom_150() || sender == rmfi_page_zoom_150_2()) {
+		else if (sender == rmfi_menu_layout_zoom_150() || sender == rmfi_popup_layout_zoom_150()) {
 			scale = 1.5f;
 		}
-		else if (sender == rmfi_page_zoom_200() || sender == rmfi_page_zoom_200_2()) {
+		else if (sender == rmfi_menu_layout_zoom_200() || sender == rmfi_popup_layout_zoom_200()) {
 			scale = 2.0f;
 		}
-		else if (sender == rmfi_page_zoom_300() || sender == rmfi_page_zoom_300_2()) {
+		else if (sender == rmfi_menu_layout_zoom_300() || sender == rmfi_popup_layout_zoom_300()) {
 			scale = 3.0f;
 		}
-		else if (sender == rmfi_page_zoom_400() || sender == rmfi_page_zoom_400_2()) {
+		else if (sender == rmfi_menu_layout_zoom_400() || sender == rmfi_popup_layout_zoom_400()) {
 			scale = 4.0f;
 		}
-		else if (sender == rmfi_page_zoom_075() || sender == rmfi_page_zoom_075_2()) {
+		else if (sender == rmfi_menu_layout_zoom_075() || sender == rmfi_popup_layout_zoom_075()) {
 			scale = 0.75f;
 		}
-		else if (sender == rmfi_page_zoom_050() || sender == rmfi_page_zoom_050_2()) {
+		else if (sender == rmfi_menu_layout_zoom_050() || sender == rmfi_popup_layout_zoom_050()) {
 			scale = 0.5f;
 		}
-		else if (sender == rmfi_page_zoom_025() || sender == rmfi_page_zoom_025_2()) {
+		else if (sender == rmfi_menu_layout_zoom_025() || sender == rmfi_popup_layout_zoom_025()) {
 			scale = 0.25f;
 		}
 		else {

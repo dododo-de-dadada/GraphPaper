@@ -43,16 +43,16 @@ namespace winrt::GraphPaper::implementation
 
 			tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
 			tx_edit_text().SelectAll();
-			ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
+			ck_fit_text_frame().IsChecked(m_fit_text_frame);
 			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 				ustack_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
-				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
-				if (m_text_fit_frame_to_text) {
+				m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
+				if (m_fit_text_frame) {
 					ustack_push_position(s, LOC_TYPE::LOC_SE);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -61,17 +61,17 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == mfi_edit_poly_close() || sender == mfi_edit_poly_close_2()) {
+		if (sender == mfi_menu_edit_poly_close() || sender == mfi_popup_edit_poly_close()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				main_draw();
 			}
 		}
-		else if (sender == mfi_edit_poly_open() || sender == mfi_edit_poly_open_2()) {
+		else if (sender == mfi_menu_edit_poly_open() || sender == mfi_popup_edit_poly_open()) {
 			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -85,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 		const auto str_arc_sweep_direction{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction") };
 		const auto str_arc_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize") };
 		const auto str_arc_counter_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize") };
-		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_edit_arc") };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_edit_arc_rotation") };
 
 		ShapeArc* t;	// •ÒW‚·‚é‰~ŒÊ}Œ`
 		if (m_event_shape_prev != nullptr &&
@@ -305,8 +305,7 @@ namespace winrt::GraphPaper::implementation
 					s->get_arc_rot(new_val);
 					ustack_push_set<UNDO_T::ARC_ROT>(new_val);
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
 					main_draw();
 				}
 			}

@@ -47,76 +47,76 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::font_stretch_is_checked(const DWRITE_FONT_STRETCH val)
 	{
 		if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
-			rmfi_font_stretch_ultra_condensed().IsChecked(true);
-			rmfi_font_stretch_ultra_condensed_2().IsChecked(true);
+			rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
+			rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
-			rmfi_font_stretch_extra_condensed().IsChecked(true);
-			rmfi_font_stretch_extra_condensed_2().IsChecked(true);
+			rmfi_menu_font_stretch_extra_condensed().IsChecked(true);
+			rmfi_popup_font_stretch_extra_condensed().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
-			rmfi_font_stretch_condensed().IsChecked(true);
-			rmfi_font_stretch_condensed_2().IsChecked(true);
+			rmfi_menu_font_stretch_condensed().IsChecked(true);
+			rmfi_popup_font_stretch_condensed().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
-			rmfi_font_stretch_semi_condensed().IsChecked(true);
-			rmfi_font_stretch_semi_condensed_2().IsChecked(true);
+			rmfi_menu_font_stretch_semi_condensed().IsChecked(true);
+			rmfi_popup_font_stretch_semi_condensed().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
-			rmfi_font_stretch_normal().IsChecked(true);
-			rmfi_font_stretch_normal_2().IsChecked(true);
+			rmfi_menu_font_stretch_normal().IsChecked(true);
+			rmfi_popup_font_stretch_normal().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
-			rmfi_font_stretch_semi_expanded().IsChecked(true);
-			rmfi_font_stretch_semi_expanded_2().IsChecked(true);
+			rmfi_menu_font_stretch_semi_expanded().IsChecked(true);
+			rmfi_popup_font_stretch_semi_expanded().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
-			rmfi_font_stretch_expanded().IsChecked(true);
-			rmfi_font_stretch_expanded_2().IsChecked(true);
+			rmfi_menu_font_stretch_expanded().IsChecked(true);
+			rmfi_popup_font_stretch_expanded().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
-			rmfi_font_stretch_extra_expanded().IsChecked(true);
-			rmfi_font_stretch_extra_expanded_2().IsChecked(true);
+			rmfi_menu_font_stretch_extra_expanded().IsChecked(true);
+			rmfi_popup_font_stretch_extra_expanded().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
-			rmfi_font_stretch_ultra_expanded().IsChecked(true);
-			rmfi_font_stretch_ultra_expanded_2().IsChecked(true);
+			rmfi_menu_font_stretch_ultra_expanded().IsChecked(true);
+			rmfi_popup_font_stretch_ultra_expanded().IsChecked(true);
 		}
 	}
 
 	void MainPage::font_stretch_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_FONT_STRETCH f_stretch = static_cast<DWRITE_FONT_STRETCH>(-1);
-		if (sender == rmfi_font_stretch_ultra_condensed() || sender == rmfi_font_stretch_ultra_condensed_2()) {
+		if (sender == rmfi_menu_font_stretch_ultra_condensed() || sender == rmfi_popup_font_stretch_ultra_condensed()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED;
 		}
-		else if (sender == rmfi_font_stretch_extra_condensed() || sender == rmfi_font_stretch_extra_condensed_2()) {
+		else if (sender == rmfi_menu_font_stretch_extra_condensed() || sender == rmfi_popup_font_stretch_extra_condensed()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED;
 		}
-		else if (sender == rmfi_font_stretch_condensed() || sender == rmfi_font_stretch_condensed_2()) {
+		else if (sender == rmfi_menu_font_stretch_condensed() || sender == rmfi_popup_font_stretch_condensed()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED;
 		}
-		else if (sender == rmfi_font_stretch_semi_condensed() || sender == rmfi_font_stretch_semi_condensed_2()) {
+		else if (sender == rmfi_menu_font_stretch_semi_condensed() || sender == rmfi_popup_font_stretch_semi_condensed()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED;
 		}
-		else if (sender == rmfi_font_stretch_normal() || sender == rmfi_font_stretch_normal_2()) {
+		else if (sender == rmfi_menu_font_stretch_normal() || sender == rmfi_popup_font_stretch_normal()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
 		}
-		else if (sender == rmfi_font_stretch_semi_expanded() || sender == rmfi_font_stretch_semi_expanded_2()) {
+		else if (sender == rmfi_menu_font_stretch_semi_expanded() || sender == rmfi_popup_font_stretch_semi_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED;
 		}
-		else if (sender == rmfi_font_stretch_expanded() || sender == rmfi_font_stretch_expanded_2()) {
+		else if (sender == rmfi_menu_font_stretch_expanded() || sender == rmfi_popup_font_stretch_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED;
 		}
-		else if (sender == rmfi_font_stretch_extra_expanded() || sender == rmfi_font_stretch_extra_expanded_2()) {
+		else if (sender == rmfi_menu_font_stretch_extra_expanded() || sender == rmfi_popup_font_stretch_extra_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED;
 		}
-		else if (sender == rmfi_font_stretch_ultra_expanded() || sender == rmfi_font_stretch_ultra_expanded_2()) {
+		else if (sender == rmfi_menu_font_stretch_ultra_expanded() || sender == rmfi_popup_font_stretch_ultra_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED;
 		}
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && ustack_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -125,84 +125,84 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::font_weight_is_checked(DWRITE_FONT_WEIGHT val)
 	{
 		if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
-			rmfi_font_weight_thin().IsChecked(true);
-			rmfi_font_weight_thin_2().IsChecked(true);
+			rmfi_menu_font_weight_thin().IsChecked(true);
+			rmfi_popup_font_weight_thin().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
-			rmfi_font_weight_extra_light().IsChecked(true);
-			rmfi_font_weight_extra_light_2().IsChecked(true);
+			rmfi_menu_font_weight_extra_light().IsChecked(true);
+			rmfi_popup_font_weight_extra_light().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
-			rmfi_font_weight_light().IsChecked(true);
-			rmfi_font_weight_light_2().IsChecked(true);
+			rmfi_menu_font_weight_light().IsChecked(true);
+			rmfi_popup_font_weight_light().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
-			rmfi_font_weight_normal().IsChecked(true);
-			rmfi_font_weight_normal_2().IsChecked(true);
+			rmfi_menu_font_weight_normal().IsChecked(true);
+			rmfi_popup_font_weight_normal().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
-			rmfi_font_weight_medium().IsChecked(true);
-			rmfi_font_weight_medium_2().IsChecked(true);
+			rmfi_menu_font_weight_medium().IsChecked(true);
+			rmfi_popup_font_weight_medium().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
-			rmfi_font_weight_semi_bold().IsChecked(true);
-			rmfi_font_weight_semi_bold_2().IsChecked(true);
+			rmfi_menu_font_weight_semi_bold().IsChecked(true);
+			rmfi_popup_font_weight_semi_bold().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
-			rmfi_font_weight_bold().IsChecked(true);
-			rmfi_font_weight_bold_2().IsChecked(true);
+			rmfi_menu_font_weight_bold().IsChecked(true);
+			rmfi_popup_font_weight_bold().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
-			rmfi_font_weight_extra_bold().IsChecked(true);
-			rmfi_font_weight_extra_bold_2().IsChecked(true);
+			rmfi_menu_font_weight_extra_bold().IsChecked(true);
+			rmfi_popup_font_weight_extra_bold().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
-			rmfi_font_weight_black().IsChecked(true);
-			rmfi_font_weight_black_2().IsChecked(true);
+			rmfi_menu_font_weight_black().IsChecked(true);
+			rmfi_popup_font_weight_black().IsChecked(true);
 		}
 		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
-			rmfi_font_weight_extra_black().IsChecked(true);
-			rmfi_font_weight_extra_black_2().IsChecked(true);
+			rmfi_menu_font_weight_extra_black().IsChecked(true);
+			rmfi_popup_font_weight_extra_black().IsChecked(true);
 		}
 	}
 
 	void MainPage::font_weight_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_FONT_WEIGHT f_weight = static_cast<DWRITE_FONT_WEIGHT>(-1);
-		if (sender == rmfi_font_weight_thin() || sender == rmfi_font_weight_thin_2()) {
+		if (sender == rmfi_menu_font_weight_thin() || sender == rmfi_popup_font_weight_thin()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN;
 		}
-		else if (sender == rmfi_font_weight_extra_light() || sender == rmfi_font_weight_extra_light_2()) {
+		else if (sender == rmfi_menu_font_weight_extra_light() || sender == rmfi_popup_font_weight_extra_light()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT;
 		}
-		else if (sender == rmfi_font_weight_light() || sender == rmfi_font_weight_light_2()) {
+		else if (sender == rmfi_menu_font_weight_light() || sender == rmfi_popup_font_weight_light()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT;
 		}
-		else if (sender == rmfi_font_weight_normal() || sender == rmfi_font_weight_normal_2()) {
+		else if (sender == rmfi_menu_font_weight_normal() || sender == rmfi_popup_font_weight_normal()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
 		}
-		else if (sender == rmfi_font_weight_medium() || sender == rmfi_font_weight_medium_2()) {
+		else if (sender == rmfi_menu_font_weight_medium() || sender == rmfi_popup_font_weight_medium()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM;
 		}
-		else if (sender == rmfi_font_weight_semi_bold() || sender == rmfi_font_weight_semi_bold_2()) {
+		else if (sender == rmfi_menu_font_weight_semi_bold() || sender == rmfi_popup_font_weight_semi_bold()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD;
 		}
-		else if (sender == rmfi_font_weight_bold() || sender == rmfi_font_weight_bold_2()) {
+		else if (sender == rmfi_menu_font_weight_bold() || sender == rmfi_popup_font_weight_bold()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD;
 		}
-		else if (sender == rmfi_font_weight_extra_bold() || sender == rmfi_font_weight_extra_bold_2()) {
+		else if (sender == rmfi_menu_font_weight_extra_bold() || sender == rmfi_popup_font_weight_extra_bold()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD;
 		}
-		else if (sender == rmfi_font_weight_black() || sender == rmfi_font_weight_black_2()) {
+		else if (sender == rmfi_menu_font_weight_black() || sender == rmfi_popup_font_weight_black()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK;
 		}
-		else if (sender == rmfi_font_weight_extra_black() || sender == rmfi_font_weight_extra_black_2()) {
+		else if (sender == rmfi_menu_font_weight_extra_black() || sender == rmfi_popup_font_weight_extra_black()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK;
 		}
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && ustack_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
 			ustack_push_null();
-			ustack_is_enable();
-			//xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -257,8 +257,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_family(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -322,8 +322,8 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_size(samp_val);
 				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -339,34 +339,34 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::font_style_is_checked(const DWRITE_FONT_STYLE f_style)
 	{
 		if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
-			rmfi_font_style_italic().IsChecked(true);
-			rmfi_font_style_italic_2().IsChecked(true);
+			rmfi_menu_font_style_italic().IsChecked(true);
+			rmfi_popup_font_style_italic().IsChecked(true);
 		}
 		else if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL) {
-			rmfi_font_style_normal().IsChecked(true);
-			rmfi_font_style_normal_2().IsChecked(true);
+			rmfi_menu_font_style_normal().IsChecked(true);
+			rmfi_popup_font_style_normal().IsChecked(true);
 		}
 		else if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
-			rmfi_font_style_oblique().IsChecked(true);
-			rmfi_font_style_oblique_2().IsChecked(true);
+			rmfi_menu_font_style_oblique().IsChecked(true);
+			rmfi_popup_font_style_oblique().IsChecked(true);
 		}
 	}
 
 	void MainPage::font_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_FONT_STYLE f_style = static_cast<DWRITE_FONT_STYLE>(-1);
-		if (sender == rmfi_font_style_normal() || sender == rmfi_font_style_normal_2()) {
+		if (sender == rmfi_menu_font_style_normal() || sender == rmfi_popup_font_style_normal()) {
 			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
 		}
-		else if (sender == rmfi_font_style_italic() || sender == rmfi_font_style_italic_2()) {
+		else if (sender == rmfi_menu_font_style_italic() || sender == rmfi_popup_font_style_italic()) {
 			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC;
 		}
-		else if (sender == rmfi_font_style_oblique() || sender == rmfi_font_style_oblique_2()) {
+		else if (sender == rmfi_menu_font_style_oblique() || sender == rmfi_popup_font_style_oblique()) {
 			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE;
 		}
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && ustack_push_set<UNDO_T::FONT_STYLE>(f_style)) {
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -378,8 +378,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			ustack_push_null();
-			ustack_is_enable();
-			//xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -390,8 +390,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
-			ustack_is_enable();
-			//xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -402,8 +402,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
-			ustack_is_enable();
-			//xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_weight(new_val);
 				if (ustack_push_set<UNDO_T::FONT_WEIGHT>(new_val)) {
 					ustack_push_null();
-					xcvd_is_enabled();
+					xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}

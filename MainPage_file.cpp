@@ -345,8 +345,8 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
-		ustack_is_enable();
-		xcvd_is_enabled();
+		ustack_menu_is_enabled();
+		xcvd_menu_is_enabled();
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -364,7 +364,7 @@ namespace winrt::GraphPaper::implementation
 		color_code_is_checked(m_color_code);
 		zoom_is_cheched(m_main_scale);
 		status_bar_is_checked(m_status_bar);
-		tmfi_snap_grid().IsChecked(m_snap_grid);
+		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);
 
 		wchar_t* unavailable_font;	// 無効な書体名
@@ -516,7 +516,7 @@ namespace winrt::GraphPaper::implementation
 			m_find_repl = reinterpret_cast<wchar_t*>(find_repl_data);
 			m_find_repl[find_repl_len] = L'\0';
 			const uint16_t f_bit = dt_reader.ReadUInt16();
-			m_text_fit_frame_to_text = ((f_bit & 1) != 0);
+			m_fit_text_frame = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
@@ -884,7 +884,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);
 			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
 			uint16_t f_bit = 0;
-			if (m_text_fit_frame_to_text) {
+			if (m_fit_text_frame) {
 				f_bit |= 1;
 			}
 			if (m_find_text_case) {
@@ -1042,7 +1042,7 @@ dt_writer.WriteBoolean(m_snap_grid);
 		}
 
 		// 設定データを保存するフォルダーを得る.
-		mfi_layout_reset().IsEnabled(false);
+		mfi_menu_layout_reset().IsEnabled(false);
 		winrt::Windows::Storage::IStorageItem setting_item{
 			co_await ApplicationData::Current().LocalFolder().TryGetItemAsync(LAYOUT_FILE)
 		};
@@ -1058,7 +1058,7 @@ dt_writer.WriteBoolean(m_snap_grid);
 				constexpr bool SETTING_ONLY = true;
 				co_await file_read_gpf_async<!RESUME, SETTING_ONLY>(setting_file);
 				setting_file = nullptr;
-				mfi_layout_reset().IsEnabled(true);
+				mfi_menu_layout_reset().IsEnabled(true);
 			}
 			setting_item = nullptr;
 		}

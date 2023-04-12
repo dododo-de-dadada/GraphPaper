@@ -40,16 +40,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_val;
-		if (sender == rmfi_cap_style_flat() || sender == rmfi_cap_style_flat_2()) {
+		if (sender == rmfi_menu_cap_style_flat() || sender == rmfi_popup_cap_style_flat()) {
 			new_val = CAP_STYLE_FLAT;
 		}
-		else if (sender == rmfi_cap_style_square() || sender == rmfi_cap_style_square_2()) {
+		else if (sender == rmfi_menu_cap_style_square() || sender == rmfi_popup_cap_style_square()) {
 			new_val = CAP_STYLE_SQUARE;
 		}
-		else if (sender == rmfi_cap_style_round() || sender == rmfi_cap_style_round_2()) {
+		else if (sender == rmfi_menu_cap_style_round() || sender == rmfi_popup_cap_style_round()) {
 			new_val = CAP_STYLE_ROUND;
 		}
-		else if (sender == rmfi_cap_style_triangle() || rmfi_cap_style_triangle_2()) {
+		else if (sender == rmfi_menu_cap_style_triangle() || rmfi_popup_cap_style_triangle()) {
 			new_val = CAP_STYLE_TRIANGLE;
 		}
 		else {
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		cap_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -68,10 +68,10 @@ namespace winrt::GraphPaper::implementation
 	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
-		rmfi_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
-		rmfi_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
-		rmfi_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
-		rmfi_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
+		rmfi_menu_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
+		rmfi_menu_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
+		rmfi_menu_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
+		rmfi_menu_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
 	}
 
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 				const bool width_changed = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
 					ustack_push_null();
-					ustack_is_enable();
+					ustack_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -269,11 +269,11 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
 		dialog_slider_4().Header(box_value(str_stroke_width + buf));
 
-		dialog_combo_box_0().Header(box_value(mfsi_dash_style().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dot().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash_dot().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_dash_style_dash_dot_dot().Text()));
+		dialog_combo_box_0().Header(box_value(mfsi_menu_dash_style().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_dash_style_dash().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_dash_style_dot().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_dash_style_dash_dot().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_dash_style_dash_dot_dot().Text()));
 		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
 			dialog_combo_box_0().SelectedIndex(0);
 			dialog_slider_0().Visibility(Visibility::Visible);
@@ -438,8 +438,8 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_style = ustack_push_set<UNDO_T::DASH_STYLE>(new_style);
 				if (flag_patt || flag_width || flag_style) {
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -460,27 +460,27 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(-1);
-		if (sender == rmfi_dash_style_solid() || sender == rmfi_dash_style_solid_2()) {
+		if (sender == rmfi_menu_dash_style_solid() || sender == rmfi_popup_dash_style_solid()) {
 			d_style = D2D1_DASH_STYLE_SOLID;
 		}
-		else if (sender == rmfi_dash_style_dash() || sender == rmfi_dash_style_dash_2()) {
+		else if (sender == rmfi_menu_dash_style_dash() || sender == rmfi_popup_dash_style_dash()) {
 			d_style = D2D1_DASH_STYLE_DASH;
 		}
-		else if (sender == rmfi_dash_style_dot() || sender == rmfi_dash_style_dot_2()) {
+		else if (sender == rmfi_menu_dash_style_dot() || sender == rmfi_popup_dash_style_dot()) {
 			d_style = D2D1_DASH_STYLE_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot() || sender == rmfi_dash_style_dash_dot_2()) {
+		else if (sender == rmfi_menu_dash_style_dash_dot() || sender == rmfi_popup_dash_style_dash_dot()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot_dot() || sender == rmfi_dash_style_dash_dot_dot_2()) {
+		else if (sender == rmfi_menu_dash_style_dash_dot_dot() || sender == rmfi_popup_dash_style_dash_dot_dot()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
 		}
 		if (d_style != static_cast<D2D1_DASH_STYLE>(-1)) {
-			mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+			mfi_menu_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 			if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
 				ustack_push_null();
-				ustack_is_enable();
-				//xcvd_is_enabled();
+				ustack_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -491,35 +491,35 @@ namespace winrt::GraphPaper::implementation
 	// d_style	破線の形式
 	void MainPage::dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		rmfi_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		rmfi_dash_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		rmfi_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
-		rmfi_dash_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
-		rmfi_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_dash_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
-		rmfi_dash_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
-		rmfi_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
-		rmfi_dash_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+		rmfi_menu_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_popup_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_menu_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_popup_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_menu_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_popup_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_menu_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_popup_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_menu_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+		rmfi_popup_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
 
-		mfi_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		mfi_dash_pat_2().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		mfi_menu_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		mfi_popup_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 	}
 
 	// 属性メニューの「線の結合の形式」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_val;
-		if (sender == rmfi_join_style_bevel() || sender == rmfi_join_style_bevel_2()) {
+		if (sender == rmfi_menu_join_style_bevel() || sender == rmfi_popup_join_style_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 		}
-		//else if (sender == rmfi_join_style_miter()) {
-		//	new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
-		//}
-		else if (sender == rmfi_join_style_miter_or_bevel() || sender == rmfi_join_style_miter_or_bevel_2()) {
+		else if (sender == rmfi_menu_join_style_miter() || sender == rmfi_popup_join_style_miter()) {
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
+		}
+		else if (sender == rmfi_menu_join_style_miter_or_bevel() || sender == rmfi_popup_join_style_miter_or_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 		}
-		else if (sender == rmfi_join_style_round() || sender == rmfi_join_style_round_2()) {
+		else if (sender == rmfi_menu_join_style_round() || sender == rmfi_popup_join_style_round()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 		}
 		else {
@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		join_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -539,41 +539,52 @@ namespace winrt::GraphPaper::implementation
 	// s_join	線の結合
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
-		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_style_miter_or_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		rmfi_join_style_round_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		mfi_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		mfi_join_miter_limit_2().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_menu_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_popup_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_menu_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_popup_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_menu_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_popup_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_menu_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		rmfi_popup_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		mfi_menu_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		mfi_popup_join_miter_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 	}
 
 	// 属性メニューの「太さ」のサブ項目が選択された.
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float s_width = -1.0f;
-		if (sender == rmfi_stroke_width_0px() || sender == rmfi_stroke_width_0px_2()) {
+		if (sender == rmfi_menu_stroke_width_0px() || sender == rmfi_popup_stroke_width_0px()) {
 			s_width = 0.0f;
 		}
-		else if (sender == rmfi_stroke_width_1px() || sender == rmfi_stroke_width_1px_2()) {
+		else if (sender == rmfi_menu_stroke_width_1px() || sender == rmfi_popup_stroke_width_1px()) {
 			s_width = 1.0f;
 		}
-		else if (sender == rmfi_stroke_width_2px() || sender == rmfi_stroke_width_2px_2()) {
+		else if (sender == rmfi_menu_stroke_width_2px() || sender == rmfi_popup_stroke_width_2px()) {
 			s_width = 2.0f;
 		}
-		else if (sender == rmfi_stroke_width_3px() || sender == rmfi_stroke_width_3px_2()) {
+		else if (sender == rmfi_menu_stroke_width_3px() || sender == rmfi_popup_stroke_width_3px()) {
 			s_width = 3.0f;
 		}
-		else if (sender == rmfi_stroke_width_4px() || sender == rmfi_stroke_width_4px_2()) {
+		else if (sender == rmfi_menu_stroke_width_4px() || sender == rmfi_popup_stroke_width_4px()) {
 			s_width = 4.0f;
+		}
+		else if (sender == rmfi_menu_stroke_width_8px() || sender == rmfi_popup_stroke_width_8px()) {
+			s_width = 8.0f;
+		}
+		else if (sender == rmfi_menu_stroke_width_12px() || sender == rmfi_popup_stroke_width_12px()) {
+			s_width = 12.0f;
+		}
+		else if (sender == rmfi_menu_stroke_width_16px() || sender == rmfi_popup_stroke_width_16px()) {
+			s_width = 16.0f;
 		}
 		if (s_width >= 0.0f) {
 			stroke_width_is_checked(s_width);
 			if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
 				ustack_push_null();
-				ustack_is_enable();
-				//xcvd_is_enabled();
+				ustack_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -582,18 +593,25 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::stroke_width_is_checked(const float s_width) noexcept
 	{
-		rmfi_stroke_width_0px().IsChecked(s_width == 0.0f);
-		rmfi_stroke_width_0px_2().IsChecked(s_width == 0.0f);
-		rmfi_stroke_width_1px().IsChecked(s_width == 1.0f);
-		rmfi_stroke_width_1px_2().IsChecked(s_width == 1.0f);
-		rmfi_stroke_width_2px().IsChecked(s_width == 2.0f);
-		rmfi_stroke_width_2px_2().IsChecked(s_width == 2.0f);
-		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
-		rmfi_stroke_width_3px_2().IsChecked(s_width == 3.0f);
-		rmfi_stroke_width_4px().IsChecked(s_width == 4.0f);
-		rmfi_stroke_width_4px_2().IsChecked(s_width == 4.0f);
-		rmfi_stroke_width_other().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
-		rmfi_stroke_width_other_2().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
+		rmfi_menu_stroke_width_0px().IsChecked(s_width == 0.0f);
+		rmfi_popup_stroke_width_0px().IsChecked(s_width == 0.0f);
+		rmfi_menu_stroke_width_1px().IsChecked(s_width == 1.0f);
+		rmfi_popup_stroke_width_1px().IsChecked(s_width == 1.0f);
+		rmfi_menu_stroke_width_2px().IsChecked(s_width == 2.0f);
+		rmfi_popup_stroke_width_2px().IsChecked(s_width == 2.0f);
+		rmfi_menu_stroke_width_3px().IsChecked(s_width == 3.0f);
+		rmfi_popup_stroke_width_3px().IsChecked(s_width == 3.0f);
+		rmfi_menu_stroke_width_4px().IsChecked(s_width == 4.0f);
+		rmfi_popup_stroke_width_4px().IsChecked(s_width == 4.0f);
+		rmfi_menu_stroke_width_8px().IsChecked(s_width == 8.0f);
+		rmfi_popup_stroke_width_8px().IsChecked(s_width == 8.0f);
+		rmfi_menu_stroke_width_12px().IsChecked(s_width == 12.0f);
+		rmfi_popup_stroke_width_12px().IsChecked(s_width == 12.0f);
+		rmfi_menu_stroke_width_16px().IsChecked(s_width == 16.0f);
+		rmfi_popup_stroke_width_16px().IsChecked(s_width == 16.0f);
+		const bool others = (s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f && s_width != 8.0f && s_width != 16.0f);
+		rmfi_menu_stroke_width_other().IsChecked(others);
+		rmfi_popup_stroke_width_other().IsChecked(others);
 	}
 
 	// 属性メニューの「太さ」>「その他」が選択された.
@@ -642,8 +660,8 @@ namespace winrt::GraphPaper::implementation
 				stroke_width_is_checked(new_val);
 				if (ustack_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}

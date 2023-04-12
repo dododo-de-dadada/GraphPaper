@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 		const auto str_color_g{ ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " };
 		const auto str_color_b{ ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " };
 		const auto str_opacity{ ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " };
-		const auto str_color_code{ mfsi_color_code().Text() };
+		const auto str_color_code{ mfsi_menu_color_code().Text() };
 
 		wchar_t* res = nullptr;
 		if constexpr (U == UNDO_T::FILL_COLOR) {
@@ -202,10 +202,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().Visibility(Visibility::Visible);
 
 		dialog_combo_box_0().Header(box_value(str_color_code));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_dec().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_hex().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_real().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_pct().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_dec().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_hex().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_real().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_pct().Text()));
 		if (m_color_code == COLOR_CODE::DEC) {
 			dialog_combo_box_0().SelectedIndex(0);
 		}
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 				color_code_is_checked(m_color_code);
 				if (color_ustack_set<U>(*this, new_val)) {
 					ustack_push_null();
-					ustack_is_enable();
+					ustack_menu_is_enabled();
 					main_draw();
 				}
 			}

@@ -53,40 +53,40 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::background_color_is_checked(const bool checker_board, const D2D1_COLOR_F& color)
 	{
 		if (checker_board) {
-			tmfi_background_pattern().IsChecked(true);
-			tmfi_background_pattern_2().IsChecked(true);
+			tmfi_menu_background_show().IsChecked(true);
+			tmfi_popup_background_show().IsChecked(true);
 		}
 		else {
-			tmfi_background_pattern().IsChecked(false);
-			tmfi_background_pattern_2().IsChecked(false);
+			tmfi_menu_background_show().IsChecked(false);
+			tmfi_popup_background_show().IsChecked(false);
 		}
 		if (equal(color, COLOR_BLACK)) {
-			rmfi_background_black().IsChecked(true);
-			rmfi_background_black_2().IsChecked(true);
+			rmfi_menu_background_black().IsChecked(true);
+			rmfi_popup_background_black().IsChecked(true);
 		}
 		else {
-			rmfi_background_white().IsChecked(true);
-			rmfi_background_white_2().IsChecked(true);
+			rmfi_menu_background_white().IsChecked(true);
+			rmfi_popup_background_white().IsChecked(true);
 		}
 	}
 
 	// 背景パターンがクリックされた.
 	void MainPage::background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == tmfi_background_pattern() || sender == tmfi_background_pattern_2()) {
+		if (sender == tmfi_menu_background_show() || sender == tmfi_popup_background_show()) {
 			const auto toggle = sender.as<ToggleMenuFlyoutItem>();
 			if (m_background_show != toggle.IsChecked()) {
 				m_background_show = toggle.IsChecked();
 				main_draw();
 			}
 		}
-		else if (sender == rmfi_background_white() || sender == rmfi_background_white_2()) {
+		else if (sender == rmfi_menu_background_white() || sender == rmfi_popup_background_white()) {
 			if (!equal(m_background_color, COLOR_WHITE)) {
 				m_background_color = COLOR_WHITE;
 				main_draw();
 			}
 		}
-		else if (sender == rmfi_background_black() || sender == rmfi_background_black_2()) {
+		else if (sender == rmfi_menu_background_black() || sender == rmfi_popup_background_black()) {
 			if (!equal(m_background_color, COLOR_BLACK)) {
 				m_background_color = COLOR_BLACK;
 				main_draw();
@@ -98,13 +98,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_EMPH val;
-		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
+		if (sender == rmfi_menu_grid_emph_1() || sender == rmfi_popup_grid_emph_1()) {
 			val = GRID_EMPH_0;
 		}
-		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
+		else if (sender == rmfi_menu_grid_emph_2() || sender == rmfi_popup_grid_emph_2()) {
 			val = GRID_EMPH_2;
 		}
-		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
+		else if (sender == rmfi_menu_grid_emph_3() || sender == rmfi_popup_grid_emph_3()) {
 			val = GRID_EMPH_3;
 		}
 		else {
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(g_emph, val)) {
 			ustack_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -126,12 +126,12 @@ namespace winrt::GraphPaper::implementation
 	// g_emph	方眼の強調
 	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
-		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
-		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+		rmfi_menu_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_popup_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_menu_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_popup_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_menu_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+		rmfi_popup_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -157,11 +157,11 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Header(box_value(str_grid_length + buf));
 		dialog_slider_0().Visibility(Visibility::Visible);
 
-		dialog_combo_box_0().Items().Append(box_value(rmfi_len_unit_pixel().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_len_unit_inch().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_len_unit_milli().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_len_unit_point().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_len_unit_grid().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_len_unit_pixel().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_len_unit_inch().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_len_unit_milli().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_len_unit_point().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_len_unit_grid().Text()));
 		if (m_len_unit == LEN_UNIT::PIXEL) {
 			dialog_combo_box_0().SelectedIndex(0);
 		}
@@ -270,8 +270,8 @@ namespace winrt::GraphPaper::implementation
 				if (!equal(page_val, setting_val)) {
 					ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
 					ustack_push_null();
-					ustack_is_enable();
-					//xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		if (val >= 1.0f) {
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
 			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -318,13 +318,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_SHOW new_val;
-		if (sender == rmfi_grid_show_back() || sender == rmfi_grid_show_back_2()) {
+		if (sender == rmfi_menu_grid_show_back() || sender == rmfi_popup_grid_show_back()) {
 			new_val = GRID_SHOW::BACK;
 		}
-		else if (sender == rmfi_grid_show_front() || sender == rmfi_grid_show_front_2()) {
+		else if (sender == rmfi_menu_grid_show_front() || sender == rmfi_popup_grid_show_front()) {
 			new_val = GRID_SHOW::FRONT;
 		}
-		else if (sender == rmfi_grid_show_hide() || sender == rmfi_grid_show_hide_2()) {
+		else if (sender == rmfi_menu_grid_show_hide() || sender == rmfi_popup_grid_show_hide()) {
 			new_val = GRID_SHOW::HIDE;
 		}
 		else {
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_main_page.m_grid_show != new_val) {
 			ustack_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -345,12 +345,12 @@ namespace winrt::GraphPaper::implementation
 	// g_show	方眼の表示
 	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
-		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
-		rmfi_grid_show_back_2().IsChecked(g_show == GRID_SHOW::BACK);
-		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
-		rmfi_grid_show_front_2().IsChecked(g_show == GRID_SHOW::FRONT);
-		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
-		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
+		rmfi_menu_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
+		rmfi_popup_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
+		rmfi_menu_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
+		rmfi_popup_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
+		rmfi_menu_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
+		rmfi_popup_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 	// レイアウトメニューの「レイアウトをリセット」が選択された.
 	// データを保存したファイルがある場合, それを削除する.
@@ -367,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 				HRESULT hres = E_FAIL;
 				try {
 					co_await delete_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_layout_reset().IsEnabled(false);
+					mfi_menu_layout_reset().IsEnabled(false);
 					hres = S_OK;
 				}
 				catch (winrt::hresult_error const& e) {
@@ -397,13 +397,14 @@ namespace winrt::GraphPaper::implementation
 		if (setting_file != nullptr) {
 			co_await file_write_gpf_async<false, true>(setting_file);
 			setting_file = nullptr;
-			mfi_layout_reset().IsEnabled(true);
+			mfi_menu_layout_reset().IsEnabled(true);
 		}
 		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 		//mru_list.Clear();
 	}
 
+	/*
 	// レイアウトメニューの項目に印をつける.
 	void MainPage::layout_is_checked(void) noexcept
 	{
@@ -453,12 +454,13 @@ namespace winrt::GraphPaper::implementation
 
 		//bool g_snap;
 		//m_main_page.get_snap_grid(g_snap);
-		//tmfi_snap_grid().IsChecked(g_snap);
+		//tmfi_menu_snap_grid().IsChecked(g_snap);
 
 		//float scale;
 		//m_main_page.get_page_scale(scale);
 		//zoom_is_cheched(scale);
 	}
+	*/
 
 	// レイアウトを既定値に戻す.
 	void MainPage::layout_init(void) noexcept
@@ -606,7 +608,7 @@ namespace winrt::GraphPaper::implementation
 		color_code_is_checked(m_color_code);
 		zoom_is_cheched(m_main_scale);
 		status_bar_is_checked(m_status_bar);
-		tmfi_snap_grid().IsChecked(m_snap_grid);
+		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);
 	}
 
@@ -736,7 +738,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -860,7 +862,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -873,7 +875,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページの大きさダイアログのテキストボックスの値が変更された.
-	void MainPage::page_size_value_changed(IInspectable const& sender, NumberBoxValueChangedEventArgs const&)
+	void MainPage::page_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&)
 	{
 		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
 		const auto g_len = m_main_page.m_grid_base + 1.0;

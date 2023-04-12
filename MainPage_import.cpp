@@ -92,7 +92,7 @@ namespace winrt::GraphPaper::implementation
 				ustack_push_append(s);
 				ustack_push_select(s);
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 				m_mutex_draw.unlock();
 			}
 
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 				summary_append(s);
 				summary_select(s);
 			}
-			xcvd_is_enabled();
+			xcvd_menu_is_enabled();
 			main_bbox_update(s);
 			main_panel_size();
 			main_draw();

@@ -75,9 +75,9 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Value(a_size.m_offset);
 		dialog_slider_2().Visibility(Visibility::Visible);
 
-		dialog_radio_btns().Header(box_value(mfsi_arrow_style().Text()));
-		dialog_radio_btn_0().Content(box_value(rmfi_arrow_style_opened().Text()));
-		dialog_radio_btn_1().Content(box_value(rmfi_arrow_style_filled().Text()));
+		dialog_radio_btns().Header(box_value(mfsi_menu_arrow_style().Text()));
+		dialog_radio_btn_0().Content(box_value(rmfi_menu_arrow_style_opened().Text()));
+		dialog_radio_btn_1().Content(box_value(rmfi_menu_arrow_style_filled().Text()));
 		dialog_radio_btns().Visibility(Visibility::Visible);
 		if (a_style == ARROW_STYLE::ARROW_OPENED) {
 			dialog_radio_btns().SelectedIndex(0);
@@ -86,11 +86,11 @@ namespace winrt::GraphPaper::implementation
 			dialog_radio_btns().SelectedIndex(1);
 		}
 
-		dialog_combo_box_0().Header(box_value(mfsi_cap_style().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_flat().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_square().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_round().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_cap_style_triangle().Text()));
+		dialog_combo_box_0().Header(box_value(mfsi_menu_cap_style().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_flat().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_square().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_round().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_triangle().Text()));
 		if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
 			dialog_combo_box_0().SelectedIndex(0);
 		}
@@ -105,11 +105,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		dialog_combo_box_0().Visibility(Visibility::Visible);
 
-		dialog_combo_box_1().Header(box_value(mfsi_join_style().Text()));
-		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_miter_or_bevel().Text()));
-		//dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_miter().Text()));
-		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_round().Text()));
-		dialog_combo_box_1().Items().Append(box_value(rmfi_join_style_bevel().Text()));
+		dialog_combo_box_1().Header(box_value(mfsi_menu_join_style().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_miter_or_bevel().Text()));
+		if (rmfi_menu_join_style_miter().Visibility() == Visibility::Visible) {
+			dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_miter().Text()));
+		}
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_round().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_bevel().Text()));
 		//if (a_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
 		//	dialog_combo_box_1().SelectedIndex(0);
 		//}
@@ -276,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_join = ustack_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
 					ustack_push_null();
-					ustack_is_enable();
+					ustack_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -313,21 +315,20 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style = static_cast<ARROW_STYLE>(-1);
-		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
+		if (sender == rmfi_menu_arrow_style_none() || sender == rmfi_popup_arrow_style_none()) {
 			a_style = ARROW_STYLE::ARROW_NONE;
 		}
-		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
+		else if (sender == rmfi_menu_arrow_style_opened() || sender == rmfi_popup_arrow_style_opened()) {
 			a_style = ARROW_STYLE::ARROW_OPENED;
 		}
-		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
+		else if (sender == rmfi_menu_arrow_style_filled() || sender == rmfi_popup_arrow_style_filled()) {
 			a_style = ARROW_STYLE::ARROW_FILLED;
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
 			arrow_style_is_checked(a_style);
 			if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
 				ustack_push_null();
-				ustack_is_enable();
-				//xcvd_is_enabled();
+				ustack_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -341,20 +342,20 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
 		if (val == ARROW_STYLE::ARROW_NONE) {
-			rmfi_arrow_style_none().IsChecked(true);
-			rmfi_arrow_style_none_2().IsChecked(true);
+			rmfi_menu_arrow_style_none().IsChecked(true);
+			rmfi_popup_arrow_style_none().IsChecked(true);
 		}
 		else if (val == ARROW_STYLE::ARROW_OPENED) {
-			rmfi_arrow_style_opened().IsChecked(true);
-			rmfi_arrow_style_opened_2().IsChecked(true);
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
+			rmfi_menu_arrow_style_opened().IsChecked(true);
+			rmfi_popup_arrow_style_opened().IsChecked(true);
+			mfi_menu_arrow_size().IsEnabled(true);
+			mfi_popup_arrow_size().IsEnabled(true);
 		}
 		else if (val == ARROW_STYLE::ARROW_FILLED) {
-			rmfi_arrow_style_filled().IsChecked(true);
-			rmfi_arrow_style_filled_2().IsChecked(true);
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
+			rmfi_menu_arrow_style_filled().IsChecked(true);
+			rmfi_popup_arrow_style_filled().IsChecked(true);
+			mfi_menu_arrow_size().IsEnabled(true);
+			mfi_popup_arrow_size().IsEnabled(true);
 		}
 	}
 

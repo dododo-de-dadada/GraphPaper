@@ -23,12 +23,12 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「画像の縦横比を維持」に印をつける.
 	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
 	{
-		tmfi_image_keep_aspect().IsChecked(keep_aspect);
-		tmfi_image_keep_aspect_2().IsChecked(keep_aspect);
+		tmfi_menu_image_keep_aspect().IsChecked(keep_aspect);
+		tmfi_menu_image_keep_aspect_2().IsChecked(keep_aspect);
 	}
 
 	// 画像メニューの「原画像に戻す」が選択された.
-	void MainPage::image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	void MainPage::image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		for (Shape* const s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
@@ -39,8 +39,8 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeImage*>(s)->revert();
 		}
 		ustack_push_null();
-		ustack_is_enable();
-		//xcvd_is_enabled();
+		ustack_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_panel_size();
 		main_draw();
 		status_bar_set_pos();
@@ -72,10 +72,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Visible);
 
 		dialog_combo_box_0().Header(box_value(str_color_code));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_dec().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_hex().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_real().Text()));
-		dialog_combo_box_0().Items().Append(box_value(rmfi_color_code_pct().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_dec().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_hex().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_real().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_pct().Text()));
 		if (m_color_code == COLOR_CODE::DEC) {
 			dialog_combo_box_0().SelectedIndex(0);
 		}
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 				color_code_is_checked(m_color_code);
 				if (ustack_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
 					ustack_push_null();
-					ustack_is_enable();
+					ustack_menu_is_enabled();
 					main_draw();
 				}
 			}

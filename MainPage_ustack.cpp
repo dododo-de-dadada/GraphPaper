@@ -244,8 +244,8 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 			if (flag) {
-				ustack_is_enable();
-				xcvd_is_enabled();
+				ustack_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -309,8 +309,8 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_ucnt--;
 				m_ustack_rcnt++;
 			}
-			ustack_is_enable();
-			xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -409,12 +409,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す/やり直しメニューの可否を設定する.
-	void MainPage::ustack_is_enable(void)
+	void MainPage::ustack_menu_is_enabled(void)
 	{
-		mfi_undo().IsEnabled(m_ustack_ucnt > 0);
-		mfi_undo_2().IsEnabled(m_ustack_ucnt > 0);
-		mfi_redo().IsEnabled(m_ustack_rcnt > 0);
-		mfi_redo_2().IsEnabled(m_ustack_rcnt > 0);
+		mbi_menu_undo().IsEnabled(m_ustack_ucnt > 0);
+		mfi_popup_undo().IsEnabled(m_ustack_ucnt > 0);
+		mfi_menu_redo().IsEnabled(m_ustack_rcnt > 0);
+		mfi_popup_redo().IsEnabled(m_ustack_rcnt > 0);
 	}
 
 	// 無効な操作の組をポップする.

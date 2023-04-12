@@ -39,8 +39,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_select(g);
 		ustack_push_null();
-		ustack_is_enable();
-		xcvd_is_enabled();
+		ustack_menu_is_enabled();
+		xcvd_menu_is_enabled();
 		main_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 		if (summary_is_visible()) {
@@ -90,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_remove(g);
 		}
 		ustack_push_null();
-		ustack_is_enable();
-		xcvd_is_enabled();
+		ustack_menu_is_enabled();
+		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
 	}

@@ -80,6 +80,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -228,7 +229,7 @@ namespace winrt::GraphPaper::implementation
 		std::mutex m_mutex_event;	// イベント処理させないための排他制御
 
 		// 文字列の編集, 検索と置換
-		bool m_text_fit_frame_to_text = false;	// 枠を文字列に合わせる
+		bool m_fit_text_frame = false;	// 枠を文字列に合わせる
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
@@ -433,6 +434,11 @@ namespace winrt::GraphPaper::implementation
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 
+		void event_arrange_popup_prop(const bool visible, const Shape* s);
+		void event_arrange_popup_font(const bool visible);
+		void event_arrange_popup_image(const bool visible);
+		void event_arrange_popup_layout(const bool visible);
+
 		//-------------------------------
 		// MainPage_file.cpp
 		// ファイルの読み書き
@@ -483,10 +489,10 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_edit.cpp
-		// 文字列の編集, 円弧の編集
+		// 多角形の終端の編集, 文字列の編集, 円弧の傾きの編集
 		//-------------------------------
 
-		// 編集メニューの「円弧の編集」が選択された.
+		// 編集メニューの「円弧の傾きの編集」が選択された.
 		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「多角形の終端の編集」のサブ項目が選択された.
 		void edit_poly_end_click(IInspectable const&, RoutedEventArgs const&);
@@ -615,7 +621,7 @@ namespace winrt::GraphPaper::implementation
 		// 画像メニューの「画像の縦横比を保つ」に印をつける.
 		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「原画像に戻す」が選択された.
-		void image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		void image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「画像の不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 
@@ -731,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「方眼の表示」が選択された.
 		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
 		// レイアウトメニューの項目に印をつける.
-		void layout_is_checked(void) noexcept;
+		//void layout_is_checked(void) noexcept;
 		// レイアウトを既定値に戻す.
 		void layout_init(void) noexcept;
 		// レイアウトメニューの「レイアウトをリセット」が選択された.
@@ -880,7 +886,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
 		// 書体メニューの「枠を文字列に合わせる」が選択された.
-		void text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&);
+		void fit_text_frame_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.
@@ -920,7 +926,7 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		// 元に戻す/やり直しメニューの可否を設定する.
-		void ustack_is_enable(void);
+		void ustack_menu_is_enabled(void);
 		// 編集メニューの「やり直し」が選択された.
 		void ustack_redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
@@ -976,7 +982,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「削除」が選択された.
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの可否を設定する.
-		void xcvd_is_enabled(void);
+		void xcvd_menu_is_enabled(void);
 		// 編集メニューの「貼り付け」が選択された.
 		void xcvd_paste_click(IInspectable const&, RoutedEventArgs const&);
 		// 画像を貼り付ける.

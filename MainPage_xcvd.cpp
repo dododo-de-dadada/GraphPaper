@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 			// メモリストリームは閉じちゃダメ.
 			out_stream.Close();
 			out_stream = nullptr;
-			xcvd_is_enabled();
+			xcvd_menu_is_enabled();
 			// スレッドコンテキストを復元する.
 			co_await context;
 		}
@@ -144,8 +144,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_mutex_draw.unlock();
 			ustack_push_null();
-			ustack_is_enable();
-			xcvd_is_enabled();
+			ustack_menu_is_enabled();
+			xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -159,10 +159,8 @@ namespace winrt::GraphPaper::implementation
 	// 枠を文字列に合わせる, と元の大きさに戻す.
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
 	//------------------------------
-	void MainPage::xcvd_is_enabled(void)
+	void MainPage::xcvd_menu_is_enabled(void)
 	{
-		//ustack_is_enable();
-
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
 		uint32_t selected_group_cnt = 0;	// 選択されたグループ図形の数
@@ -227,47 +225,47 @@ namespace winrt::GraphPaper::implementation
 		const bool exists_clipboard_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
 			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 
-		mfi_xcvd_cut().IsEnabled(exists_selected);
-		mfi_xcvd_cut_2().IsEnabled(exists_selected);
-		mfi_xcvd_copy().IsEnabled(exists_selected);
-		mfi_xcvd_copy_2().IsEnabled(exists_selected);
-		mfi_xcvd_paste().IsEnabled(exists_clipboard_data);
-		mfi_xcvd_paste_2().IsEnabled(exists_clipboard_data);
-		mfi_xcvd_delete().IsEnabled(exists_selected);
-		mfi_xcvd_delete_2().IsEnabled(exists_selected);
-		mfi_select_all().IsEnabled(exists_unselected);
-		mfi_select_all_2().IsEnabled(exists_unselected);
-		mfi_group().IsEnabled(exists_selected_2);
-		mfi_group_2().IsEnabled(exists_selected_2);
-		mfi_ungroup().IsEnabled(exists_selected_group);
-		mfi_ungroup_2().IsEnabled(exists_selected_group);
+		mfi_menu_xcvd_cut().IsEnabled(exists_selected);
+		mfi_popup_xcvd_cut().IsEnabled(exists_selected);
+		mfi_menu_xcvd_copy().IsEnabled(exists_selected);
+		mfi_popup_xcvd_copy().IsEnabled(exists_selected);
+		mfi_menu_xcvd_paste().IsEnabled(exists_clipboard_data);
+		mfi_popup_xcvd_paste().IsEnabled(exists_clipboard_data);
+		mfi_menu_xcvd_delete().IsEnabled(exists_selected);
+		mfi_popup_xcvd_delete().IsEnabled(exists_selected);
+		mfi_menu_select_all().IsEnabled(exists_unselected);
+		mfi_popup_select_all().IsEnabled(exists_unselected);
+		mfi_menu_group().IsEnabled(exists_selected_2);
+		mfi_popup_group().IsEnabled(exists_selected_2);
+		mfi_menu_ungroup().IsEnabled(exists_selected_group);
+		mfi_popup_ungroup().IsEnabled(exists_selected_group);
 		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 		// そうしないと, 子の項目の可否がただちに反映しない.
-		mfsi_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-		mfsi_edit_poly_end_2().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-		mfi_edit_poly_open().IsEnabled(exists_selected_poly_close);
-		mfi_edit_poly_open_2().IsEnabled(exists_selected_poly_close);
-		mfi_edit_poly_close().IsEnabled(exists_selected_poly_open);
-		mfi_edit_poly_close_2().IsEnabled(exists_selected_poly_open);
-		mfi_edit_arc().IsEnabled(exists_selected_arc);
-		mfi_edit_arc_2().IsEnabled(exists_selected_arc);
-		mfi_edit_text().IsEnabled(exists_selected_text);
-		mfi_edit_text_2().IsEnabled(exists_selected_text);
-		mfi_find_text().IsEnabled(exists_text);
-		mfi_find_text_2().IsEnabled(exists_text);
-		mfi_text_fit_frame_to_text().IsEnabled(exists_selected_text);
-		mfi_text_fit_frame_to_text_2().IsEnabled(exists_selected_text);
-		mfi_bring_forward().IsEnabled(enable_forward);
-		mfi_bring_forward_2().IsEnabled(enable_forward);
-		mfi_bring_to_front().IsEnabled(enable_forward);
-		mfi_bring_to_front_2().IsEnabled(enable_forward);
-		mfi_send_to_back().IsEnabled(enable_backward);
-		mfi_send_to_back_2().IsEnabled(enable_backward);
-		mfi_send_backward().IsEnabled(enable_backward);
-		mfi_send_backward_2().IsEnabled(enable_backward);
-		mfsi_order().IsEnabled(enable_forward || enable_backward);
-		mfsi_order_2().IsEnabled(enable_forward || enable_backward);
-		mfi_image_revert_to_original().IsEnabled(exists_selected_image);
+		mfsi_menu_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+		mfsi_popup_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+		mfi_menu_edit_poly_open().IsEnabled(exists_selected_poly_close);
+		mfi_popup_edit_poly_open().IsEnabled(exists_selected_poly_close);
+		mfi_menu_edit_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_popup_edit_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_menu_edit_arc().IsEnabled(exists_selected_arc);
+		mfi_popup_edit_arc().IsEnabled(exists_selected_arc);
+		mfi_menu_edit_text().IsEnabled(exists_selected_text);
+		mfi_popup_edit_text().IsEnabled(exists_selected_text);
+		mfi_menu_find_text().IsEnabled(exists_text);
+		mfi_popup_find_text().IsEnabled(exists_text);
+		mfi_menu_fit_text_frame().IsEnabled(exists_selected_text);
+		mfi_popup_fit_text_frame().IsEnabled(exists_selected_text);
+		mfi_menu_bring_forward().IsEnabled(enable_forward);
+		mfi_popup_bring_forward().IsEnabled(enable_forward);
+		mfi_menu_bring_to_front().IsEnabled(enable_forward);
+		mfi_popup_bring_to_front().IsEnabled(enable_forward);
+		mfi_menu_send_to_back().IsEnabled(enable_backward);
+		mfi_popup_send_to_back().IsEnabled(enable_backward);
+		mfi_menu_send_backward().IsEnabled(enable_backward);
+		mfi_popup_send_backward().IsEnabled(enable_backward);
+		mfsi_menu_order().IsEnabled(enable_forward || enable_backward);
+		mfsi_popup_order().IsEnabled(enable_forward || enable_backward);
+		mfi_menu_image_revert().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}
 
@@ -375,11 +373,11 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 		}
 		ustack_push_null();
-		ustack_is_enable();
-		xcvd_is_enabled();
+		ustack_menu_is_enabled();
+		xcvd_menu_is_enabled();
 
 		co_await winrt::resume_foreground(Dispatcher());
-		ustack_is_enable();
+		ustack_menu_is_enabled();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);
@@ -444,8 +442,8 @@ namespace winrt::GraphPaper::implementation
 					}
 					m_mutex_draw.unlock();
 					ustack_push_null();
-					ustack_is_enable();
-					xcvd_is_enabled();
+					ustack_menu_is_enabled();
+					xcvd_menu_is_enabled();
 					main_panel_size();
 					main_draw();
 					slist_pasted.clear();
@@ -506,14 +504,14 @@ namespace winrt::GraphPaper::implementation
 				m_mutex_draw.unlock();
 			}
 			ustack_push_null();
-			ustack_is_enable();
+			ustack_menu_is_enabled();
 
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_append(t);
 				summary_select(t);
 			}
-			xcvd_is_enabled();
+			xcvd_menu_is_enabled();
 			main_bbox_update(t);
 			main_panel_size();
 			main_draw();

@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			/*
 			MenuFlyout popup{};
-			for (const auto item : mfsi_status_bar().Items()) {
+			for (const auto item : mfsi_menu_status_bar().Items()) {
 				popup.Items().Append(item);
 			}
 			sp_status_bar_panel().ContextFlyout(popup);

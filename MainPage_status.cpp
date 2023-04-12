@@ -50,74 +50,74 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「ステータスバー」が選択された.
 	void MainPage::status_bar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == tmfi_status_bar_pos()) {
-			const bool is_checked = tmfi_status_bar_pos().IsChecked();
+		if (sender == tmfi_menu_status_bar_pos()) {
+			const bool is_checked = tmfi_menu_status_bar_pos().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
-			tmfi_status_bar_pos_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_pos().IsChecked(is_checked);
 		}
-		else if (sender == tmfi_status_bar_grid()) {
-			const bool is_checked = tmfi_status_bar_grid().IsChecked();
+		else if (sender == tmfi_menu_status_bar_grid()) {
+			const bool is_checked = tmfi_menu_status_bar_grid().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
-			tmfi_status_bar_grid_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_grid().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
-		else if (sender == tmfi_status_bar_page()) {
-			const bool is_checked = tmfi_status_bar_page().IsChecked();
+		else if (sender == tmfi_menu_status_bar_page()) {
+			const bool is_checked = tmfi_menu_status_bar_page().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
-			tmfi_status_bar_page_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_page().IsChecked(is_checked);
 			status_bar_set_page();
 		}
-		else if (sender == tmfi_status_bar_zoom()) {
-			const bool is_checked = tmfi_status_bar_zoom().IsChecked();
+		else if (sender == tmfi_menu_status_bar_zoom()) {
+			const bool is_checked = tmfi_menu_status_bar_zoom().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
-			tmfi_status_bar_zoom_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_zoom().IsChecked(is_checked);
 			status_bar_set_zoom();
 		}
-		else if (sender == tmfi_status_bar_draw()) {
-			const bool is_checked = tmfi_status_bar_draw().IsChecked();
+		else if (sender == tmfi_menu_status_bar_draw()) {
+			const bool is_checked = tmfi_menu_status_bar_draw().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
-			tmfi_status_bar_draw_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_draw().IsChecked(is_checked);
 			status_bar_set_draw();
 		}
-		else if (sender == tmfi_status_bar_unit()) {
-			const bool is_checked = tmfi_status_bar_unit().IsChecked();
+		else if (sender == tmfi_menu_status_bar_unit()) {
+			const bool is_checked = tmfi_menu_status_bar_unit().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
-			tmfi_status_bar_unit_2().IsChecked(is_checked);
+			tmfi_popup_status_bar_unit().IsChecked(is_checked);
 			status_bar_set_unit();
 		}
-		else if (sender == tmfi_status_bar_pos_2()) {
-			const bool is_checked = tmfi_status_bar_pos_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_pos()) {
+			const bool is_checked = tmfi_popup_status_bar_pos().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
-			tmfi_status_bar_pos().IsChecked(is_checked);
+			tmfi_menu_status_bar_pos().IsChecked(is_checked);
 		}
-		else if (sender == tmfi_status_bar_grid_2()) {
-			const bool is_checked = tmfi_status_bar_grid_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_grid()) {
+			const bool is_checked = tmfi_popup_status_bar_grid().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
-			tmfi_status_bar_grid().IsChecked(is_checked);
+			tmfi_menu_status_bar_grid().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
-		else if (sender == tmfi_status_bar_page_2()) {
-			const bool is_checked = tmfi_status_bar_page_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_page()) {
+			const bool is_checked = tmfi_popup_status_bar_page().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
-			tmfi_status_bar_page().IsChecked(is_checked);
+			tmfi_menu_status_bar_page().IsChecked(is_checked);
 			status_bar_set_page();
 		}
-		else if (sender == tmfi_status_bar_zoom_2()) {
-			const bool is_checked = tmfi_status_bar_zoom_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_zoom()) {
+			const bool is_checked = tmfi_popup_status_bar_zoom().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
-			tmfi_status_bar_zoom().IsChecked(is_checked);
+			tmfi_menu_status_bar_zoom().IsChecked(is_checked);
 			status_bar_set_zoom();
 		}
-		else if (sender == tmfi_status_bar_draw_2()) {
-			const bool is_checked = tmfi_status_bar_draw_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_draw()) {
+			const bool is_checked = tmfi_popup_status_bar_draw().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
-			tmfi_status_bar_draw().IsChecked(is_checked);
+			tmfi_menu_status_bar_draw().IsChecked(is_checked);
 			status_bar_set_draw();
 		}
-		else if (sender == tmfi_status_bar_unit_2()) {
-			const bool is_checked = tmfi_status_bar_unit_2().IsChecked();
+		else if (sender == tmfi_popup_status_bar_unit()) {
+			const bool is_checked = tmfi_popup_status_bar_unit().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
-			tmfi_status_bar_unit().IsChecked(is_checked);
+			tmfi_menu_status_bar_unit().IsChecked(is_checked);
 			status_bar_set_unit();
 		}
 		else {
@@ -140,19 +140,19 @@ namespace winrt::GraphPaper::implementation
 	// s_bar	ステータスバーの状態
 	void MainPage::status_bar_is_checked(const STATUS_BAR s_bar)
 	{
-		tmfi_status_bar_pos().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
-		tmfi_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_status_bar_page().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
-		tmfi_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		tmfi_menu_status_bar_pos().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
+		tmfi_menu_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_menu_status_bar_page().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
+		tmfi_menu_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_menu_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_menu_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
 
-		tmfi_status_bar_pos_2().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
-		tmfi_status_bar_grid_2().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_status_bar_page_2().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
-		tmfi_status_bar_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_status_bar_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_status_bar_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		tmfi_popup_status_bar_pos().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
+		tmfi_popup_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_popup_status_bar_page().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
+		tmfi_popup_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_popup_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_popup_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
 	}
 
 	// ポインターの位置をステータスバーに格納する.

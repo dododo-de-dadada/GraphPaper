@@ -490,17 +490,17 @@ namespace winrt::GraphPaper::implementation
 
 		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit_text().SelectAll();
-		ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
+		ck_fit_text_frame().IsChecked(m_fit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			ustack_push_set<UNDO_T::TEXT_CONTENT>(s, text);
-			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
-			if (m_text_fit_frame_to_text) {
+			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
+			if (m_fit_text_frame) {
 				ustack_push_position(s, LOC_TYPE::LOC_SE);
 				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
-			xcvd_is_enabled();
+			xcvd_menu_is_enabled();
 			main_draw();
 		}
 	}
@@ -610,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		ustack_push_null();
-		ustack_is_enable();
+		ustack_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
 	}
@@ -644,7 +644,7 @@ namespace winrt::GraphPaper::implementation
 				ustack_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
 				ustack_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				ustack_push_null();
-				ustack_is_enable();
+				ustack_menu_is_enabled();
 			}
 		}
 		// éüÇåüçıÇ∑ÇÈ.
@@ -753,7 +753,7 @@ namespace winrt::GraphPaper::implementation
 	//	dt_write(m_find_text, dt_writer);
 	//	dt_write(m_find_repl, dt_writer);
 	//	uint16_t bit = 0;
-	//	if (m_text_fit_frame_to_text) {
+	//	if (m_fit_text_frame) {
 	//		bit |= 1;
 	//	}
 	//	if (m_find_text_case) {

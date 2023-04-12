@@ -27,54 +27,54 @@ namespace winrt::GraphPaper::implementation
 		Summary(Shape* s, const ResourceDictionary& r) :
 			m_shape(s)
 		{
-			auto const& t_id = typeid(*s);
-			if (t_id == typeid(ShapeBezier)) {
+			auto const& tid = typeid(*s);
+			if (tid == typeid(ShapeBezier)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezier")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_bezier/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_bezier/Text");
 			}
-			else if (t_id == typeid(ShapeEllipse)) {
+			else if (tid == typeid(ShapeEllipse)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ellipse")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_ellipse/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_ellipse/Text");
 			}
-			else if (t_id == typeid(ShapeGroup)) {
+			else if (tid == typeid(ShapeGroup)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_grouped");
 			}
-			else if (t_id == typeid(ShapeLine)) {
+			else if (tid == typeid(ShapeLine)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_line/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_line/Text");
 			}
-			else if (t_id == typeid(ShapePoly)) {
+			else if (tid == typeid(ShapePoly)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_poly/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_poly/Text");
 			}
-			else if (t_id == typeid(ShapeArc)) {
+			else if (tid == typeid(ShapeArc)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_arc")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_arc/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_arc/Text");
 			}
-			else if (t_id == typeid(ShapeRect)) {
+			else if (tid == typeid(ShapeRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_rect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_rect/Text");
 			}
-			else if (t_id == typeid(ShapeRRect)) {
+			else if (tid == typeid(ShapeRRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_rrect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_rrect/Text");
 			}
-			else if (t_id == typeid(ShapeRuler)) {
+			else if (tid == typeid(ShapeRuler)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_ruler/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_ruler/Text");
 			}
-			else if (t_id == typeid(ShapeText)) {
+			else if (tid == typeid(ShapeText)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_text/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_text/Text");
 			}
-			else if (t_id == typeid(ShapeImage)) {
+			else if (tid == typeid(ShapeImage)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_image");
 			}
-			else if (t_id == typeid(ShapeArc)) {
+			else if (tid == typeid(ShapeArc)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_arc")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_arc/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_menu_drawing_arc/Text");
 			}
 			else {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));

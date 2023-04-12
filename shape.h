@@ -503,6 +503,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
+		// 矢じるしをつけられるか判定する.
+		virtual bool is_arrowable(void) const noexcept { return false; }
 		// 図形を移動する.
 		virtual	bool move(const D2D1_POINT_2F /*pos*/) noexcept { return false; }
 		// 値を円弧の始点の角度に格納する.
@@ -1291,6 +1293,9 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
 
+		// 矢じるしをつけられるか判定する.
+		virtual bool is_arrowable(void) const noexcept override { return true; }
+		// 矢じるしのストロークを作成する.
 		void create_arrow_stroke(void)
 		{
 			m_d2d_arrow_stroke = nullptr;
@@ -1313,7 +1318,6 @@ namespace winrt::GraphPaper::implementation
 				factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put())
 			);
 		}
-
 		// 図形を表示する.
 		virtual void draw(void) = 0;
 
@@ -1582,32 +1586,32 @@ namespace winrt::GraphPaper::implementation
 	struct ShapePoly : ShapePath {
 		bool m_end_closed;	// 辺が閉じているか判定
 
+		// 矢じるしをつけられるか判定する.
+		virtual bool is_arrowable(void) const noexcept final override
+		{
+			return !m_end_closed;
+		}
 		//------------------------------
 		// shape_poly.cpp
 		//------------------------------
 
 		// 矢じりの先端と返しの位置を得る.
-		static bool poly_get_pos_arrow(
-			const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size, 
-			D2D1_POINT_2F barb[], D2D1_POINT_2F& tip) noexcept;
+		static bool poly_get_pos_arrow(const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size, D2D1_POINT_2F barb[], D2D1_POINT_2F& tip) noexcept;
 		// 矩形をもとに多角形を作成する.
-		static void poly_create_by_box(
-			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt,
-			D2D1_POINT_2F p[]) noexcept;
+		static void poly_create_by_box(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt, D2D1_POINT_2F p[]) noexcept;
 		// 図形を表示する
-		void draw(void) final override;
+		virtual void draw(void) final override;
 		// 辺が閉じているかを得る.
-		bool get_poly_closed(bool& val) const noexcept final override 
+		virtual bool get_poly_closed(bool& val) const noexcept final override
 		{ val = m_end_closed; return true; }
 		// 図形が点を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
+		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 矩形に含まれるか判定する.
-		virtual bool is_inside(
-			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
+		virtual bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 値を矢じるしの形式に格納する.
-		bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
+		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
 		// 値を辺が閉じているかに格納する.
-		bool set_poly_closed(const bool val) noexcept final override 
+		virtual bool set_poly_closed(const bool val) noexcept final override
 		{
 			if (m_end_closed != val) {
 				m_end_closed = val;
@@ -1622,9 +1626,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapePoly(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(DataWriter const& /*dt_writer*/) const;
+		virtual void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
@@ -1642,21 +1646,21 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの返しと先端の点を得る
 		static bool bezi_get_pos_arrow(const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
-		void draw(void) final override;
+		virtual void draw(void) final override;
 		// 図形が点を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 矩形に含まれるか判定する.
-		bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
+		virtual bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
 		// 図形を作成する.
 		ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
 		ShapeBezier(DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに書き込む.
-		void write(const DataWriter& dt_writer) const final override;
+		virtual void write(const DataWriter& dt_writer) const final override;
 	};
 
 	// 円弧
