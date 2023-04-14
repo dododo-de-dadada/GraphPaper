@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(buf);
 			pt_add(v_pos[i], m_pos[i], v_pos[i + 1]);
 		}
-		if (m_end_closed) {
+		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
 			dt_writer.WriteString(L"Z");
 		}
 		dt_writer.WriteString(L"\" ");
@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRect::export_svg(DataWriter const& dt_writer) noexcept
+	void ShapeOblong::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && 
@@ -461,17 +461,24 @@ namespace winrt::GraphPaper::implementation
 		f_face->GetDesignGlyphAdvances(10, gid, g_adv);
 		f_face->Release();
 		const double f_size = m_font_size;	// 書体の大きさ
-		const double l_height = 	// 行の高さ
-			f_size * (f_met.ascent + f_met.descent + f_met.lineGap) / f_met.designUnitsPerEm;
-		const double b_line = f_size * (f_met.ascent) / f_met.designUnitsPerEm;	// (文字の上端からの) ベースラインまでの距離
+		const double f_asc = f_met.ascent;
+		const double f_des = f_met.descent;
+		const double f_gap = f_met.lineGap;
+		const double f_upe = f_met.designUnitsPerEm;
+		const double l_height = f_size * (f_asc + f_des + f_gap) / f_upe;	// 行の高さ
+		const double b_line = f_size * f_asc / f_upe;	// (文字の上端からの) ベースラインまでの距離
 
 		if (is_opaque(m_fill_color)) {
 
 			// 塗りつぶし色が不透明なら, 方形を塗りつぶす.
-			const auto x = min(m_start.x, m_start.x + m_pos.x);
-			const auto y = min(m_start.y, m_start.y + m_pos.y);
-			const auto w = fabsf(m_pos.x);
-			const auto h = fabsf(m_pos.y);
+			const double sx = m_start.x;
+			const double sy = m_start.y;
+			const double px = m_pos.x;
+			const double py = m_pos.y;
+			const double x = min(sx, sx + px);
+			const double y = min(sy, sy + py);
+			const double w = abs(px);
+			const double h = abs(py);
 			swprintf_s(buf,
 				L"<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" stroke-width = \"0\" stroke=\"none\" ",
 				x, y, w, h);

@@ -572,20 +572,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矩形をもとに多角形を作成する.
-	// start	始点
-	// pos	終点の位置ベクトル
-	// p_opt	多角形の作成方法
-	// p	頂点の配列
 	void ShapePoly::poly_create_by_box(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt,
-		D2D1_POINT_2F p[]) noexcept
+		const D2D1_POINT_2F start,	// 始点
+		const D2D1_POINT_2F pos,	// 終点の位置ベクトル
+		const POLY_OPTION& p_opt,	// 多角形の作成方法
+		D2D1_POINT_2F p[]	// 各点の配列
+	) noexcept
 	{
 		// v_cnt	多角形の頂点の数
 		// v_up	頂点を上に作成するか判定
 		// v_reg	正多角形を作成するか判定
 		// v_clock	時計周りで作成するか判定
 		const auto p_cnt = p_opt.m_vertex_cnt;
-		if (p_cnt == 0) {
+		if (p_cnt < 2) {
+			return;
+		}
+		else if (p_cnt == 2) {
+			p[0] = start;
+			p[1].x = start.x + pos.x;
+			p[1].y = start.y + pos.y;
 			return;
 		}
 		const auto p_up = p_opt.m_vertex_up;
@@ -620,24 +625,26 @@ namespace winrt::GraphPaper::implementation
 		// 正多角形の場合, X 方向と Y 方向の, どちらか小さい方の拡大率に一致させる.
 		const double px = fabs(pos.x);
 		const double py = fabs(pos.y);
+		const double bw = static_cast<double>(box_rb.x) - static_cast<double>(box_lt.x);
+		const double bh = static_cast<double>(box_rb.y) - static_cast<double>(box_lt.y);
 		double sx;	// X 方向の拡大率
 		double sy;	// Y 方向の拡大率
 		if (px <= py) {
-			sx = px / (box_rb.x - box_lt.x);
+			sx = px / bw;
 			if (p_reg) {
 				sy = sx;
 			}
 			else {
-				sy = py / (box_rb.y - box_lt.y);
+				sy = py / bh;
 			}
 		}
 		else{
-			sy = py / (box_rb.y - box_lt.y);
+			sy = py / bh;
 			if (p_reg) {
 				sx = sy;
 			}
 			else {
-				sx = px / (box_rb.x - box_lt.x);
+				sx = px / bw;
 			}
 		}
 
@@ -699,14 +706,16 @@ namespace winrt::GraphPaper::implementation
 				const auto f_begin = is_opaque(m_fill_color) ?
 					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
 					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-				const auto f_end = (m_end_closed ?
+				const auto f_end = (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED ?
 					D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 					D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(
-					factory->CreatePathGeometry(m_d2d_path_geom.put()));
+					factory->CreatePathGeometry(m_d2d_path_geom.put())
+				);
 				winrt::check_hresult(
-					m_d2d_path_geom->Open(sink.put()));
+					m_d2d_path_geom->Open(sink.put())
+				);
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 				sink->BeginFigure(p[0], f_begin);
 				for (size_t i = 1; i < p_cnt; i++) {
@@ -714,7 +723,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				sink->EndFigure(f_end);
 				winrt::check_hresult(
-					sink->Close());
+					sink->Close()
+				);
 				sink = nullptr;
 			}
 		}
@@ -751,7 +761,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (is_opaque(m_fill_color)) {
+		if (p_cnt > 2 && is_opaque(m_fill_color)) {
 			const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
 			if (p_geom != nullptr) {
 				brush->SetColor(m_fill_color);
@@ -801,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 	) const noexcept
 	{
 		const D2D1_POINT_2F u{ t.x - m_start.x, t.y - m_start.y };
-		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end_closed, m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_loc_width);
+		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED, m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_loc_width);
 	}
 
 	// 矩形に含まれるか判定する.
@@ -828,21 +838,21 @@ namespace winrt::GraphPaper::implementation
 
 	bool ShapePoly::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
-		if (!m_end_closed) {
+		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
 			return ShapePath::set_arrow_style(val);
 		}
 		return false;
 	}
 
 	// 図形を作成する.
-	// start	囲む領域の始点
-	// pos	囲む領域の終点への位置ベクトル
-	// page	ページ
-	// p_opt	多角形の選択肢
 	ShapePoly::ShapePoly(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt) :
+		const D2D1_POINT_2F start,	// 矩形の始点
+		const D2D1_POINT_2F pos,	// 矩形の終点への位置ベクトル
+		const Shape* page,	// 属性を格納したページ
+		const POLY_OPTION& p_opt	// 作成方法
+	) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
-		m_end_closed(p_opt.m_end_closed)
+		m_end(p_opt.m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)
 	{
 		D2D1_POINT_2F p[N_GON_MAX];
 		poly_create_by_box(start, pos, p_opt, p);
@@ -861,14 +871,17 @@ namespace winrt::GraphPaper::implementation
 	ShapePoly::ShapePoly(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-		m_end_closed = dt_reader.ReadBoolean();
+		const auto end = static_cast<D2D1_FIGURE_END>(dt_reader.ReadUInt32());
+		if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED || end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
+			m_end = end;
+		}
 	}
 
 	// 図形をデータライターに書き込む.
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
-		dt_writer.WriteBoolean(m_end_closed);
+		dt_writer.WriteUInt32(m_end);
 	}
 
 }

@@ -77,7 +77,8 @@ namespace winrt::GraphPaper::implementation
 			m_color_code = COLOR_CODE::REAL;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
+			return;
 		}
 		color_code_is_checked(m_color_code);
 		status_bar_set_pos();
@@ -113,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 			new_val = LEN_UNIT::POINT;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
 			return;
 		}
 		m_len_unit = new_val;
@@ -154,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring str_snap_point{ ResourceLoader::GetForCurrentView().GetString(L"str_snap_point") + L": " };
 		const auto val = m_snap_point;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0, buf);
 		sd_snap_point().Header(box_value(str_snap_point + buf));
 		sd_snap_point().Value(static_cast<double>(m_snap_point));
 		m_mutex_event.lock();
@@ -163,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 				sd_snap_point().ValueChanged(winrt::auto_revoke, [this, str_snap_point](auto, auto args) {
 					const auto val = args.NewValue();
 					wchar_t buf[32];
-					conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0f, buf);
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0, buf);
 					sd_snap_point().Header(box_value(str_snap_point + buf));
 				})
 			};

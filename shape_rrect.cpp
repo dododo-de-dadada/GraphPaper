@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_start, rx, dy - ry, val);
 			break;
 		default:
-			ShapeRect::get_pos_loc(loc, val);
+			ShapeOblong::get_pos_loc(loc, val);
 			break;
 		}
 	}
@@ -385,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 			rrect_corner_radius(m_pos, r, m_corner_radius);
 			break;
 		default:
-			if (!ShapeRect::set_pos_loc(val, loc, snap_point, false)) {
+			if (!ShapeOblong::set_pos_loc(val, loc, snap_point, false)) {
 				return false;
 			}
 			if (m_pos.x * m_corner_radius.x < 0.0f) {
@@ -408,7 +408,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	対角点への位置ベクトル
 	// page	属性
 	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeRect::ShapeRect(start, pos, page)
+		ShapeOblong::ShapeOblong(start, pos, page)
 	{
 		float g_base;
 		page->get_grid_base(g_base);
@@ -417,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(dt_reader)
+		ShapeOblong::ShapeOblong(dt_reader)
 	{
 		m_corner_radius = D2D1_POINT_2F{
 			dt_reader.ReadSingle(),
@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeRRect::write(DataWriter const& dt_writer) const
 	{
-		ShapeRect::write(dt_writer);
+		ShapeOblong::write(dt_writer);
 		dt_writer.WriteSingle(m_corner_radius.x);
 		dt_writer.WriteSingle(m_corner_radius.y);
 	}

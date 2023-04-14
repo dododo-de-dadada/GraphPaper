@@ -805,16 +805,16 @@ namespace winrt::GraphPaper::implementation
 				collection->GetFontFamily(i, font_family.put()));
 
 			// 書体からローカライズされた書体名を得る.
-			winrt::com_ptr<IDWriteLocalizedStrings> localized_name;
+			winrt::com_ptr<IDWriteLocalizedStrings> loc_name;
 			winrt::check_hresult(
-				font_family->GetFamilyNames(localized_name.put()));
+				font_family->GetFamilyNames(loc_name.put()));
 
 			// ローカライズされた書体名の位置を得る.
 			UINT32 index_en_us = 0;
 			UINT32 index_local = 0;
 			BOOL exists = false;
 			winrt::check_hresult(
-				localized_name->FindLocaleName(L"en-us", &index_en_us, &exists)
+				loc_name->FindLocaleName(L"en-us", &index_en_us, &exists)
 			);
 			if (exists != TRUE) {
 				// en-us がない場合,
@@ -822,7 +822,7 @@ namespace winrt::GraphPaper::implementation
 				index_en_us = 0;
 			}
 			winrt::check_hresult(
-				localized_name->FindLocaleName(lang, &index_local, &exists)
+				loc_name->FindLocaleName(lang, &index_local, &exists)
 			);
 			if (exists != TRUE) {
 				// 地域名がない場合,
@@ -834,23 +834,23 @@ namespace winrt::GraphPaper::implementation
 			UINT32 length_en_us = 0;
 			UINT32 length_local = 0;
 			winrt::check_hresult(
-				localized_name->GetStringLength(index_en_us, &length_en_us)
+				loc_name->GetStringLength(index_en_us, &length_en_us)
 			);
 			winrt::check_hresult(
-				localized_name->GetStringLength(index_local, &length_local)
+				loc_name->GetStringLength(index_local, &length_local)
 			);
 
 			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
-			s_available_fonts[i] = new wchar_t[length_en_us + 1 + length_local + 1];
+			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length_en_us) + 1 + static_cast<size_t>(length_local) + 1];
 			winrt::check_hresult(
-				localized_name->GetString(index_en_us, s_available_fonts[i], length_en_us + 1)
+				loc_name->GetString(index_en_us, s_available_fonts[i], length_en_us + 1)
 			);
 			winrt::check_hresult(
-				localized_name->GetString(index_local, s_available_fonts[i] + length_en_us + 1, length_local + 1)
+				loc_name->GetString(index_local, s_available_fonts[i] + static_cast<size_t>(length_en_us) + 1, length_local + 1)
 			);
 
 			// ローカライズされた書体名と書体を破棄する.
-			localized_name = nullptr;
+			loc_name = nullptr;
 			font_family = nullptr;
 		}
 
@@ -1012,7 +1012,7 @@ namespace winrt::GraphPaper::implementation
 
 	static wchar_t* text_read_text(DataReader const& dt_reader)
 	{
-		const int text_len = dt_reader.ReadUInt32();
+		const auto text_len{ dt_reader.ReadUInt32() };
 		wchar_t* text = new wchar_t[text_len + 1];
 		dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(text), 2 * text_len));
 		text[text_len] = L'\0';
@@ -1122,20 +1122,20 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_font_color.b);
 		dt_writer.WriteSingle(m_font_color.a);
 
-		const uint32_t font_family_len = wchar_len(m_font_family);
-		dt_writer.WriteUInt32(font_family_len);
-		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
-		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+		const uint32_t f_len = wchar_len(m_font_family);
+		dt_writer.WriteUInt32(f_len);
+		const auto f_data = reinterpret_cast<const uint8_t*>(m_font_family);
+		dt_writer.WriteBytes(array_view(f_data, f_data + 2 * static_cast<size_t>(f_len)));
 
 		dt_writer.WriteSingle(m_font_size);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
 
-		const uint32_t text_len = wchar_len(m_text);
-		dt_writer.WriteUInt32(text_len);
-		const auto text_data = reinterpret_cast<const uint8_t*>(m_text);
-		dt_writer.WriteBytes(array_view(text_data, text_data + 2 * text_len));
+		const uint32_t t_len = wchar_len(m_text);
+		dt_writer.WriteUInt32(t_len);
+		const auto t_data = reinterpret_cast<const uint8_t*>(m_text);
+		dt_writer.WriteBytes(array_view(t_data, t_data + 2 * static_cast<size_t>(t_len)));
 
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_vert));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_horz));

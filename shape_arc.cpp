@@ -438,8 +438,8 @@ namespace winrt::GraphPaper::implementation
 		const double py = start.y;
 		const double qx = end.x;
 		const double qy = end.y;
-		const double A = 1.0 / (rad.width * rad.width);
-		const double B = 1.0 / (rad.height * rad.height);
+		const double A = 1.0 / (static_cast<double>(rad.width) * static_cast<double>(rad.width));
+		const double B = 1.0 / (static_cast<double>(rad.height) * static_cast<double>(rad.height));
 		const double d = -2 * A * C * (C * px + S * py) - 2 * B * S * (S * px - C * py);
 		const double e = -2 * A * S * (C * px + S * py) + 2 * B * C * (S * px - C * py);
 		const double f = A * (C * px + S * py) * (C * px + S * py) + B * (S * px - C * py) * (S * px - C * py);
@@ -600,7 +600,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を傾き角度に格納する.
-	bool ShapeArc::set_arc_rot(const float val) noexcept
+	bool ShapeArc::set_arc_rot(
+		const float val	// 格納する値
+	) noexcept
 	{
 		if (equal(m_angle_rot, val)) {
 			return false;
@@ -766,10 +768,12 @@ namespace winrt::GraphPaper::implementation
 			if (arc_center(start, end, m_radius, c, s, ctr)) {
 				const int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, c, s);	// 象限番号
 				if (qn == 1 || qn == 3) {
-					const double ty = -s * (val.x - ctr.x) + c * (val.y - ctr.y);
+					const double vx = static_cast<double>(val.x) - static_cast<double>(ctr.x);
+					const double vy = static_cast<double>(val.y) - static_cast<double>(ctr.y);
+					const double ty = -s * vx + c * vy;
 					const double a = ty / -m_radius.height;
 					if (abs(a) > FLT_MIN) {
-						const double tx = c * (val.x - ctr.x) + s * (val.y - ctr.y);
+						const double tx = c * vx + s * vy;
 						const double b = tx / m_radius.width;
 						const double r = atan(b / a);
 						const double d = 180.0 * r / M_PI;
@@ -783,10 +787,12 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else {
-					const double tx = c * (val.x - ctr.x) + s * (val.y - ctr.y);
+					const double vx = static_cast<double>(val.x) - static_cast<double>(ctr.x);
+					const double vy = static_cast<double>(val.y) - static_cast<double>(ctr.y);
+					const double tx = c * vx + s * vy;
 					const double a = tx / m_radius.height;
 					if (abs(a) > FLT_MIN) {
-						const double ty = -s * (val.x - ctr.x) + c * (val.y - ctr.y);
+						const double ty = -s * vx + c * vy;
 						const double b = ty / m_radius.width;
 						const double r = atan(b / a);
 						const double d = 180.0 * r / M_PI;
@@ -813,10 +819,12 @@ namespace winrt::GraphPaper::implementation
 			if (arc_center(start, end, m_radius, c, s, ctr)) {
 				int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, c, s);	// 象限番号
 				if (qn == 1 || qn == 3) {
-					const double tx = c * (val.x - ctr.x) + s * (val.y - ctr.y);
+					const double vx = static_cast<double>(val.x) - static_cast<double>(ctr.x);
+					const double vy = static_cast<double>(val.y) - static_cast<double>(ctr.y);
+					const double tx = c * vx + s * vy;
 					const double a = tx / m_radius.width;
 					if (abs(a) > FLT_MIN) {
-						const double ty = -s * (val.x - ctr.x) + c * (val.y - ctr.y);
+						const double ty = -s * vx + c * vy;
 						const double b = ty / m_radius.height;
 						const double r = atan(b / a);
 						const double d = 180.0 * r / M_PI;
@@ -830,10 +838,12 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else {
-					const double ty = -s * (val.x - ctr.x) + c * (val.y - ctr.y);
+					const double vx = static_cast<double>(val.x) - static_cast<double>(ctr.x);
+					const double vy = static_cast<double>(val.y) - static_cast<double>(ctr.y);
+					const double ty = -s * vx + c * vy;
 					const double a = ty / -m_radius.height;
 					if (abs(a) > FLT_MIN) {
-						const double tx = c * (val.x - ctr.x) + s * (val.y - ctr.y);
+						const double tx = c * vx + s * vy;
 						const double b = tx / m_radius.width;
 						const double r = atan(b / a);
 						const double d = 180.0 * r / M_PI;
@@ -898,7 +908,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
 	uint32_t ShapeArc::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
+		const D2D1_POINT_2F t	// 点
 	) const noexcept
 	{
 		D2D1_POINT_2F p[5];
@@ -925,12 +935,12 @@ namespace winrt::GraphPaper::implementation
 		const double rot = M_PI * m_angle_rot / 180.0;
 		const double c = cos(rot);
 		const double s = sin(rot);
-		const double sx = p[START].x - p[CENTER].x;	// 始点 (中心点が原点)
-		const double sy = p[START].y - p[CENTER].y;	// 始点 (中心点が原点)
-		const double ex = p[END].x - p[CENTER].x;	// 終点 (中心点が原点)
-		const double ey = p[END].y - p[CENTER].y;	// 終点 (中心点が原点)
-		const double tx = t.x - p[CENTER].x;	// 判定する点 (中心点が原点)
-		const double ty = t.y - p[CENTER].y;	// 判定する点 (中心点が原点)
+		const double sx = static_cast<double>(p[START].x) - static_cast<double>(p[CENTER].x);	// 始点 (中心点が原点)
+		const double sy = static_cast<double>(p[START].y) - static_cast<double>(p[CENTER].y);	// 始点 (中心点が原点)
+		const double ex = static_cast<double>(p[END].x) - static_cast<double>(p[CENTER].x);	// 終点 (中心点が原点)
+		const double ey = static_cast<double>(p[END].y) - static_cast<double>(p[CENTER].y);	// 終点 (中心点が原点)
+		const double tx = static_cast<double>(t.x) - static_cast<double>(p[CENTER].x);	// 判定する点 (中心点が原点)
+		const double ty = static_cast<double>(t.y) - static_cast<double>(p[CENTER].y);	// 判定する点 (中心点が原点)
 		const double st = sx * ty - sy * tx;	// 始点と判定する点の外積
 		const double et = ex * ty - ey * tx;	// 終点と判定する点の外積
 		const double rw = abs(m_radius.width);
@@ -1192,7 +1202,9 @@ namespace winrt::GraphPaper::implementation
 					D2D1_POINT_2F arrow[3];
 					arc_get_pos_arrow(m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
 					winrt::com_ptr<ID2D1GeometrySink> sink;
-					const ARROW_STYLE a_style{ m_arrow_style };
+					const ARROW_STYLE a_style{
+						m_arrow_style
+					};
 					// ジオメトリパスを作成する.
 					winrt::check_hresult(
 						factory->CreatePathGeometry(m_d2d_arrow_geom.put())

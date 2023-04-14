@@ -108,7 +108,8 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::PAGE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_PAD> { using type = D2D1_RECT_F; };
-	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = bool; };
+	//template <> struct U_TYPE<UNDO_T::POLY_END> { using type = bool; };
+	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = D2D1_FIGURE_END; };
 	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::STROKE_WIDTH> { using type = float; };

@@ -424,9 +424,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ひな型に描画に必要な変数を格納する.
-		//const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
-		const auto p_scale = max(m_main_scale, 0.0f);
-		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), p_scale);
+		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), m_main_scale);
 
 		// 描画環境を保存, 描画を開始する.
 		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
@@ -443,9 +441,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 変換行列に拡大縮小と平行移動を設定する.
 		D2D1_MATRIX_3X2_F t{};	// 変換行列
-		t.m11 = t.m22 = p_scale;
-		t.dx = static_cast<FLOAT>(-(m_main_bbox_lt.x + sb_horz().Value()) * p_scale);
-		t.dy = static_cast<FLOAT>(-(m_main_bbox_lt.y + sb_vert().Value()) * p_scale);
+		t.m11 = t.m22 = m_main_scale;
+		t.dx = static_cast<FLOAT>(-(m_main_bbox_lt.x + sb_horz().Value()) * m_main_scale);
+		t.dy = static_cast<FLOAT>(-(m_main_bbox_lt.y + sb_vert().Value()) * m_main_scale);
 		m_main_d2d.m_d2d_context->SetTransform(&t);
 
 		// 図形を (ページも) 表示する.

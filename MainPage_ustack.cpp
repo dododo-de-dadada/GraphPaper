@@ -625,7 +625,8 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_T::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::JOIN_LIMIT>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
-	template bool MainPage::ustack_push_set<UNDO_T::POLY_END>(bool const& val);
+	//template bool MainPage::ustack_push_set<UNDO_T::POLY_END>(bool const& val);
+	template bool MainPage::ustack_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_T::STROKE_WIDTH>(float const& val);

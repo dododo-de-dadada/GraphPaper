@@ -15,30 +15,27 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static size_t export_pdf_arrow(
-		const float width, const D2D1_COLOR_F& color, const ARROW_STYLE style, const D2D1_CAP_STYLE cap, const D2D1_LINE_JOIN join, const float join_limit,
-		const D2D1_SIZE_F page_size, const D2D1_POINT_2F barb[], const D2D1_POINT_2F tip,
-		DataWriter const& dt_writer);
-	static size_t export_pdf_stroke(
-		const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap,
-		const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join,
-		const float miter_limit, const DataWriter& dt_writer);
-
-	//------------------------------
 	// 矢じるしをデータライターに PDF として書き込む.
-	// width	線・枠の太さ
-	// stroke	線・枠の色
-	// dt_weiter	データライター
-	// styke	矢じるしの形式
-	// page_size	ページの大きさ
-	// barbs	矢じりの返しの位置
-	// tip	矢じりの先端の位置
+	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& color, const ARROW_STYLE style, const D2D1_CAP_STYLE cap, const D2D1_LINE_JOIN join, const float join_limit, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barb[], const D2D1_POINT_2F tip, DataWriter const& dt_writer);
+	// ストロークをデータライターに PDF として書き込む.
+	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join, const float miter_limit, const DataWriter& dt_writer);
+	// PDF のパス描画命令を得る.
+	template <bool C> static bool export_pdf_path_cmd(const float width, const D2D1_COLOR_F& stroke,	const D2D1_COLOR_F& fill, wchar_t*& cmd);
+
+	// 矢じるしをデータライターに PDF として書き込む.
 	// 戻り値	書き込んだバイト数
-	//------------------------------
 	static size_t export_pdf_arrow(
-		const float width, const D2D1_COLOR_F& stroke, const ARROW_STYLE style, const D2D1_CAP_STYLE cap, const D2D1_LINE_JOIN join, const float join_limit,
-		const D2D1_SIZE_F page_size, const D2D1_POINT_2F barb[], const D2D1_POINT_2F tip,
-		DataWriter const& dt_writer)
+		const float width,	// 線・枠の太さ
+		const D2D1_COLOR_F& stroke,	// 線・枠の色
+		const ARROW_STYLE style,	// 矢じるしの形式
+		const D2D1_CAP_STYLE cap,	// 矢じるしの返しの形式
+		const D2D1_LINE_JOIN join,	// 矢じるしの先端の形式
+		const float join_limit,	// 尖り制限値
+		const D2D1_SIZE_F page_size,	// ページの大きさ
+		const D2D1_POINT_2F barb[],	// 矢じりの返しの点
+		const D2D1_POINT_2F tip,	// 矢じりの先端の点
+		DataWriter const& dt_writer	// データライター
+	)
 	{
 		if (equal(width, 0.0f) || !is_opaque(stroke)) {
 			return 0;
@@ -55,11 +52,17 @@ namespace winrt::GraphPaper::implementation
 				stroke.r, stroke.g, stroke.b);
 			len += dt_writer.WriteString(buf);
 		}
+		const double b0x = barb[0].x;
+		const double b0y = -static_cast<double>(barb[0].y) + static_cast<double>(page_size.height);
+		const double tx = tip.x;
+		const double ty = -static_cast<double>(tip.y) + static_cast<double>(page_size.height);
+		const double b1x = barb[1].x;
+		const double b1y = -static_cast<double>(barb[1].y) + static_cast<double>(page_size.height);
 		swprintf_s(buf,
 			L"%f %f m %f %f l %f %f l\n",
-			barb[0].x, -barb[0].y + page_size.height,
-			tip.x, -tip.y + page_size.height,
-			barb[1].x, -barb[1].y + page_size.height
+			b0x, b0y,
+			tx, ty,
+			b1x, b1y
 		);
 		len += dt_writer.WriteString(buf);
 		if (style == ARROW_STYLE::ARROW_OPENED) {
@@ -71,25 +74,21 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	//------------------------------
 	// PDF のパス描画命令を得る.
-	// C	パスを閉じるなら true, 開いたままなら false
-	// width	線・枠の太さ
-	// stroke	線・枠の色
-	// fill	塗りつぶし色
-	// cmd	パス描画命令
 	// 戻り値	命令が得られたなら true, なければ false
-	// 
-	// パス描画命令
-	// B* = パスを塗りつぶして、ストロークも描画する (偶奇規則)
-	// b* = B* と同じだが、描画前にパスを閉じる
-	// S = パスをストロークで描画
-	// s = 現在のパスを閉じた後 (開始点までを直線でつなぐ)、ストロークで描画
-	// f* = 偶奇規則を使用してパスを塗りつぶし, パスは自動的に閉じられる.
-	//------------------------------
-	template <bool C>
+	template <bool C>	// パスを閉じるなら true, 開いたままなら false
 	static bool export_pdf_path_cmd(
-		const float width, const D2D1_COLOR_F& stroke, const D2D1_COLOR_F& fill, wchar_t*& cmd)
+		const float width,	// 線・枠の太さ
+		const D2D1_COLOR_F& stroke,	// 線・枠の色
+		const D2D1_COLOR_F& fill,	// 塗りつぶし色
+		wchar_t*& cmd	// パス描画命令
+		// パス描画命令
+		// B* = パスを塗りつぶして、ストロークも描画する (偶奇規則)
+		// b* = B* と同じだが、描画前にパスを閉じる
+		// S = パスをストロークで描画
+		// s = 現在のパスを閉じた後 (開始点までを直線でつなぐ)、ストロークで描画
+		// f* = 偶奇規則を使用してパスを塗りつぶし, パスは自動的に閉じられる.
+	)
 	{
 		if (!equal(width, 0.0f) && is_opaque(stroke)) {
 			if (is_opaque(fill)) {
@@ -125,15 +124,18 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//------------------------------
-	// 図形をデータライターに PDF として書き込む.
-	// dt_weiter	データライター
+	// ストロークをデータライターに PDF として書き込む.
 	// 戻り値	書き込んだバイト数
-	//------------------------------
 	static size_t export_pdf_stroke(
-		const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap,
-		const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join,
-		const float miter_limit, const DataWriter& dt_writer)
+		const float width,	// 線・枠の太さ
+		const D2D1_COLOR_F& color,	// 線・枠の色
+		const D2D1_CAP_STYLE& cap,	// 端点の形式
+		const D2D1_DASH_STYLE dash,	// 破線の形式
+		const DASH_PAT& patt,	// 破線の配置
+		const D2D1_LINE_JOIN join,	// 結合の形式
+		const float miter_limit,	// 尖り制限値
+		const DataWriter& dt_writer	// データライター
+	)
 	{
 		size_t len = 0;
 		wchar_t buf[1024];
@@ -255,14 +257,17 @@ namespace winrt::GraphPaper::implementation
 		len += export_pdf_stroke(
 			m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat,
 			m_join_style, m_join_miter_limit, dt_writer);
-	
+		const double sx = m_start.x;
+		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
+		const double b1x = b_seg.point1.x;
+		const double b1y = -static_cast<double>(b_seg.point1.y) + static_cast<double>(page_size.height);
+		const double b2x = b_seg.point2.x;
+		const double b2y = -static_cast<double>(b_seg.point2.y) + static_cast<double>(page_size.height);
+		const double b3x = b_seg.point3.x;
+		const double b3y = -static_cast<double>(b_seg.point3.y) + static_cast<double>(page_size.height);
 		swprintf_s(buf, 
 			L"%f %f m %f %f %f %f %f %f c %s",
-			m_start.x, -m_start.y + page_size.height,
-			b_seg.point1.x, -b_seg.point1.y + page_size.height,
-			b_seg.point2.x, -b_seg.point2.y + page_size.height,
-			b_seg.point3.x, -b_seg.point3.y + page_size.height,
-			cmd
+			sx, sy, b1x, b1y, b2x, b2y, b3x, b3y, cmd
 		);
 		len += dt_writer.WriteString(buf);
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
@@ -293,10 +298,13 @@ namespace winrt::GraphPaper::implementation
 			m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
+		const double sx = m_start.x;
+		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
+		const double ex = static_cast<double>(m_start.x) + static_cast<double>(m_pos[0].x);
+		const double ey = -(static_cast<double>(m_start.y) + static_cast<double>(m_pos[0].y)) + static_cast<double>(page_size.height);
 		swprintf_s(buf, 
 			L"%f %f m %f %f l S\n",
-			m_start.x, -m_start.y + page_size.height,
-			m_start.x + m_pos[0].x, -(m_start.y + m_pos[0].y) + page_size.height
+			sx, sy, ex, ey
 		);
 		len += dt_writer.WriteString(buf);
 
@@ -317,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapePoly::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
 	{
 		wchar_t* cmd;	// パス描画命令
-		if (m_end_closed) {
+		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
 			if (!export_pdf_path_cmd<true>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 				return 0;
 			}
@@ -341,15 +349,19 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		const size_t v_cnt = m_pos.size() + 1;
-		D2D1_POINT_2F v_pos[N_GON_MAX];
-		v_pos[0] = m_start;
-		swprintf_s(buf, L"%f %f m\n", v_pos[0].x, -v_pos[0].y + page_size.height);
+		// 矢じるしつきならば後で必要になるので, 折れ線の各点を求めながら出力する.
+		const size_t p_cnt = m_pos.size() + 1;	// 折れ線各点の数
+		D2D1_POINT_2F p[N_GON_MAX];	// 折れ線各点の配列
+		p[0] = m_start;
+		const double sx = p[0].x;
+		const double sy = -static_cast<double>(p[0].y) + static_cast<double>(page_size.height);
+		swprintf_s(buf, L"%f %f m\n", sx, sy);
 		len += dt_writer.WriteString(buf);
-
-		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_pos[i - 1], v_pos[i]);
-			swprintf_s(buf, L"%f %f l\n", v_pos[i].x, -v_pos[i].y + page_size.height);
+		for (size_t i = 1; i < p_cnt; i++) {
+			pt_add(p[i - 1], m_pos[i - 1], p[i]);
+			const double px = p[i].x;
+			const double py = -static_cast<double>(p[i].y) + static_cast<double>(page_size.height);
+			swprintf_s(buf, L"%f %f l\n", px, py);
 			len += dt_writer.WriteString(buf);
 		}
 		len += dt_writer.WriteString(cmd);
@@ -357,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, barb, tip)) {
+			if (poly_get_pos_arrow(p_cnt, p, m_arrow_size, barb, tip)) {
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, m_arrow_cap, m_arrow_join, m_arrow_join_limit, page_size, barb, tip, dt_writer);
 			}
 		}
@@ -372,20 +384,17 @@ namespace winrt::GraphPaper::implementation
 			return 0;
 		}
 
-		const float ty = page_size.height;
+		const double ty = page_size.height;
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;
-		const float rx = 0.5f * m_pos.x;
-		const float ry = 0.5f * m_pos.y;
-		const float cx = m_start.x + rx;
-		const float cy = m_start.y + ry;
+		const double rx = 0.5 * m_pos.x;
+		const double ry = 0.5 * m_pos.y;
+		const double cx = m_start.x + rx;
+		const double cy = m_start.y + ry;
 
 		size_t len = 0;
-		len += dt_writer.WriteString(
-			L"% Ellipse\n");
+		len += dt_writer.WriteString(L"% Ellipse\n");
 
-		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat,
-			m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -436,7 +445,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	size_t ShapeRect::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
+	size_t ShapeOblong::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
 	{
 		wchar_t* cmd;
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
@@ -454,11 +463,13 @@ namespace winrt::GraphPaper::implementation
 			m_fill_color.r, m_fill_color.g, m_fill_color.b
 		);
 		len += dt_writer.WriteString(buf);
-
+		const double sx = m_start.x;
+		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
+		const double px = m_pos.x;
+		const double py = -static_cast<double>(m_pos.y);
 		swprintf_s(buf,
 			L"%f %f %f %f re %s",
-			m_start.x, -(m_start.y) + page_size.height, m_pos.x, -m_pos.y,
-			cmd
+			sx, sy, px, py, cmd
 		);
 		len += dt_writer.WriteString(buf);
 		return len;
@@ -490,37 +501,41 @@ namespace winrt::GraphPaper::implementation
 		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
-		const float ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
-		const float rx = (m_pos.x >= 0.0f ? m_corner_radius.x : -m_corner_radius.x);	// だ円の x 方向の半径
-		const float ry = (m_pos.y >= 0.0f ? m_corner_radius.y : -m_corner_radius.y);	// だ円の y 方向の半径
+		const double ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
+		const double rx = (m_pos.x >= 0.0f ? m_corner_radius.x : -m_corner_radius.x);	// だ円の x 方向の半径
+		const double ry = (m_pos.y >= 0.0f ? m_corner_radius.y : -m_corner_radius.y);	// だ円の y 方向の半径
 
 		// 上辺の始点.
+		const double sx = m_start.x;
+		const double sy = m_start.y;
 		swprintf_s(buf,
 			L"%f %f m\n",
-			m_start.x + rx, -(m_start.y) + ty
+			sx + rx, -(sy) + ty
 		);
 		len += dt_writer.WriteString(buf);
 
 		// 上辺と右上の角を描く.
-		float cx = m_start.x + m_pos.x - rx;	// 角丸の中心点 x
-		float cy = m_start.y + ry;	// 角丸の中心点 y
+		const double px = static_cast<double>(m_pos.x);
+		const double py = static_cast<double>(m_pos.y);
+		double cx = sx + px - rx;	// 角丸の中心点 x
+		double cy = sy + ry;	// 角丸の中心点 y
 		swprintf_s(buf,
 			L"%f %f l\n"
 			L"%f %f %f %f %f %f c\n",
-			cx, -(m_start.y) + ty,
+			cx, -sy + ty,
 			cx + a * rx, -(cy - ry) + ty,
 			cx + rx, -(cy - a * ry) + ty,
-			cx + rx, -(cy)+ty
+			cx + rx, -(cy) + ty
 		);
 		len += dt_writer.WriteString(buf);
 
 		// 右辺と右下の角を描く.
-		cx = m_start.x + m_pos.x - rx;
-		cy = m_start.y + m_pos.y - ry;
+		cx = sx + px - rx;
+		cy = sy + py - ry;
 		swprintf_s(buf,
 			L"%f %f l\n"
 			L"%f %f %f %f %f %f c\n",
-			m_start.x + m_pos.x, -(cy)+ty,
+			sx + px, -(cy) + ty,
 			cx + rx, -(cy + a * ry) + ty,
 			cx + a * rx, -(cy + ry) + ty,
 			cx, -(cy + ry) + ty
@@ -528,12 +543,12 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		//　下辺と左下の角を描く.
-		cx = m_start.x + rx;
-		cy = m_start.y + m_pos.y - ry;
+		cx = sx + rx;
+		cy = sy + py - ry;
 		swprintf_s(buf,
 			L"%f %f l\n"
 			L"%f %f %f %f %f %f c\n",
-			cx, -(m_start.y + m_pos.y) + ty,
+			cx, -(sy + py) + ty,
 			cx - a * rx, -(cy + ry) + ty,
 			cx - rx, -(cy + a * ry) + ty,
 			cx - rx, -(cy)+ty
@@ -541,12 +556,12 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		// 左辺と左上の角を描く.
-		cx = m_start.x + rx;
-		cy = m_start.y + ry;
+		cx = sx + rx;
+		cy = sy + ry;
 		swprintf_s(buf,
 			L"%f %f l\n"
 			L"%f %f %f %f %f %f c %s",
-			m_start.x, -(cy)+ty,
+			sx, -(cy) + ty,
 			cx - rx, -(cy - a * ry) + ty,
 			cx - a * rx, -(cy - ry) + ty,
 			cx, -(cy - ry) + ty,
@@ -564,14 +579,17 @@ namespace winrt::GraphPaper::implementation
 		// きちんと表示するには, 変換行列に大きさを指定し, 拡大する.
 		// 表示する位置は, 左上でなく左下隅を指定する.
 		wchar_t buf[1024];
+		const double w = m_view.width;
+		const double h = m_view.height;
+		const double sx = m_start.x;
+		const double sy = m_start.y;
 		swprintf_s(buf,
 			L"%% Image\n"
 			L"q\n"
 			L"%f 0 0 %f %f %f cm\n"
 			L"/Image%d Do\n"
 			L"Q\n",
-			m_view.width, m_view.height,
-			m_start.x, -(m_start.y + m_view.height) + page_size.height,
+			w, h, sx, -(sy + h) + static_cast<double>(page_size.height),
 			m_pdf_image_cnt
 		);
 		return dt_writer.WriteString(buf);
@@ -637,7 +655,7 @@ namespace winrt::GraphPaper::implementation
 		for (uint16_t i = 0; i < numTables; i++) {
 			uint16_t platformID = get_uint16(table_data, 4ull + 8ull * i + 0);
 			uint16_t encodingID = get_uint16(table_data, 4ull + 8ull * i + 2);
-			uint32_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
+			size_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
 			if (platformID == 0) {	// Unicode
 				if (encodingID == 3) {	// Unicode 2.0 (BMP のみ)
 					uint16_t format = get_uint16(table_data, offset);
@@ -785,11 +803,16 @@ namespace winrt::GraphPaper::implementation
 			const uint32_t t_len = m_dwrite_test_metrics[i].length;	// 行の文字数
 
 			// Tm = テキスト空間からユーザー空間への変換行列を設定
+			const double sx = m_start.x;
+			const double sy = m_start.y;
+			const double w = m_text_pad.width;
+			const double h = m_text_pad.height;
+			const double left = m_dwrite_test_metrics[i].left;
+			const double top = m_dwrite_test_metrics[i].top;
+			const double b = m_dwrite_line_metrics[0].baseline;
 			swprintf_s(buf,
 				L"1 0 %f 1 %f %f Tm\n",
-				oblique,
-				m_start.x + m_text_pad.width + m_dwrite_test_metrics[i].left,
-				-(m_start.y + m_text_pad.height + m_dwrite_test_metrics[i].top + m_dwrite_line_metrics[0].baseline) + page_size.height);
+				oblique, sx + w + left, -(sy + h + top + b) + static_cast<double>(page_size.height));
 			len += dt_writer.WriteString(buf);
 
 			// 文字列を書き込む.
@@ -892,21 +915,28 @@ namespace winrt::GraphPaper::implementation
 		face->Release();
 
 		const double f_size = m_font_size;	// 書体の大きさ
-		const double l_height =	// 行の高さ
-			f_size * (f_met.ascent + f_met.descent + f_met.lineGap) / f_met.designUnitsPerEm;
-		const double b_line = f_size * (f_met.ascent) / f_met.designUnitsPerEm;	// (文字の上端からの) ベースラインまでの距離
+		const double f_asc = f_met.ascent;
+		const double f_des = f_met.descent;
+		const double f_gap = f_met.lineGap;
+		const double f_upe = f_met.designUnitsPerEm;
+		const double l_height = f_size * (f_asc + f_des + f_gap) / f_upe;	// 行の高さ
+		const double b_line = f_size * (f_asc) / f_upe;	// (文字の上端からの) ベースラインまでの距離
 
 		if (is_opaque(m_fill_color)) {
 
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
+			const double sx = m_start.x;
+			const double sy = m_start.y;
+			const double px = m_pos.x;
+			const double py = m_pos.y;
 			swprintf_s(buf,
 				L"%% Ruler\n"
 				L"%f %f %f rg\n"
 				L"%f %f %f %f re\n"
 				L"f*\n",
 				m_fill_color.r, m_fill_color.g, m_fill_color.b,
-				m_start.x, -(m_start.y) + page_size.height, m_pos.x, -m_pos.y
+				sx, -(sy) + static_cast<double>(page_size.height), px, -py
 			);
 			len += dt_writer.WriteString(buf);
 		}
@@ -941,25 +971,30 @@ namespace winrt::GraphPaper::implementation
 			*/
 			len += export_pdf_stroke(1.0f, m_stroke_color, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, D2D1_LINE_JOIN_MITER_OR_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
 
+			const double ph = page_size.height;
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
 
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * intvl_x;
-				const D2D1_POINT_2F p{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
-					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
-				};
+				const double px = (w_ge_h ? x : y0);
+				const double py = (w_ge_h ? y0 : x);
+				//const D2D1_POINT_2F p{
+				//	w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
+				//	w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
+				//};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
-				const D2D1_POINT_2F q{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
-					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
-				};
+				const double qx = (w_ge_h ? x : y);
+				const double qy = (w_ge_h ? y : x);
+				//const D2D1_POINT_2F q{
+				//	w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
+				//	w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
+				//};
 				swprintf_s(buf,
 					L"%f %f m %f %f l\n"
 					L"S\n",
-					p.x, -p.y + page_size.height,
-					q.x, -q.y + page_size.height
+					px, -py + ph,
+					qx, -qy + ph
 				);
 				len += dt_writer.WriteString(buf);
 			}
@@ -980,14 +1015,12 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * intvl_x;
-				//const D2D1_POINT_2F p{
-				//	w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
-				//	w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
+				//const D2D1_POINT_2F q{
+				//	w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y1),
+				//	w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x)
 				//};
-				const D2D1_POINT_2F q{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y1),
-					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x)
-				};
+				const double qx = (w_ge_h ? x : y1);
+				const double qy = (w_ge_h ? y1 : x);
 				// .left top
 				// |                |      |
 				// |       /\       |      |
@@ -999,26 +1032,29 @@ namespace winrt::GraphPaper::implementation
 				//                  |      |
 				//   |--g_adv[A]--|        |
 				// |-----f_size-----|
-				const double w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
-				const D2D1_POINT_2F r{
+				const double f_upe = f_met.designUnitsPerEm;
+				const double w = f_size * g_adv[i % 10] / f_upe;
+				const double rx = (
 					w_ge_h ?
-						// 目盛りの位置から字体の幅の半分だけずらし, 文字の基点とする.
-						static_cast<FLOAT>(x - w / 2) :
-						// 目盛りの位置から, 書体の半分の大きさだけずらし, 文字の中央位置を求め,
-						// その位置から字体の幅の半分だけずらして, 文字の基点とする.
-						static_cast<FLOAT>(m_pos.x >= 0.0f ? q.x - f_size / 2 - w / 2 : q.x + f_size / 2 - w / 2),
-					w_ge_h ? 
-						// 目盛りの位置から, 書体大きさの半分だけずらし, さらに行の高さの半分だけずらし,
-						// 文字の上位置を求めたあと, その位置からベースラインの距離だけずらし,
-						// 文字の基点とする.
-						static_cast<FLOAT>(m_pos.y >= 0.0f ? q.y - f_size / 2 - l_height / 2 + b_line : q.y + f_size / 2 - l_height / 2 + b_line) :
-						// 目盛りの位置から, 行の高さの半分だけずらして, 文字の上位置を求め,
-						// その位置からベースラインまでの距離を加え, 文字の基点とする.
-						static_cast<FLOAT>(q.y - l_height / 2 + b_line)
-				};
+					// 目盛りの位置から字体の幅の半分だけずらし, 文字の基点とする.
+					x - w / 2 :
+					// 目盛りの位置から, 書体の半分の大きさだけずらし, 文字の中央位置を求め,
+					// その位置から字体の幅の半分だけずらして, 文字の基点とする.
+					(m_pos.x >= 0.0f ? qx - f_size / 2 - w / 2 : qx + f_size / 2 - w / 2)
+				);
+				const double ry = (
+					w_ge_h ?
+					// 目盛りの位置から, 書体大きさの半分だけずらし, さらに行の高さの半分だけずらし,
+					// 文字の上位置を求めたあと, その位置からベースラインの距離だけずらし,
+					// 文字の基点とする.
+					(m_pos.y >= 0.0f ? qy - f_size / 2 - l_height / 2 + b_line : qy + f_size / 2 - l_height / 2 + b_line) :
+					// 目盛りの位置から, 行の高さの半分だけずらして, 文字の上位置を求め,
+					// その位置からベースラインまでの距離を加え, 文字の基点とする.
+					qy - l_height / 2 + b_line
+				);
 				swprintf_s(buf,
 					L"1 0 0 1 %f %f Tm <%04x> Tj\n",
-					r.x, -r.y + page_size.height, gid[i % 10]);
+					rx, -ry + ph, gid[i % 10]);
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"ET\n");
@@ -1110,12 +1146,16 @@ namespace winrt::GraphPaper::implementation
 				gw = 0.5F * g_width;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-
-			swprintf_s(buf, 
+			const double sx = v_start.x;
+			const double sy = v_start.y;
+			const double ex = v_end.x;
+			const double ey = v_end.y;
+			const double ph = m_page_size.height;
+			swprintf_s(buf,
 				L"%f w %f %f m %f %f l S\n",
 				gw,
-				v_start.x, -(v_start.y) + m_page_size.height,
-				v_end.x, -(v_end.y) + m_page_size.height
+				sx, -sy + ph,
+				ex, -ey + ph
 			);
 			len += dt_writer.WriteString(buf);
 		}
@@ -1133,12 +1173,16 @@ namespace winrt::GraphPaper::implementation
 				gw = 0.5F * g_width;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-
+			const double sx = h_start.x;
+			const double sy = h_start.y;
+			const double ex = h_end.x;
+			const double ey = h_end.y;
+			const double ph = m_page_size.height;
 			swprintf_s(buf,
 				L"%f w %f %f m %f %f l S\n",
 				gw,
-				h_start.x, -(h_start.y) + m_page_size.height,
-				h_end.x, -(h_end.y) + m_page_size.height
+				sx, -sy + ph,
+				ex, -ey + ph
 			);
 			len += dt_writer.WriteString(buf);
 		}
@@ -1180,15 +1224,24 @@ namespace winrt::GraphPaper::implementation
 			// f* = 偶奇規則を使用してパスを塗りつぶす。
 			// パスは自動的に閉じられる
 			wchar_t buf[1024];
+			const double sx = start1.x;
+			const double sy = start1.y;
+			const double b1x = b_seg1.point1.x;
+			const double b1y = b_seg1.point1.y;
+			const double b2x = b_seg1.point2.x;
+			const double b2y = b_seg1.point2.y;
+			const double b3x = b_seg1.point3.x;
+			const double b3y = b_seg1.point3.y;
+			const double ph = page_size.height;
 			swprintf_s(buf,
 				L"%f %f %f rg\n"
 				L"%f %f m %f %f %f %f %f %f c %f %f l f*\n",
 				m_fill_color.r, m_fill_color.g, m_fill_color.b,
-				start1.x, -start1.y + page_size.height,
-				b_seg1.point1.x, -b_seg1.point1.y + page_size.height,
-				b_seg1.point2.x, -b_seg1.point2.y + page_size.height,
-				b_seg1.point3.x, -b_seg1.point3.y + page_size.height,
-				ctr.x, -ctr.y + page_size.height
+				sx, -sy + ph,
+				b1x, -b1y + ph,
+				b2x, -b2y + ph,
+				b3x, -b3y + ph,
+				ctr.x, -ctr.y + ph
 			);
 			len += dt_writer.WriteString(buf);
 		}
@@ -1197,20 +1250,27 @@ namespace winrt::GraphPaper::implementation
 			// S = パスをストロークで描画
 			// パスは開いたまま.
 			wchar_t buf[1024];
+			const double sx = start1.x;
+			const double sy = start1.y;
+			const double b1x = b_seg1.point1.x;
+			const double b1y = b_seg1.point1.y;
+			const double b2x = b_seg1.point2.x;
+			const double b2y = b_seg1.point2.y;
+			const double b3x = b_seg1.point3.x;
+			const double b3y = b_seg1.point3.y;
+			const double ph = page_size.height;
 			swprintf_s(buf,
 				L"%f %f m %f %f %f %f %f %f c S\n",
-				start1.x, -start1.y + page_size.height,
-				b_seg1.point1.x, -b_seg1.point1.y + page_size.height,
-				b_seg1.point2.x, -b_seg1.point2.y + page_size.height,
-				b_seg1.point3.x, -b_seg1.point3.y + page_size.height
+				sx, -sy + ph,
+				b1x, -b1y + ph,
+				b2x, -b2y + ph,
+				b3x, -b3y + ph
 			);
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_get_pos_arrow(
-					m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
-				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, m_arrow_cap, m_arrow_join, m_arrow_join_limit, page_size,
-					arrow, arrow[2], dt_writer);
+				arc_get_pos_arrow(m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
+				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, m_arrow_cap, m_arrow_join, m_arrow_join_limit, page_size, arrow, arrow[2], dt_writer);
 			}
 		}
 		return len;

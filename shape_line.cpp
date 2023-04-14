@@ -39,20 +39,21 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				(*geo)->Open(sink.put())
 			);
-			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(
-				barb[0],
+			const auto f_begin = (
 				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 				: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
 			);
-			sink->AddLine(tip);
-			sink->AddLine(barb[1]);
-			sink->EndFigure(
+			const auto f_end = (
 				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
 				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
 			);
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+			sink->BeginFigure(barb[0], f_begin);
+			sink->AddLine(tip);
+			sink->AddLine(barb[1]);
+			sink->EndFigure(f_end);
 			winrt::check_hresult(
 				sink->Close()
 			);
@@ -359,7 +360,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			if (snap_point > FLT_MIN && pt_abs2(m_pos[0]) <= snap_point * snap_point) {
+			const double ss = static_cast<double>(snap_point) * static_cast<double>(snap_point);
+			if (ss > FLT_MIN && pt_abs2(m_pos[0]) <= ss) {
 				if (loc == LOC_TYPE::LOC_P0) {
 					m_start.x = m_start.x + m_pos[0].x;
 					m_start.y = m_start.y + m_pos[0].y;

@@ -78,6 +78,12 @@ namespace winrt::GraphPaper::implementation
 			else if (sender == rmfi_menu_drawing_poly_deca()) {
 				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 10);
 			}
+			else if (sender == rmfi_menu_drawing_poly_hendeca()) {
+				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 11);
+			}
+			else if (sender == rmfi_menu_drawing_poly_dodeca()) {
+				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 12);
+			}
 			else if (sender == tmfi_tool_poly_end_close()) {
 				m_drawing_poly_opt.m_end_closed = !m_drawing_poly_opt.m_end_closed;
 			}
@@ -91,7 +97,8 @@ namespace winrt::GraphPaper::implementation
 				m_drawing_poly_opt.m_clockwise = !m_drawing_poly_opt.m_clockwise;
 			}
 			else {
-				winrt::hresult_not_implemented();
+				throw winrt::hresult_not_implemented();
+				return;
 			}
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
@@ -138,6 +145,8 @@ namespace winrt::GraphPaper::implementation
 		rmfi_menu_drawing_poly_octa().IsChecked(val == 8);
 		rmfi_menu_drawing_poly_nona().IsChecked(val == 9);
 		rmfi_menu_drawing_poly_deca().IsChecked(val == 10);
+		rmfi_menu_drawing_poly_hendeca().IsChecked(val == 11);
+		rmfi_menu_drawing_poly_dodeca().IsChecked(val == 12);
 	}
 
 }

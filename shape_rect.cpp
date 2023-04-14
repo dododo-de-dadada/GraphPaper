@@ -10,7 +10,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	void ShapeRect::draw_loc(void)
+	void ShapeOblong::draw_loc(void)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeRect::draw(void)
+	void ShapeOblong::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeRect::hit_test(
+	uint32_t ShapeOblong::hit_test(
 		const D2D1_POINT_2F t	// 判定される点
 	) const noexcept
 	{
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 	// a_rb	元の領域の右下位置.
 	// b_lt	囲む領域の左上位置.
 	// b_rb	囲む領域の右下位置.
-	void ShapeRect::get_bound(
+	void ShapeOblong::get_bound(
 		const D2D1_POINT_2F a_lt,
 		const D2D1_POINT_2F a_rb,
 		D2D1_POINT_2F& b_lt,
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 塗りつぶし色を得る.
 	// val	得られた値.
-	bool ShapeRect::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapeOblong::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_fill_color;
 		return true;
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 塗りつぶし色に格納する.
 	// val	格納する値.
-	bool ShapeRect::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapeOblong::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {
 			m_fill_color = val;
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定した部位の点を得る.
-	void ShapeRect::get_pos_loc(
+	void ShapeOblong::get_pos_loc(
 		const uint32_t loc,	// 部位
 		D2D1_POINT_2F& val	// 得られた値
 	) const noexcept
@@ -394,7 +394,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む矩形の左上点を得る.
 	// val	左上点
-	void ShapeRect::get_bound_lt(D2D1_POINT_2F& val) const noexcept
+	void ShapeOblong::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		val.x = (0.0f <= m_pos.x ? m_start.x : m_start.x + m_pos.x);
 		val.y = (0.0f <= m_pos.y ? m_start.y : m_start.y + m_pos.y);
@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 	// 始点を得る
 	// val	始点
 	// 戻り値	つねに true
-	bool ShapeRect::get_pos_start(D2D1_POINT_2F& val) const noexcept
+	bool ShapeOblong::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
 		val = m_start;
 		return true;
@@ -414,7 +414,7 @@ namespace winrt::GraphPaper::implementation
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeRect::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeOblong::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_pos, pos);
@@ -423,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を移動する.
 	// pos	位置ベクトル
-	bool ShapeRect::move(const D2D1_POINT_2F pos) noexcept
+	bool ShapeOblong::move(const D2D1_POINT_2F pos) noexcept
 	{
 		D2D1_POINT_2F start;
 		pt_add(m_start, pos, start);
@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を, 指定した部位の点に格納する.
-	bool ShapeRect::set_pos_loc(
+	bool ShapeOblong::set_pos_loc(
 		const D2D1_POINT_2F val,	// 値
 		const uint32_t loc,	// 部位
 		const float snap_point,
@@ -568,7 +568,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	bool ShapeRect::set_pos_start(const D2D1_POINT_2F val) noexcept
+	bool ShapeOblong::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F p;	// 丸めた値.
 		pt_round(val, PT_ROUND, p);
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// pos	対角点への位置ベクトル
 	// page	属性
-	ShapeRect::ShapeRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
+	ShapeOblong::ShapeOblong(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
 		ShapeStroke(page),
 		m_start(start),
 		m_pos(pos)
@@ -592,7 +592,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRect::ShapeRect(DataReader const& dt_reader) :
+	ShapeOblong::ShapeOblong(DataReader const& dt_reader) :
 		ShapeStroke(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
@@ -610,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに書き込む.
-	void ShapeRect::write(DataWriter const& dt_writer) const
+	void ShapeOblong::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);
 
@@ -629,7 +629,7 @@ namespace winrt::GraphPaper::implementation
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeRect::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
+	bool ShapeOblong::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool flag = false;
 		D2D1_POINT_2F q[4];
@@ -652,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 	// 頂点を得る.
 	// p	頂点を格納する配列
 	// 戻り値	頂点の個数
-	size_t ShapeRect::get_verts(D2D1_POINT_2F p[]) const noexcept
+	size_t ShapeOblong::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
 		// 左上
 		p[0] = m_start;

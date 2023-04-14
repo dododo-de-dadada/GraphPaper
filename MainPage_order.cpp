@@ -71,6 +71,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				throw winrt::hresult_not_implemented();
+				return;
 			}
 		}
 		// ‘I‘ğ‚³‚ê‚Ä‚¢‚È‚¢}Œ`‚Ì’†‚©‚çÅ‰‚Ì}Œ`‚ğ“¾‚é.

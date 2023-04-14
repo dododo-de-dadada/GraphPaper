@@ -62,14 +62,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == mfi_menu_edit_poly_close() || sender == mfi_popup_edit_poly_close()) {
-			if (ustack_push_set<UNDO_T::POLY_END>(true)) {
+			if (ustack_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
+			//if (ustack_push_set<UNDO_T::POLY_END>(true)) {
 				ustack_push_null();
 				ustack_menu_is_enabled();
 				main_draw();
 			}
 		}
 		else if (sender == mfi_menu_edit_poly_open() || sender == mfi_popup_edit_poly_open()) {
-			if (ustack_push_set<UNDO_T::POLY_END>(false)) {
+			if (ustack_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
+			//if (ustack_push_set<UNDO_T::POLY_END>(false)) {
 				ustack_push_null();
 				ustack_menu_is_enabled();
 				main_draw();

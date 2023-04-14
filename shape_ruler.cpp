@@ -284,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	対角点への位置ベクトル
 	// page	属性
 	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeRect::ShapeRect(start, pos, page)
+		ShapeOblong::ShapeOblong(start, pos, page)
 	{
 		ShapeText::is_available_font(m_font_family);
 		page->get_grid_base(m_grid_base);
@@ -313,7 +313,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(dt_reader),
+		ShapeOblong::ShapeOblong(dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
 		m_font_family(dt_read_name(dt_reader)),
 		m_font_size(dt_reader.ReadSingle())
@@ -330,12 +330,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeRuler::write(DataWriter const& dt_writer) const
 	{
-		ShapeRect::write(dt_writer);
+		ShapeOblong::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
-		const uint32_t font_family_len = wchar_len(m_font_family);
-		dt_writer.WriteUInt32(font_family_len);
+		const uint32_t f_len = wchar_len(m_font_family);
+		dt_writer.WriteUInt32(f_len);
 		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
-		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * static_cast<size_t>(f_len)));
 		dt_writer.WriteSingle(m_dwrite_text_format->GetFontSize());
 	}
 

@@ -517,8 +517,8 @@ namespace winrt::Zlib::implementation
 			// マージ
 			b = b / 2;
 			for (uint32_t i = 0; i < b; i++) {
-				const uint32_t i0 = idx[2 * i + 0];
-				const uint32_t i1 = idx[2 * i + 1];
+				const uint32_t i0 = idx[2 * static_cast<size_t>(i) + 0];
+				const uint32_t i1 = idx[2 * static_cast<size_t>(i) + 1];
 				pkg[i].abc.clear();
 				//pkg[i].first.clear();
 				for (int j = 0; j < tbl[i0].abc.size(); j++) {
@@ -1463,7 +1463,7 @@ namespace winrt::Zlib::implementation
 		std::array<uint32_t, MAX_BITS + 1> next_code{};
 		uint32_t code = 0;
 		bl_count[0] = 0;
-		for (int bits = 1; bits <= MAX_BITS; bits++) {
+		for (size_t bits = 1; bits <= MAX_BITS; bits++) {
 			code = (code + bl_count[bits - 1]) << 1;
 			next_code[bits] = code;
 		}
@@ -1550,11 +1550,11 @@ namespace winrt::Zlib::implementation
 		const uint8_t cm = (cmf & 0x0F);	// 圧縮方式
 		if (cm == 8)
 		{
-			const uint8_t cinfo = (cmf >> 4);	// 圧縮方式の情報
-			const uint32_t window_size = 1ul << (static_cast<int>(cinfo) + 8);	// CM=8 ならウィンドウサイズの対数-1
-			const uint8_t fcheck = (flg & 0x1f);	// CMF と FLG のチェックビット
+			//const uint8_t cinfo = (cmf >> 4);	// 圧縮方式の情報
+			//const uint32_t window_size = 1ul << (static_cast<int>(cinfo) + 8);	// CM=8 ならウィンドウサイズの対数-1
+			//const uint8_t fcheck = (flg & 0x1f);	// CMF と FLG のチェックビット
 			const uint8_t fdict = ((flg >> 5) & 1);	// プリセット辞書
-			const uint8_t flevel = ((flg >> 6) & 3);	// 圧縮レベル (0...3)
+			//const uint8_t flevel = ((flg >> 6) & 3);	// 圧縮レベル (0...3)
 			// CMF と FLG を MSB の順序で蓄積された 16 ビットの符号なし整数（CMF*256 + FLG）としてみたときに,
 			// この値が 31 の倍数となるように、FCHECK の値が定義されなければいけません
 			if (((static_cast<uint32_t>(cmf) << 8) + flg) % 31ul == 0) {

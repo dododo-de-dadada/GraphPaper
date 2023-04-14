@@ -108,7 +108,8 @@ namespace winrt::GraphPaper::implementation
 			val = GRID_EMPH_3;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
+			return;
 		}
 		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
@@ -147,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 		float g_base;
 		m_prop_page.get_grid_base(g_base);
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, g_base + 1.0f, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, g_base + 1.0, dpi, g_len, buf);
 
 		dialog_slider_0().Minimum(0.0);
 		dialog_slider_0().Maximum(MAX_VALUE);
@@ -189,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 					const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
-					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val + 1.0f, dpi, g_len, buf);
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val + 1.0, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_grid_length + buf));
 					if (m_prop_page.set_grid_base(val)) {
 						dialog_draw();
@@ -328,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 			new_val = GRID_SHOW::HIDE;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
 			return;
 		}
 		grid_show_is_checked(new_val);

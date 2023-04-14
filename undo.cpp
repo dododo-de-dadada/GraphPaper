@@ -225,7 +225,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_T::PAGE_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
-	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const bool &val);
+	//template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const bool &val);
+	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const D2D1_FIGURE_END& val);
 	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -309,14 +310,15 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::JOIN_STYLE ||
 			U == UNDO_T::GRID_SHOW ||
 			U == UNDO_T::TEXT_ALIGN_P ||
+			U == UNDO_T::POLY_END ||
 			U == UNDO_T::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
-		else if constexpr (
-			U == UNDO_T::POLY_END
-			) {
-			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
-		}
+		//else if constexpr (
+		//	U == UNDO_T::POLY_END
+		//	) {
+		//	m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
+		//}
 		else if constexpr (
 			U == UNDO_T::GRID_EMPH ||
 			U == UNDO_T::TEXT_RANGE) {
@@ -540,9 +542,14 @@ namespace winrt::GraphPaper::implementation
 		s->set_page_margin(val);
 	}
 
-	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const bool& val)
+	//void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const bool& val)
+	//{
+	//	s->set_poly_closed(val);
+	//}
+
+	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const D2D1_FIGURE_END& val)
 	{
-		s->set_poly_closed(val);
+		s->set_poly_end(val);
 	}
 
 	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -720,9 +727,11 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_margin(val);
 	}
 
-	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, bool& val) noexcept
+	//bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, bool& val) noexcept
+	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, D2D1_FIGURE_END& val) noexcept
 	{
-		return s->get_poly_closed(val);
+		//return s->get_poly_closed(val);
+		return s->get_poly_end(val);
 	}
 
 	bool UndoValue<UNDO_T::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
@@ -820,7 +829,9 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::GRID_SHOW ||
 			U == UNDO_T::JOIN_STYLE ||
 			U == UNDO_T::TEXT_ALIGN_P ||
-			U == UNDO_T::TEXT_ALIGN_T) {
+			U == UNDO_T::TEXT_ALIGN_T ||
+			U == UNDO_T::POLY_END
+			) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
 		else if constexpr (
@@ -862,7 +873,7 @@ namespace winrt::GraphPaper::implementation
 			const uint32_t len = wchar_len(m_value);
 			dt_writer.WriteUInt32(len);
 			const auto data = reinterpret_cast<const uint8_t*>(m_value);
-			dt_writer.WriteBytes(array_view(data, data + 2 * len));
+			dt_writer.WriteBytes(array_view(data, data + 2 * static_cast<size_t>(len)));
 		}
 		else if constexpr (
 			U == UNDO_T::GRID_EMPH) {
@@ -884,11 +895,11 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_value.x);
 			dt_writer.WriteSingle(m_value.y);
 		}
-		else if constexpr (
-			U == UNDO_T::POLY_END
-			) {
-			dt_writer.WriteBoolean(m_value);
-		}
+		//else if constexpr (
+		//	U == UNDO_T::POLY_END
+		//	) {
+		//	dt_writer.WriteBoolean(m_value);
+		//}
 		else if constexpr (
 			U == UNDO_T::TEXT_PAD ||
 			U == UNDO_T::PAGE_SIZE) {

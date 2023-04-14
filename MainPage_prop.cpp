@@ -53,7 +53,8 @@ namespace winrt::GraphPaper::implementation
 			new_val = CAP_STYLE_TRIANGLE;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
+			return;
 		}
 		cap_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
@@ -65,13 +66,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性メニューの「端の形式」に印をつける.
-	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
 		rmfi_menu_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
+		rmfi_popup_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
 		rmfi_menu_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
+		rmfi_popup_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
 		rmfi_menu_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
+		rmfi_popup_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
 		rmfi_menu_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
+		rmfi_popup_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
 	}
 
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
@@ -523,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 		}
 		else {
-			winrt::hresult_not_implemented();
+			throw winrt::hresult_not_implemented();
 			return;
 		}
 		join_style_is_checked(new_val);

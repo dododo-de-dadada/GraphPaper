@@ -231,16 +231,17 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (s_tid == typeid(ShapePoly)) {
 					// 図形の型が多角形図形の場合,
-					bool closed;
-					if (s->get_poly_closed(closed)) {
-						if (closed) {
-							// 選択された閉じた多角形図形の数をインクリメントする.
-							selected_poly_close_cnt++;
-						}
-						else {
-							// 選択された開いた多角形図形の数をインクリメントする.
-							selected_poly_open_cnt++;
-						}
+					//bool closed;
+					//if (s->get_poly_closed(closed)) {
+					D2D1_FIGURE_END end;
+					s->get_poly_end(end);
+					if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
+						// 選択された閉じた多角形図形の数をインクリメントする.
+						selected_poly_close_cnt++;
+					}
+					else {
+						// 選択された開いた多角形図形の数をインクリメントする.
+						selected_poly_open_cnt++;
 					}
 				}
 				else if (s_tid == typeid(ShapeText)) {

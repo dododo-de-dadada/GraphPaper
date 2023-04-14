@@ -27,18 +27,13 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static void page_draw_grid(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
-		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		/*const float p_scale,*/ const D2D1_SIZE_F g_size);
+	static void page_draw_grid(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len, const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset, const D2D1_SIZE_F g_size);
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
-	// target	レンダーターゲット
-	// brush	色ブラシ
-	// pressed	ポインターが押された位置
-	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_bezi(
-		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
+		const D2D1_POINT_2F pressed,	// ポインターが押された点
+		const D2D1_POINT_2F current	// ポインターの現在の点
+	)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -162,13 +157,21 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F pos;	// 現在位置への位置ベクトル
 		pt_sub(current, pressed, pos);
 		ShapePoly::poly_create_by_box(pressed, pos, p_opt, p);
-		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
-		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
-		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
+		if (p_opt.m_vertex_cnt == 2) {
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(p[i], p[j], brush, m_aux_width, nullptr);
+			target->DrawLine(p[0], p[1], brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(p[i], p[j], brush, m_aux_width, m_aux_style.get());
+			target->DrawLine(p[0], p[1], brush, m_aux_width, m_aux_style.get());
+		}
+		else {
+			const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
+			const auto j_start = (p_opt.m_end_closed ? 0 : 1);
+			for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawLine(p[i], p[j], brush, m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawLine(p[i], p[j], brush, m_aux_width, m_aux_style.get());
+			}
 		}
 	}
 
@@ -350,31 +353,33 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼を表示する.
-	// d2d	描画環境
-	// g_offset	方眼のずらし量
-	// g_size	方眼を表示する領域の大きさ
 	static void page_draw_grid(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
-		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
-		/*const float p_scale,*/ const D2D1_SIZE_F g_size)
+		ID2D1RenderTarget* const target,	// D2D 描画対象
+		ID2D1SolidColorBrush* const brush,	// 色ブラシ
+		const float g_len,	// 方眼の大きさ
+		const D2D1_COLOR_F g_color,	// 方眼の色
+		const GRID_EMPH g_emph,	// 方眼の強調の形式
+		const D2D1_POINT_2F g_offset,	// 方眼のずらし値
+		const D2D1_SIZE_F g_size	// 方眼を表示する矩形の大きさ
+	)
 	{
-		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		//const FLOAT g_width = static_cast<FLOAT>(1.0 / p_scale);	// 方眼の太さ
 		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		brush->SetColor(g_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		const auto page_h = g_size.height;
-		const auto page_w = g_size.width;
+		const double page_h = g_size.height;
+		const double page_w = g_size.width;
+		const double offs_x = g_offset.x;
+		const double offs_y = g_offset.y;
 		v_end.y = g_size.height - 1.0f;
 		h_end.x = g_size.width - 1.0f;
 
 		// 垂直な方眼を表示する.
 		double w;
 		double x;
-		for (uint32_t i = 0; (x = round((g_len * i + g_offset.x) / PT_ROUND) * PT_ROUND) <= page_w; i++) {
+		for (uint32_t i = 0; (x = round((static_cast<double>(g_len) * i + offs_x) / PT_ROUND) * PT_ROUND) <= page_w; i++) {
 			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
 				w = 2.0 * g_width;
 			}
@@ -389,7 +394,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = round((g_len * i + g_offset.y) / PT_ROUND) * PT_ROUND) <= page_h; i++) {
+		for (uint32_t i = 0; (y = round((static_cast<double>(g_len) * i + offs_y) / PT_ROUND) * PT_ROUND) <= page_h; i++) {
 			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
 				w = 2.0 * g_width;
 			}
@@ -1298,10 +1303,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_font_color.b);
 		dt_writer.WriteSingle(m_font_color.a);
 		// 書体名
-		const uint32_t font_family_len = wchar_len(m_font_family);
-		const uint8_t* font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
-		dt_writer.WriteUInt32(font_family_len);
-		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+		const uint32_t f_len = wchar_len(m_font_family);
+		const uint8_t* f_data = reinterpret_cast<const uint8_t*>(m_font_family);
+		dt_writer.WriteUInt32(f_len);
+		dt_writer.WriteBytes(array_view(f_data, f_data + 2 * static_cast<size_t>(f_len)));
 		// 書体の大きさ
 		dt_writer.WriteSingle(m_font_size);
 		// 書体の幅

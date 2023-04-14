@@ -73,8 +73,8 @@ namespace winrt::GraphPaper::implementation
 		const double rad_y, const double rot = 0.0) noexcept
 	{
 		// ‚¾‰~‚ÌŒX‚«‚É‡‚í‚¹‚Ä”»’è‚³‚ê‚é“_‚ğ‰ñ“].
-		const double tx = static_cast<double>(t.x - ctr.x);
-		const double ty = static_cast<double>(t.y - ctr.y);
+		const double tx = static_cast<double>(t.x) - static_cast<double>(ctr.x);
+		const double ty = static_cast<double>(t.y) - static_cast<double>(ctr.y);
 		const double c = cos(rot);
 		const double s = sin(rot);
 		const double x = c * tx + s * ty;

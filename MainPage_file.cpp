@@ -583,6 +583,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			else {
 				message_show(ICON_ALERT, L"str_err_read", s_file.Path());
 			}
+			main_draw();
 		}
 		else {
 			if constexpr (!RESUME && !SETTING_ONLY) {
@@ -877,12 +878,12 @@ m_snap_grid = dt_reader.ReadBoolean();
 			const uint32_t find_text_len = wchar_len(m_find_text);
 			dt_writer.WriteUInt32(find_text_len);
 			const auto find_text_data = reinterpret_cast<const uint8_t*>(m_find_text);
-			dt_writer.WriteBytes(array_view(find_text_data, find_text_data + 2 * find_text_len));
+			dt_writer.WriteBytes(array_view(find_text_data, find_text_data + 2 * static_cast<size_t>(find_text_len)));
 			// 置換文字列
 			const uint32_t find_repl_len = wchar_len(m_find_repl);
 			dt_writer.WriteUInt32(find_repl_len);
 			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);
-			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
+			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * static_cast<size_t>(find_repl_len)));
 			uint16_t f_bit = 0;
 			if (m_fit_text_frame) {
 				f_bit |= 1;

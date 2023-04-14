@@ -45,10 +45,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double act_w, const double act_h)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const double p_scale = m_main_scale;	// ページの倍率
-		//const double p_scale = m_main_page.m_page_scale;	// ページの倍率
-		const double view_w = act_w / p_scale;	// 見えている部分の幅
-		const double view_h = act_h / p_scale;	// 見えている部分の高さ
+		const double view_w = act_w / m_main_scale;	// 見えている部分の幅
+		const double view_h = act_h / m_main_scale;	// 見えている部分の高さ
 		const auto lt = m_main_bbox_lt;	// ページを含む図形全体の境界矩形の左上位置
 		const auto rb = m_main_bbox_rb;	// ページを含む図形全体の境界矩形の右下位置
 		const auto mw = static_cast<double>(rb.x) - static_cast<double>(lt.x) - view_w;

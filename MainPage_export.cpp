@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 				for (uint32_t j = 0; j < str_cnt; j++) {
 					UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
 					if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
-						std::vector<wchar_t> wstr(wstr_len + 1);
+						std::vector<wchar_t> wstr(static_cast<size_t>(wstr_len) + 1);
 						if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
 							p_name.clear();
 							p_name = std::data(wstr);
@@ -298,10 +298,10 @@ namespace winrt::GraphPaper::implementation
 			// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
 			if (!exists || 
 				std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
-				const auto k = wchar_len(family);
+				const size_t k = wchar_len(family);
 				std::vector<wchar_t> wstr(k + 1);
 				int wstr_len = 0;
-				for (uint32_t i = 0; i < k; i++) {
+				for (size_t i = 0; i < k; i++) {
 					if (!iswspace(family[i])) {
 						wstr[wstr_len++] = family[i];
 					}
