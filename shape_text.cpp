@@ -684,7 +684,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列の範囲の左上が原点になるよう, 判定される点を移動する.
 		D2D1_POINT_2F lt;
-		ShapeRect::get_bound_lt(lt);
+		ShapeRect::get_bbox_lt(lt);
 		pt_sub(t, lt, lt);
 		pt_sub(lt, m_text_pad, lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -714,7 +714,7 @@ namespace winrt::GraphPaper::implementation
 				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
 			// 文字列の各行が矩形に含まれる判定する.
-			ShapeRect::get_bound_lt(p_lt);
+			ShapeRect::get_bbox_lt(p_lt);
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 				const auto tl = m_dwrite_test_metrics[i].left;
 				const auto tt = m_dwrite_test_metrics[i].top;
@@ -983,24 +983,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	始点
-	// pos	対角点への位置ベクトル
-	// text	文字列
-	// page	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* page) :
-		ShapeRect::ShapeRect(start, pos, page)
+	ShapeText::ShapeText(
+		const D2D1_POINT_2F start,	// 始点
+		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
+		wchar_t* const text,	// 文字列
+		const Shape* prop	// 属性
+	) :
+		ShapeRect::ShapeRect(start, pos, prop)
 	{
-		page->get_font_color(m_font_color),
-		page->get_font_family(m_font_family),
-		page->get_font_size(m_font_size),
-		page->get_font_stretch(m_font_stretch),
-		page->get_font_style(m_font_style),
-		page->get_font_weight(m_font_weight),
-		page->get_text_line_sp(m_text_line_sp),
-		page->get_text_pad(m_text_pad),
+		prop->get_font_color(m_font_color);
+		prop->get_font_family(m_font_family);
+		prop->get_font_size(m_font_size);
+		prop->get_font_stretch(m_font_stretch);
+		prop->get_font_style(m_font_style);
+		prop->get_font_weight(m_font_weight);
+		prop->get_text_line_sp(m_text_line_sp);
+		prop->get_text_pad(m_text_pad),
+		prop->get_text_align_horz(m_text_align_horz);
+		prop->get_text_align_vert(m_text_align_vert);
 		m_text = text;
-		page->get_text_align_horz(m_text_align_horz);
-		page->get_text_align_vert(m_text_align_vert);
 		m_text_selected_range = DWRITE_TEXT_RANGE{ 0, 0 };
 		ShapeText::is_available_font(m_font_family);
 	}

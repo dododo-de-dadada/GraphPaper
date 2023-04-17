@@ -141,14 +141,13 @@ namespace winrt::GraphPaper::implementation
 		return p_cnt + 1;
 	}
 
-	// 図形を囲む領域を得る.
-// a_lt	元の領域の左上位置.
-// a_rb	元の領域の右下位置.
-// b_lt	囲む領域の左上位置.
-// b_rb	囲む領域の右下位置.
-	void ShapePath::get_bound(
-		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
-		D2D1_POINT_2F& b_rb) const noexcept
+	// 境界矩形を得る.
+	void ShapePath::get_bbox(
+		const D2D1_POINT_2F a_lt,	// a_lt	元の領域の左上位置.
+		const D2D1_POINT_2F a_rb,	// a_rb	元の領域の右下位置.
+		D2D1_POINT_2F& b_lt,	// b_lt	囲む領域の左上位置.
+		D2D1_POINT_2F& b_rb	// b_rb	囲む領域の右下位置.
+	) const noexcept
 	{
 		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
 		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
@@ -173,9 +172,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域の左上位置を得る.
-// val	領域の左上位置
-	void ShapePath::get_bound_lt(D2D1_POINT_2F& val) const noexcept
+	// 境界矩形の左上位置を得る.
+	void ShapePath::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t p_cnt = m_pos.size();	// 位置の数
 		D2D1_POINT_2F p = m_start;	// 頂点

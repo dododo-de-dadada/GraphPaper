@@ -39,43 +39,44 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「端の形式」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		CAP_STYLE new_val;
+		//CAP_STYLE new_val;
+		D2D1_CAP_STYLE new_val;
 		if (sender == rmfi_menu_cap_style_flat() || sender == rmfi_popup_cap_style_flat()) {
-			new_val = CAP_STYLE_FLAT;
+			new_val = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
 		}
 		else if (sender == rmfi_menu_cap_style_square() || sender == rmfi_popup_cap_style_square()) {
-			new_val = CAP_STYLE_SQUARE;
+			new_val = D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE;
 		}
 		else if (sender == rmfi_menu_cap_style_round() || sender == rmfi_popup_cap_style_round()) {
-			new_val = CAP_STYLE_ROUND;
+			new_val = D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND;
 		}
 		else if (sender == rmfi_menu_cap_style_triangle() || rmfi_popup_cap_style_triangle()) {
-			new_val = CAP_STYLE_TRIANGLE;
+			new_val = D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE;
 		}
 		else {
 			throw winrt::hresult_not_implemented();
 			return;
 		}
 		cap_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_T::STROKE_CAP>(new_val)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
 	}
 
 	// 属性メニューの「端の形式」に印をつける.
-	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
+	void MainPage::cap_style_is_checked(const D2D1_CAP_STYLE& val)
 	{
-		rmfi_menu_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
-		rmfi_popup_cap_style_flat().IsChecked(equal(val, CAP_STYLE_FLAT));
-		rmfi_menu_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
-		rmfi_popup_cap_style_square().IsChecked(equal(val, CAP_STYLE_SQUARE));
-		rmfi_menu_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
-		rmfi_popup_cap_style_round().IsChecked(equal(val, CAP_STYLE_ROUND));
-		rmfi_menu_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
-		rmfi_popup_cap_style_triangle().IsChecked(equal(val, CAP_STYLE_TRIANGLE));
+		rmfi_menu_cap_style_flat().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT));
+		rmfi_popup_cap_style_flat().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT));
+		rmfi_menu_cap_style_square().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE));
+		rmfi_popup_cap_style_square().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE));
+		rmfi_menu_cap_style_round().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND));
+		rmfi_popup_cap_style_round().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND));
+		rmfi_menu_cap_style_triangle().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE));
+		rmfi_popup_cap_style_triangle().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE));
 	}
 
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
@@ -178,11 +179,11 @@ namespace winrt::GraphPaper::implementation
 				float new_width;
 				m_prop_page.back()->get_join_miter_limit(new_limit);
 				m_prop_page.back()->get_stroke_width(new_width);
-				const bool limit_changed = ustack_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
-				const bool width_changed = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+				const bool limit_changed = undo_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
+				const bool width_changed = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -204,7 +205,9 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring str_dash_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dash_gap") + L": " };
 		const winrt::hstring str_dot_len{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_len") + L": " };
 		const winrt::hstring str_dot_gap{ ResourceLoader::GetForCurrentView().GetString(L"str_dot_gap") + L": " };
-		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " };
+		const winrt::hstring str_stroke_width{ ResourceLoader::GetForCurrentView().GetString(L"mfsi_stroke_width/Text") + L": " };
+		const winrt::hstring str_cap_style{ mfsi_menu_cap_style().Text() + L": " };
+
 		// まず, ダイアログページの属性を, メインページと同じにする.
 		m_prop_page.set_attr_to(&m_main_page);
 		// 見本図形の作成
@@ -227,6 +230,8 @@ namespace winrt::GraphPaper::implementation
 		m_prop_page.get_stroke_width(s_width);
 		D2D1_DASH_STYLE d_style;
 		m_prop_page.get_dash_style(d_style);
+		D2D1_CAP_STYLE c_style;
+		m_prop_page.get_stroke_cap(c_style);
 
 		const auto unit = m_len_unit;
 		const auto dpi = m_prop_d2d.m_logical_dpi;
@@ -272,6 +277,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().Value(s_width);
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, s_width, dpi, g_len, buf);
 		dialog_slider_4().Header(box_value(str_stroke_width + buf));
+		dialog_slider_4().Visibility(Visibility::Visible);
 
 		dialog_combo_box_0().Header(box_value(mfsi_menu_dash_style().Text()));
 		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_dash_style_dash().Text()));
@@ -302,8 +308,27 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_2().Visibility(Visibility::Visible);
 			dialog_slider_3().Visibility(Visibility::Visible);
 		}
-		dialog_slider_4().Visibility(Visibility::Visible);
 		dialog_combo_box_0().Visibility(Visibility::Visible);
+
+		dialog_combo_box_1().Header(box_value(str_cap_style));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_cap_style_flat().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_cap_style_square().Text()));
+		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_cap_style_round().Text()));
+		if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+			dialog_combo_box_1().SelectedIndex(0);
+		}
+		else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+			dialog_combo_box_1().SelectedIndex(1);
+		}
+		else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			dialog_combo_box_1().SelectedIndex(2);
+		}
+		else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			dialog_combo_box_1().Items().Append(box_value(rmfi_menu_cap_style_triangle().Text()));
+			dialog_combo_box_1().SelectedIndex(3);
+		}
+		dialog_combo_box_1().Visibility(Visibility::Visible);
+
 		cd_dialog_prop().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_dash_patern")));
 		{
@@ -429,21 +454,48 @@ namespace winrt::GraphPaper::implementation
 					}
 				})
 			};
+			const auto revoker6{
+				dialog_combo_box_1().SelectionChanged(winrt::auto_revoke, [this](IInspectable const&, SelectionChangedEventArgs const&) {
+					if (dialog_combo_box_1().SelectedIndex() == 0) {
+						if (m_prop_page.back()->set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT)) {
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box_1().SelectedIndex() == 1) {
+						if (m_prop_page.back()->set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box_1().SelectedIndex() == 2) {
+						if (m_prop_page.back()->set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
+							dialog_draw();
+						}
+					}
+					else if (dialog_combo_box_1().SelectedIndex() == 3) {
+						if (m_prop_page.back()->set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
+							dialog_draw();
+						}
+					}
+				})
+			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				DASH_PAT new_patt;
 				float new_width;
-				D2D1_DASH_STYLE new_style;
+				D2D1_DASH_STYLE new_dash;
+				D2D1_CAP_STYLE new_cap;
 				m_prop_page.back()->get_dash_pat(new_patt);
 				m_prop_page.back()->get_stroke_width(new_width);
-				m_prop_page.back()->get_dash_style(new_style);
-				dash_style_is_checked(new_style);
-				const bool flag_patt = ustack_push_set<UNDO_T::DASH_PAT>(new_patt);
-				const bool flag_width = ustack_push_set<UNDO_T::STROKE_WIDTH>(new_width);
-				const bool flag_style = ustack_push_set<UNDO_T::DASH_STYLE>(new_style);
-				if (flag_patt || flag_width || flag_style) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
-					//xcvd_menu_is_enabled();
+				m_prop_page.back()->get_dash_style(new_dash);
+				m_prop_page.back()->get_stroke_cap(new_cap);
+				dash_style_is_checked(new_dash);
+				cap_style_is_checked(new_cap);
+				const bool flag_patt = undo_push_set<UNDO_T::DASH_PAT>(new_patt);
+				const bool flag_width = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
+				const bool flag_dash = undo_push_set<UNDO_T::DASH_STYLE>(new_dash);
+				const bool flag_cap = undo_push_set<UNDO_T::STROKE_CAP>(new_cap);
+				if (flag_patt || flag_width || flag_dash || flag_cap) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -455,6 +507,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Items().Clear();
+		dialog_combo_box_1().Visibility(Visibility::Collapsed);
+		dialog_combo_box_1().Items().Clear();
 		status_bar_set_pos();
 		slist_clear(m_prop_page.m_shape_list);
 		m_mutex_event.unlock();
@@ -481,9 +535,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (d_style != static_cast<D2D1_DASH_STYLE>(-1)) {
 			mfi_menu_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-			if (ustack_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -531,9 +585,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		join_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -585,9 +639,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s_width >= 0.0f) {
 			stroke_width_is_checked(s_width);
-			if (ustack_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -662,9 +716,9 @@ namespace winrt::GraphPaper::implementation
 				float new_val;
 				m_prop_page.back()->get_stroke_width(new_val);
 				stroke_width_is_checked(new_val);
-				if (ustack_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}

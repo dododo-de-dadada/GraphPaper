@@ -140,11 +140,11 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(s);
 				}
 				// 図形を取り去り, その操作をスタックに積む.
-				ustack_push_remove(s);
+				undo_push_remove(s);
 			}
 			m_mutex_draw.unlock();
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_null();
+			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
@@ -368,16 +368,16 @@ namespace winrt::GraphPaper::implementation
 
 		{
 			m_mutex_draw.lock();
-			ustack_push_append(s);
-			ustack_push_select(s);
+			undo_push_append(s);
+			undo_push_select(s);
 			m_mutex_draw.unlock();
 		}
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 
 		co_await winrt::resume_foreground(Dispatcher());
-		ustack_menu_is_enabled();
+		undo_menu_is_enabled();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);
@@ -437,12 +437,12 @@ namespace winrt::GraphPaper::implementation
 						if (summary_is_visible()) {
 							summary_append(s);
 						}
-						ustack_push_append(s);
+						undo_push_append(s);
 						main_bbox_update(s);
 					}
 					m_mutex_draw.unlock();
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_null();
+					undo_menu_is_enabled();
 					xcvd_menu_is_enabled();
 					main_panel_size();
 					main_draw();
@@ -499,12 +499,12 @@ namespace winrt::GraphPaper::implementation
 			t->set_pos_start(pos);
 			{
 				m_mutex_draw.lock();
-				ustack_push_append(t);
-				ustack_push_select(t);
+				undo_push_append(t);
+				undo_push_select(t);
 				m_mutex_draw.unlock();
 			}
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_null();
+			undo_menu_is_enabled();
 
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {

@@ -89,10 +89,10 @@ namespace winrt::GraphPaper::implementation
 
 			{
 				m_mutex_draw.lock();
-				ustack_push_append(s);
-				ustack_push_select(s);
-				ustack_push_null();
-				ustack_menu_is_enabled();
+				undo_push_append(s);
+				undo_push_select(s);
+				undo_push_null();
+				undo_menu_is_enabled();
 				m_mutex_draw.unlock();
 			}
 

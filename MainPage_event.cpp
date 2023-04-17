@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 	// 最も近い点を得る.
 	static bool event_get_nearby_point(const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& v_pos) noexcept;
 	// 図形が操作スタックに含まれるか判定する.
-	static bool event_ustack_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept;
+	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept;
 	// 図形リストを整理する.
 	static void event_reduce_slist(SHAPE_LIST& slist, const UNDO_STACK& ustack, const UNDO_STACK& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
@@ -182,10 +182,8 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			// 図形を囲む領域の左上位置, 右下位置を得る.
-			s->get_bound(
-				D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, p[0], 
-				p[1]);
+			// 境界矩形の左上位置, 右下位置を得る.
+			s->get_bbox(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, p[0], p[1]);
 			const auto p_cnt = s->get_verts(p + 2);
 			for (size_t i = 0; i < 2 + p_cnt; i++) {
 				pt_round(p[i], g_len, g);
@@ -281,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形の消去フラグがない,
 			// または図形が元に戻す操作スタックに含まれる,
 			// または図形がやり直し操作スタックに含まれる,　か判定する.
-			if (!t->is_deleted() || event_ustack_contain_shape(ustack, t) || event_ustack_contain_shape(rstack, t)) {
+			if (!t->is_deleted() || event_undo_contain_shape(ustack, t) || event_undo_contain_shape(rstack, t)) {
 				continue;
 			}
 			// 上記のいずれでもない図形を消去リストに追加する.
@@ -307,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 	// s	図形
 	// 戻り値	含む場合 true.
 	//------------------------------
-	static bool event_ustack_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept
+	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept
 	{
 		for (const auto u : ustack) {
 			if (u == nullptr) {
@@ -441,10 +439,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
-		ustack_push_append(s);
-		ustack_push_select(s);
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_append(s);
+		undo_push_select(s);
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_bbox_update(s);
 		main_panel_size();
@@ -480,10 +478,10 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
-			ustack_push_append(s);
-			ustack_push_select(s);
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_append(s);
+			undo_push_select(s);
+			undo_push_null();
+			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			m_event_shape_prev = s;
 			main_bbox_update(s);
@@ -536,9 +534,9 @@ namespace winrt::GraphPaper::implementation
 			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, m_snap_point / m_main_scale, m_image_keep_aspect);
 		}
-		if (!ustack_pop_if_invalid()) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (!undo_pop_invalid()) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 		}
@@ -581,9 +579,9 @@ namespace winrt::GraphPaper::implementation
 				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		}
-		if (!ustack_pop_if_invalid()) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (!undo_pop_invalid()) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 		}
@@ -739,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に保存する.
 					m_event_pos_prev = m_event_pos_curr;
-					ustack_push_move(pos);
+					undo_push_move(pos);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
@@ -747,7 +745,7 @@ namespace winrt::GraphPaper::implementation
 					// ポインターの現在位置を前回位置に保存する.
 					m_event_state = EVENT_STATE::PRESS_DEFORM;
 					m_event_pos_prev = m_event_pos_curr;
-					ustack_push_position(m_event_shape_pressed, m_event_loc_pressed);
+					undo_push_position(m_event_shape_pressed, m_event_loc_pressed);
 					m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
 				}
 				main_draw();
@@ -840,7 +838,7 @@ namespace winrt::GraphPaper::implementation
 		Shape* pressed;
 		const uint32_t loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, pressed);
 
-		ustack_menu_is_enabled();
+		undo_menu_is_enabled();
 		int undo_visible = 0;
 		if (mfi_popup_undo().IsEnabled()) {
 			mfi_popup_undo().Visibility(Visibility::Visible);
@@ -1264,28 +1262,28 @@ namespace winrt::GraphPaper::implementation
 				Shape* s;
 				const uint32_t loc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (loc == LOC_TYPE::LOC_PAGE) {
-					ustack_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
-						ustack_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
-						ustack_push_null();
-						ustack_menu_is_enabled();
+						undo_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
+						undo_push_null();
+						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						ustack_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
-						ustack_push_null();
-						ustack_menu_is_enabled();
+						undo_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
+						undo_push_null();
+						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
-						ustack_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
-						ustack_push_null();
-						ustack_menu_is_enabled();
+						undo_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
+						undo_push_null();
+						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}
 				}
@@ -1344,6 +1342,8 @@ namespace winrt::GraphPaper::implementation
 				case LOC_TYPE::LOC_R_NE:
 				case LOC_TYPE::LOC_R_SE:
 				case LOC_TYPE::LOC_R_SW:
+				case LOC_TYPE::LOC_START:
+				case LOC_TYPE::LOC_END:
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 					break;
 				case LOC_TYPE::LOC_A_CENTER:

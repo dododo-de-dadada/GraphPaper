@@ -115,9 +115,9 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
 		if (!equal(g_emph, val)) {
-			ustack_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -269,9 +269,9 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.get_grid_base(page_val);
 				m_prop_page.get_grid_base(setting_val);
 				if (!equal(page_val, setting_val)) {
-					ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -292,9 +292,9 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
-			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -307,9 +307,9 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
-			ustack_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -334,9 +334,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		grid_show_is_checked(new_val);
 		if (m_main_page.m_grid_show != new_val) {
-			ustack_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -569,9 +569,10 @@ namespace winrt::GraphPaper::implementation
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
 			m_main_page.set_page_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
-			m_main_page.set_stroke_cap(CAP_STYLE_FLAT);
+			//m_main_page.set_stroke_cap(CAP_STYLE_FLAT);
+			m_main_page.set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_page.set_stroke_color(COLOR_BLACK);
-			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			//m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_page.set_dash_pat(DASH_PAT_DEFVAL);
 			m_main_page.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 			m_main_page.set_join_miter_limit(JOIN_MITER_LIMIT_DEFVAL);
@@ -733,13 +734,13 @@ namespace winrt::GraphPaper::implementation
 			const bool flag_mar = !equal(p_mar, m_main_page.m_page_margin);
 			if (flag_size || flag_mar) {
 				if (flag_size) {
-					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+					undo_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				}
 				if (flag_mar) {
-					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				ustack_push_null();
-				ustack_menu_is_enabled();
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -805,10 +806,9 @@ namespace winrt::GraphPaper::implementation
 			};
 
 			// リスト中の図形を囲む矩形を得る.
-			D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
-			D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
-			//D2D1_POINT_2F b_size;
-			slist_bound_shape(m_main_page.m_shape_list, b_lt, b_rb);
+			D2D1_POINT_2F b_lt{ FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
+			slist_bbox_shape(m_main_page.m_shape_list, b_lt, b_rb);
 
 			// 矩形の大きさがゼロ,なら中断する.
 			if (b_rb.x - b_lt.x < 1.0F || b_rb.y - b_lt.y < 1.0F) {
@@ -852,18 +852,18 @@ namespace winrt::GraphPaper::implementation
 				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
 				if (dx > 0.0f || dy > 0.0f) {
 					constexpr auto ANY = true;
-					ustack_push_move({ dx, dy }, ANY);
+					undo_push_move({ dx, dy }, ANY);
 				}
 				// ページの大きさが異なるなら, 更新する.
 				if (size_changed) {
-					ustack_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+					undo_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				}
 				// ページの余白が異なるなら, 更新する.
 				if (mar_chanfed) {
-					ustack_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				ustack_push_null();
-				ustack_menu_is_enabled();
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();

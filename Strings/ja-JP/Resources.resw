@@ -701,6 +701,14 @@
     <value>返しの幅</value>
     <comment>String</comment>
   </data>
+  <data name="str_arrow_cap" xml:space="preserve">
+    <value>返しの形式</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arrow_join" xml:space="preserve">
+    <value>先端の形式</value>
+    <comment>String</comment>
+  </data>
   <data name="str_color_b" xml:space="preserve">
     <value>B</value>
     <comment>String</comment>
@@ -1119,7 +1127,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_menu_snap_point.Text" xml:space="preserve">
-    <value>点を点にくっつける間隔...</value>
+    <value>点を点にくっつけるしきい値...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_menu_cap_style_flat.Text" xml:space="preserve">
@@ -1139,7 +1147,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="str_snap_point" xml:space="preserve">
-    <value>点を点にくっつける間隔</value>
+    <value>点を点にくっつけるしきい値</value>
     <comment>String</comment>
   </data>
   <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">

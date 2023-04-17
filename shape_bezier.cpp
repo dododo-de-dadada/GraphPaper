@@ -436,7 +436,8 @@ namespace winrt::GraphPaper::implementation
 		if (loc_hit_test(tp, cp[0], m_loc_width)) {
 			return LOC_TYPE::LOC_P0 + 0;
 		}
-		if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
+		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
+		//if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 			if (pt_in_circle(tp.x, tp.y, ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
@@ -444,13 +445,13 @@ namespace winrt::GraphPaper::implementation
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_STYLE_SQUARE)) {
+		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(
 				tp, cp, m_pos.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
+		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(
 				tp, cp, m_pos.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
@@ -688,14 +689,13 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//------------------------------
 	// 図形を作成する.
-	// start	始点
-	// pos	対角点への位置ベクトル
-	// page	属性
-	//------------------------------
-	ShapeBezier::ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapePath::ShapePath(page, false)
+	ShapeBezier::ShapeBezier(
+		const D2D1_POINT_2F start,	// 始点
+		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
+		const Shape* prop	// 属性
+	) :
+		ShapePath::ShapePath(prop, false)
 	{
 		m_start = start;
 		m_pos.resize(3);

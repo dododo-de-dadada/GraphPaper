@@ -45,14 +45,14 @@ namespace winrt::GraphPaper::implementation
 			tx_edit_text().SelectAll();
 			ck_fit_text_frame().IsChecked(m_fit_text_frame);
 			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-				ustack_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
+				undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
 				m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 				if (m_fit_text_frame) {
-					ustack_push_position(s, LOC_TYPE::LOC_SE);
+					undo_push_position(s, LOC_TYPE::LOC_SE);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
-				ustack_push_null();
-				ustack_menu_is_enabled();
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -62,18 +62,18 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == mfi_menu_edit_poly_close() || sender == mfi_popup_edit_poly_close()) {
-			if (ustack_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
-			//if (ustack_push_set<UNDO_T::POLY_END>(true)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
+			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_draw();
 			}
 		}
 		else if (sender == mfi_menu_edit_poly_open() || sender == mfi_popup_edit_poly_open()) {
-			if (ustack_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
-			//if (ustack_push_set<UNDO_T::POLY_END>(false)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
+			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -298,16 +298,16 @@ namespace winrt::GraphPaper::implementation
 					// ’ˆÓ: ‡”Ô‚ª OK ‚©‚Ç‚¤‚©.
 					D2D1_SWEEP_DIRECTION new_dir;
 					s->get_arc_dir(new_dir);
-					ustack_push_set<UNDO_T::ARC_DIR>(new_dir);
+					undo_push_set<UNDO_T::ARC_DIR>(new_dir);
 					float new_val;
 					s->get_arc_start(new_val);
-					ustack_push_set<UNDO_T::ARC_START>(new_val);
+					undo_push_set<UNDO_T::ARC_START>(new_val);
 					s->get_arc_end(new_val);
-					ustack_push_set<UNDO_T::ARC_END>(new_val);
+					undo_push_set<UNDO_T::ARC_END>(new_val);
 					s->get_arc_rot(new_val);
-					ustack_push_set<UNDO_T::ARC_ROT>(new_val);
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_set<UNDO_T::ARC_ROT>(new_val);
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}

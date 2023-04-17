@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		unselect_all();
-		ustack_push_append(g);
+		undo_push_append(g);
 		for (const auto s : slist) {
 			// 図形の消去フラグが立っているか判定する.
 			if (s->is_deleted()) {
@@ -34,12 +34,12 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_remove(s);
 			}
-			ustack_push_remove(s);
-			ustack_push_append(g, s);
+			undo_push_remove(s);
+			undo_push_append(g, s);
 		}
-		ustack_push_select(g);
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_select(g);
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		// 一覧が表示されてるか判定する.
@@ -82,15 +82,15 @@ namespace winrt::GraphPaper::implementation
 				// グループ図形から先頭の図形を取り去り,
 				// 図形リスト中のそのグループ図形の直前に,
 				// 取り去った図形を挿入する.
-				ustack_push_remove(g, s);
-				ustack_push_insert(s, g);
-				ustack_push_select(s);
+				undo_push_remove(g, s);
+				undo_push_insert(s, g);
+				undo_push_select(s);
 				//t = s;
 			}
-			ustack_push_remove(g);
+			undo_push_remove(g);
 		}
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();

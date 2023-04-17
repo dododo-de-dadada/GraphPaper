@@ -280,16 +280,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	始点
-	// pos	対角点への位置ベクトル
-	// page	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeOblong::ShapeOblong(start, pos, page)
+	ShapeRuler::ShapeRuler(
+		const D2D1_POINT_2F start,	// 始点
+		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
+		const Shape* prop	// 属性
+	) :
+		ShapeOblong::ShapeOblong(start, pos, prop)
 	{
 		ShapeText::is_available_font(m_font_family);
-		page->get_grid_base(m_grid_base);
-		page->get_font_family(m_font_family);
-		page->get_font_size(m_font_size);
+		prop->get_grid_base(m_grid_base);
+		prop->get_font_family(m_font_family);
+		prop->get_font_size(m_font_size);
 	}
 
 	static wchar_t* dt_read_name(DataReader const& dt_reader)

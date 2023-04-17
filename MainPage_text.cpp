@@ -76,8 +76,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_panel_size();
 			main_draw();
 		}
@@ -99,9 +99,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
 			text_align_vert_is_checked(val);
-			if (ustack_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -139,9 +139,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
 			text_align_horz_is_checked(val);
-			if (ustack_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -224,9 +224,9 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
 				m_prop_page.back()->get_text_line_sp(samp_val);
-				if (ustack_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -315,9 +315,9 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
 				m_prop_page.back()->get_text_pad(samp_val);
-				if (ustack_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}

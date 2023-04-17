@@ -382,14 +382,14 @@ namespace winrt::GraphPaper::implementation
 	// s	追加された図形
 	void MainPage::main_bbox_update(const Shape* s) noexcept
 	{
-		s->get_bound(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
+		s->get_bbox(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
 	// メインのページ図形の境界矩形を更新する.
 	void MainPage::main_bbox_update(void) noexcept
 	{
 		// リスト中の図形を囲む矩形を得る.
-		slist_bound_shape(m_main_page.m_shape_list, m_main_bbox_lt, m_main_bbox_rb);
+		slist_bbox_shape(m_main_page.m_shape_list, m_main_bbox_lt, m_main_bbox_rb);
 
 		// 矩形の右下点がページの右下点より小さいなら, ページの右下点を格納する.
 		const auto rb_x = m_main_page.m_page_size.width - m_main_page.m_page_margin.left;

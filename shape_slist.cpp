@@ -67,43 +67,11 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.rbegin(), slist.rend(), _);
 	}
 
-	// リスト中の図形とページを囲む領域を得る.
-	// slist	図形リスト
-	// p_size	ページの大きさ
-	// b_lt	領域の左上位置
-	// b_rb	領域の右下位置
-	/*
-	void slist_bound_page(SHAPE_LIST const& slist, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
-	{
-		slist_bound_shape(slist, b_lt, b_rb);
-		if (b_lt.x > 0.0f) {
-			b_lt.x = 0.0f;
-		}
-		if (b_lt.y > 0.0f) {
-			b_lt.y = 0.0f;
-		}
-		if (b_rb.x < p_size.width) {
-			b_rb.x = p_size.width;
-		}
-		if (b_rb.y < p_size.height) {
-			b_rb.y = p_size.height;
-		}
-		//b_lt = { 0.0f, 0.0f };
-		//b_rb = { p_size.width, p_size.height };
-		//for (const Shape* s : slist) {
-		//	if (s->is_deleted()) {
-		//		continue;
-		//	}
-		//	s->get_bound(b_lt, b_rb, b_lt, b_rb);
-		//}
-	}
-		*/
-
-	// リスト中の図形を囲む領域を得る.
+	// リスト中の図形の境界矩形を得る.
 	// slist	図形リスト
 	// b_lt	領域の左上点
 	// b_rb	領域の右下点
-	void slist_bound_shape(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
+	void slist_bbox_shape(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
 		b_lt = { FLT_MAX, FLT_MAX };	// 左上点
 		b_rb = { -FLT_MAX, -FLT_MAX };	// 右下点
@@ -111,16 +79,16 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_lt, b_rb, b_lt, b_rb);
+			s->get_bbox(b_lt, b_rb, b_lt, b_rb);
 		}
 	}
 
-	// リスト中の選択された図形を囲む領域を得る.
+	// リスト中の選択された図形の境界矩形を得る.
 	// slist	図形リスト
 	// b_lt	領域の左上点
 	// b_rb	領域の右下点
 	// 戻り値	選択された図形があったなら true.
-	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
+	bool slist_bbox_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
 		bool flag = false;
 		b_lt = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上点
@@ -129,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			s->get_bound(b_lt, b_rb, b_lt, b_rb);
+			s->get_bbox(b_lt, b_rb, b_lt, b_rb);
 			flag = true;
 		}
 		return flag;

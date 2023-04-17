@@ -319,9 +319,18 @@ namespace winrt::GraphPaper::implementation
 	// s_limit	尖り制限
 	// f_opa	塗りつぶしが不透明か判定
 	static uint32_t poly_hit_test(
-		const D2D1_POINT_2F t, const size_t p_cnt, const D2D1_POINT_2F p[], const bool s_opaque,
-		const double s_width, const bool e_closed, const CAP_STYLE& s_cap,
-		const D2D1_LINE_JOIN s_join, const double s_limit, const bool f_opaque, const double a_len)
+		const D2D1_POINT_2F t,	// 判定される点 (線分の始点を原点とする)
+		const size_t p_cnt,	// 始点を除く位置ベクトルの数
+		const D2D1_POINT_2F p[],	// 始点を除く位置ベクトルの配列
+		const bool s_opaque,	// 線が不透明か判定
+		const double s_width,	// 線の太さ
+		const bool e_closed,	// 線が閉じているか判定
+		const D2D1_CAP_STYLE& s_cap,	// 線の端の形式
+		const D2D1_LINE_JOIN s_join,	// 線の結合の形式
+		const double s_limit,	// 尖り制限
+		const bool f_opaque,	// 塗りつぶしが不透明か判定
+		const double a_len
+	)
 	{
 		D2D1_POINT_2F q[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点 (始点 { 0,0 } を含めた)
 		double s_len[N_GON_MAX];	// 辺の長さ
@@ -367,20 +376,20 @@ namespace winrt::GraphPaper::implementation
 				s_len[p_cnt] = sqrt(pt_abs2(q[p_cnt]));
 			}
 			// 閉じてないなら, 端の形式が円形か判定する.
-			else if (equal(s_cap, CAP_STYLE_ROUND)) {
+			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 				if (pt_in_circle(t.x, t.y, e_width) ||
 					pt_in_circle(t, q[p_cnt], e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
-			else if (equal(s_cap, CAP_STYLE_SQUARE)) {
+			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 				if (poly_test_cap_square(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
-			else if (equal(s_cap, CAP_STYLE_TRIANGLE)) {
+			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 				if (poly_test_cap_triangle(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
@@ -848,10 +857,10 @@ namespace winrt::GraphPaper::implementation
 	ShapePoly::ShapePoly(
 		const D2D1_POINT_2F start,	// 矩形の始点
 		const D2D1_POINT_2F pos,	// 矩形の終点への位置ベクトル
-		const Shape* page,	// 属性を格納したページ
+		const Shape* prop,	// 属性
 		const POLY_OPTION& p_opt	// 作成方法
 	) :
-		ShapePath::ShapePath(page, p_opt.m_end_closed),
+		ShapePath::ShapePath(prop, p_opt.m_end_closed),
 		m_end(p_opt.m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)
 	{
 		D2D1_POINT_2F p[N_GON_MAX];

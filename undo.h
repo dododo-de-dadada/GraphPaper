@@ -13,9 +13,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	//------------------------------
 	// 操作の識別子
 	//------------------------------
@@ -30,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 		ARROW_JOIN,	// 矢じるしの先端の形式の操作
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
-		DASH_CAP,	// 破線の端の形式の操作
+		//DASH_CAP,	// 破線の端の形式の操作
 		DASH_PAT,	// 破線の配置の操作
 		DASH_STYLE,	// 破線の形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作
@@ -87,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::ARROW_JOIN> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_T::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_T::ARROW_STYLE> { using type = ARROW_STYLE; };
-	template <> struct U_TYPE<UNDO_T::DASH_CAP> { using type = D2D1_CAP_STYLE; };
+	//template <> struct U_TYPE<UNDO_T::DASH_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::DASH_PAT> { using type = DASH_PAT; };
 	template <> struct U_TYPE<UNDO_T::DASH_STYLE> { using type = D2D1_DASH_STYLE; };
 	template <> struct U_TYPE<UNDO_T::FILL_COLOR> { using type = D2D1_COLOR_F; };
@@ -108,9 +105,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::PAGE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_PAD> { using type = D2D1_RECT_F; };
-	//template <> struct U_TYPE<UNDO_T::POLY_END> { using type = bool; };
 	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = D2D1_FIGURE_END; };
-	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = CAP_STYLE; };
+	//template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::STROKE_WIDTH> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
@@ -306,4 +303,15 @@ namespace winrt::GraphPaper::implementation
 			m_value = nullptr;
 		}
 	}
+
+	// 図形をグループに追加する.
+#define UndoAppendG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
+// 図形をリストに追加する.
+#define UndoAppend(s)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
+// 図形をリストに挿入する.
+#define UndoInsert(s, p)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(p))
+// 図形をグループから取り除く.
+#define UndoRemoveG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s))
+// 図形をリストから取り除く.
+#define UndoRemove(s)	UndoList(static_cast<Shape* const>(s))
 }

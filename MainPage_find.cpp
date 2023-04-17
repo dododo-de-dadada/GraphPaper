@@ -493,13 +493,13 @@ namespace winrt::GraphPaper::implementation
 		ck_fit_text_frame().IsChecked(m_fit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
-			ustack_push_set<UNDO_T::TEXT_CONTENT>(s, text);
+			undo_push_set<UNDO_T::TEXT_CONTENT>(s, text);
 			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			if (m_fit_text_frame) {
-				ustack_push_position(s, LOC_TYPE::LOC_SE);
+				undo_push_position(s, LOC_TYPE::LOC_SE);
 				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
-			ustack_push_null();
+			undo_push_null();
 			xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -605,12 +605,12 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				if (done2) {
-					ustack_push_set<UNDO_T::TEXT_CONTENT>(t, w_text);
+					undo_push_set<UNDO_T::TEXT_CONTENT>(t, w_text);
 				}
 			}
 		}
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
 	}
@@ -641,10 +641,10 @@ namespace winrt::GraphPaper::implementation
 				// ˆê’v‚µ‚½ê‡
 				const auto r_len = wchar_len(m_find_repl);
 				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				ustack_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
-				ustack_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
-				ustack_push_null();
-				ustack_menu_is_enabled();
+				undo_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
+				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				undo_push_null();
+				undo_menu_is_enabled();
 			}
 		}
 		// Ÿ‚ğŒŸõ‚·‚é.
@@ -654,9 +654,9 @@ namespace winrt::GraphPaper::implementation
 			// ŒŸõ‚Å‚«‚½‚È‚ç‚Î,
 			// •¶š”ÍˆÍ‚ª‘I‘ğ‚³‚ê‚½}Œ`‚ª‚ ‚è, ‚»‚ê‚ªŸ‚Ì}Œ`‚ÆˆÙ‚È‚é‚©”»’è‚·‚é.
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -709,9 +709,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			main_draw();
 		}

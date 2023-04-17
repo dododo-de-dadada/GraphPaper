@@ -407,11 +407,11 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// pos	対角点への位置ベクトル
 	// page	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeOblong::ShapeOblong(start, pos, page)
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* prop) :
+		ShapeOblong::ShapeOblong(start, pos, prop)
 	{
 		float g_base;
-		page->get_grid_base(g_base);
+		prop->get_grid_base(g_base);
 		rrect_corner_radius(pos, D2D1_POINT_2F{ g_base + 1.0f, g_base + 1.0f }, m_corner_radius);
 	}
 

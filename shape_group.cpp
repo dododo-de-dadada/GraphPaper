@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				s->draw();
-				s->get_bound(b_lt, b_rb, b_lt, b_rb);
+				s->get_bbox(b_lt, b_rb, b_lt, b_rb);
 			}
 			ID2D1RenderTarget* const target = Shape::m_d2d_target;
 			ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -43,16 +43,13 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//------------------------------
-	// 図形を囲む領域を得る.
-	// a_lt	元の領域の左上位置.
-	// a_rb	元の領域の右下位置.
-	// b_lt	得られた領域の左上位置.
-	// b_rb	得られた領域の右下位置.
-	//------------------------------
-	void ShapeGroup::get_bound(
-		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
-		D2D1_POINT_2F& b_rb) const noexcept
+	// 境界矩形を得る.
+	void ShapeGroup::get_bbox(
+		const D2D1_POINT_2F a_lt,	// 元の矩形の左上位置.
+		const D2D1_POINT_2F a_rb,	// 元の矩形の右下位置.
+		D2D1_POINT_2F& b_lt,	// 得られた矩形の左上位置.
+		D2D1_POINT_2F& b_rb	// 得られた矩形の右下位置.
+	) const noexcept
 	{
 		b_lt = a_lt;
 		b_rb = a_rb;
@@ -60,15 +57,12 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_lt, b_rb, b_lt, b_rb);
+			s->get_bbox(b_lt, b_rb, b_lt, b_rb);
 		}
 	}
 
-	//------------------------------
-	// 図形を囲む矩形の左上点を得る.
-	// val	左上点
-	//------------------------------
-	void ShapeGroup::get_bound_lt(D2D1_POINT_2F& val) const noexcept
+	// 境界矩形の左上点を得る.
+	void ShapeGroup::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		get_pos_start(val);
 	}
@@ -86,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			D2D1_POINT_2F lt;
-			s->get_bound_lt(lt);
+			s->get_bbox_lt(lt);
 			if (!flag) {
 				val = lt;
 				flag = true;

@@ -35,11 +35,11 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-			ustack_push_image(s);
+			undo_push_image(s);
 			static_cast<ShapeImage*>(s)->revert();
 		}
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		//xcvd_menu_is_enabled();
 		main_panel_size();
 		main_draw();
@@ -145,9 +145,9 @@ namespace winrt::GraphPaper::implementation
 					m_color_code = COLOR_CODE::PCT;
 				}
 				color_code_is_checked(m_color_code);
-				if (ustack_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}

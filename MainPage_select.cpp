@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 			if (!done) {
 				done = true;
 			}
-			ustack_push_select(s);
+			undo_push_select(s);
 		}
 		if (!done) {
 			return;
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (s->is_inside(lt, rb)) {
 				if (!s->is_selected()) {
-					ustack_push_select(s);
+					undo_push_select(s);
 					// 一覧が表示されてるか判定する.
 					if (summary_is_visible()) {
 						summary_select(s);
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			else if (s->is_selected()) {
-				ustack_push_select(s);
+				undo_push_select(s);
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_unselect(s);
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed =
 			m_event_shape_prev = s;
 			unselect_all();
-			ustack_push_select(s);
+			undo_push_select(s);
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_select(s);
@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 					[[fallthrough]];
 			case END:
 					if (s->is_selected()) {
-						ustack_push_select(s);
+						undo_push_select(s);
 						// 一覧が表示されてるか判定する.
 						if (summary_is_visible()) {
 							summary_unselect(s);
@@ -210,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 				[[fallthrough]];
 			case NEXT:
 				if (!s->is_selected()) {
-					ustack_push_select(s);
+					undo_push_select(s);
 					// 一覧が表示されてるか判定する.
 					if (summary_is_visible()) {
 						summary_select(s);
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// コントロールキーが押されているか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
-			ustack_push_select(s);
+			undo_push_select(s);
 			xcvd_menu_is_enabled();
 			main_draw();
 			// 一覧が表示されてるか判定する.
@@ -267,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形が選択されてるか判定する.
 			if (!s->is_selected()) {
 				unselect_all();
-				ustack_push_select(s);
+				undo_push_select(s);
 				xcvd_menu_is_enabled();
 				main_draw();
 				// 一覧が表示されてるか判定する.
@@ -294,7 +294,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || !s->is_inside(lt, rb)) {
 				continue;
 			}
-			ustack_push_select(s);
+			undo_push_select(s);
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				if (!s->is_selected()) {
@@ -323,7 +323,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 文字範囲だけ解除でない, かつ図形が選択されているか判定する.
 			if (!t_range_only && s->is_selected()) {
-				ustack_push_select(s);
+				undo_push_select(s);
 				if (!done) {
 					done = true;
 				}
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			ustack_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			if (!done) {
 				done = true;
 			}

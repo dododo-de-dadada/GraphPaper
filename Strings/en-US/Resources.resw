@@ -705,6 +705,14 @@
     <value>Barb Width</value>
     <comment>String</comment>
   </data>
+  <data name="str_arrow_join" xml:space="preserve">
+    <value>Tip Style</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arrow_cap" xml:space="preserve">
+    <value>Barb Style</value>
+    <comment>String</comment>
+  </data>
   <data name="str_color_b" xml:space="preserve">
     <value>B</value>
     <comment>String</comment>
@@ -1119,7 +1127,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_menu_snap_point.Text" xml:space="preserve">
-    <value>Snap Point to Point Interval...</value>
+    <value>Limit Distance to Snap Point...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_menu_cap_style_flat.Text" xml:space="preserve">
@@ -1139,7 +1147,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="str_snap_point" xml:space="preserve">
-    <value>Snap Point to Point Interval</value>
+    <value>Limit Distance to Snap Point to Other</value>
     <comment>String</comment>
   </data>
   <data name="str_must_0_to_32768" xml:space="preserve">

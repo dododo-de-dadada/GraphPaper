@@ -36,13 +36,13 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(s);
 					summary_append(s);
 				}
-				ustack_push_remove(s);
-				ustack_push_insert(s, nullptr);
+				undo_push_remove(s);
+				undo_push_insert(s, nullptr);
 			}
 		}
 		slist.clear();
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
@@ -98,8 +98,8 @@ namespace winrt::GraphPaper::implementation
 				if (it_src == it_end) {
 					// ŒğŠ·Ï‚İ‚©”»’è‚·‚é
 					if (done) {
-						ustack_push_null();
-						ustack_menu_is_enabled();
+						undo_push_null();
+						undo_menu_is_enabled();
 						xcvd_menu_is_enabled();
 						main_draw();
 					}
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_order(s, t);
 			}
-			ustack_push_order(s, t);
+			undo_push_order(s, t);
 			// ŒğŠ·Ï‚İ‚É‚·‚é.
 			done = true;
 		}
@@ -149,13 +149,13 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(t);
 					summary_insert_at(t, i++);
 				}
-				ustack_push_remove(t);
-				ustack_push_insert(t, s);
+				undo_push_remove(t);
+				undo_push_insert(t, s);
 			}
 		}
 		slist.clear();
-		ustack_push_null();
-		ustack_menu_is_enabled();
+		undo_push_null();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();

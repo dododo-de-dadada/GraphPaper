@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(Shape* s, const D2D1_LINE_JOIN& val);
 	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(Shape* s, const ARROW_SIZE& val);
 	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(Shape* s, const ARROW_STYLE& val);
-	template UndoValue<UNDO_T::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
+	//template UndoValue<UNDO_T::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
 	template UndoValue<UNDO_T::DASH_PAT>::UndoValue(Shape* s, const DASH_PAT& val);
 	template UndoValue<UNDO_T::DASH_STYLE>::UndoValue(Shape* s, const D2D1_DASH_STYLE& val);
 	template UndoValue<UNDO_T::FILL_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
@@ -225,9 +225,9 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_T::PAGE_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
-	//template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const D2D1_FIGURE_END& val);
-	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
+	//template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
+	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::TEXT_ALIGN_P>::UndoValue(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& val);
@@ -302,15 +302,16 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::ARROW_CAP ||
 			U == UNDO_T::ARROW_JOIN ||
 			U == UNDO_T::ARROW_STYLE ||
-			U == UNDO_T::DASH_CAP ||
+			//U == UNDO_T::DASH_CAP ||
 			U == UNDO_T::DASH_STYLE ||
 			U == UNDO_T::FONT_STRETCH ||
 			U == UNDO_T::FONT_STYLE ||
 			U == UNDO_T::FONT_WEIGHT ||
-			U == UNDO_T::JOIN_STYLE ||
 			U == UNDO_T::GRID_SHOW ||
-			U == UNDO_T::TEXT_ALIGN_P ||
+			U == UNDO_T::JOIN_STYLE ||
 			U == UNDO_T::POLY_END ||
+			U == UNDO_T::STROKE_CAP ||
+			U == UNDO_T::TEXT_ALIGN_P ||
 			U == UNDO_T::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
@@ -327,14 +328,14 @@ namespace winrt::GraphPaper::implementation
 				dt_reader.ReadUInt32()
 			};
 		}
-		else if constexpr (
-			U == UNDO_T::STROKE_CAP
-			) {
-			m_value = U_TYPE<U>::type{
-				static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
-				static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
-			};
-		}
+		//else if constexpr (
+		//	U == UNDO_T::STROKE_CAP
+		//	) {
+		//	m_value = U_TYPE<U>::type{
+		//		static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
+		//		static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
+		//	};
+		//}
 		else if constexpr (
 			U == UNDO_T::FONT_FAMILY ||
 			U == UNDO_T::TEXT_CONTENT) {
@@ -359,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_T::DASH_CAP>::UndoValue(DataReader const& dt_reader);
+	//template UndoValue<UNDO_T::DASH_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::DASH_PAT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::DASH_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::FILL_COLOR>::UndoValue(DataReader const& dt_reader);
@@ -437,10 +438,10 @@ namespace winrt::GraphPaper::implementation
 		s->set_arrow_style(val);
 	}
 
-	void UndoValue<UNDO_T::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
-	{
-		s->set_dash_cap(val);
-	}
+	//void UndoValue<UNDO_T::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
+	//{
+	//	s->set_dash_cap(val);
+	//}
 
 	void UndoValue<UNDO_T::DASH_PAT>::SET(Shape* const s, const DASH_PAT& val)
 	{
@@ -552,7 +553,8 @@ namespace winrt::GraphPaper::implementation
 		s->set_poly_end(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
+	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
+	//void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
 	{
 		s->set_stroke_cap(val);
 	}
@@ -622,10 +624,10 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arrow_style(val);
 	}
 
-	bool UndoValue<UNDO_T::DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
-	{
-		return s->get_dash_cap(val);
-	}
+	//bool UndoValue<UNDO_T::DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
+	//{
+	//	return s->get_dash_cap(val);
+	//}
 
 	bool UndoValue<UNDO_T::DASH_PAT>::GET(const Shape* s, DASH_PAT& val) noexcept
 	{
@@ -754,7 +756,8 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arc_start(val);
 	}
 
-	bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
+	//bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
 	{
 		return s->get_stroke_cap(val);
 	}
@@ -821,17 +824,17 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::ARROW_CAP ||
 			U == UNDO_T::ARROW_JOIN ||
 			U == UNDO_T::ARROW_STYLE ||
-			U == UNDO_T::DASH_CAP ||
+			//U == UNDO_T::DASH_CAP ||
 			U == UNDO_T::DASH_STYLE ||
 			U == UNDO_T::FONT_STRETCH ||
 			U == UNDO_T::FONT_STYLE ||
 			U == UNDO_T::FONT_WEIGHT ||
 			U == UNDO_T::GRID_SHOW ||
 			U == UNDO_T::JOIN_STYLE ||
+			U == UNDO_T::POLY_END ||
+			U == UNDO_T::STROKE_CAP ||
 			U == UNDO_T::TEXT_ALIGN_P ||
-			U == UNDO_T::TEXT_ALIGN_T ||
-			U == UNDO_T::POLY_END
-			) {
+			U == UNDO_T::TEXT_ALIGN_T) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
 		else if constexpr (
@@ -880,11 +883,11 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(m_value.m_gauge_1);
 			dt_writer.WriteUInt32(m_value.m_gauge_2);
 		}
-		else if constexpr (
-			U == UNDO_T::STROKE_CAP) {
-			dt_writer.WriteUInt32(m_value.m_start);
-			dt_writer.WriteUInt32(m_value.m_end);
-		}
+		//else if constexpr (
+		//	U == UNDO_T::STROKE_CAP) {
+		//	dt_writer.WriteUInt32(m_value.m_start);
+		//	dt_writer.WriteUInt32(m_value.m_end);
+		//}
 		else if constexpr (
 			U == UNDO_T::TEXT_RANGE) {
 			dt_writer.WriteUInt32(m_value.startPosition);

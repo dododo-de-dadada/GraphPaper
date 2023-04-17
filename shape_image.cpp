@@ -277,8 +277,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域を得る.
-	void ShapeImage::get_bound(
+	// 境界矩形を得る.
+	void ShapeImage::get_bbox(
 		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
 		D2D1_POINT_2F& b_rb) const noexcept
 	{
@@ -376,8 +376,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域の左上位置を得る.
-	void ShapeImage::get_bound_lt(D2D1_POINT_2F& val) const noexcept
+	// 境界矩形の左上位置を得る.
+	void ShapeImage::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const float ax = m_start.x;
 		const float ay = m_start.y;

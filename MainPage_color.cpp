@@ -64,27 +64,27 @@ namespace winrt::GraphPaper::implementation
 	static bool color_ustack_set(MainPage& that, const D2D1_COLOR_F& c)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
-			return that.ustack_push_set<UNDO_T::FILL_COLOR>(c);
+			return that.undo_push_set<UNDO_T::FILL_COLOR>(c);
 		}
 		else if constexpr (U == UNDO_T::FONT_COLOR) {
-			return that.ustack_push_set<UNDO_T::FONT_COLOR>(c);
+			return that.undo_push_set<UNDO_T::FONT_COLOR>(c);
 		}
 		else if constexpr (U == UNDO_T::GRID_COLOR) {
 			if (!equal(that.m_main_page.m_grid_color, c)) {
-				that.ustack_push_set<UNDO_T::GRID_COLOR>(&that.m_main_page, c);
+				that.undo_push_set<UNDO_T::GRID_COLOR>(&that.m_main_page, c);
 				return true;
 			}
 			return false;
 		}
 		else if constexpr (U == UNDO_T::PAGE_COLOR) {
 			if (!equal(that.m_main_page.m_page_color, c)) {
-				that.ustack_push_set<UNDO_T::PAGE_COLOR>(&that.m_main_page, c);
+				that.undo_push_set<UNDO_T::PAGE_COLOR>(&that.m_main_page, c);
 				return true;
 			}
 			return false;
 		}
 		else if constexpr (U == UNDO_T::STROKE_COLOR) {
-			return that.ustack_push_set<UNDO_T::STROKE_COLOR>(c);
+			return that.undo_push_set<UNDO_T::STROKE_COLOR>(c);
 		}
 		else {
 			return false;
@@ -329,8 +329,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				color_code_is_checked(m_color_code);
 				if (color_ustack_set<U>(*this, new_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}

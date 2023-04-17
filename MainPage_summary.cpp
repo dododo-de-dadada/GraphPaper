@@ -398,7 +398,7 @@ namespace winrt::GraphPaper::implementation
 			e.RemovedItems().GetMany(i, item);
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && s->is_selected()) {
-				ustack_push_select(s);
+				undo_push_select(s);
 			}
 		}
 
@@ -409,7 +409,7 @@ namespace winrt::GraphPaper::implementation
 			e.AddedItems().GetMany(i, item);
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && !s->is_selected()) {
-				ustack_push_select(t = s);
+				undo_push_select(t = s);
 			}
 		}
 

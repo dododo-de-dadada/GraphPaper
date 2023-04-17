@@ -114,9 +114,9 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_stretch_ultra_expanded() || sender == rmfi_popup_font_stretch_ultra_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED;
 		}
-		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && ustack_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -199,9 +199,9 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_weight_extra_black() || sender == rmfi_popup_font_weight_extra_black()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK;
 		}
-		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && ustack_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -255,9 +255,9 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				wchar_t* samp_val;
 				m_prop_page.back()->get_font_family(samp_val);
-				if (ustack_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -320,9 +320,9 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
 				m_prop_page.back()->get_font_size(samp_val);
-				if (ustack_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -364,9 +364,9 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_style_oblique() || sender == rmfi_popup_font_style_oblique()) {
 			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE;
 		}
-		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && ustack_push_set<UNDO_T::FONT_STYLE>(f_style)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -376,9 +376,9 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -388,9 +388,9 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「字体「標準」が選択された.
 	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -400,9 +400,9 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::font_style_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
-			ustack_push_null();
-			ustack_menu_is_enabled();
+		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
+			undo_push_null();
+			undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -452,8 +452,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				DWRITE_FONT_WEIGHT new_val;
 				m_prop_page.back()->get_font_weight(new_val);
-				if (ustack_push_set<UNDO_T::FONT_WEIGHT>(new_val)) {
-					ustack_push_null();
+				if (undo_push_set<UNDO_T::FONT_WEIGHT>(new_val)) {
+					undo_push_null();
 					xcvd_menu_is_enabled();
 					main_draw();
 				}

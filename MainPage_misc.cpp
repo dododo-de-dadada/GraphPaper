@@ -39,8 +39,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F b_lt;
 		D2D1_POINT_2F b_rb;
 		D2D1_POINT_2F b_pos;
-		s->get_bound(
-			D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_lt, b_rb);
+		s->get_bbox(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_lt, b_rb);
 		pt_sub(b_rb, b_lt, b_pos);
 		s->move(
 			D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_pos.x) * 0.5),

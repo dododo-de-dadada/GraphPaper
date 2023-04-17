@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 			m_prop_d2d.Trim();
 		}
 
-		ustack_clear();
+		undo_clear();
 		slist_clear(m_main_page.m_shape_list);
 		slist_clear(m_prop_page.m_shape_list);
 #if defined(_DEBUG)
@@ -345,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
-		ustack_menu_is_enabled();
+		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
@@ -472,7 +472,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 操作スタックと図形リストを消去する.
-			ustack_clear();
+			undo_clear();
 			slist_clear(m_main_page.m_shape_list);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
@@ -556,7 +556,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 					// 再開なら,
 					if constexpr (RESUME) {
 						// スタックも読み込む.
-						ustack_read(dt_reader);
+						undo_read_stack(dt_reader);
 					}
 					hres = S_OK;
 				}
@@ -921,7 +921,7 @@ dt_writer.WriteBoolean(m_snap_grid);
 				// 消去された図形も含めて書き込む.
 				// 操作スタックも書き込む.
 				slist_write<!REDUCE>(m_main_page.m_shape_list, dt_writer);
-				ustack_write(dt_writer);
+				undo_write_stack(dt_writer);
 			}
 			else if constexpr (!SETTING_ONLY) {
 				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
@@ -963,7 +963,7 @@ dt_writer.WriteBoolean(m_snap_grid);
 				if (summary_is_visible()) {
 					summary_clear();
 				}
-				ustack_clear();
+				undo_clear();
 				slist_clear(m_main_page.m_shape_list);
 				slist_clear(m_prop_page.m_shape_list);
 #if defined(_DEBUG)
@@ -1012,7 +1012,7 @@ dt_writer.WriteBoolean(m_snap_grid);
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
-		ustack_clear();
+		undo_clear();
 		slist_clear(m_main_page.m_shape_list);
 
 #if defined(_DEBUG)

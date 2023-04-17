@@ -972,9 +972,10 @@ namespace winrt::GraphPaper::implementation
 		else if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			// 端点に含まれるか判定する.
 			// 時計回りに対してのみ判定しているので要注意.
-			auto c_style = m_stroke_cap.m_start;
+			//auto c_style = m_stroke_cap.m_start;
+			auto cap = m_stroke_cap;
 			const double ew = m_stroke_width * 0.5;	// 辺の半分の幅.
-			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				if (pt_in_circle(tx - sx, ty - sy, ew)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
@@ -994,7 +995,7 @@ namespace winrt::GraphPaper::implementation
 				const double ab = sqrt(a * a + b * b);
 				const double ox = ew * a / ab;
 				const double oy = ew * b / ab;
-				if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+				if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
 					const D2D1_POINT_2F quad[4]{
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
@@ -1005,7 +1006,7 @@ namespace winrt::GraphPaper::implementation
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
-				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+				else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 					const D2D1_POINT_2F quad[4]{
 						{ static_cast<FLOAT>(x0 + ox + oy), static_cast<FLOAT>(y0 - ox + oy) },
 						{ static_cast<FLOAT>(x0 - ox + oy), static_cast<FLOAT>(y0 - ox - oy) },
@@ -1016,7 +1017,7 @@ namespace winrt::GraphPaper::implementation
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
-				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+				else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 					const D2D1_POINT_2F tri[3]{
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 						{ static_cast<FLOAT>(x0 + oy), static_cast<FLOAT>(y0 - ox) },
@@ -1027,7 +1028,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				if (pt_in_circle(tx - ex, ty - ey, ew)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
@@ -1048,7 +1049,7 @@ namespace winrt::GraphPaper::implementation
 				const double ab = sqrt(a * a + b * b);
 				const double ox = ew * a / ab;
 				const double oy = ew * b / ab;
-				if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+				if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
 					const D2D1_POINT_2F quad[4]{
 						{ static_cast<FLOAT>(x0 + ox + oy), static_cast<FLOAT>(y0 - ox + oy) },
 						{ static_cast<FLOAT>(x0 - ox + oy), static_cast<FLOAT>(y0 - ox - oy) },
@@ -1059,7 +1060,7 @@ namespace winrt::GraphPaper::implementation
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
-				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+				else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 					const D2D1_POINT_2F quad[4]{
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
@@ -1070,7 +1071,7 @@ namespace winrt::GraphPaper::implementation
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
-				else if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+				else if (cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 					const D2D1_POINT_2F tri[3]{
 						{ static_cast<FLOAT>(x0 + ox), static_cast<FLOAT>(y0 + oy) },
 						{ static_cast<FLOAT>(x0 - ox), static_cast<FLOAT>(y0 - oy) },
@@ -1308,8 +1309,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	ShapeArc::ShapeArc(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) : 
-		ShapePath(page, false),
+		const D2D1_POINT_2F start,
+		const D2D1_POINT_2F pos,
+		const Shape* prop
+	) : 
+		ShapePath(prop, false),
 		m_radius(D2D1_SIZE_F{ fabs(pos.x), fabs(pos.y) }),
 		m_angle_rot(0.0f),
 		m_angle_start(0.0f),
@@ -1319,11 +1323,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_start = start;	// 始点
 		m_pos.push_back(pos);	// 終点
-		if (typeid(*page) == typeid(ShapeArc)) {
-			const float angle_start = static_cast<const ShapeArc*>(page)->m_angle_start;
-			const float angle_end = static_cast<const ShapeArc*>(page)->m_angle_end;
-			const float angle_rot = static_cast<const ShapeArc*>(page)->m_angle_rot;
-			const D2D1_SWEEP_DIRECTION dir = static_cast<const ShapeArc*>(page)->m_sweep_dir;
+		if (typeid(*prop) == typeid(ShapeArc)) {
+			const float angle_start = static_cast<const ShapeArc*>(prop)->m_angle_start;
+			const float angle_end = static_cast<const ShapeArc*>(prop)->m_angle_end;
+			const float angle_rot = static_cast<const ShapeArc*>(prop)->m_angle_rot;
+			const D2D1_SWEEP_DIRECTION dir = static_cast<const ShapeArc*>(prop)->m_sweep_dir;
 			set_arc_start(angle_start);
 			set_arc_end(angle_end);
 			set_arc_rot(angle_rot);

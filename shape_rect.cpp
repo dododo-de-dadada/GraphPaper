@@ -300,12 +300,12 @@ namespace winrt::GraphPaper::implementation
 		return LOC_TYPE::LOC_PAGE;
 	}
 
-	// 図形を囲む領域を得る.
+	// 境界矩形を得る.
 	// a_lt	元の領域の左上位置.
 	// a_rb	元の領域の右下位置.
 	// b_lt	囲む領域の左上位置.
 	// b_rb	囲む領域の右下位置.
-	void ShapeOblong::get_bound(
+	void ShapeOblong::get_bbox(
 		const D2D1_POINT_2F a_lt,
 		const D2D1_POINT_2F a_rb,
 		D2D1_POINT_2F& b_lt,
@@ -392,9 +392,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む矩形の左上点を得る.
-	// val	左上点
-	void ShapeOblong::get_bound_lt(D2D1_POINT_2F& val) const noexcept
+	// 境界矩形の左上点を得る.
+	void ShapeOblong::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		val.x = (0.0f <= m_pos.x ? m_start.x : m_start.x + m_pos.x);
 		val.y = (0.0f <= m_pos.y ? m_start.y : m_start.y + m_pos.y);
@@ -583,12 +582,12 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// pos	対角点への位置ベクトル
 	// page	属性
-	ShapeOblong::ShapeOblong(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
-		ShapeStroke(page),
+	ShapeOblong::ShapeOblong(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* prop) :
+		ShapeStroke(prop),
 		m_start(start),
 		m_pos(pos)
 	{
-		page->get_fill_color(m_fill_color);
+		prop->get_fill_color(m_fill_color);
 	}
 
 	// 図形をデータリーダーから読み込む.

@@ -25,6 +25,8 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring str_arrow_width{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": " };	// 返しの幅
 		const winrt::hstring str_arrow_length{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": " };	// 矢じりの長さ
 		const winrt::hstring str_arrow_offset{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": " };	// 先端の位置
+		const winrt::hstring str_arrow_cap{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_cap") + L": " };	// 返しの形式
+		const winrt::hstring str_arrow_join{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_join") + L": " };	// 先端の形式
 		const winrt::hstring str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_arrow_size") };	// ダイアログ表題
 
 		m_mutex_event.lock();
@@ -86,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			dialog_radio_btns().SelectedIndex(1);
 		}
 
-		dialog_combo_box_0().Header(box_value(mfsi_menu_cap_style().Text()));
+		dialog_combo_box_0().Header(box_value(str_arrow_cap));
 		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_flat().Text()));
 		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_square().Text()));
 		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_cap_style_round().Text()));
@@ -105,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dialog_combo_box_0().Visibility(Visibility::Visible);
 
-		dialog_combo_box_1().Header(box_value(mfsi_menu_join_style().Text()));
+		dialog_combo_box_1().Header(box_value(str_arrow_join));
 		dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_miter_or_bevel().Text()));
 		if (rmfi_menu_join_style_miter().Visibility() == Visibility::Visible) {
 			dialog_combo_box_1().Items().Append(box_value(rmfi_menu_join_style_miter().Text()));
@@ -251,12 +253,12 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 					else if (index == 2) {
-						if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
+						if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL)) {
 							dialog_draw();
 						}
 					}
 					//else if (dialog_combo_box_1().SelectedIndex() == 2) {
-					//	if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL)) {
+					//	if (m_prop_page.back()->set_arrow_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER)) {
 					//		dialog_draw();
 					//	}
 					//}
@@ -272,13 +274,13 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_arrow_cap(new_cap);
 				m_prop_page.back()->get_arrow_join(new_join);
 				arrow_style_is_checked(new_style);
-				const bool flag_size = ustack_push_set<UNDO_T::ARROW_SIZE>(new_size);
-				const bool flag_style = ustack_push_set<UNDO_T::ARROW_STYLE>(new_style);
-				const bool flag_cap = ustack_push_set<UNDO_T::ARROW_CAP>(new_cap);
-				const bool flag_join = ustack_push_set<UNDO_T::ARROW_JOIN>(new_join);
+				const bool flag_size = undo_push_set<UNDO_T::ARROW_SIZE>(new_size);
+				const bool flag_style = undo_push_set<UNDO_T::ARROW_STYLE>(new_style);
+				const bool flag_cap = undo_push_set<UNDO_T::ARROW_CAP>(new_cap);
+				const bool flag_join = undo_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
-					ustack_push_null();
-					ustack_menu_is_enabled();
+					undo_push_null();
+					undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -326,9 +328,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
 			arrow_style_is_checked(a_style);
-			if (ustack_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-				ustack_push_null();
-				ustack_menu_is_enabled();
+			if (undo_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
+				undo_push_null();
+				undo_menu_is_enabled();
 				main_draw();
 			}
 		}

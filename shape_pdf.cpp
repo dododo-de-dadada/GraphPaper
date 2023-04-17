@@ -255,8 +255,8 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat,
-			m_join_style, m_join_miter_limit, dt_writer);
+			m_stroke_width, m_stroke_color, m_stroke_cap, //m_stroke_cap.m_start,
+			m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 		const double sx = m_start.x;
 		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
 		const double b1x = b_seg.point1.x;
@@ -293,16 +293,14 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Line\n");
 
-		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat,
-			m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
-		wchar_t buf[1024];
 		const double sx = m_start.x;
 		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
-		const double ex = static_cast<double>(m_start.x) + static_cast<double>(m_pos[0].x);
-		const double ey = -(static_cast<double>(m_start.y) + static_cast<double>(m_pos[0].y)) + static_cast<double>(page_size.height);
-		swprintf_s(buf, 
+		const double ex = static_cast<double>(m_start.x) + static_cast<double>(m_pos.x);
+		const double ey = -(static_cast<double>(m_start.y) + static_cast<double>(m_pos.y)) + static_cast<double>(page_size.height);
+		wchar_t buf[1024];
+		swprintf_s(buf,
 			L"%f %f m %f %f l S\n",
 			sx, sy, ex, ey
 		);
@@ -310,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barbs[3];
-			if (line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barbs, barbs[2])) {
+			if (line_get_pos_arrow(m_start, m_pos, m_arrow_size, barbs, barbs[2])) {
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, m_arrow_cap, m_arrow_join, m_arrow_join_limit, page_size, barbs, barbs[2], dt_writer);
 			}
 		}
@@ -338,9 +336,7 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;
 		len += dt_writer.WriteString(
 			L"% Polyline\n");
-		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat,
-			m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -394,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;
 		len += dt_writer.WriteString(L"% Ellipse\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -455,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Rectangle\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -498,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const double ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
@@ -1246,7 +1242,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap.m_start, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
 			// S = パスをストロークで描画
 			// パスは開いたまま.
 			wchar_t buf[1024];

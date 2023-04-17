@@ -39,7 +39,7 @@
 // MainPage_summary.cpp	図形の一覧
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
-// MainPage_ustack.cpp	元に戻すとやり直し操作
+// MainPage_undo.cpp	元に戻すとやり直し操作
 // MainPage_xcvd.cpp	切り取り (x) とコピー (c), 貼り付け (v), 削除 (d)
 //------------------------------
 #include <ppltasks.h>
@@ -524,20 +524,14 @@ namespace winrt::GraphPaper::implementation
 		//　書体
 		//-------------------------------
 
-		// 書体メニューの「字体」に印をつける.
-		void font_style_is_checked(const DWRITE_FONT_STYLE f_style);
 		// 書体メニューの「書体の色」が選択された.
 		void font_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::FONT_COLOR>(); }
 		// 書体メニューの「書体名」が選択された.
 		IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「字体」のサブ項目が選択された.
 		void font_style_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「字体」>「イタリック体」が選択された.
-		//void font_style_italic_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「字体」>「標準」が選択された.
-		//void font_style_normal_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「字体」>「斜体」が選択された.
-		//void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「字体」のサブ項目に印をつける
+		void font_style_is_checked(const DWRITE_FONT_STYLE f_style);
 		// 書体メニューの「書体の大きさ」が選択された.
 		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体の幅」が選択された.
@@ -546,7 +540,7 @@ namespace winrt::GraphPaper::implementation
 		//IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体の幅」のサブ項目が選択された.
 		void font_stretch_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「書体の幅」のサブ項目が選択された.
+		// 書体メニューの「書体の幅」のサブ項目に印をつける
 		void font_stretch_is_checked(const DWRITE_FONT_STRETCH val);
 		// 書体メニューの「書体の太さ」のサブ項目が選択された.
 		void font_weight_click(IInspectable const&, RoutedEventArgs const&);
@@ -616,9 +610,9 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//-----------------------------
 
-		// 画像メニューの「画像の縦横比を保つ」が選択された.
+		// 画像メニューの「画像の縦横比を維持」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「画像の縦横比を保つ」に印をつける.
+		// 画像メニューの「画像の縦横比を維持」に印をつける.
 		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「原画像に戻す」が選択された.
 		void image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept;
@@ -632,15 +626,15 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色の基数」に印をつける.
+		// その他メニューの「色の記法」に印をつける.
 		void color_code_is_checked(const COLOR_CODE c_code);
-		// その他メニューの「色の基数」のサブ項目が選択された.
+		// その他メニューの「色の記法」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「点を点にくっつける間隔...」が選択された.
+		// その他メニューの「点を点にくっつけるしきい値...」が選択された.
 		IAsyncAction snap_point_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// その他メニューの「点を方眼にくっつける」が選択された.
 		void snap_grid_click(IInspectable const&, RoutedEventArgs const&);
@@ -795,7 +789,8 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 属性メニューの「端の形式」に印をつける.
-		void cap_style_is_checked(const CAP_STYLE& s_cap);
+		void cap_style_is_checked(const D2D1_CAP_STYLE& s_cap);
+		//void cap_style_is_checked(const CAP_STYLE& s_cap);
 		// 属性メニューの「端の形式」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 属性メニューの「破線の形式」のサブ項目が選択された.
@@ -921,54 +916,54 @@ namespace winrt::GraphPaper::implementation
 		void drawing_poly_opt_is_checked(const POLY_OPTION& val);
 
 		//-----------------------------
-		// MainPage_ustack.cpp
+		// MainPage_undo.cpp
 		// 元に戻すとやり直し操作
 		//-----------------------------
 
 		// 元に戻す/やり直しメニューの可否を設定する.
-		void ustack_menu_is_enabled(void);
+		void undo_menu_is_enabled(void);
 		// 編集メニューの「やり直し」が選択された.
-		void ustack_redo_click(IInspectable const&, RoutedEventArgs const&);
+		void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
-		void ustack_undo_click(IInspectable const&, RoutedEventArgs const&);
+		void undo_click(IInspectable const&, RoutedEventArgs const&);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
-		void ustack_clear(void);
+		void undo_clear(void);
 		// 操作を実行する.
-		void ustack_exec(Undo* u);
-		// 無効な操作の組をポップする.
-		bool ustack_pop_if_invalid(void);
+		void undo_exec(Undo* u);
+		// 無効な操作をポップする.
+		bool undo_pop_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
-		void ustack_push_append(Shape* const s);
+		void undo_push_append(Shape* const s);
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void ustack_push_append(ShapeGroup* const g, Shape* const s);
+		void undo_push_append(ShapeGroup* const g, Shape* const s);
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void ustack_push_order(Shape* const s, Shape* const t);
+		void undo_push_order(Shape* const s, Shape* const t);
 		// 指定した部位の点をスタックに保存する.
-		void ustack_push_position(Shape* const s, const uint32_t loc);
+		void undo_push_position(Shape* const s, const uint32_t loc);
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-		void ustack_push_image(Shape* const s);
+		void undo_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.
-		void ustack_push_insert(Shape* const s, Shape* const s_pos);
+		void undo_push_insert(Shape* const s, Shape* const s_pos);
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
-		void ustack_push_move(const D2D1_POINT_2F pos, const bool any = false);
+		void undo_push_move(const D2D1_POINT_2F pos, const bool any = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		void ustack_push_null(void);
+		void undo_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.
-		void ustack_push_remove(Shape* const g, Shape* const s);
+		void undo_push_remove(Shape* const g, Shape* const s);
 		// 図形を取り去り, その操作をスタックに積む.
-		void ustack_push_remove(Shape* const s);
+		void undo_push_remove(Shape* const s);
 		// 図形の選択を反転して, その操作をスタックに積む.
-		void ustack_push_select(Shape* const s);
+		void undo_push_select(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_T U, typename T> void ustack_push_set(Shape* const s, T const& val);
+		template <UNDO_T U, typename T> void undo_push_set(Shape* const s, T const& val);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
-		template <UNDO_T U, typename T> bool ustack_push_set(T const& val);
+		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
 		// 図形の値をスタックに保存する.
-		template <UNDO_T U> void ustack_push_set(Shape* const s);
+		template <UNDO_T U> void undo_push_set(Shape* const s);
 		// データリーダーから操作スタックを読み込む.
-		void ustack_read(DataReader const& dt_reader);
+		void undo_read_stack(DataReader const& dt_reader);
 		// データリーダーに操作スタックを書き込む.
-		void ustack_write(DataWriter const& dt_writer);
+		void undo_write_stack(DataWriter const& dt_writer);
 
 		//-------------------------------
 		// MainPage_xcvd.cpp
