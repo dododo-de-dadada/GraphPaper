@@ -887,9 +887,9 @@ namespace winrt::GraphPaper::implementation
 
 	size_t ShapeRuler::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
 	{
+		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
 		// üE˜g‚Ì‘¾‚³‚©F‚ª‚È‚µ, ‚©‚Â“h‚è‚Â‚Ô‚µF‚à‚È‚µ‚È‚ç’†’f‚·‚é.
-		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) &&
-			!is_opaque(m_fill_color)) {
+		if (!exist_stroke && !is_opaque(m_fill_color)) {
 			return 0;
 		}
 
@@ -936,7 +936,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			len += dt_writer.WriteString(buf);
 		}
-		if (is_opaque(m_stroke_color)) {
+		if (exist_stroke) {
 
 			// ü˜g‚ÌF‚ª•s“§–¾‚Èê‡,
 			const double g_len = m_grid_base + 1.0;	// •ûŠá‚Ì‘å‚«‚³

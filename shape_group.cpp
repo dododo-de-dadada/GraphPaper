@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形を表示する.
 	//------------------------------
-	void ShapeGroup::draw(void)
+	void ShapeGroup::draw(void) noexcept
 	{
 		// 選択フラグが立ってるか判定する.
 		if (m_loc_show && is_selected()) {

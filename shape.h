@@ -402,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を描画する前に設定する.
 		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale);
 		// 図形を表示する.
-		virtual void draw(void) = 0;
+		virtual void draw(void) noexcept = 0;
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t export_pdf(const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
@@ -617,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_is_selected = false;	// 選択されたか判定
 
 		// 図形を表示する.
-		virtual void draw(void) = 0;
+		virtual void draw(void) noexcept = 0;
 		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept final override { return m_is_deleted; }
 		// 選択されてるか判定する.
@@ -694,7 +694,7 @@ namespace winrt::GraphPaper::implementation
 		template <bool CLIP>
 		IAsyncOperation<bool> copy(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
 		// 図形を表示する.
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 境界矩形を得る.
 		virtual void get_bbox(const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/, D2D1_POINT_2F& /*b_rb*/) const noexcept final override;
 		// 境界矩形の左上点を得る.
@@ -818,21 +818,21 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 曲線の補助線を表示する.
-		void auxiliary_draw_bezi(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_bezi(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// だ円の補助線を表示する.
-		void auxiliary_draw_elli(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_elli(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// 直線の補助線を表示する.
-		void auxiliary_draw_line(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_line(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// 方形の補助線を表示する.
-		void auxiliary_draw_rect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_rect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// 多角形の補助線を表示する.
-		void auxiliary_draw_poly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt);
+		void auxiliary_draw_poly(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt) noexcept;
 		// 角丸方形の補助線を表示する.
-		void auxiliary_draw_rrect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_rrect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// 四分円の補助線を表示する.
-		void auxiliary_draw_arc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void auxiliary_draw_arc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos) noexcept;
 		// 図形を表示する.
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 矢じるしの寸法を得る.
 		virtual bool get_arrow_size(ARROW_SIZE& val) const noexcept final override;
 		// 矢じるしの形式を得る.
@@ -1015,7 +1015,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を表示する.
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 境界矩形を得る.
 		virtual void get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept final override;
 		// 境界矩形の左上点を得る.
@@ -1083,9 +1083,9 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// D2D ストロークスタイルを作成する.
-		void create_stroke_style(ID2D1Factory* const factory);
+		HRESULT create_stroke_style(ID2D1Factory* const factory) noexcept;
 		// 図形を表示する.
-		virtual void draw(void) override = 0;
+		virtual void draw(void) noexcept override = 0;
 		// 端の形式を得る.
 		//bool get_stroke_cap(CAP_STYLE& val) const noexcept final override;
 		bool get_stroke_cap(D2D1_CAP_STYLE& val) const noexcept final override;
@@ -1147,9 +1147,9 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから図形を読み込む.
 		ShapeOblong(DataReader const& dt_reader);
 		// 部位を表示する.
-		void draw_loc(void);
+		void draw_loc(void) noexcept;
 		// 図形を表示する.
-		virtual void draw(void) override;
+		virtual void draw(void) noexcept override;
 		// 境界矩形を得る.
 		void get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept final override;
 		// 近傍の点を見つける.
@@ -1221,9 +1221,9 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 文字列レイアウトを作成する.
-		void create_text_format(void);
+		HRESULT create_text_format(void) noexcept;
 		// 図形を表示する.
-		void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 字面を得る (使用後は Release する).
@@ -1269,7 +1269,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を表示する.
-		void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
@@ -1290,7 +1290,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を表示する.
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept final override;
 		// 指定した部位の点を得る.
@@ -1327,14 +1327,12 @@ namespace winrt::GraphPaper::implementation
 		// 線の終端があるか判定する.
 		virtual bool exist_cap(void) const noexcept override { return true; }
 		// 矢じるしのストロークを作成する.
-		void create_arrow_stroke(void)
+		HRESULT create_arrow_stroke(void) noexcept
 		{
 			m_d2d_arrow_stroke = nullptr;
 			ID2D1Factory* factory = nullptr;
 			Shape::m_d2d_target->GetFactory(&factory);
-			if (factory == nullptr) {
-				return;
-			}
+
 			// 矢じるしはかならずｊとする.
 			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
 				m_arrow_cap,	// startCap
@@ -1345,12 +1343,10 @@ namespace winrt::GraphPaper::implementation
 				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 				0.0f	// dashOffset
 			};
-			winrt::check_hresult(
-				factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put())
-			);
+			return factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put());
 		}
 		// 図形を表示する.
-		virtual void draw(void) = 0;
+		virtual void draw(void) noexcept = 0;
 
 		virtual bool get_arrow_size(ARROW_SIZE& val) const noexcept final override
 		{
@@ -1510,7 +1506,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから図形を読み込む.
 		ShapeLine(DataReader const& dt_reader);
 		// 図形を表示する.
-		virtual void draw(void) override;
+		virtual void draw(void) noexcept override;
 		// 境界矩形を得る.
 		virtual void get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept override;
 		// 指定した部位の点を得る.
@@ -1559,7 +1555,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
 		// 図形を表示する.
-		virtual void draw(void) = 0;
+		virtual void draw(void) noexcept = 0;
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
 		// 値を, 指定した部位の点に格納する.
@@ -1635,7 +1631,7 @@ namespace winrt::GraphPaper::implementation
 		// 矩形をもとに多角形を作成する.
 		static void poly_create_by_box(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt, D2D1_POINT_2F p[]) noexcept;
 		// 図形を表示する
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 辺が閉じているかを得る.
 		virtual bool get_poly_end(D2D1_FIGURE_END& val) const noexcept final override
 		{
@@ -1688,7 +1684,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの返しと先端の点を得る
 		static bool bezi_get_pos_arrow(const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 図形が点を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 矩形に含まれるか判定する.
@@ -1774,7 +1770,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの返しと先端の位置を得る.
 		static bool arc_get_pos_arrow(const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad, const double deg_start, const double deg_end, const double deg_rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く
-		virtual void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
@@ -1851,11 +1847,11 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 文字列レイアウトを作成する.
-		void create_text_layout(void);
+		void create_text_layout(void) noexcept;
 		// 枠を文字列に合わせる.
 		bool fit_frame_to_text(const float g_len) noexcept;
 		// 図形を表示する.
-		void draw(void) final override;
+		virtual void draw(void) noexcept final override;
 		// 書体の色を得る.
 		bool get_font_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 字面を得る (使用後は Release する).
@@ -1893,7 +1889,7 @@ namespace winrt::GraphPaper::implementation
 		// 計量を破棄する.
 		void relese_metrics(void) noexcept;
 		// 有効な書体名の配列を設定する.
-		static void set_available_fonts(void);
+		static void set_available_fonts(void) noexcept;
 		// 値を書体の色に格納する.
 		bool set_font_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を書体名に格納する.

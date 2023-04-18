@@ -257,71 +257,70 @@ namespace winrt::GraphPaper::implementation
 		//for (int i = 0; i < utf32.size(); i++) {
 		//	cid[i] = cmap_getcid(utf32[i]);
 		//}
+		HRESULT hr = S_OK;
 
 		// UTF32 文字列からソートされた GID を得る.
 		gid.resize(utf32.size());
-		winrt::check_hresult(
-			face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid))
-		);
-		std::sort(std::begin(gid), std::end(gid));
+		if (hr == S_OK) {
+			hr = face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid));
+		}
+		if (hr == S_OK) {
+			std::sort(std::begin(gid), std::end(gid));
 
-		// GID 文字列から字形 (グリフ) の計量を得る.
-		g_met.resize(utf32.size());
-		winrt::check_hresult(
-			face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met))
-		);
-		//face->Release();
-
-		// 字面からポストスクリプト名を得る.
-		IDWriteLocalizedStrings* str = nullptr;
-		BOOL exists = false;
-		if (face->GetInformationalStrings(
-			DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
-			if (exists) {
-				const UINT32 str_cnt = str->GetCount();
-				for (uint32_t j = 0; j < str_cnt; j++) {
-					UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
-					if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
-						std::vector<wchar_t> wstr(static_cast<size_t>(wstr_len) + 1);
-						if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
-							p_name.clear();
-							p_name = std::data(wstr);
-							break;
-						}
-					}
-				}
-				str->Release();
-			}
-			// たとえば 'Windows Himaraya' のとき,
-			// ポストスクリプト名を要求したにもかかわらず空白の入った文字列を返す場合がある.
-			// ポストスクリプト名が存在しない, あるいは上記のような場合は,
-			// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
-			if (!exists || 
-				std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
-				const size_t k = wchar_len(family);
-				std::vector<wchar_t> wstr(k + 1);
-				int wstr_len = 0;
-				for (size_t i = 0; i < k; i++) {
-					if (!iswspace(family[i])) {
-						wstr[wstr_len++] = family[i];
-					}
-				}
-				wstr[wstr_len] = L'\0';
-				p_name.clear();
-				p_name = std::data(wstr);
-			}
+			// GID 文字列から字形 (グリフ) の計量を得る.
+			g_met.resize(utf32.size());
+			hr = face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
 		}
 
-		// 字面から傾きを得る.
-		// ただし, PDF は, 字面の変形はサポートしてないので, 字体そのものが
-		// イタリックでない限り, 斜体にはならない.
-		const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
-		std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
-		if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(
-			std::data(axis_val), axis_cnt) == S_OK) {
-			for (uint32_t i = 0; i < axis_cnt; i++) {
-				if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
-					angle = axis_val[i].value;
+		if (hr == S_OK) {
+			// 字面からポストスクリプト名を得る.
+			IDWriteLocalizedStrings* str = nullptr;
+			BOOL exists = false;
+			if (face->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
+				if (exists) {
+					const UINT32 str_cnt = str->GetCount();
+					for (uint32_t j = 0; j < str_cnt; j++) {
+						UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
+						if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
+							std::vector<wchar_t> wstr(static_cast<size_t>(wstr_len) + 1);
+							if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
+								p_name.clear();
+								p_name = std::data(wstr);
+								break;
+							}
+						}
+					}
+					str->Release();
+				}
+				// たとえば 'Windows Himaraya' のとき,
+				// ポストスクリプト名を要求したにもかかわらず空白の入った文字列を返す場合がある.
+				// ポストスクリプト名が存在しない, あるいは上記のような場合は,
+				// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
+				if (!exists || std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
+					const size_t k = wchar_len(family);
+					std::vector<wchar_t> wstr(k + 1);
+					int wstr_len = 0;
+					for (size_t i = 0; i < k; i++) {
+						if (!iswspace(family[i])) {
+							wstr[wstr_len++] = family[i];
+						}
+					}
+					wstr[wstr_len] = L'\0';
+					p_name.clear();
+					p_name = std::data(wstr);
+				}
+			}
+
+			// 字面から傾きを得る.
+			// ただし, PDF は, 字面の変形はサポートしてないので, 字体そのものが
+			// イタリックでない限り, 斜体にはならない.
+			const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
+			std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
+			if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
+				for (uint32_t i = 0; i < axis_cnt; i++) {
+					if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
+						angle = axis_val[i].value;
+					}
 				}
 			}
 		}
@@ -751,195 +750,204 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// 画像としてストレージファイルに非同期に書き込む.
+	// Direct2D コンテンツを画像ファイルに保存する方法
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(
 		const StorageFile& image_file	// 書き込み先の画像ファイル
 	) noexcept
 	{
-		HRESULT hres = E_FAIL;
+		HRESULT hr = S_OK;
 
-		// ファイルのコンテントの種類をもとに GUID の WIC フォーマットを得る.
-		const GUID& wic_fmt = [](const winrt::hstring& c_type)
+		// ファイルの MIME タイプをもとに WIC フォーマット の GUID を得る.
+		const winrt::hstring mime{ image_file.ContentType() };
+		const GUID& wic_fmt = [](const winrt::hstring& mime)
 		{
-			if (c_type == L"image/bmp") {
+			if (mime == L"image/bmp") {
 				return GUID_ContainerFormatBmp;
 			}
-			else if (c_type == L"image/gif") {
+			else if (mime == L"image/gif") {
 				return GUID_ContainerFormatGif;
 			}
-			else if (c_type == L"image/jpeg") {
+			else if (mime == L"image/jpeg") {
 				return GUID_ContainerFormatJpeg;
 			}
-			else if (c_type == L"image/png") {
+			else if (mime == L"image/png") {
 				return GUID_ContainerFormatPng;
 			}
-			else if (c_type == L"image/tiff") {
+			else if (mime == L"image/tiff") {
 				return GUID_ContainerFormatTiff;
 			}
 			return GUID_NULL;
-		}(image_file.ContentType());
+		}(mime);
 
-		// WIC フォーマットが空でなければ,
-		if (wic_fmt != GUID_NULL) {
+		// WIC フォーマットが空なら, E_FAIL.
+		if (wic_fmt == GUID_NULL) {
+			hr = E_FAIL;
+		}
 
-			// Direct2D コンテンツを画像ファイルに保存する方法
+		// ストレージファイルのランダムアクセスストリームを開く.
+		IRandomAccessStream image_stream{};
+		if (hr == S_OK) {
 			try {
-				// ファイルのランダムアクセスストリーム
-				IRandomAccessStream image_stream{
-					co_await image_file.OpenAsync(FileAccessMode::ReadWrite)
-				};
-
-				// WIC のランダムアクセスストリーム
-				winrt::com_ptr<IStream> wic_stream;
-				winrt::hresult(
-					CreateStreamOverRandomAccessStream(
-						winrt::get_unknown(image_stream),
-						__uuidof(IStream),
-						wic_stream.put_void()
-						//IID_PPV_ARGS(&wic_stream)
-					)
-				);
-
-				//winrt::com_ptr<IWICImagingFactory2> wic_factory;
-				//winrt::check_hresult(
-				//	CoCreateInstance(
-				//		CLSID_WICImagingFactory,
-				//		nullptr,
-				//		CLSCTX_INPROC_SERVER,
-				//		IID_PPV_ARGS(&wic_factory)
-				//	)
-				//);
-
-				// Create and initialize WIC Bitmap Encoder.
-				winrt::com_ptr<IWICBitmapEncoder> wic_enc;
-				winrt::check_hresult(
-					ShapeImage::wic_factory->CreateEncoder(wic_fmt, nullptr, wic_enc.put())
-				);
-				winrt::check_hresult(
-					wic_enc->Initialize(wic_stream.get(), WICBitmapEncoderNoCache)
-				);
-
-				// Create and initialize WIC Frame Encoder.
-				winrt::com_ptr<IWICBitmapFrameEncode> wic_frm;
-				winrt::check_hresult(
-					wic_enc->CreateNewFrame(wic_frm.put(), nullptr)
-				);
-				winrt::check_hresult(
-					wic_frm->Initialize(nullptr)
-				);
-
-				// デバイスの作成
-				/*
-				const UINT w = m_main_page.m_page_size.width;
-				const UINT h = m_main_page.m_page_size.height;
-				std::vector<uint8_t> mem(4 * w * h);
-				winrt::com_ptr<IWICBitmap> wic_bitmap;
-				ShapeImage::wic_factory->CreateBitmapFromMemory(
-					w, h,
-					GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, std::data(mem), wic_bitmap.put());
-				D2D1_RENDER_TARGET_PROPERTIES prop{
-					D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-					D2D1_PIXEL_FORMAT{
-						DXGI_FORMAT_B8G8R8A8_UNORM,
-						D2D1_ALPHA_MODE_STRAIGHT
-						},
-					96.0f,
-					96.0f,
-					D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
-					D2D1_FEATURE_LEVEL_DEFAULT
-				};
-				winrt::com_ptr<ID2D1RenderTarget> target;
-				Shape::s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-				*/
-
-				// デバイスとデバイスコンテキストの作成
-				D2D_UI d2d;
-
-				// ビットマップレンダーターゲットの作成
-				// サポートされているピクセル形式とアルファ モードの
-				// https://learn.microsoft.com/ja-jp/windows/win32/direct2d/supported-pixel-formats-and-alpha-modes#supported-formats-for-wic-bitmap-render-target
-				// ・WIC ビットマップ レンダー ターゲットでサポートされている形式
-				// ・ID2D1DCRenderTarget でサポートされる形式
-				// を参照.
-				const UINT32 page_w = static_cast<UINT32>(m_main_page.m_page_size.width);
-				const UINT32 page_h = static_cast<UINT32>(m_main_page.m_page_size.height);
-				winrt::com_ptr<ID2D1BitmapRenderTarget> target;
-				winrt::check_hresult(
-					d2d.m_d2d_context->CreateCompatibleRenderTarget(
-						m_main_page.m_page_size,
-						D2D_SIZE_U{ page_w, page_h },
-						D2D1_PIXEL_FORMAT{
-							DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
-//D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_STRAIGHT は使用できない
-							D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED
-						},
-						D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
-						target.put()
-					)
-				);
-
-				// ビットマップオブジェクトは, レンダーターゲット依存するため全て消去
-				for (const auto s : m_main_page.m_shape_list) {
-					if (typeid(*s) == typeid(ShapeImage)) {
-						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
-					}
-				}
-
-				// ビットマップへの描画
-				m_mutex_draw.lock();
-				m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
-				target->SaveDrawingState(Shape::m_state_block.get());
-				target->BeginDraw();
-				m_main_page.draw();
-				winrt::check_hresult(
-					target->EndDraw()
-				);
-				target->RestoreDrawingState(Shape::m_state_block.get());
-				m_mutex_draw.unlock();
-
-				// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
-				for (const auto s : m_main_page.m_shape_list) {
-					if (typeid(*s) == typeid(ShapeImage)) {
-						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
-					}
-				}
-
-				// Retrieve D2D Device.
-				winrt::com_ptr<ID2D1Device> dev;
-				d2d.m_d2d_context->GetDevice(dev.put());
-
-				// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
-				winrt::com_ptr<IWICImageEncoder> image_enc;
-				winrt::check_hresult(
-					ShapeImage::wic_factory->CreateImageEncoder(dev.get(), image_enc.put())
-				);
-				winrt::com_ptr<ID2D1Bitmap> d2d_image;
-				winrt::check_hresult(
-					target->GetBitmap(d2d_image.put())
-				);
-				winrt::check_hresult(
-					image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
-				);
-				winrt::check_hresult(
-					wic_frm->Commit()
-				);
-				winrt::check_hresult(
-					wic_enc->Commit()
-				);
-				// Flush all memory buffers to the next-level storage object.
-				winrt::check_hresult(
-					wic_stream->Commit(STGC_DEFAULT)
-				);
-
-				d2d.Trim();
-				hres = S_OK;
+				image_stream = co_await image_file.OpenAsync(FileAccessMode::ReadWrite);
 			}
 			catch (const winrt::hresult_error& e) {
-				hres = e.code();
+				hr = e.code();
 			}
 		}
-		co_return hres;
+
+		// 開いたストリームを元に, エンコーダーのランダムアクセスストリームを作成する.
+		winrt::com_ptr<IStream> wic_stream;
+		if (hr == S_OK) {
+			hr = CreateStreamOverRandomAccessStream(
+				winrt::get_unknown(image_stream),
+				//IID_PPV_ARGS(&wic_stream)
+				__uuidof(IStream),
+				wic_stream.put_void()
+			);
+		}
+
+		//winrt::com_ptr<IWICImagingFactory2> wic_factory;
+		//winrt::check_hresult(
+		//	CoCreateInstance(
+		//		CLSID_WICImagingFactory,
+		//		nullptr,
+		//		CLSCTX_INPROC_SERVER,
+		//		IID_PPV_ARGS(&wic_factory)
+		//	)
+		//);
+
+
+		// WIC ファクトリーで, WIC ビットマップエンコーダーを作成する.
+		winrt::com_ptr<IWICBitmapEncoder> wic_bmp_enc;
+		if (hr == S_OK) {
+			hr = ShapeImage::wic_factory->CreateEncoder(wic_fmt, nullptr, wic_bmp_enc.put());
+		}
+		// WIC ビットマップエンコーダー を初期化する.
+		if (hr == S_OK) {
+			hr = wic_bmp_enc->Initialize(wic_stream.get(), WICBitmapEncoderNoCache);
+		}
+		// WIC ビットマップエンコーダー で, WIC フレームエンコーダーを作成する.
+		winrt::com_ptr<IWICBitmapFrameEncode> wic_frm_enc;
+		if (hr == S_OK) {
+			hr = wic_bmp_enc->CreateNewFrame(wic_frm_enc.put(), nullptr);
+		}
+		// 作成された WIC フレームエンコーダーを初期化する.
+		if (hr == S_OK) {
+			hr = wic_frm_enc->Initialize(nullptr);
+		}
+
+		// デバイスの作成
+		/*
+		const UINT w = m_main_page.m_page_size.width;
+		const UINT h = m_main_page.m_page_size.height;
+		std::vector<uint8_t> mem(4 * w * h);
+		winrt::com_ptr<IWICBitmap> wic_bitmap;
+		ShapeImage::wic_factory->CreateBitmapFromMemory(
+			w, h,
+			GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, std::data(mem), wic_bitmap.put());
+		D2D1_RENDER_TARGET_PROPERTIES prop{
+			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+			D2D1_PIXEL_FORMAT{
+				DXGI_FORMAT_B8G8R8A8_UNORM,
+				D2D1_ALPHA_MODE_STRAIGHT
+				},
+			96.0f,
+			96.0f,
+			D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
+			D2D1_FEATURE_LEVEL_DEFAULT
+		};
+		winrt::com_ptr<ID2D1RenderTarget> target;
+		Shape::s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+		*/
+
+		// オフスクリーンの D2D を作成する.
+		D2D_UI offscreen;
+
+		// D2D デバイスコンテキストに対応する D2D ビットマップレンダーターゲットの作成する.
+		// サポートされているピクセル形式とアルファ モードの
+		// https://learn.microsoft.com/ja-jp/windows/win32/direct2d/supported-pixel-formats-and-alpha-modes#supported-formats-for-wic-bitmap-render-target
+		// ・WIC ビットマップ レンダー ターゲットでサポートされている形式
+		// ・ID2D1DCRenderTarget でサポートされる形式
+		// を参照.
+		// D2D1_PIXEL_FORMAT には D2D1_ALPHA_MODE_PREMULTIPLIED を指定する.
+		// D2D1_ALPHA_MODE_STRAIGHT は使用できない
+		const D2D1_SIZE_U p_size{	// 画素単位での大きさ
+			static_cast<UINT32>(m_main_page.m_page_size.width),
+			static_cast<UINT32>(m_main_page.m_page_size.height)
+		};
+		const D2D1_PIXEL_FORMAT p_format{	// 画素フォーマット
+			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+			D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED
+		};
+		winrt::com_ptr<ID2D1BitmapRenderTarget> target;
+		if (hr == S_OK) {
+			hr = offscreen.m_d2d_context->CreateCompatibleRenderTarget(
+				m_main_page.m_page_size, p_size, p_format, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, target.put()
+			);
+		}
+
+		if (hr == S_OK) {
+			m_mutex_draw.lock();
+
+			// ビットマップオブジェクトは, レンダーターゲット依存するため全て消去
+			for (const auto s : m_main_page.m_shape_list) {
+				if (typeid(*s) == typeid(ShapeImage)) {
+					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+				}
+			}
+
+			// ビットマップへの描画
+			m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
+			target->SaveDrawingState(Shape::m_state_block.get());
+			target->BeginDraw();
+			m_main_page.draw();
+			hr = target->EndDraw();
+			target->RestoreDrawingState(Shape::m_state_block.get());
+
+			// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
+			for (const auto s : m_main_page.m_shape_list) {
+				if (typeid(*s) == typeid(ShapeImage)) {
+					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+				}
+			}
+
+			m_mutex_draw.unlock();
+		}
+
+		// ビットマップレンダーターゲットからビットマップを得る.
+		winrt::com_ptr<ID2D1Bitmap> d2d_bmp;
+		if (hr == S_OK) {
+			hr = target->GetBitmap(d2d_bmp.put());
+		}
+
+		// D2D デバイスコンテキストから D2D デバイスを得て, WIC ファクトリーでその D2D デバイスに対応する WIC イメージエンコーダーを作成する.
+		winrt::com_ptr<IWICImageEncoder> wic_img_enc;
+		if (hr == S_OK) {
+			winrt::com_ptr<ID2D1Device> dev;
+			offscreen.m_d2d_context->GetDevice(dev.put());
+			hr = ShapeImage::wic_factory->CreateImageEncoder(dev.get(), wic_img_enc.put());
+		}
+
+		// WIC イメージエンコーダーで, D2D ビットマップを WIC フレームエンコーダーに書き込む.
+		if (hr == S_OK) {
+			// nullptr = 通常使用される既定のパラメーター
+			hr = wic_img_enc->WriteFrame(d2d_bmp.get(), wic_frm_enc.get(), nullptr);
+		}
+		if (hr == S_OK) {
+			hr = wic_frm_enc->Commit();
+		}
+		if (hr == S_OK) {
+			hr = wic_bmp_enc->Commit();
+		}
+		// 次のレベルのストレージオブジェクトに渡すため全てのメモリバッファを出力する.
+		if (hr == S_OK) {
+			hr = wic_stream->Commit(STGC_DEFAULT);
+		}
+
+		offscreen.Trim();
+		co_return hr;
 	}
 
 	//-------------------------------

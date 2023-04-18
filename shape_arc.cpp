@@ -1153,38 +1153,39 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	void ShapeArc::draw(void)
+	void ShapeArc::draw(void) noexcept
 	{
 		ID2D1RenderTarget* target = Shape::m_d2d_target;
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 		ID2D1SolidColorBrush* brush = Shape::m_d2d_color_brush.get();
+		HRESULT hr = S_OK;
+		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
 
 		D2D1_POINT_2F p[5]{};
-		if ((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) ||
-			(is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr || is_selected())) {
+		if (exist_stroke || (is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr || is_selected())) {
 			get_verts(p);
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			if (m_d2d_stroke_style == nullptr) {
-				create_stroke_style(factory);
+		if (exist_stroke && m_d2d_stroke_style == nullptr) {
+			hr = create_stroke_style(factory);
+		}
+		if (exist_stroke && m_d2d_path_geom == nullptr) {
+			D2D1_ARC_SEGMENT arc{
+				p[END],
+				D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
+				m_angle_rot,
+				//m_sweep_dir,
+				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
+				m_larg_flag
+			};
+			winrt::com_ptr<ID2D1GeometrySink> sink;
+			if (hr == S_OK) {
+				hr = factory->CreatePathGeometry(m_d2d_path_geom.put());
 			}
-			if (m_d2d_path_geom == nullptr) {
-				D2D1_ARC_SEGMENT arc{
-					p[END],
-					D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
-					m_angle_rot,
-					//m_sweep_dir,
-					D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
-					m_larg_flag
-				};
-				winrt::com_ptr<ID2D1GeometrySink> sink;
-				winrt::check_hresult(
-					factory->CreatePathGeometry(m_d2d_path_geom.put())
-				);
-				winrt::check_hresult(
-					m_d2d_path_geom->Open(sink.put())
-				);
+			if (hr == S_OK) {
+				hr = m_d2d_path_geom->Open(sink.put());
+			}
+			if (hr == S_OK) {
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 				const auto f_begin = (is_opaque(m_fill_color) ?
 					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
@@ -1192,47 +1193,43 @@ namespace winrt::GraphPaper::implementation
 				sink->BeginFigure(p[START], f_begin);
 				sink->AddArc(arc);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-				winrt::check_hresult(
-					sink->Close()
-				);
-				sink = nullptr;
+				hr = sink->Close();
 			}
-			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
-				if (m_d2d_arrow_geom == nullptr) {
-					// だ円の弧長を求めるのはしんどいので, ベジェで近似
-					D2D1_POINT_2F arrow[3];
-					arc_get_pos_arrow(m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
-					winrt::com_ptr<ID2D1GeometrySink> sink;
-					const ARROW_STYLE a_style{
-						m_arrow_style
-					};
-					// ジオメトリパスを作成する.
-					winrt::check_hresult(
-						factory->CreatePathGeometry(m_d2d_arrow_geom.put())
-					);
-					winrt::check_hresult(
-						m_d2d_arrow_geom->Open(sink.put())
-					);
-					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					const auto f_begin = (a_style == ARROW_STYLE::ARROW_FILLED
-						? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
-						: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-					const auto f_end = (a_style == ARROW_STYLE::ARROW_FILLED
-						? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
-						: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-					sink->BeginFigure(arrow[0], f_begin);
-					sink->AddLine(arrow[2]);
-					sink->AddLine(arrow[1]);
-					sink->EndFigure(f_end);
-					winrt::check_hresult(
-						sink->Close()
-					);
-					sink = nullptr;
-				}
-				if (m_d2d_arrow_stroke == nullptr) {
-					create_arrow_stroke();
-				}
+			sink = nullptr;
+		}
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
+			// だ円の弧長を求めるのはしんどいので, ベジェで近似
+			D2D1_POINT_2F arrow[3];
+			arc_get_pos_arrow(m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
+			winrt::com_ptr<ID2D1GeometrySink> sink;
+			const ARROW_STYLE a_style{
+				m_arrow_style
+			};
+			// ジオメトリパスを作成する.
+			if (hr == S_OK) {
+				hr = factory->CreatePathGeometry(m_d2d_arrow_geom.put());
 			}
+			if (hr == S_OK) {
+				hr = m_d2d_arrow_geom->Open(sink.put());
+			}
+			if (hr == S_OK) {
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				const auto f_begin = (a_style == ARROW_STYLE::ARROW_FILLED
+					? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
+					: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				const auto f_end = (a_style == ARROW_STYLE::ARROW_FILLED
+					? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
+					: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				sink->BeginFigure(arrow[0], f_begin);
+				sink->AddLine(arrow[2]);
+				sink->AddLine(arrow[1]);
+				sink->EndFigure(f_end);
+				hr = sink->Close();
+			}
+			sink = nullptr;
+		}
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
+			hr = create_arrow_stroke();
 		}
 		if (is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr) {
 			D2D1_ARC_SEGMENT arc{
@@ -1244,67 +1241,68 @@ namespace winrt::GraphPaper::implementation
 				m_larg_flag
 			};
 			winrt::com_ptr<ID2D1GeometrySink> sink;
-			winrt::check_hresult(
-				factory->CreatePathGeometry(m_d2d_fill_geom.put())
-			);
-			winrt::check_hresult(
-				m_d2d_fill_geom->Open(sink.put())
-			);
-			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			const auto f_begin = (is_opaque(m_fill_color) ?
-				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
-				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-			sink->BeginFigure(p[START], f_begin);
-			sink->AddArc(arc);
-			sink->AddLine(p[CENTER]);
-			sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
-			winrt::check_hresult(
-				sink->Close());
+			if (hr == S_OK) {
+				hr = factory->CreatePathGeometry(m_d2d_fill_geom.put());
+			}
+			if (hr == S_OK) {
+				hr = m_d2d_fill_geom->Open(sink.put());
+			}
+			if (hr == S_OK) {
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				const auto f_begin = (is_opaque(m_fill_color) ?
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(p[START], f_begin);
+				sink->AddArc(arc);
+				sink->AddLine(p[CENTER]);
+				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
+			}
+			hr = sink->Close();
 			sink = nullptr;
 		}
-		if (m_d2d_fill_geom != nullptr) {
-			brush->SetColor(m_fill_color);
-			target->FillGeometry(m_d2d_fill_geom.get(), brush);
-		}
-		if (m_d2d_path_geom != nullptr) {
-			brush->SetColor(m_stroke_color);
-			target->DrawGeometry(
-				m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
-			if (m_d2d_arrow_geom != nullptr) {
-				if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
-					target->FillGeometry(m_d2d_arrow_geom.get(), brush);
-					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
-						m_d2d_arrow_stroke.get());
-				}
-				if (m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
-					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
-						m_d2d_arrow_stroke.get());
+		if (hr == S_OK) {
+			if (m_d2d_fill_geom != nullptr) {
+				brush->SetColor(m_fill_color);
+				target->FillGeometry(m_d2d_fill_geom.get(), brush);
+			}
+			if (m_d2d_path_geom != nullptr) {
+				brush->SetColor(m_stroke_color);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
+				if (m_d2d_arrow_geom != nullptr) {
+					if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
+						target->FillGeometry(m_d2d_arrow_geom.get(), brush);
+						target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
+					}
+					if (m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
+						target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width,
+							m_d2d_arrow_stroke.get());
+					}
 				}
 			}
-		}
-		if (m_loc_show && is_selected()) {
-			// 補助線を描く
-			if (m_stroke_width >= Shape::m_loc_square_inner) {
+			if (m_loc_show && is_selected()) {
+				// 補助線を描く
+				if (m_stroke_width >= Shape::m_loc_square_inner) {
+					brush->SetColor(COLOR_WHITE);
+					target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
+					brush->SetColor(COLOR_BLACK);
+					target->DrawGeometry(m_d2d_path_geom.get(), brush, m_aux_width, m_aux_style.get());
+				}
+				// 軸の補助線を描く.
 				brush->SetColor(COLOR_WHITE);
-				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
+				target->DrawLine(p[CENTER], p[AXIS1], brush, m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
-				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_aux_width, m_aux_style.get());
+				target->DrawLine(p[CENTER], p[AXIS1], brush, m_aux_width, m_aux_style.get());
+				brush->SetColor(COLOR_WHITE);
+				target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, m_aux_style.get());
+				// 図形の部位を描く.
+				loc_draw_rhombus(p[CENTER], target, brush);
+				loc_draw_circle(p[START], target, brush);
+				loc_draw_circle(p[END], target, brush);
+				loc_draw_square(p[AXIS1], target, brush);
+				loc_draw_square(p[AXIS2], target, brush);
 			}
-			// 軸の補助線を描く.
-			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(p[CENTER], p[AXIS1], brush, m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(p[CENTER], p[AXIS1], brush, m_aux_width, m_aux_style.get());
-			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, m_aux_style.get());
-			// 図形の部位を描く.
-			loc_draw_rhombus(p[CENTER], target, brush);
-			loc_draw_circle(p[START], target, brush);
-			loc_draw_circle(p[END], target, brush);
-			loc_draw_square(p[AXIS1], target, brush);
-			loc_draw_square(p[AXIS2], target, brush);
 		}
 	}
 

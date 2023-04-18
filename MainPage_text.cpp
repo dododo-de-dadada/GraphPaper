@@ -88,13 +88,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_PARAGRAPH_ALIGNMENT val = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1);
-		if (sender == rmfi_menu_text_align_top()) {
+		if (sender == rmfi_menu_text_align_top() || sender == rmfi_popup_text_align_top()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 		}
-		else if (sender == rmfi_menu_text_align_bot()) {
+		else if (sender == rmfi_menu_text_align_bot() || sender == rmfi_popup_text_align_bot()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR;
 		}
-		else if (sender == rmfi_menu_text_align_mid()) {
+		else if (sender == rmfi_menu_text_align_mid() || sender == rmfi_popup_text_align_mid()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
@@ -113,28 +113,28 @@ namespace winrt::GraphPaper::implementation
 	// val	段落のそろえ
 	void MainPage::text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
-		rmfi_menu_text_align_top().IsChecked(
-			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_menu_text_align_bot().IsChecked(
-			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_menu_text_align_mid().IsChecked(
-			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_menu_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_popup_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_menu_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_popup_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_menu_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_popup_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
 	void MainPage::text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_TEXT_ALIGNMENT val = static_cast<DWRITE_TEXT_ALIGNMENT>(-1);
-		if (sender == rmfi_menu_text_align_left()) {
+		if (sender == rmfi_menu_text_align_left() || sender == rmfi_popup_text_align_left()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
 		}
-		else if (sender == rmfi_menu_text_align_right()) {
+		else if (sender == rmfi_menu_text_align_right() || sender == rmfi_popup_text_align_right()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING;
 		}
-		else if (sender == rmfi_menu_text_align_center()) {
+		else if (sender == rmfi_menu_text_align_center() || sender == rmfi_popup_text_align_center()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER;
 		}
-		else if (sender == rmfi_menu_text_align_just()) {
+		else if (sender == rmfi_menu_text_align_just() || sender == rmfi_popup_text_align_just()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
 		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
@@ -153,14 +153,14 @@ namespace winrt::GraphPaper::implementation
 	// t_align	文字列のそろえ
 	void MainPage::text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
-		rmfi_menu_text_align_left().IsChecked(
-			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_menu_text_align_right().IsChecked(
-			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_menu_text_align_center().IsChecked(
-			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_menu_text_align_just().IsChecked(
-			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_menu_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_popup_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_menu_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_popup_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_menu_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_popup_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_menu_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_popup_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.

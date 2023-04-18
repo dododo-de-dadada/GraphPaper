@@ -10,12 +10,12 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// }Œ`‚ð•\Ž¦‚·‚é.
-	void ShapeEllipse::draw(void)
+	void ShapeEllipse::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 
-		if (m_d2d_stroke_style == nullptr) {
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_d2d_stroke_style == nullptr) {
 			ID2D1Factory* factory;
 			target->GetFactory(&factory);
 			create_stroke_style(factory);

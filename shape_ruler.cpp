@@ -125,43 +125,48 @@ namespace winrt::GraphPaper::implementation
 		return LOC_TYPE::LOC_PAGE;
 	}
 
-	void ShapeRuler::create_text_format(void)
+	HRESULT ShapeRuler::create_text_format(void) noexcept
 	{
+		HRESULT hr = S_OK;
 		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
-
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		//const float font_size = min(m_font_size, m_grid_base + 1.0f);
 		const float font_size = m_font_size;
-		winrt::check_hresult(
-			dwrite_factory->CreateTextFormat(
-				m_font_family,
-				static_cast<IDWriteFontCollection*>(nullptr),
-				DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
-				DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
-				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				font_size,
-				locale_name,
-				m_dwrite_text_format.put()
-			)
+		hr = dwrite_factory->CreateTextFormat(
+			m_font_family,
+			static_cast<IDWriteFontCollection*>(nullptr),
+			DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+			font_size,
+			locale_name,
+			m_dwrite_text_format.put()
 		);
-		m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		m_dwrite_text_format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		if (hr == S_OK) {
+			hr = m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		}
+		if (hr == S_OK) {
+			hr = m_dwrite_text_format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		}
+		return hr;
 	}
 
 	// 図形を表示する.
-	void ShapeRuler::draw(void)
+	void ShapeRuler::draw(void) noexcept
 	{
+		HRESULT hr = S_OK;
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
 
-		if (m_d2d_stroke_style == nullptr) {
+		if (exist_stroke && m_d2d_stroke_style == nullptr) {
 			ID2D1Factory* factory;
 			target->GetFactory(&factory);
-			create_stroke_style(factory);
+			hr = create_stroke_style(factory);
 		}
-		if (m_dwrite_text_format == nullptr) {
-			create_text_format();
+		if (is_opaque(m_stroke_color) && m_dwrite_text_format == nullptr) {
+			hr = create_text_format();
 		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 
@@ -177,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(m_fill_color);
 			target->FillRectangle(&rect, brush);
 		}
-		if (is_opaque(m_stroke_color)) {
+		if (exist_stroke) {
 			// 線枠の色が不透明な場合,
 			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
 			const double f_size = m_dwrite_text_format->GetFontSize();	// 書体の大きさ

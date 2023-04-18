@@ -442,6 +442,8 @@ namespace winrt::GraphPaper::implementation
 
 	void ShapeRuler::export_svg(const DataWriter& dt_writer) noexcept
 	{
+		HRESULT hr = S_OK;
+
 		// üE˜g‚ÌF‚à“h‚è‚Â‚Ô‚µ‚ÌF‚à“§–¾‚È‚ç
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) &&
 			!is_opaque(m_fill_color)) {
@@ -449,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (m_dwrite_text_format == nullptr) {
-			create_text_format();
+			hr = create_text_format();
 		}
 
 		constexpr wchar_t D[10] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9' };

@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double T3 = 1.0;	// 区間の終端
 
 	// 曲線の矢じるしのジオメトリを作成する.
-	static void bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static HRESULT bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo) noexcept;
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bezi_get_convex(const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
@@ -87,38 +87,45 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 曲線の矢じるしのジオメトリを作成する.
 	//------------------------------
-	static void bezi_create_arrow_geom(
+	static HRESULT bezi_create_arrow_geom(
 		ID2D1Factory3* const factory,	// D2D ファクトリ
 		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg,	// 曲線の始点と制御点
 		const ARROW_STYLE a_style,	// 矢じるしの種別
 		const ARROW_SIZE a_size,	// 矢じるしの寸法
 		ID2D1PathGeometry** a_geom	// 矢じるしのジオメトリ
-	)
+	) noexcept
 	{
 		D2D1_POINT_2F barb[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-
+		HRESULT hr = S_OK;
 		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, barb)) {
+			hr = E_FAIL;
+		}
+		if (hr == S_OK) {
 			// ジオメトリシンクに追加する.
+			hr = factory->CreatePathGeometry(a_geom);
+		}
+		if (hr == S_OK) {
+			hr = (*a_geom)->Open(sink.put());
+		}
+		if (hr == S_OK) {
 			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::ARROW_FILLED ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
 			const D2D1_FIGURE_END f_end = a_style == ARROW_STYLE::ARROW_FILLED ?
 				D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 				D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN;
-			winrt::check_hresult(
-				factory->CreatePathGeometry(a_geom));
-			winrt::check_hresult(
-				(*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(barb[0], f_begin);
 			sink->AddLine(barb[2]);
 			sink->AddLine(barb[1]);
 			sink->EndFigure(f_end);
-			winrt::check_hresult(
-				sink->Close());
-			sink = nullptr;
 		}
+		if (hr == S_OK) {
+			hr = sink->Close();
+		}
+		sink = nullptr;
+		return hr;
 	}
 
 	//------------------------------
@@ -304,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形を表示する.
 	//------------------------------
-	void ShapeBezier::draw(void)
+	void ShapeBezier::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -312,56 +319,59 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_target->GetFactory(&factory);
 		bool b_flag = false;
 		D2D1_BEZIER_SEGMENT b_seg{};
-
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_d2d_stroke_style == nullptr) {
-			create_stroke_style(factory);
+		HRESULT hr = S_OK;
+		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
+		if (exist_stroke && m_d2d_stroke_style == nullptr) {
+			if (hr == S_OK) {
+				hr = create_stroke_style(factory);
+			}
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
-			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
-			create_arrow_stroke();
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
+			if (hr == S_OK) {
+				hr = create_arrow_stroke();
+			}
 		}
-		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) || is_opaque(m_fill_color)) &&
-			m_d2d_path_geom == nullptr) {
+		if ((exist_stroke || is_opaque(m_fill_color)) && m_d2d_path_geom == nullptr) {
 			if (!b_flag) {
 				pt_add(m_start, m_pos[0], b_seg.point1);
 				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
 				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
 				b_flag = true;
+			}
+			if (hr == S_OK) {
+				hr = factory->CreatePathGeometry(m_d2d_path_geom.put());
 			}
 			winrt::com_ptr<ID2D1GeometrySink> sink;
-			winrt::check_hresult(
-				factory->CreatePathGeometry(m_d2d_path_geom.put()));
-			m_d2d_path_geom->Open(sink.put());
-			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			const auto f_begin = (is_opaque(m_fill_color) ?
-				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
-				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-			sink->BeginFigure(m_start, f_begin);
-			sink->AddBezier(b_seg);
-			sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-			winrt::check_hresult(
-				sink->Close());
+			if (hr == S_OK) {
+				hr = m_d2d_path_geom->Open(sink.put());
+			}
+			if (hr == S_OK) {
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				const auto f_begin = (is_opaque(m_fill_color) ?
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(m_start, f_begin);
+				sink->AddBezier(b_seg);
+				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				hr = sink->Close();
+			}
 			sink = nullptr;
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			if (!b_flag) {
 				pt_add(m_start, m_pos[0], b_seg.point1);
 				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
 				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
 				b_flag = true;
 			}
-			bezi_create_arrow_geom(
-				static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style,
-				m_arrow_size, m_d2d_arrow_geom.put());
-
+			hr = bezi_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style, m_arrow_size,
+				m_d2d_arrow_geom.put());
 		}
 		if (is_opaque(m_fill_color)) {
 			brush->SetColor(m_fill_color);
 			target->FillGeometry(m_d2d_path_geom.get(), brush, nullptr);
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+		if (exist_stroke) {
 			brush->SetColor(m_stroke_color);
 			target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
 			if (m_arrow_style == ARROW_STYLE::ARROW_FILLED) {

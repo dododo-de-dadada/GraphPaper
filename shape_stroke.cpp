@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// D2D ストロークスタイルを作成する.
-	void ShapeStroke::create_stroke_style(ID2D1Factory* const factory)
+	HRESULT ShapeStroke::create_stroke_style(ID2D1Factory* const factory) noexcept
 	{
 		UINT32 d_cnt;	// 破線の配置の要素数
 		FLOAT d_arr[6];	// 破線の配置
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 太さがゼロか判定する.
 		if (m_stroke_width < FLT_MIN) {
-			return;
+			return E_FAIL;
 		}
 		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
 			d_arr[0] = m_dash_pat.m_[2] / m_stroke_width;
@@ -144,9 +144,7 @@ namespace winrt::GraphPaper::implementation
 			d_style,	// dashStyle
 			0.0f,
 		};
-		winrt::check_hresult(
-			factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, m_d2d_stroke_style.put())
-		);
+		return factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, m_d2d_stroke_style.put());
 	}
 
 	// 値を端の形式に格納する.

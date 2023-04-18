@@ -14,13 +14,13 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 	// 見本の図形を作成する.
-	static void font_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
+	static Shape* font_create_sample_shape(const float p_width, const float p_height, const Shape* prop) noexcept;
 
 	// 見本の図形を作成する.
 	// p_width	見本を表示するパネルの幅
 	// p_height	見本を表示するパネルの高さ
 	// page	見本を表示するシート
-	static void font_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
+	static Shape* font_create_sample_shape(const float p_width, const float p_height, const Shape* prop) noexcept
 	{
 		const auto mar_w = p_width * 0.125;
 		const auto mar_h = p_height * 0.125;
@@ -38,10 +38,11 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pangram.c_str();
 		}
-		page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(text), &page));
+		Shape* t = new ShapeText(start, pos, wchar_cpy(text), prop);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
+		return t;
 	}
 
 	void MainPage::font_stretch_is_checked(const DWRITE_FONT_STRETCH val)
@@ -235,9 +236,13 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(
+		const Shape* prop = m_event_shape_pressed;
+		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
+			prop = &m_prop_page;
+		}
+		m_prop_page.m_shape_list.push_back(font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_prop_page);
+			static_cast<float>(scp_dialog_panel().Height()), prop));
 		cd_dialog_prop().Title(box_value(str_title));
 		m_mutex_event.lock();
 		{
@@ -282,9 +287,13 @@ namespace winrt::GraphPaper::implementation
 		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") };
 		constexpr auto TICK_FREQ = 1.0;
 		m_prop_page.set_attr_to(&m_main_page);
-		font_create_sample_shape(
+		const Shape* prop = m_event_shape_pressed;
+		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
+			prop = &m_prop_page;
+		}
+		m_prop_page.m_shape_list.push_back(font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_prop_page);
+			static_cast<float>(scp_dialog_panel().Height()), prop));
 		float f_size;
 		m_prop_page.get_font_size(f_size);
 		dialog_slider_4().Minimum(1.0f);

@@ -362,7 +362,7 @@ namespace winrt::GraphPaper::implementation
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
 		color_code_is_checked(m_color_code);
-		zoom_is_cheched(m_main_scale);
+		zoom_is_checked(m_main_scale);
 		status_bar_is_checked(m_status_bar);
 		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);

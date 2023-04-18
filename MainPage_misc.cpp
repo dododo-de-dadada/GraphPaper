@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「ズーム」のサブ項目に印をつける.
-	void MainPage::zoom_is_cheched(float scale)
+	void MainPage::zoom_is_checked(float scale)
 	{
 		rmfi_menu_layout_zoom_100().IsChecked(equal(scale, 1.0f));
 		rmfi_popup_layout_zoom_100().IsChecked(equal(scale, 1.0f));
@@ -226,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		zoom_is_cheched(scale);
+		zoom_is_checked(scale);
 		//if (scale != m_main_page.m_page_scale) {
 		//	m_main_page.m_page_scale = scale;
 		if (scale != m_main_scale) {

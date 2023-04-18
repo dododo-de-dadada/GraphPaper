@@ -225,10 +225,11 @@ namespace winrt::GraphPaper::implementation
 		const winrt::guid enc_id, IRandomAccessStream& stream) const;
 
 	// 図形を表示する.
-	void ShapeImage::draw(void)
+	void ShapeImage::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		HRESULT hr = S_OK;
 
 		// D2D ビットマップが空なら, 作成する.
 		if (m_d2d_bitmap == nullptr) {
@@ -241,8 +242,8 @@ namespace winrt::GraphPaper::implementation
 			};
 			const UINT32 pitch = 4u * m_orig.width;
 			winrt::com_ptr<ID2D1Bitmap> bitmap;
-			target->CreateBitmap(m_orig, static_cast<void*>(m_bgra), pitch, b_prop, bitmap.put());
-			m_d2d_bitmap = bitmap.as<ID2D1Bitmap1>();
+			hr = target->CreateBitmap(m_orig, static_cast<void*>(m_bgra), pitch, b_prop, bitmap.put());
+			m_d2d_bitmap = bitmap.try_as<ID2D1Bitmap1>();
 			if (m_d2d_bitmap == nullptr) {
 				return;
 			}
@@ -254,9 +255,7 @@ namespace winrt::GraphPaper::implementation
 			m_start.x + m_view.width,
 			m_start.y + m_view.height
 		};
-		target->DrawBitmap(
-			m_d2d_bitmap.get(), rect, m_opac,
-			D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
+		target->DrawBitmap(m_d2d_bitmap.get(), rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
 		// 選択された図形なら, 補助線と図形の部位を表示する.
 		if (m_loc_show && is_selected()) {

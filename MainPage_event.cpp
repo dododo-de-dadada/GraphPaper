@@ -44,17 +44,16 @@ namespace winrt::GraphPaper::implementation
 	// マウスホイールの値でスクロールする.
 	static bool event_scroll_by_wheel_delta(const ScrollBar& scroll_bar, const int32_t delta, const float scale);
 
-	//------------------------------
 	// 押された位置と離された位置を調整する.
-	// slist	図形リスト
-	// boxed	調整の対象を, 図形を囲む領域とするなら true, 図形の頂点を対象とするなら false 
-	// interval	制限距離
-	// g_snap	方眼にそろえる.
-	// g_len	方眼の大きさ
-	// pressed	押された位置
-	// released	離された位置
-	//------------------------------
-	static void event_pos_snap_to(const SHAPE_LIST& slist, const bool boxed, const float interval, const bool g_snap, const double g_len, D2D1_POINT_2F& pressed, D2D1_POINT_2F& released)
+	static void event_pos_snap_to(
+		const SHAPE_LIST& slist,	// 図形リスト
+		const bool boxed,	// 調整の対象を, 図形を囲む領域とするなら true, 図形の頂点を対象とするなら false 
+		const float interval,	// 制限距離
+		const bool g_snap,	// 方眼にそろえる.
+		const double g_len,	// 方眼の大きさ
+		D2D1_POINT_2F& pressed,	// 押された位置
+		D2D1_POINT_2F& released	// 離された位置
+	)
 	{
 		D2D1_POINT_2F box[4]{	// 押された位置と離された位置で囲まれた方形の頂点
 			pressed, { released.x, pressed.y }, released, { pressed.x, released.y },
@@ -166,13 +165,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//------------------------------
 	// 最も近い方眼への位置ベクトルを求める.
-	// slist	図形リスト
-	// g_len	方眼の大きさ
-	// g_pos	図形から方眼への位置ベクトル
-	//------------------------------
-	static bool event_get_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_pos) noexcept
+	static bool event_get_nearby_grid(
+		const SHAPE_LIST& slist,	// 図形リスト
+		const float g_len,	// 方眼の大きさ
+		D2D1_POINT_2F& g_pos	// 図形から方眼への位置ベクトル
+	) noexcept
 	{
 		D2D1_POINT_2F p[2 + N_GON_MAX];
 		D2D1_POINT_2F g;	// 方眼の大きさで丸めた位置
@@ -201,14 +199,13 @@ namespace winrt::GraphPaper::implementation
 		return d_min < FLT_MAX;
 	}
 
-	//------------------------------
 	// 最も近い頂点を得る.
-	// slist	図形リスト
-	// interval	間隔 (これ以上離れた点は無視する)
-	// pos	最も近い頂点への位置ベクトル
 	// 戻り値	見つかったなら true
-	//------------------------------
-	static bool event_get_nearby_point(const SHAPE_LIST& slist, const float interval, D2D1_POINT_2F& pos) noexcept
+	static bool event_get_nearby_point(
+		const SHAPE_LIST& slist,	// 図形リスト
+		const float interval,	// 間隔 (これ以上離れた点は無視する)
+		D2D1_POINT_2F& pos	// 最も近い頂点への位置ベクトル
+	) noexcept
 	{
 		float dd = interval * interval;
 		bool flag = false;
@@ -238,14 +235,12 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	//------------------------------
 	// マウスホイールの値でスクロールする.
-	// scroll	スクロールバー
-	// delta	マウスホイールのデルタ値
-	// scale	ページの倍率
-	//------------------------------
 	static bool event_scroll_by_wheel_delta(
-		const ScrollBar& scroll_bar, const int32_t delta, const float scale)
+		const ScrollBar& scroll_bar,	// スクロールバー
+		const int32_t delta,	// マウスホイールのデルタ値
+		const float scale	// ページの倍率
+	)
 	{
 		constexpr double DELTA = 32.0;
 		double val = scroll_bar.Value();
@@ -263,15 +258,12 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//------------------------------
 	// 図形リストを整理する.
-	// ただし, 操作スタックで参照されている図形は削除されない.
-	// slist	図形リスト
-	// ustack	元に戻す操作スタック
-	// rstack	やり直す操作スタック
-	//------------------------------
 	static void event_reduce_slist(
-		SHAPE_LIST& slist, const UNDO_STACK& ustack, const UNDO_STACK& rstack) noexcept
+		SHAPE_LIST& slist,	// 図形リスト
+		const UNDO_STACK& ustack,	// 元に戻す操作スタック
+		const UNDO_STACK& rstack	// やり直す操作スタック
+	) noexcept
 	{
 		// 消去フラグの立つ図形を消去リストに格納する.
 		SHAPE_LIST delete_list;	// 消去リスト
@@ -1110,6 +1102,7 @@ namespace winrt::GraphPaper::implementation
 		// 作図ツールが選択ツールか判定する.
 		if (m_drawing_tool == DRAWING_TOOL::SELECT || m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 			m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
+			m_main_page.set_attr_to(m_event_shape_pressed);
 			// 押されたのが図形の外側か判定する.
 			if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 				m_event_shape_pressed = nullptr;
@@ -1432,7 +1425,7 @@ namespace winrt::GraphPaper::implementation
 				//m_main_page.m_page_scale *= 1.1f;
 				//zoom_is_cheched(m_main_page.m_page_scale);
 				m_main_scale *= 1.1f;
-				zoom_is_cheched(m_main_scale);
+				zoom_is_checked(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();
@@ -1443,7 +1436,7 @@ namespace winrt::GraphPaper::implementation
 				//m_main_page.m_page_scale /= 1.1f;
 				//zoom_is_cheched(m_main_page.m_page_scale);
 				m_main_scale /= 1.1f;
-				zoom_is_cheched(m_main_scale);
+				zoom_is_checked(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();

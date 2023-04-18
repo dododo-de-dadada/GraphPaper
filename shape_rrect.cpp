@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ê}å`Çï\é¶Ç∑ÇÈ.
-	void ShapeRRect::draw(void)
+	void ShapeRRect::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();

@@ -641,7 +641,7 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「ページの倍率」が選択された.
 		void zoom_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「ズーム」のサブ項目に印をつける.
-		void zoom_is_cheched(float scale);
+		void zoom_is_checked(float scale);
 
 		//-------------------------------
 		// MainPage_prop.cpp
@@ -753,7 +753,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 背景パターンの画像ブラシを得る.
-		void background_get_brush(void);
+		void background_get_brush(void) noexcept;
 		// 背景パターンがクリックされた.
 		void background_pattern_click(IInspectable const&, RoutedEventArgs const&);
 		// 背景色の項目に印をつける

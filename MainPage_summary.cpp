@@ -212,6 +212,7 @@ namespace winrt::GraphPaper::implementation
 		const winrt::impl::com_ref<Summary> summary = item.try_as<Summary>();
 		m_event_shape_prev =
 		m_event_shape_pressed = summary->get_shape();
+		m_main_page.set_attr_to(m_event_shape_pressed);
 	}
 
 	// 編集メニューの「一覧を表示」が選択された.

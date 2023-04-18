@@ -688,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapePoly::draw(void)
+	void ShapePoly::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -696,17 +696,16 @@ namespace winrt::GraphPaper::implementation
 		target->GetFactory(&factory);
 		D2D1_POINT_2F p[N_GON_MAX];
 		size_t p_cnt = static_cast<size_t>(-1);
+		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
+		HRESULT hr = S_OK;
 
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_d2d_stroke_style == nullptr) {
+		if (exist_stroke && m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_stroke == nullptr) {
 			create_arrow_stroke();
 		}
-		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) ||
-			is_opaque(m_fill_color)) && m_d2d_path_geom == nullptr) {
+		if ((exist_stroke || is_opaque(m_fill_color)) && m_d2d_path_geom == nullptr) {
 			if (p_cnt == static_cast<size_t>(-1)) {
 				p_cnt = get_verts(p);
 			}
@@ -719,26 +718,23 @@ namespace winrt::GraphPaper::implementation
 					D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 					D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::com_ptr<ID2D1GeometrySink> sink;
-				winrt::check_hresult(
-					factory->CreatePathGeometry(m_d2d_path_geom.put())
-				);
-				winrt::check_hresult(
-					m_d2d_path_geom->Open(sink.put())
-				);
-				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				sink->BeginFigure(p[0], f_begin);
-				for (size_t i = 1; i < p_cnt; i++) {
-					sink->AddLine(p[i]);
+				hr = factory->CreatePathGeometry(m_d2d_path_geom.put());
+				if (hr == S_OK) {
+					hr = m_d2d_path_geom->Open(sink.put());
 				}
-				sink->EndFigure(f_end);
-				winrt::check_hresult(
-					sink->Close()
-				);
+				if (hr == S_OK) {
+					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+					sink->BeginFigure(p[0], f_begin);
+					for (size_t i = 1; i < p_cnt; i++) {
+						sink->AddLine(p[i]);
+					}
+					sink->EndFigure(f_end);
+					hr = sink->Close();
+				}
 				sink = nullptr;
 			}
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
-			m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
+		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			if (p_cnt == static_cast<size_t>(-1)) {
 				p_cnt = get_verts(p);
 			}
@@ -755,17 +751,20 @@ namespace winrt::GraphPaper::implementation
 					const auto a_end = (m_arrow_style == ARROW_STYLE::ARROW_FILLED ?
 						D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 						D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-					winrt::check_hresult(
-						factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-					winrt::check_hresult(
-						m_d2d_arrow_geom->Open(sink.put()));
-					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					sink->BeginFigure(barb[0], a_begin);
-					sink->AddLine(tip);
-					sink->AddLine(barb[1]);
-					sink->EndFigure(a_end);
-					winrt::check_hresult(
-						sink->Close());
+					if (hr == S_OK) {
+						hr = factory->CreatePathGeometry(m_d2d_arrow_geom.put());
+					}
+					if (hr == S_OK) {
+						hr = m_d2d_arrow_geom->Open(sink.put());
+					}
+					if (hr == S_OK) {
+						sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+						sink->BeginFigure(barb[0], a_begin);
+						sink->AddLine(tip);
+						sink->AddLine(barb[1]);
+						sink->EndFigure(a_end);
+						hr = sink->Close();
+					}
 					sink = nullptr;
 				}
 			}
@@ -777,7 +776,7 @@ namespace winrt::GraphPaper::implementation
 				target->FillGeometry(p_geom, brush, nullptr);
 			}
 		}
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+		if (exist_stroke) {
 			const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
 			if (p_geom != nullptr) {
 				brush->SetColor(m_stroke_color);

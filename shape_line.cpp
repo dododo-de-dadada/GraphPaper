@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 矢じるしの D2D1 パスジオメトリを作成する.
-	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo);
+	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo) noexcept;
 	// 矢じるしの D2D ストローク特性を作成する.
 	//static void line_create_arrow_stroke(
 	//	ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, 
@@ -25,40 +25,41 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE style,	// 矢じるしの形式
 		ARROW_SIZE& a_size,	// 矢じるしの大きさ
 		ID2D1PathGeometry** geo	// 作成されたパスジオメトリ
-	)
+	) noexcept
 	{
 		D2D1_POINT_2F barb[2];	// 矢じるしの返しの端点
 		D2D1_POINT_2F tip;	// 矢じるしの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-
-		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barb, tip)) {
+		HRESULT hr = S_OK;
+		if (!ShapeLine::line_get_pos_arrow(start, pos, a_size, barb, tip)) {
+			hr = E_FAIL;
+		}
+		if (hr == S_OK) {
 			// ジオメトリパスを作成する.
-			winrt::check_hresult(
-				factory->CreatePathGeometry(geo)
-			);
-			winrt::check_hresult(
-				(*geo)->Open(sink.put())
-			);
+			hr = factory->CreatePathGeometry(geo);
+		}
+		if (hr == S_OK) {
+			hr = (*geo)->Open(sink.put());
+		}
+		if (hr == S_OK) {
 			const auto f_begin = (
 				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 				: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
-			);
+				);
 			const auto f_end = (
 				style == ARROW_STYLE::ARROW_FILLED
 				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
 				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
-			);
+				);
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(barb[0], f_begin);
 			sink->AddLine(tip);
 			sink->AddLine(barb[1]);
 			sink->EndFigure(f_end);
-			winrt::check_hresult(
-				sink->Close()
-			);
-			sink = nullptr;
+			hr = sink->Close();
 		}
+		sink = nullptr;
 	}
 
 	// 矢じるしの先端と返しの位置を求める.
@@ -89,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeLine::draw(void)
+	void ShapeLine::draw(void) noexcept
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
@@ -112,9 +113,7 @@ namespace winrt::GraphPaper::implementation
 				create_arrow_stroke();
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(
-					static_cast<ID2D1Factory3*>(factory), m_start, m_pos, m_arrow_style,
-					m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, m_pos, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {

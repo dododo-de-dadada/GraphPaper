@@ -18,34 +18,34 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 背景パターンの画像ブラシを得る.
-	void MainPage::background_get_brush()
+	void MainPage::background_get_brush() noexcept
 	{
+		HRESULT hr = S_OK;
 		// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
 		// WIC ファクトリは ShapeImage が確保しているものを使用する.
 		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
-		winrt::check_hresult(
-			ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
-		);
+		if (hr == S_OK) {
+			hr = ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put());
+		}
 		// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
 		UINT f_cnt;
-		winrt::check_hresult(
-			wic_decoder->GetFrameCount(&f_cnt)
-		);
+		if (hr == S_OK) {
+			hr = wic_decoder->GetFrameCount(&f_cnt);
+		}
 		// 最後のフレームを得る.
 		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
-		winrt::check_hresult(
-			wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
-		);
+		if (hr == S_OK) {
+			hr = wic_decoder->GetFrame(f_cnt - 1, wic_frame.put());
+		}
 		wic_decoder = nullptr;
 		// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
-		winrt::check_hresult(
-			ShapeImage::wic_factory->CreateFormatConverter(m_wic_background.put())
-		);
+		if (hr == S_OK) {
+			hr = ShapeImage::wic_factory->CreateFormatConverter(m_wic_background.put());
+		}
 		// WIC フォーマットコンバーターに, 得たフレームを格納する.
-		winrt::check_hresult(
-			m_wic_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA,
-				WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
-		);
+		if (hr == S_OK) {
+			hr = m_wic_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom);
+		}
 		wic_frame = nullptr;
 	}
 
@@ -459,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 
 		//float scale;
 		//m_main_page.get_page_scale(scale);
-		//zoom_is_cheched(scale);
+		//zoom_is_checked(scale);
 	}
 	*/
 
@@ -608,7 +608,7 @@ namespace winrt::GraphPaper::implementation
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
 		color_code_is_checked(m_color_code);
-		zoom_is_cheched(m_main_scale);
+		zoom_is_checked(m_main_scale);
 		status_bar_is_checked(m_status_bar);
 		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);
