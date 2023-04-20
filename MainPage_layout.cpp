@@ -593,6 +593,8 @@ namespace winrt::GraphPaper::implementation
 		m_background_show = false;
 		m_background_color = COLOR_WHITE;
 
+		//event_menu_is_checked();
+
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -605,13 +607,14 @@ namespace winrt::GraphPaper::implementation
 		join_style_is_checked(m_main_page.m_join_style);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+		background_color_is_checked(m_background_show, m_background_color);
+		zoom_is_checked(m_main_scale);
+
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
 		color_code_is_checked(m_color_code);
-		zoom_is_checked(m_main_scale);
 		status_bar_is_checked(m_status_bar);
 		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
-		background_color_is_checked(m_background_show, m_background_color);
 	}
 
 	//------------------------------

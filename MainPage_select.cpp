@@ -249,8 +249,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_prev = s;
 		}
 		// シフトキーが押されて, かつ直前に押された図形があり, その図形が選択されているか判定する.
-		else if (k_mod == VirtualKeyModifiers::Shift &&
-			m_event_shape_prev != nullptr && m_event_shape_prev->is_selected() && !m_event_shape_prev->is_deleted()) {
+		else if (k_mod == VirtualKeyModifiers::Shift && m_event_shape_prev != nullptr && m_event_shape_prev->is_selected() && !m_event_shape_prev->is_deleted()) {
 			// 前回ポインターが押された図形が空か判定する.
 			//if (m_event_shape_prev == nullptr) {
 			//	// 図形リストの先頭を前回ポインターが押された図形に格納する.
@@ -312,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の選択をすべて解除する.
-	// t_range_only	文字範囲だけ解除 (文字範囲だけでないなら, 図形の選択も解除される).
+	// t_range_only	true なら文字列選択だけを解除. false なら図形の選択も解除.
 	// 戻り値	選択が解除された図形があるなら true
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
@@ -321,19 +320,19 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			// 文字範囲だけ解除でない, かつ図形が選択されているか判定する.
+			// 文字列選択だけを解除ではない, かつ選択された図形か判定する.
 			if (!t_range_only && s->is_selected()) {
 				undo_push_select(s);
 				if (!done) {
 					done = true;
 				}
 			}
-			// 文字範囲が取得できない (文字列図形でない場合も含む) か判定する.
+			// そもそも文字列選択がない図形か判定する.
 			DWRITE_TEXT_RANGE d_range;
 			if (!s->get_text_selected(d_range)) {
 				continue;
 			}
-			// 得た文字範囲が { 0, 0 } か判定する.
+			// 文字列選択の範囲が { 0, 0 } か判定する.
 			constexpr DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
 			if (equal(s_range, d_range)) {
 				continue;

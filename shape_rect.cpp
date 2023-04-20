@@ -624,21 +624,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 近傍の頂点を見つける.
-	// pos	ある位置
+	// pos	ある点
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeOblong::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
+	bool ShapeOblong::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool flag = false;
 		D2D1_POINT_2F q[4];
 		const size_t q_cnt = get_verts(q);
 		for (size_t i = 0; i < q_cnt; i++) {
-			D2D1_POINT_2F vec;
-			pt_sub(q[i], pos, vec);
-			const float vv = static_cast<float>(pt_abs2(vec));
-			if (vv < dd) {
-				dd = vv;
+			D2D1_POINT_2F r;
+			pt_sub(q[i], p, r);
+			const double r_abs = pt_abs2(r);
+			if (r_abs < dd) {
+				dd = r_abs;
 				val = q[i];
 				if (!flag) {
 					flag = true;

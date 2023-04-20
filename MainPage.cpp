@@ -35,10 +35,8 @@ namespace winrt::GraphPaper::implementation
 	// 方眼を表示する.
 	static void page_draw_grid(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len, const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset, const D2D1_SIZE_F g_size);
 
-	//-------------------------------
 	// 待機カーソルを表示する.
 	// 戻り値	それまで表示されていたカーソル.
-	//-------------------------------
 	const CoreCursor wait_cursor_show(void)
 	{
 		const CoreWindow& core_win = Window::Current().CoreWindow();
@@ -49,18 +47,13 @@ namespace winrt::GraphPaper::implementation
 		return prev_cur;
 	}
 
-
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
-
-	//-------------------------------
-	// 色成分を文字列に変換する.
-	// c_code	色の基数
-	// c_val	色成分の値
-	// t_len	文字列の最大長 ('\0' を含む長さ)
-	// t_buf	文字列の配列 [t_len]
-	//-------------------------------
-	void conv_col_to_str(const COLOR_CODE c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(
+		const COLOR_CODE c_code,	// 色成分の記法
+		const double c_val,	// 色成分の値
+		const size_t t_len,	// 文字列の最大長 ('\0' を含む長さ)
+		wchar_t t_buf[]	// 文字列の配列 [t_len]
+	) noexcept
 	{
 		// 色の基数が 10 進数か判定する.
 		if (c_code == COLOR_CODE::DEC) {
@@ -83,17 +76,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//-------------------------------
 	// 長さを文字列に変換する.
-	// B	単位付加フラグ
-	// len_unit	長さの単位
-	// len_val	ピクセル単位の長さ
-	// dpi	DPI
-	// g_len	方眼の大きさ
-	// t_len	文字列の最大長 ('\0' を含む長さ)
-	// t_buf	文字列の配列
-	//-------------------------------
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
+	template <bool B>	// 単位付加フラグ
+	void conv_len_to_str(
+		const LEN_UNIT len_unit,	// 長さの単位
+		const double val,	// ピクセル単位の長さ
+		const double dpi,	// DPI
+		const double g_len,	// 方眼の大きさ
+		const uint32_t t_len,	// 文字列の最大長 ('\0' を含む長さ)
+		wchar_t *t_buf	// 文字列の配列
+	) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
@@ -146,21 +138,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 長さを文字列に変換する (単位なし).
-	template void conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-		const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len,
-		const uint32_t t_len, wchar_t* t_buf) noexcept;
-
+	template void conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 	// 長さを文字列に変換する (単位つき).
 	template void conv_len_to_str<LEN_UNIT_NAME_APPEND>(const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さををピクセル単位の値に変換する.
-	// 変換された値は, 0.5 ピクセル単位に丸められる.
-	// l_unit	長さの単位
-	// l_val	長さの値
-	// dpi	DPI
-	// g_len	方眼の大きさ
 	// 戻り値	ピクセル単位の値
-	double conv_len_to_pixel(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
+	double conv_len_to_pixel(
+		const LEN_UNIT l_unit,	// 長さの単位
+		const double l_val,	// 長さの値
+		const double dpi,	// DPI
+		const double g_len	// 方眼の大きさ
+	) noexcept
 	{
 		double ret;
 
@@ -250,14 +239,13 @@ namespace winrt::GraphPaper::implementation
 		auto _{ file_new_click_async(nullptr, nullptr) };
 	}
 
-	//-------------------------------
 	// メッセージダイアログを表示する.
-	// glyph	フォントアイコンのグリフの静的リソースのキー
-	// message	メッセージのアプリケーションリソースのキー
-	// desc		説明文のアプリケーションリソースのキー
 	// 戻り値	なし
-	//-------------------------------
-	void MainPage::message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc)
+	void MainPage::message_show(
+		winrt::hstring const& glyph,	// フォントアイコンのグリフの静的リソースのキー
+		winrt::hstring const& message,	// メッセージのアプリケーションリソースのキー
+		winrt::hstring const& desc	// 説明文のアプリケーションリソースのキー
+	)
 	{
 		constexpr wchar_t QUOT[] = L"\"";	// 引用符
 		constexpr wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
@@ -378,14 +366,15 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形をもとにメインのページ図形の境界矩形を更新する.
-	// s	追加された図形
-	void MainPage::main_bbox_update(const Shape* s) noexcept
+	// 更新された図形をもとにメインのページの境界矩形を更新する.
+	void MainPage::main_bbox_update(
+		const Shape* s	// 更新された図形
+	) noexcept
 	{
 		s->get_bbox(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
-	// メインのページ図形の境界矩形を更新する.
+	// メインのページの境界矩形を更新する.
 	void MainPage::main_bbox_update(void) noexcept
 	{
 		// リスト中の図形を囲む矩形を得る.
@@ -412,18 +401,18 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// メインのページ図形を表示する.
+	// メインのページを表示する.
 	void MainPage::main_draw(void)
 	{
 		if (!scp_main_panel().IsLoaded()) {
 			return;
 		}
+		// ロックできないなら中断する.
 		if (!m_mutex_draw.try_lock()) {
-			// ロックできない場合
 			return;
 		}
 
-		// ひな型に描画に必要な変数を格納する.
+		// 描画前に必要な変数を格納する.
 		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), m_main_scale);
 
 		// 描画環境を保存, 描画を開始する.

@@ -391,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeImage::get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept
+	bool ShapeImage::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool found = false;
 		D2D1_POINT_2F q[4];	// 図形の頂点.
@@ -399,7 +399,7 @@ namespace winrt::GraphPaper::implementation
 		for (size_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r;	// pq 間のベクトル
 			pt_sub(p, q[i], r);
-			const float r_abs = static_cast<float>(pt_abs2(r));
+			const double r_abs = pt_abs2(r);
 			if (r_abs < dd) {
 				dd = r_abs;
 				val = q[i];

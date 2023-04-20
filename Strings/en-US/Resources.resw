@@ -214,7 +214,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_menu_color_code.Text" xml:space="preserve">
-    <value>Color Code</value>
+    <value>Color Component Code</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_menu_len_unit.Text" xml:space="preserve">
@@ -317,15 +317,19 @@
     <value>Layout</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_misc.Title" xml:space="preserve">
-    <value>&amp;Misc</value>
+  <data name="mbi_menu_help.Title" xml:space="preserve">
+    <value>Help</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_properties.Title" xml:space="preserve">
-    <value>Properties</value>
+  <data name="mbi_menu_method.Title" xml:space="preserve">
+    <value>Method</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_drawing.Title" xml:space="preserve">
+  <data name="mbi_menu_property.Title" xml:space="preserve">
+    <value>Property</value>
+    <comment>MenuBarItem</comment>
+  </data>
+	<data name="mbi_menu_drawing.Title" xml:space="preserve">
     <value>Draw</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -357,7 +361,7 @@
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
+  <data name="mfi_menu_meth_text_edit.Text" xml:space="preserve">
     <value>Edit Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -381,7 +385,7 @@
     <value>Open...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_find_text.Text" xml:space="preserve">
+  <data name="mfi_menu_meth_text_find.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -494,7 +498,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_menu_text_pad.Text" xml:space="preserve">
-    <value>Padding...</value>
+    <value>Text Padding...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mbi_menu_undo.Text" xml:space="preserve">
@@ -1038,7 +1042,7 @@
     <value>Order</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_menu_fit_text_frame.Text" xml:space="preserve">
+  <data name="mfi_menu_meth_text_fit_frame.Text" xml:space="preserve">
     <value>Fit Frame Size to Text</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1086,8 +1090,8 @@
     <value>Triangle (3)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_drawing_poly_opt.Text" xml:space="preserve">
-    <value>Polygon Option</value>
+  <data name="mfsi_menu_drawing_poly.Text" xml:space="preserve">
+    <value>Drawing Polygon</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">
@@ -1159,38 +1163,34 @@
     <comment>String</comment>
   </data>
   <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">
-    <value>Clockwise</value>
+    <value>Draw Clockwise</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tmfi_tool_poly_end_close.Text" xml:space="preserve">
-    <value>End Close</value>
+    <value>Draw End Close</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tmfi_tool_poly_regular.Text" xml:space="preserve">
-    <value>Regular Polygon</value>
+    <value>Draw Regular Polygon</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tmfi_tool_poly_vertex_up.Text" xml:space="preserve">
-    <value>Vertex Up</value>
+    <value>Draw Vertex Up</value>
     <comment>ToggleMenuFlyoutItem</comment>
-  </data>
-  <data name="mbi_menu_image.Title" xml:space="preserve">
-    <value>Image</value>
-    <comment>MenuBarItem</comment>
   </data>
   <data name="mfi_menu_image_opac.Text" xml:space="preserve">
     <value>Image Opacity...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_image_revert.Text" xml:space="preserve">
-    <value>Revert Original Image</value>
+  <data name="mfi_menu_meth_image_revert.Text" xml:space="preserve">
+    <value>Revert Image to Original</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="str_image_opac" xml:space="preserve">
     <value>Image Opacity</value>
     <comment>String</comment>
   </data>
-  <data name="tmfi_menu_image_keep_aspect.Text" xml:space="preserve">
+  <data name="tmfi_menu_meth_image_keep_asp.Text" xml:space="preserve">
     <value>Keep Image Aspect Ratio</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -1238,16 +1238,16 @@
     <value>Sweep Direction</value>
     <comment>String</comment>
   </data>
-  <data name="str_edit_arc_rotation" xml:space="preserve">
-    <value>Edit Arc Rotation</value>
+  <data name="str_arc_rotation" xml:space="preserve">
+    <value>Arc Rotation</value>
     <comment>String</comment>
   </data>
-  <data name="mfsi_menu_edit_poly_end.Text" xml:space="preserve">
-    <value>Edit Polygon End</value>
+  <data name="mfsi_menu_meth_poly_end.Text" xml:space="preserve">
+    <value>Polygon End</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_menu_edit_arc.Text" xml:space="preserve">
-    <value>Edit Arc Rotation</value>
+  <data name="mfi_menu_meth_arc_rot.Text" xml:space="preserve">
+    <value>Arc Rotation</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_menu_background_pattern.Text" xml:space="preserve">

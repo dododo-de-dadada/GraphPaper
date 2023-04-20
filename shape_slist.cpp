@@ -620,14 +620,18 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択されてない図形から, 指定した距離以下で, 指定した点に最も近い点を得る.
 	// slist	図形リスト
-	// p	点
-	// d	距離
+	// p	指定した点
+	// d	指定した距離
 	// v	最も近い頂点
 	bool slist_find_vertex_closest(
-		const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const float d, D2D1_POINT_2F& v) noexcept
+		const SHAPE_LIST& slist,
+		const D2D1_POINT_2F& p,
+		const double d, 
+		D2D1_POINT_2F& v
+	) noexcept
 	{
 		bool flag = false;	// 頂点があったかどうかのフラグ
-		float dd = d * d;	// 距離の二乗
+		double dd = d * d;	// 距離の二乗
 		for (const auto s : slist) {
 			if (s->is_deleted() || s->is_selected()) {
 				continue;

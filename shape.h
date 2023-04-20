@@ -374,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t);
 	// 選択されてない図形の頂点の中から 指定した点に最も近い点を見つける.
-	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const float d, D2D1_POINT_2F& val) noexcept;
+	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const double d, D2D1_POINT_2F& val) noexcept;
 
 	//------------------------------
 	// 図形のひな型
@@ -399,7 +399,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		virtual ~Shape(void) noexcept {}	// 派生クラスのデストラクタを呼ぶために仮想化が必要.
-		// 図形を描画する前に設定する.
+		// 描画前に必要な変数を格納する.
 		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale);
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
@@ -467,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 		//virtual bool get_poly_closed(bool& /*val*/) const noexcept { return false; }
 		virtual bool get_poly_end(D2D1_FIGURE_END& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept { return false; }
+		virtual bool get_pos_nearest(const D2D1_POINT_2F/*p*/, double&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept { return false; }
 		// 指定した部位の点を得る.
 		virtual	void get_pos_loc(const uint32_t/*loc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 始点を得る.
@@ -704,7 +704,7 @@ namespace winrt::GraphPaper::implementation
 		// 画素の色を得る.
 		bool get_pixcel(const D2D1_POINT_2F p, D2D1_COLOR_F& val) const noexcept;
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(const D2D1_POINT_2F /*p*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept final override;
+		virtual bool get_pos_nearest(const D2D1_POINT_2F /*p*/, double& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 指定した部位の点を得る.
 		virtual void get_pos_loc(const uint32_t /*loc*/, D2D1_POINT_2F&/*val*/) const noexcept final override;
 		// 開始点を得る.
@@ -1153,7 +1153,7 @@ namespace winrt::GraphPaper::implementation
 		// 境界矩形を得る.
 		void get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept final override;
 		// 近傍の点を見つける.
-		bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept final override;
+		bool get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept final override;
 		// 頂点を得る.
 		size_t get_verts(D2D1_POINT_2F p[]) const noexcept final override;
 		// 図形が点を含むか判定する.
@@ -1516,7 +1516,7 @@ namespace winrt::GraphPaper::implementation
 		// 開始点を得る.
 		bool get_pos_start(D2D1_POINT_2F& val) const noexcept final override;
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
+		virtual bool get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept override;
 		// 点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
 		// 図形が点を含むか判定する.
@@ -1557,7 +1557,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
 		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
+		virtual bool get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept override;
 		// 値を, 指定した部位の点に格納する.
 		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 頂点を得る.

@@ -454,12 +454,12 @@ namespace winrt::GraphPaper::implementation
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeLine::get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept
+	bool ShapeLine::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool done = false;
 		D2D1_POINT_2F d;
 		pt_sub(m_start, p, d);
-		float d_abs = static_cast<float>(pt_abs2(d));
+		double d_abs = pt_abs2(d);
 		if (d_abs < dd) {
 			dd = d_abs;
 			val = m_start;
@@ -467,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_POINT_2F q{ m_start.x + m_pos.x, m_start.y + m_pos.y };
 		pt_sub(q, p, d);
-		d_abs = static_cast<float>(pt_abs2(d));
+		d_abs = pt_abs2(d);
 		if (d_abs < dd) {
 			dd = d_abs;
 			val = q;
@@ -478,7 +478,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(m_start.y + 0.5 * m_pos.y)
 		};
 		pt_sub(r, p, d);
-		d_abs = static_cast<float>(pt_abs2(d));
+		d_abs = pt_abs2(d);
 		if (d_abs < dd) {
 			dd = d_abs;
 			val = r;

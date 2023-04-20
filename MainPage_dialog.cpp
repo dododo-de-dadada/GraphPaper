@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 			// ƒƒbƒN‚Å‚«‚È‚¢ê‡
 			return;
 		}
-		// ‚Ð‚ÈŒ^‚É•`‰æ‚É•K—v‚È•Ï”‚ðŠi”[‚·‚é.
+		// •`‰æ‘O‚É•K—v‚È•Ï”‚ðŠi”[‚·‚é.
 		m_prop_page.begin_draw(m_prop_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
 		m_prop_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
 		m_prop_d2d.m_d2d_context->BeginDraw();

@@ -23,8 +23,8 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「画像の縦横比を維持」に印をつける.
 	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
 	{
-		tmfi_menu_image_keep_aspect().IsChecked(keep_aspect);
-		tmfi_menu_image_keep_aspect_2().IsChecked(keep_aspect);
+		tmfi_menu_meth_image_keep_asp().IsChecked(keep_aspect);
+		tmfi_menu_meth_image_keep_asp_2().IsChecked(keep_aspect);
 	}
 
 	// 画像メニューの「原画像に戻す」が選択された.

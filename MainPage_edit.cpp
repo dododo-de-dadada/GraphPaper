@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == mfi_menu_edit_poly_close() || sender == mfi_popup_edit_poly_close()) {
+		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_edit_poly_close()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
 				undo_push_null();
@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			}
 		}
-		else if (sender == mfi_menu_edit_poly_open() || sender == mfi_popup_edit_poly_open()) {
+		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_edit_poly_open()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
 				undo_push_null();
@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 		const auto str_arc_sweep_direction{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction") };
 		const auto str_arc_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize") };
 		const auto str_arc_counter_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize") };
-		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_edit_arc_rotation") };
+		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_rotation") };
 
 		ShapeArc* t;	// ï“èWÇ∑ÇÈâ~å ê}å`
 		if (m_event_shape_prev != nullptr &&

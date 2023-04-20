@@ -347,6 +347,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
+
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -359,6 +360,7 @@ namespace winrt::GraphPaper::implementation
 		join_style_is_checked(m_main_page.m_join_style);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
 		color_code_is_checked(m_color_code);
@@ -589,14 +591,11 @@ m_snap_grid = dt_reader.ReadBoolean();
 			if constexpr (!RESUME && !SETTING_ONLY) {
 				file_recent_add(s_file);
 				file_finish_reading();
-				// 保存されたスクロールバーの値が, 表示できる範囲ならば, 
 				// 値をスクロールバーに格納する.
-				if (scroll_h >= sb_horz().Minimum() && scroll_h <= sb_horz().Maximum()) {
-					sb_horz().Value(scroll_h);
-				}
-				if (scroll_v >= sb_vert().Minimum() && scroll_v <= sb_vert().Maximum()) {
-					sb_vert().Value(scroll_v);
-				}
+				// ファイルを開いたとき, ウィンドウの大きさが異なる場合もあるので,
+				// かならずしも同じ位置が復元できるとは限らない.
+				sb_horz().Value(scroll_h);
+				sb_vert().Value(scroll_v);
 				main_draw();
 			}
 		}
@@ -901,11 +900,11 @@ m_snap_grid = dt_reader.ReadBoolean();
 			dt_writer.WriteSingle(m_background_color.g);
 			dt_writer.WriteSingle(m_background_color.b);
 			dt_writer.WriteSingle(1.0f);
-			// その他
+
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
-dt_writer.WriteSingle(m_main_scale);
-dt_writer.WriteBoolean(m_snap_grid);
+			dt_writer.WriteSingle(m_main_scale);
+			dt_writer.WriteBoolean(m_snap_grid);
 			dt_writer.WriteSingle(m_snap_point);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);

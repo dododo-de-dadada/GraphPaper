@@ -241,19 +241,19 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_ungroup().IsEnabled(exists_selected_group);
 		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 		// そうしないと, 子の項目の可否がただちに反映しない.
-		mfsi_menu_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+		mfsi_menu_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
 		mfsi_popup_edit_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-		mfi_menu_edit_poly_open().IsEnabled(exists_selected_poly_close);
+		mfi_menu_meth_poly_open().IsEnabled(exists_selected_poly_close);
 		mfi_popup_edit_poly_open().IsEnabled(exists_selected_poly_close);
-		mfi_menu_edit_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_menu_meth_poly_close().IsEnabled(exists_selected_poly_open);
 		mfi_popup_edit_poly_close().IsEnabled(exists_selected_poly_open);
-		mfi_menu_edit_arc().IsEnabled(exists_selected_arc);
+		mfi_menu_meth_arc_rot().IsEnabled(exists_selected_arc);
 		mfi_popup_edit_arc().IsEnabled(exists_selected_arc);
-		mfi_menu_edit_text().IsEnabled(exists_selected_text);
+		mfi_menu_meth_text_edit().IsEnabled(exists_selected_text);
 		mfi_popup_edit_text().IsEnabled(exists_selected_text);
-		mfi_menu_find_text().IsEnabled(exists_text);
+		mfi_menu_meth_text_find().IsEnabled(exists_text);
 		mfi_popup_find_text().IsEnabled(exists_text);
-		mfi_menu_fit_text_frame().IsEnabled(exists_selected_text);
+		mfi_menu_meth_text_fit_frame().IsEnabled(exists_selected_text);
 		mfi_popup_fit_text_frame().IsEnabled(exists_selected_text);
 		mfi_menu_bring_forward().IsEnabled(enable_forward);
 		mfi_popup_bring_forward().IsEnabled(enable_forward);
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_send_backward().IsEnabled(enable_backward);
 		mfsi_menu_order().IsEnabled(enable_forward || enable_backward);
 		mfsi_popup_order().IsEnabled(enable_forward || enable_backward);
-		mfi_menu_image_revert().IsEnabled(exists_selected_image);
+		mfi_menu_meth_image_revert().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}
 

@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	float Shape::m_loc_rhombus_outer =	// 部位 (ひし型) の中心から外側の頂点までの半分の長さ
 		static_cast<FLOAT>(sqrt((LOC_LEN + 4.0) * (LOC_LEN + 4.0) * 0.5) * 0.5);
 
-	// 図形を描画する前に設定する.
+	// 描画前に必要な変数を格納する.
 	void Shape::begin_draw(
 		ID2D1RenderTarget* target,	// D2D 描画対象
 		const bool located,	// 部位の表示/非表示

@@ -284,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の表記
+		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の記法
 		bool m_snap_grid = true;	// 点を方眼にくっつける.
 		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点と点をくっつける間隔
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
@@ -438,6 +438,7 @@ namespace winrt::GraphPaper::implementation
 		void event_arrange_popup_font(const bool visible);
 		void event_arrange_popup_image(const bool visible);
 		void event_arrange_popup_layout(const bool visible);
+		//void event_menu_is_checked(void);
 
 		//-------------------------------
 		// MainPage_file.cpp
@@ -489,12 +490,12 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_edit.cpp
-		// 多角形の終端の編集, 文字列の編集, 円弧の傾きの編集
+		// 多角形の終端, 文字列の編集, 円弧の傾きの編集
 		//-------------------------------
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
 		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「多角形の終端の編集」のサブ項目が選択された.
+		// 編集メニューの「多角形の終端」のサブ項目が選択された.
 		void edit_poly_end_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -626,9 +627,9 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色の記法」に印をつける.
+		// その他メニューの「色成分の記法」に印をつける.
 		void color_code_is_checked(const COLOR_CODE c_code);
-		// その他メニューの「色の記法」のサブ項目が選択された.
+		// その他メニューの「色成分の記法」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);

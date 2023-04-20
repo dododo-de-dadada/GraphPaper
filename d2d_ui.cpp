@@ -699,7 +699,8 @@ namespace winrt::GraphPaper::implementation
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
 		m_d2d_context = nullptr;
 		winrt::check_hresult(
-			d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put()));
+			d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put())
+		);
 
 	};
 
