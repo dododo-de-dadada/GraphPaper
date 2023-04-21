@@ -214,10 +214,10 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_pressed = summary->get_shape();
 		m_main_page.set_attr_to(m_event_shape_pressed);
 		// メニューバーを更新する
-		dash_style_is_checked(m_main_page.m_dash_style);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		cap_style_is_checked(m_main_page.m_stroke_cap);
-		join_style_is_checked(m_main_page.m_join_style);
+		prop_dash_style_is_checked(m_main_page.m_dash_style);
+		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+		prop_join_style_is_checked(m_main_page.m_join_style);
 		arrow_style_is_checked(m_main_page.m_arrow_style);
 		font_weight_is_checked(m_main_page.m_font_weight);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -431,8 +431,6 @@ namespace winrt::GraphPaper::implementation
 		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるようスクロールする.
 			scroll_to(t);
-//			m_main_page.set_attr_to(t);
-//			layout_is_checked();
 		}
 
 		// 編集メニュー項目の使用の可否を設定する.

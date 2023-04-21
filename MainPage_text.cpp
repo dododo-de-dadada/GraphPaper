@@ -48,42 +48,6 @@ namespace winrt::GraphPaper::implementation
 #endif
 	}
 
-	// 書体メニューの「枠を文字列に合わせる」が選択された.
-	void MainPage::fit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto flag = false;
-		//const auto g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
-		const auto g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
-		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			else if (!s->is_selected()) {
-				continue;
-			}
-			else if (typeid(*s) != typeid(ShapeText)) {
-				continue;
-			}
-			auto u = new UndoDeform(s, LOC_TYPE::LOC_SE);
-			if (static_cast<ShapeText*>(s)->fit_frame_to_text(g_len)) {
-				m_ustack_undo.push_back(u);
-				if (!flag) {
-					flag = true;
-				}
-			}
-			else {
-				delete u;
-			}
-		}
-		if (flag) {
-			undo_push_null();
-			undo_menu_is_enabled();
-			main_panel_size();
-			main_draw();
-		}
-		status_bar_set_pos();
-	}
-
 	// 書体メニューの「段落のそろえ」が選択された.
 	void MainPage::text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&)
 	{

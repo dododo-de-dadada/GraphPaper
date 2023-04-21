@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 			//CAP_STYLE val;
 			D2D1_CAP_STYLE val;
 			m_main_page.get_stroke_cap(val);
-			cap_style_is_checked(val);
+			prop_cap_style_is_checked(val);
 		}
 		//else if (u_type == typeid(UndoValue<UNDO_T::DASH_CAP>)) {
 		//	D2D1_CAP_STYLE val;
@@ -374,17 +374,17 @@ namespace winrt::GraphPaper::implementation
 		else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
 			m_main_page.get_dash_style(val);
-			dash_style_is_checked(val);
+			prop_dash_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
 			m_main_page.get_join_style(val);
-			join_style_is_checked(val);
+			prop_join_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_WIDTH>)) {
 			float val;
 			m_main_page.get_stroke_width(val);
-			stroke_width_is_checked(val);
+			prop_stroke_width_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;

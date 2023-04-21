@@ -743,13 +743,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_menu_is_checked(void)
 	{
 		arrow_style_is_checked(m_main_page.m_arrow_style);
-		cap_style_is_checked(m_main_page.m_stroke_cap);
-		dash_style_is_checked(m_main_page.m_dash_style);
+		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+		prop_dash_style_is_checked(m_main_page.m_dash_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_weight_is_checked(m_main_page.m_font_weight);
-		join_style_is_checked(m_main_page.m_join_style);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
+		prop_join_style_is_checked(m_main_page.m_join_style);
+		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
@@ -941,40 +941,40 @@ namespace winrt::GraphPaper::implementation
 			mfs_popup_sepa_select_group().Visibility(Visibility::Collapsed);
 		}
 		int edit_visible = 0;
-		if (mfsi_popup_edit_poly_end().IsEnabled()) {
-			mfsi_popup_edit_poly_end().Visibility(Visibility::Visible);
+		if (mfsi_popup_meth_poly_end().IsEnabled()) {
+			mfsi_popup_meth_poly_end().Visibility(Visibility::Visible);
 			edit_visible++;
 		}
 		else {
-			mfsi_popup_edit_poly_end().Visibility(Visibility::Collapsed);
+			mfsi_popup_meth_poly_end().Visibility(Visibility::Collapsed);
 		}
-		if (mfi_popup_edit_arc().IsEnabled()) {
-			mfi_popup_edit_arc().Visibility(Visibility::Visible);
+		if (mfi_popup_meth_arc_rot().IsEnabled()) {
+			mfi_popup_meth_arc_rot().Visibility(Visibility::Visible);
 			edit_visible++;
 		}
 		else {
-			mfi_popup_edit_arc().Visibility(Visibility::Collapsed);
+			mfi_popup_meth_arc_rot().Visibility(Visibility::Collapsed);
 		}
-		if (mfi_popup_edit_text().IsEnabled()) {
-			mfi_popup_edit_text().Visibility(Visibility::Visible);
+		if (mfi_popup_meth_text_edit().IsEnabled()) {
+			mfi_popup_meth_text_edit().Visibility(Visibility::Visible);
 			edit_visible++;
 		}
 		else {
-			mfi_popup_edit_text().Visibility(Visibility::Collapsed);
+			mfi_popup_meth_text_edit().Visibility(Visibility::Collapsed);
 		}
-		if (mfi_popup_find_text().IsEnabled()) {
-			mfi_popup_find_text().Visibility(Visibility::Visible);
+		if (mfi_popup_meth_text_find().IsEnabled()) {
+			mfi_popup_meth_text_find().Visibility(Visibility::Visible);
 			edit_visible++;
 		}
 		else {
-			mfi_popup_find_text().Visibility(Visibility::Collapsed);
+			mfi_popup_meth_text_find().Visibility(Visibility::Collapsed);
 		}
-		if (mfi_popup_fit_text_frame().IsEnabled()) {
-			mfi_popup_fit_text_frame().Visibility(Visibility::Visible);
+		if (mfi_popup_meth_text_fit_frame().IsEnabled()) {
+			mfi_popup_meth_text_fit_frame().Visibility(Visibility::Visible);
 			edit_visible++;
 		}
 		else {
-			mfi_popup_fit_text_frame().Visibility(Visibility::Collapsed);
+			mfi_popup_meth_text_fit_frame().Visibility(Visibility::Collapsed);
 		}
 		if ((undo_visible + xcvd_visible + select_visible + group_visible > 0 && edit_visible > 1) ||
 			(undo_visible + xcvd_visible + select_visible + group_visible > 1 && edit_visible > 0)) {
@@ -1001,10 +1001,10 @@ namespace winrt::GraphPaper::implementation
 			// 押された図形の属性値を表示に格納する.
 			m_main_page.set_attr_to(pressed);
 			// メニューバーを更新する
-			dash_style_is_checked(m_main_page.m_dash_style);
-			stroke_width_is_checked(m_main_page.m_stroke_width);
-			cap_style_is_checked(m_main_page.m_stroke_cap);
-			join_style_is_checked(m_main_page.m_join_style);
+			prop_dash_style_is_checked(m_main_page.m_dash_style);
+			prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+			prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+			prop_join_style_is_checked(m_main_page.m_join_style);
 			arrow_style_is_checked(m_main_page.m_arrow_style);
 			font_weight_is_checked(m_main_page.m_font_weight);
 			font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -1115,10 +1115,10 @@ namespace winrt::GraphPaper::implementation
 			m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 			m_main_page.set_attr_to(m_event_shape_pressed);
 			// メニューバーを更新する
-			dash_style_is_checked(m_main_page.m_dash_style);
-			stroke_width_is_checked(m_main_page.m_stroke_width);
-			cap_style_is_checked(m_main_page.m_stroke_cap);
-			join_style_is_checked(m_main_page.m_join_style);
+			prop_dash_style_is_checked(m_main_page.m_dash_style);
+			prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+			prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+			prop_join_style_is_checked(m_main_page.m_join_style);
 			arrow_style_is_checked(m_main_page.m_arrow_style);
 			font_weight_is_checked(m_main_page.m_font_weight);
 			font_stretch_is_checked(m_main_page.m_font_stretch);
@@ -1213,10 +1213,10 @@ namespace winrt::GraphPaper::implementation
 			if (t_stamp - m_event_time_pressed <= c_time && m_event_shape_pressed != nullptr) {
 				// ダブルクリックの確定.
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
-					edit_text_click_async(nullptr, nullptr);
+					meth_text_edit_click_async(nullptr, nullptr);
 				}
 				else if (typeid(*m_event_shape_pressed) == typeid(ShapeArc)) {
-					edit_arc_click_async(nullptr, nullptr);
+					meth_arc_click_async(nullptr, nullptr);
 				}
 			}
 		}

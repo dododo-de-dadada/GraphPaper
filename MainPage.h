@@ -485,8 +485,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 「...色」が選択された.
 		template <UNDO_T U> IAsyncAction color_click_async(void);
-		// 属性メニューの「塗りつぶし色」が選択された.
-		void fill_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::FILL_COLOR>(); }
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -494,11 +492,11 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
-		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction meth_arc_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「多角形の終端」のサブ項目が選択された.
-		void edit_poly_end_click(IInspectable const&, RoutedEventArgs const&);
+		void meth_poly_end_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
-		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction meth_text_edit_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -519,6 +517,15 @@ namespace winrt::GraphPaper::implementation
 		void find_replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
 		void find_replace_click(IInspectable const&, RoutedEventArgs const&);
+		// 画像メニューの「画像の縦横比を維持」が選択された.
+		void meth_image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 画像メニューの「画像の縦横比を維持」に印をつける.
+		void image_keep_aspect_is_checked(const bool keep_aspect);
+		// 画像メニューの「原画像に戻す」が選択された.
+		void meth_image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 操作メニューの「枠を文字列に合わせる」が選択された.
+		void meth_text_fit_frame_click(IInspectable const&, RoutedEventArgs const&);
+
 
 		//-------------------------------
 		//　MainPage_font.cpp
@@ -610,15 +617,6 @@ namespace winrt::GraphPaper::implementation
 		// MainPage_image.cpp
 		// 画像
 		//-----------------------------
-
-		// 画像メニューの「画像の縦横比を維持」が選択された.
-		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「画像の縦横比を維持」に印をつける.
-		void image_keep_aspect_is_checked(const bool keep_aspect);
-		// 画像メニューの「原画像に戻す」が選択された.
-		void image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「画像の不透明度...」が選択された.
-		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-----------------------------
 		// MainPage_misc.cpp
@@ -731,8 +729,6 @@ namespace winrt::GraphPaper::implementation
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼の表示」が選択された.
 		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
-		// レイアウトメニューの項目に印をつける.
-		//void layout_is_checked(void) noexcept;
 		// レイアウトを既定値に戻す.
 		void layout_init(void) noexcept;
 		// レイアウトメニューの「レイアウトをリセット」が選択された.
@@ -781,37 +777,42 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
 		void status_bar_set_zoom(void);
-		// 属性メニューの「色」が選択された.
-		void stroke_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::STROKE_COLOR>(); }
 
 		//------------------------------
 		// MainPage_stroke.cpp
 		// 線枠
 		//------------------------------
 
+		// 属性メニューの「塗りつぶし色」が選択された.
+		void prop_fill_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::FILL_COLOR>(); }
 		// 属性メニューの「端の形式」に印をつける.
-		void cap_style_is_checked(const D2D1_CAP_STYLE& s_cap);
-		//void cap_style_is_checked(const CAP_STYLE& s_cap);
+		void prop_cap_style_is_checked(const D2D1_CAP_STYLE& s_cap);
+		//void prop_cap_style_is_checked(const CAP_STYLE& s_cap);
 		// 属性メニューの「端の形式」が選択された.
-		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		void prop_cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 属性メニューの「破線の形式」のサブ項目が選択された.
-		void dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		void prop_dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 属性メニューの「破線の形式」に印をつける.
-		void dash_style_is_checked(const D2D1_DASH_STYLE d_style);
+		void prop_dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 属性メニューの「破線の配列」が選択された.
-		IAsyncAction dash_pat_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction prop_dash_pat_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
-		IAsyncAction join_miter_limit_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction prop_join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 属性メニューの「線の結合の形式」に印をつける.
-		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
+		void prop_join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		// 属性メニューの「結合の形式」が選択された.
-		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		void prop_join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 属性メニューの「太さ」のサブ項目が選択された.
-		void stroke_width_click(IInspectable const&, RoutedEventArgs const&);
+		void prop_stroke_width_click(IInspectable const&, RoutedEventArgs const&);
 		// 属性メニューの「太さ」>「その他」が選択された.
-		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction prop_stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 属性メニューの「太さ」が選択された.
-		void stroke_width_is_checked(const float s_width) noexcept;
+		void prop_stroke_width_is_checked(const float s_width) noexcept;
+		// 属性メニューの「色」が選択された.
+		void prop_stroke_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::STROKE_COLOR>(); }
+		// 属性メニューの「画像の不透明度...」が選択された.
+		IAsyncAction prop_image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+
 
 		//-------------------------------
 		// MainPage_summary.cpp
@@ -881,8 +882,6 @@ namespace winrt::GraphPaper::implementation
 		void text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val);
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
-		// 書体メニューの「枠を文字列に合わせる」が選択された.
-		void fit_text_frame_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.

@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Slider;
 
 	// 編集メニューの「文字列の編集」が選択された.
-	IAsyncAction MainPage::edit_text_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::meth_text_edit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = static_cast<ShapeText*>(nullptr);	// 編集する文字列図形
 		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
@@ -59,9 +59,9 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	void MainPage::edit_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::meth_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_edit_poly_close()) {
+		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_meth_poly_close()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
 				undo_push_null();
@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			}
 		}
-		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_edit_poly_open()) {
+		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_popup_poly_open()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
 				undo_push_null();
@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::meth_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		const auto str_arc_start{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": "};
 		const auto str_arc_end{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_end") + L": " };
@@ -344,4 +344,75 @@ namespace winrt::GraphPaper::implementation
 		}
 		status_bar_set_pos();
 	}
+
+	// 操作メニューの「画像を原画像に戻す」が選択された.
+	void MainPage::meth_image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	{
+		for (Shape* const s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
+				continue;
+			}
+			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
+			undo_push_image(s);
+			static_cast<ShapeImage*>(s)->revert();
+		}
+		undo_push_null();
+		undo_menu_is_enabled();
+		//xcvd_menu_is_enabled();
+		main_panel_size();
+		main_draw();
+		status_bar_set_pos();
+	}
+
+	// 操作メニューの「画像の縦横比を維持」が選択された.
+	void MainPage::meth_image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	{
+		m_image_keep_aspect = !m_image_keep_aspect;
+		status_bar_set_pos();
+	}
+
+	// 操作メニューの「画像の縦横比を維持」に印をつける.
+	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
+	{
+		tmfi_menu_meth_image_keep_asp().IsChecked(keep_aspect);
+		tmfi_menu_meth_image_keep_asp_2().IsChecked(keep_aspect);
+	}
+
+	// 操作メニューの「枠を文字列に合わせる」が選択された.
+	void MainPage::meth_text_fit_frame_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		auto flag = false;
+		//const auto g_len = (m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+		const auto g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+		for (auto s : m_main_page.m_shape_list) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			else if (!s->is_selected()) {
+				continue;
+			}
+			else if (typeid(*s) != typeid(ShapeText)) {
+				continue;
+			}
+			auto u = new UndoDeform(s, LOC_TYPE::LOC_SE);
+			if (static_cast<ShapeText*>(s)->fit_frame_to_text(g_len)) {
+				m_ustack_undo.push_back(u);
+				if (!flag) {
+					flag = true;
+				}
+			}
+			else {
+				delete u;
+			}
+		}
+		if (flag) {
+			undo_push_null();
+			undo_menu_is_enabled();
+			main_panel_size();
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+
 }

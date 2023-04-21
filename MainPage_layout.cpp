@@ -405,64 +405,6 @@ namespace winrt::GraphPaper::implementation
 		//mru_list.Clear();
 	}
 
-	/*
-	// レイアウトメニューの項目に印をつける.
-	void MainPage::layout_is_checked(void) noexcept
-	{
-		ARROW_STYLE a_style;
-		m_main_page.get_arrow_style(a_style);
-		arrow_style_is_checked(a_style);
-
-		DWRITE_FONT_STYLE f_style;
-		m_main_page.get_font_style(f_style);
-		font_style_is_checked(f_style);
-
-		DWRITE_FONT_STRETCH f_stretch;
-		m_main_page.get_font_stretch(f_stretch);
-		font_stretch_is_checked(f_stretch);
-
-		DWRITE_FONT_WEIGHT f_weight;
-		m_main_page.get_font_weight(f_weight);
-		font_weight_is_checked(f_weight);
-
-		D2D1_DASH_STYLE s_style;
-		m_main_page.get_dash_style(s_style);
-		dash_style_is_checked(s_style);
-
-		D2D1_LINE_JOIN j_style;
-		m_main_page.get_join_style(j_style);
-		join_style_is_checked(j_style);
-
-		float s_width;
-		m_main_page.get_stroke_width(s_width);
-		stroke_width_is_checked(s_width);
-
-		DWRITE_TEXT_ALIGNMENT t_align_horz;
-		m_main_page.get_text_align_horz(t_align_horz);
-		text_align_horz_is_checked(t_align_horz);
-
-		DWRITE_PARAGRAPH_ALIGNMENT t_align_vert;
-		m_main_page.get_text_align_vert(t_align_vert);
-		text_align_vert_is_checked(t_align_vert);
-
-		GRID_EMPH g_emph;
-		m_main_page.get_grid_emph(g_emph);
-		grid_emph_is_checked(g_emph);
-
-		GRID_SHOW g_show;
-		m_main_page.get_grid_show(g_show);
-		grid_show_is_checked(g_show);
-
-		//bool g_snap;
-		//m_main_page.get_snap_grid(g_snap);
-		//tmfi_menu_snap_grid().IsChecked(g_snap);
-
-		//float scale;
-		//m_main_page.get_page_scale(scale);
-		//zoom_is_checked(scale);
-	}
-	*/
-
 	// レイアウトを既定値に戻す.
 	void MainPage::layout_init(void) noexcept
 	{
@@ -601,10 +543,10 @@ namespace winrt::GraphPaper::implementation
 		font_weight_is_checked(m_main_page.m_font_weight);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
-		cap_style_is_checked(m_main_page.m_stroke_cap);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		dash_style_is_checked(m_main_page.m_dash_style);
-		join_style_is_checked(m_main_page.m_join_style);
+		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+		prop_dash_style_is_checked(m_main_page.m_dash_style);
+		prop_join_style_is_checked(m_main_page.m_join_style);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		background_color_is_checked(m_background_show, m_background_color);
@@ -1010,4 +952,67 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// その他メニューの「ズーム」のサブ項目に印をつける.
+	void MainPage::zoom_is_checked(float scale)
+	{
+		rmfi_menu_layout_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_popup_layout_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_menu_layout_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_popup_layout_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_menu_layout_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_popup_layout_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_menu_layout_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_popup_layout_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_menu_layout_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_popup_layout_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_menu_layout_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_popup_layout_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_menu_layout_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_popup_layout_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_menu_layout_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_popup_layout_zoom_025().IsChecked(equal(scale, 0.25f));
+	}
+
+	// その他メニューの「ズーム」が選択された.
+	void MainPage::zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		float scale;
+		if (sender == rmfi_menu_layout_zoom_100() || sender == rmfi_popup_layout_zoom_100()) {
+			scale = 1.0f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_150() || sender == rmfi_popup_layout_zoom_150()) {
+			scale = 1.5f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_200() || sender == rmfi_popup_layout_zoom_200()) {
+			scale = 2.0f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_300() || sender == rmfi_popup_layout_zoom_300()) {
+			scale = 3.0f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_400() || sender == rmfi_popup_layout_zoom_400()) {
+			scale = 4.0f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_075() || sender == rmfi_popup_layout_zoom_075()) {
+			scale = 0.75f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_050() || sender == rmfi_popup_layout_zoom_050()) {
+			scale = 0.5f;
+		}
+		else if (sender == rmfi_menu_layout_zoom_025() || sender == rmfi_popup_layout_zoom_025()) {
+			scale = 0.25f;
+		}
+		else {
+			return;
+		}
+		zoom_is_checked(scale);
+		//if (scale != m_main_page.m_page_scale) {
+		//	m_main_page.m_page_scale = scale;
+		if (scale != m_main_scale) {
+			m_main_scale = scale;
+			main_panel_size();
+			main_draw();
+			status_bar_set_zoom();
+		}
+		status_bar_set_pos();
+	}
 }

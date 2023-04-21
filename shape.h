@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		virtual ~Shape(void) noexcept {}	// 派生クラスのデストラクタを呼ぶために仮想化が必要.
 		// 描画前に必要な変数を格納する.
-		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale);
+		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale) noexcept;
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
 		// 図形をデータライターに PDF として書き込む.

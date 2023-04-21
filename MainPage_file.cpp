@@ -354,10 +354,10 @@ namespace winrt::GraphPaper::implementation
 		font_weight_is_checked(m_main_page.m_font_weight);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
-		cap_style_is_checked(m_main_page.m_stroke_cap);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		dash_style_is_checked(m_main_page.m_dash_style);
-		join_style_is_checked(m_main_page.m_join_style);
+		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
+		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+		prop_dash_style_is_checked(m_main_page.m_dash_style);
+		prop_join_style_is_checked(m_main_page.m_join_style);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 

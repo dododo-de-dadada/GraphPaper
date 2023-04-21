@@ -276,11 +276,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_event_shape_prev = s;
 		}
-		if (s->is_selected()) {
-			// 押された図形が選択されている場合,
-//			m_main_page.set_attr_to(s);
-//			layout_is_checked();
-		}
 	}
 
 	// 矩形に含まれる図形の選択を反転する.
