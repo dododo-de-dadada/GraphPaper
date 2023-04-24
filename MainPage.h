@@ -798,17 +798,17 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction prop_dash_pat_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
 		IAsyncAction prop_join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 属性メニューの「線の結合の形式」に印をつける.
+		// 属性メニューの「線の結合の形式」のサブ項目に印をつける.
 		void prop_join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		// 属性メニューの「結合の形式」が選択された.
 		void prop_join_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 属性メニューの「太さ」のサブ項目が選択された.
+		// 属性メニューの「線枠の太さ」のサブ項目が選択された.
 		void prop_stroke_width_click(IInspectable const&, RoutedEventArgs const&);
-		// 属性メニューの「太さ」>「その他」が選択された.
+		// 属性メニューの「線枠の太さ」>「その他」が選択された.
 		IAsyncAction prop_stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 属性メニューの「太さ」が選択された.
+		// 属性メニューの「線枠の太さ」のサブ項目に印をつける.
 		void prop_stroke_width_is_checked(const float s_width) noexcept;
-		// 属性メニューの「色」が選択された.
+		// 属性メニューの「線枠の色」が選択された.
 		void prop_stroke_color_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::STROKE_COLOR>(); }
 		// 属性メニューの「画像の不透明度...」が選択された.
 		IAsyncAction prop_image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
