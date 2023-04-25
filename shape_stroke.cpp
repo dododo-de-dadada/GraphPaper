@@ -36,9 +36,9 @@ namespace winrt::GraphPaper::implementation
 	// ü˜g‚ÌŒ`®‚ğ“¾‚é.
 	// val	“¾‚ç‚ê‚½’l
 	// –ß‚è’l	‚Â‚Ë‚É true
-	bool ShapeStroke::get_dash_style(D2D1_DASH_STYLE& val) const noexcept
+	bool ShapeStroke::get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept
 	{
-		val = m_dash_style;
+		val = m_stroke_dash;
 		return true;
 	}
 
@@ -54,9 +54,9 @@ namespace winrt::GraphPaper::implementation
 	// ü•ª‚ÌŒ‹‡‚ğ“¾‚é.
 	// val	“¾‚ç‚ê‚½’l
 	// –ß‚è’l	‚Â‚Ë‚É true
-	bool ShapeStroke::get_join_style(D2D1_LINE_JOIN& val) const noexcept
+	bool ShapeStroke::get_stroke_join(D2D1_LINE_JOIN& val) const noexcept
 	{
-		val = m_join_style;
+		val = m_stroke_join;
 		return true;
 	}
 
@@ -95,21 +95,21 @@ namespace winrt::GraphPaper::implementation
 		if (m_stroke_width < FLT_MIN) {
 			return E_FAIL;
 		}
-		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+		if (m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
 			d_arr[0] = m_dash_pat.m_[2] / m_stroke_width;
 			d_arr[1] = m_dash_pat.m_[3] / m_stroke_width;
 			d_ptr = d_arr;
 			d_cnt = 2;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 		}
-		else if (m_dash_style == D2D1_DASH_STYLE_DASH) {
+		else if (m_stroke_dash == D2D1_DASH_STYLE_DASH) {
 			d_arr[0] = m_dash_pat.m_[0] / m_stroke_width;
 			d_arr[1] = m_dash_pat.m_[1] / m_stroke_width;
 			d_ptr = d_arr;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 2;
 		}
-		else if (m_dash_style == D2D1_DASH_STYLE_DASH_DOT) {
+		else if (m_stroke_dash == D2D1_DASH_STYLE_DASH_DOT) {
 			d_arr[0] = m_dash_pat.m_[0] / m_stroke_width;
 			d_arr[1] = m_dash_pat.m_[1] / m_stroke_width;
 			d_arr[2] = m_dash_pat.m_[2] / m_stroke_width;
@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 4;
 		}
-		else if (m_dash_style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
+		else if (m_stroke_dash == D2D1_DASH_STYLE_DASH_DOT_DOT) {
 			d_arr[0] = m_dash_pat.m_[0] / m_stroke_width;
 			d_arr[1] = m_dash_pat.m_[1] / m_stroke_width;
 			d_arr[2] = m_dash_pat.m_[2] / m_stroke_width;
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap,	// endCap
 			//m_dash_cap,	// dashCap
 			m_stroke_cap,	// dashCap
-			m_join_style,	// lineJoin
+			m_stroke_join,	// lineJoin
 			m_join_miter_limit,	// miterLimit
 			d_style,	// dashStyle
 			0.0f,
@@ -184,10 +184,10 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
 	// val	Ši”[‚·‚é’l
-	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE val) noexcept
+	bool ShapeStroke::set_stroke_dash(const D2D1_DASH_STYLE val) noexcept
 	{
-		if (m_dash_style != val) {
-			m_dash_style = val;
+		if (m_stroke_dash != val) {
+			m_stroke_dash = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -212,10 +212,10 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğü•ª‚ÌŒ‹‡‚ÉŠi”[‚·‚é.
 	// val	Ši”[‚·‚é’l
-	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& val)  noexcept
+	bool ShapeStroke::set_stroke_join(const D2D1_LINE_JOIN& val)  noexcept
 	{
-		if (m_join_style != val) {
-			m_join_style = val;
+		if (m_stroke_join != val) {
+			m_stroke_join = val;
 			m_d2d_stroke_style = nullptr;
 			return true;
 		}
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_stroke_width, val)) {
 			m_stroke_width = val;
-			if (m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
+			if (m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 				if (m_d2d_stroke_style != nullptr) {
 					m_d2d_stroke_style = nullptr;
 				}
@@ -256,9 +256,9 @@ namespace winrt::GraphPaper::implementation
 		prop->get_stroke_cap(m_stroke_cap);
 		prop->get_stroke_color(m_stroke_color);
 		prop->get_dash_pat(m_dash_pat);
-		prop->get_dash_style(m_dash_style);
+		prop->get_stroke_dash(m_stroke_dash);
 		prop->get_join_miter_limit(m_join_miter_limit);
-		prop->get_join_style(m_join_style);
+		prop->get_stroke_join(m_stroke_join);
 		prop->get_stroke_width(m_stroke_width);
 		m_d2d_stroke_style = nullptr;
 	}
@@ -290,9 +290,9 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadSingle()
 			}
 		}),
-		m_dash_style(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
+		m_stroke_dash(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
 		m_join_miter_limit(dt_reader.ReadSingle()),
-		m_join_style(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
+		m_stroke_join(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
 		m_d2d_stroke_style(nullptr)
 	{
 		// ’l‚ª–³Œø‚È‚ç, ƒy[ƒW‚Ì‘®«‚Ì’l‚ğ}Œ`‚ÉŠi”[‚·‚é.
@@ -332,21 +332,21 @@ namespace winrt::GraphPaper::implementation
 			m_dash_pat.m_[5] < 0.0f) {
 			m_dash_pat = DASH_PAT_DEFVAL;
 		}
-		if (m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID &&
-			m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH &&
-			m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT &&
-			m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT &&
-			m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-			m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
+		if (m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID &&
+			m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH &&
+			m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT &&
+			m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT &&
+			m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+			m_stroke_dash = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
 		}
 		if (m_join_miter_limit < 0.0f) {
 			m_join_miter_limit = JOIN_MITER_LIMIT_DEFVAL;
 		}
-		if (m_join_style != D2D1_LINE_JOIN_BEVEL &&
-			m_join_style != D2D1_LINE_JOIN_ROUND &&
-			m_join_style != D2D1_LINE_JOIN_MITER &&
-			m_join_style != D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			m_join_style = JOIN_STYLE_DEFVAL;
+		if (m_stroke_join != D2D1_LINE_JOIN_BEVEL &&
+			m_stroke_join != D2D1_LINE_JOIN_ROUND &&
+			m_stroke_join != D2D1_LINE_JOIN_MITER &&
+			m_stroke_join != D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			m_stroke_join = JOIN_STYLE_DEFVAL;
 		}
 	}
 
@@ -373,11 +373,11 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_dash_pat.m_[4]);
 		dt_writer.WriteSingle(m_dash_pat.m_[5]);
 		// ”jü‚ÌŒ`®
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash));
 		// ü‚ÌŒ‹‡‚Ìë‚è§ŒÀ
 		dt_writer.WriteSingle(m_join_miter_limit);
 		// ü‚ÌŒ‹‡‚ÌŒ`®
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join));
 	}
 
 }

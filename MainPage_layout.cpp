@@ -13,12 +13,14 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::TextBlock;
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 	using winrt::Windows::UI::Xaml::Setter;
+	using winrt::Windows::Storage::StorageDeleteOption;
+
 
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 背景パターンの画像ブラシを得る.
-	void MainPage::background_get_brush() noexcept
+	void MainPage::background_get_brush(void) noexcept
 	{
 		HRESULT hr = S_OK;
 		// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
@@ -127,21 +129,32 @@ namespace winrt::GraphPaper::implementation
 	// g_emph	方眼の強調
 	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
-		rmfi_menu_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_popup_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_menu_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_popup_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_menu_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
-		rmfi_popup_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+		if (g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0) {
+			rmfi_menu_grid_emph_1().IsChecked(true);
+			rmfi_popup_grid_emph_1().IsChecked(true);
+		}
+		else if (g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0) {
+			rmfi_menu_grid_emph_2().IsChecked(true);
+			rmfi_popup_grid_emph_2().IsChecked(true);
+		}
+		else if (g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0) {
+			rmfi_menu_grid_emph_3().IsChecked(true);
+			rmfi_popup_grid_emph_3().IsChecked(true);
+		}
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		m_mutex_event.lock();
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		const auto str_grid_length{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " };
-		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") };
+		const auto str_grid_length{
+			ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": "
+		};
+		const auto str_title{
+			ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")
+		};
 		m_prop_page.set_attr_to(&m_main_page);
 		const auto dpi = m_prop_d2d.m_logical_dpi;
 		const auto g_len = m_prop_page.m_grid_base + 1.0;
@@ -181,7 +194,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_combo_box_0().Visibility(Visibility::Visible);
 
 		cd_dialog_prop().Title(box_value(str_title));
-		m_mutex_event.lock();
 		{
 			const auto revoker0{
 				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
@@ -353,12 +365,10 @@ namespace winrt::GraphPaper::implementation
 		rmfi_menu_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
 		rmfi_popup_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
-	// レイアウトメニューの「レイアウトをリセット」が選択された.
+	// レイアウトメニューの「レイアウトを既定値に戻す」が選択された.
 	// データを保存したファイルがある場合, それを削除する.
 	IAsyncAction MainPage::layout_reset_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::Storage::StorageDeleteOption;
-
 		winrt::Windows::Storage::IStorageItem setting_item{
 			co_await ApplicationData::Current().LocalFolder().TryGetItemAsync(LAYOUT_FILE)
 		};
@@ -516,9 +526,9 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_stroke_color(COLOR_BLACK);
 			//m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_page.set_dash_pat(DASH_PAT_DEFVAL);
-			m_main_page.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+			m_main_page.set_stroke_dash(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 			m_main_page.set_join_miter_limit(JOIN_MITER_LIMIT_DEFVAL);
-			m_main_page.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+			m_main_page.set_stroke_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 			m_main_page.set_stroke_width(1.0);
 			m_main_page.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_page.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
@@ -537,20 +547,20 @@ namespace winrt::GraphPaper::implementation
 
 		//event_menu_is_checked();
 
-		arrow_style_is_checked(m_main_page.m_arrow_style);
+		stroke_arrow_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_weight_is_checked(m_main_page.m_font_weight);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
-		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
-		prop_dash_style_is_checked(m_main_page.m_dash_style);
-		prop_join_style_is_checked(m_main_page.m_join_style);
+		stroke_cap_is_checked(m_main_page.m_stroke_cap);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
+		stroke_dash_is_checked(m_main_page.m_stroke_dash);
+		stroke_join_is_checked(m_main_page.m_stroke_join);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		background_color_is_checked(m_background_show, m_background_color);
-		zoom_is_checked(m_main_scale);
+		page_zoom_is_checked(m_main_scale);
 
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
@@ -952,59 +962,59 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// その他メニューの「ズーム」のサブ項目に印をつける.
-	void MainPage::zoom_is_checked(float scale)
+	// レイアウトメニューの「ページのズーム」のサブ項目に印をつける.
+	void MainPage::page_zoom_is_checked(float scale)
 	{
-		rmfi_menu_layout_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_popup_layout_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_menu_layout_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_popup_layout_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_menu_layout_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_popup_layout_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_menu_layout_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_popup_layout_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_menu_layout_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_popup_layout_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_menu_layout_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_popup_layout_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_menu_layout_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_popup_layout_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_menu_layout_zoom_025().IsChecked(equal(scale, 0.25f));
-		rmfi_popup_layout_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_menu_page_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_popup_page_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_menu_page_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_popup_page_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_menu_page_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_popup_page_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_menu_page_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_popup_page_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_menu_page_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_popup_page_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_menu_page_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_popup_page_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_menu_page_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_popup_page_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_menu_page_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_popup_page_zoom_025().IsChecked(equal(scale, 0.25f));
 	}
 
-	// その他メニューの「ズーム」が選択された.
-	void MainPage::zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	// レイアウトメニューの「ページのズーム」が選択された.
+	void MainPage::page_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == rmfi_menu_layout_zoom_100() || sender == rmfi_popup_layout_zoom_100()) {
+		if (sender == rmfi_menu_page_zoom_100() || sender == rmfi_popup_page_zoom_100()) {
 			scale = 1.0f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_150() || sender == rmfi_popup_layout_zoom_150()) {
+		else if (sender == rmfi_menu_page_zoom_150() || sender == rmfi_popup_page_zoom_150()) {
 			scale = 1.5f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_200() || sender == rmfi_popup_layout_zoom_200()) {
+		else if (sender == rmfi_menu_page_zoom_200() || sender == rmfi_popup_page_zoom_200()) {
 			scale = 2.0f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_300() || sender == rmfi_popup_layout_zoom_300()) {
+		else if (sender == rmfi_menu_page_zoom_300() || sender == rmfi_popup_page_zoom_300()) {
 			scale = 3.0f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_400() || sender == rmfi_popup_layout_zoom_400()) {
+		else if (sender == rmfi_menu_page_zoom_400() || sender == rmfi_popup_page_zoom_400()) {
 			scale = 4.0f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_075() || sender == rmfi_popup_layout_zoom_075()) {
+		else if (sender == rmfi_menu_page_zoom_075() || sender == rmfi_popup_page_zoom_075()) {
 			scale = 0.75f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_050() || sender == rmfi_popup_layout_zoom_050()) {
+		else if (sender == rmfi_menu_page_zoom_050() || sender == rmfi_popup_page_zoom_050()) {
 			scale = 0.5f;
 		}
-		else if (sender == rmfi_menu_layout_zoom_025() || sender == rmfi_popup_layout_zoom_025()) {
+		else if (sender == rmfi_menu_page_zoom_025() || sender == rmfi_popup_page_zoom_025()) {
 			scale = 0.25f;
 		}
 		else {
 			return;
 		}
-		zoom_is_checked(scale);
+		page_zoom_is_checked(scale);
 		//if (scale != m_main_page.m_page_scale) {
 		//	m_main_page.m_page_scale = scale;
 		if (scale != m_main_scale) {

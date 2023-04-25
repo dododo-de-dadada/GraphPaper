@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-			unselect_all();
+			unselect_shape_all();
 			main_draw();
 		}
 		else {
@@ -24,13 +24,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// Shift + 下矢印キーが押された.
-	//void MainPage::select_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//void MainPage::select_shape_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
 	//}
 
 	// Shift + 上矢印キーが押された.
-	//void MainPage::select_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//void MainPage::select_shape_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
 	//}
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 編集メニューの「すべて選択」が選択された.
-	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::select_shape_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 	// lt	範囲の左上点
 	// rb	範囲の右下点
-	bool MainPage::select_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
+	bool MainPage::select_shape_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -142,13 +142,13 @@ namespace winrt::GraphPaper::implementation
 		return;
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
-			select_range(m_event_shape_pressed, s);
+			select_shape_range(m_event_shape_pressed, s);
 			m_event_shape_prev = s;
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
 			m_event_shape_pressed =
 			m_event_shape_prev = s;
-			unselect_all();
+			unselect_shape_all();
 			undo_push_select(s);
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 	// s_from	最初の図形
 	// s_to	最後の図形
 	// 戻り値	選択が変更された true
-	bool MainPage::select_range(Shape* const s_from, Shape* const s_to)
+	bool MainPage::select_shape_range(Shape* const s_from, Shape* const s_to)
 	{
 		constexpr int BEGIN = 0;
 		constexpr int NEXT = 1;
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 			//	m_event_shape_prev = m_main_page.m_shape_list.front();
 			//}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
-			if (select_range(s, m_event_shape_prev)) {
+			if (select_shape_range(s, m_event_shape_prev)) {
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 			// 上記以外なら,
 			// 図形が選択されてるか判定する.
 			if (!s->is_selected()) {
-				unselect_all();
+				unselect_shape_all();
 				undo_push_select(s);
 				xcvd_menu_is_enabled();
 				main_draw();
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 	// 矩形に含まれる図形の選択を反転する.
 	// lt	矩形の左上点
 	// rb	矩形の右下点
-	bool MainPage::toggle_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
+	bool MainPage::toggle_shape_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の選択をすべて解除する.
 	// t_range_only	true なら文字列選択だけを解除. false なら図形の選択も解除.
 	// 戻り値	選択が解除された図形があるなら true
-	bool MainPage::unselect_all(const bool t_range_only)
+	bool MainPage::unselect_shape_all(const bool t_range_only)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -340,7 +340,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
-			summary_unselect_all();
+			summary_unselect_shape_all();
 		}
 		return done;
 	}

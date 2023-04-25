@@ -13,9 +13,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//------------------------------
-	// 操作の識別子
-	//------------------------------
+	// 操作の種類
 	enum struct UNDO_T : uint32_t {
 		END = static_cast<uint32_t>(-1),	// 操作スタックの終端 (ファイル読み書きで使用)
 		NIL = 0,	// 操作の区切り (ファイル読み書きで使用)
@@ -43,7 +41,6 @@ namespace winrt::GraphPaper::implementation
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// グループのリスト操作
 		IMAGE,	// 画像の操作 (ファイル読み書きで使用)
-		//IMAGE_ASPECT,	// 画像の縦横維持の操作
 		IMAGE_OPAC,	// 画像の不透明度の操作
 		JOIN_LIMIT,	// 線の結合の尖り制限の操作
 		JOIN_STYLE,	// 破の結合の操作
@@ -67,14 +64,10 @@ namespace winrt::GraphPaper::implementation
 		TEXT_RANGE,	// 選択された文字範囲の操作
 	};
 
-	//------------------------------
 	// 操作スタック
-	//------------------------------
 	using UNDO_STACK = std::list<struct Undo*>;	// 操作スタック
 
-	//------------------------------
 	// 操作から値の型を得るテンプレート
-	//------------------------------
 	template <UNDO_T U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_T::ARC_START> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::ARC_DIR> { using type = D2D1_SWEEP_DIRECTION; };
@@ -106,7 +99,6 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_T::PAGE_PAD> { using type = D2D1_RECT_F; };
 	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = D2D1_FIGURE_END; };
-	//template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_T::STROKE_WIDTH> { using type = float; };
@@ -143,12 +135,10 @@ namespace winrt::GraphPaper::implementation
 		virtual void write(DataWriter const& /*dt_writer*/) {}
 	};
 
-	//------------------------------
-	// 形の操作
-	//------------------------------
+	// 図形を変形する操作
 	struct UndoDeform : Undo {
-		uint32_t m_loc;	// 操作される部位
-		D2D1_POINT_2F m_start;	// 変形前の部位の位置
+		uint32_t m_loc;	// 変形される部位
+		D2D1_POINT_2F m_p;	// 変形前の部位の点
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
@@ -214,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像の位置と大きさの操作
 	//------------------------------
 	struct UndoImage : Undo {
-		D2D1_POINT_2F m_start;	// 位置
+		D2D1_POINT_2F m_start;	// 左上点
 		D2D1_SIZE_F m_view;	// 表示されている画面上の寸法
 		D2D1_RECT_F m_clip;	// 表示されている画像上の矩形
 		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比

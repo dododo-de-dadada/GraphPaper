@@ -819,7 +819,7 @@ namespace winrt::GraphPaper::implementation
 	) const noexcept
 	{
 		const D2D1_POINT_2F u{ t.x - m_start.x, t.y - m_start.y };
-		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED, m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_loc_width);
+		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED, m_stroke_cap, m_stroke_join, m_join_miter_limit, is_opaque(m_fill_color), m_loc_width);
 	}
 
 	// ‹éŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.

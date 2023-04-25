@@ -507,7 +507,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
-	void MainPage::find_replace_all_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::replace_text_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
 		// 検索文字列の文字数を得る.
@@ -561,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 文字範囲の選択のみを解除する.
-		unselect_all(true);
+		unselect_shape_all(true);
 
 		const uint32_t r_len = wchar_len(m_find_repl);
 		it_stack.push_back(m_main_page.m_shape_list.begin());
@@ -616,7 +616,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
-	void MainPage::find_replace_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::replace_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
 		const auto f_len = wchar_len(m_find_text);

@@ -13,34 +13,37 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	/*
-	// 値をスライダーのヘッダーに格納する.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// val	格納する値
-	// 戻り値	なし.
-	void MainPage::image_slider_set_header(const float val)
+	// 操作メニューの「画像を原画像に戻す」が選択された.
+	void MainPage::image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		constexpr wchar_t R[]{ L"str_opacity" };
-		wchar_t buf[32];
-		conv_col_to_str(m_color_code, val, buf);
-		const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
-		dialog_set_slider_header<0>(text);
+		for (Shape* const s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
+				continue;
+			}
+			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
+			undo_push_image(s);
+			static_cast<ShapeImage*>(s)->revert();
+		}
+		undo_push_null();
+		undo_menu_is_enabled();
+		//xcvd_menu_is_enabled();
+		main_panel_size();
+		main_draw();
+		status_bar_set_pos();
 	}
 
-	// スライダーの値が変更された.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	// 戻り値	なし
-	void MainPage::image_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	// 操作メニューの「画像の縦横比を維持」が選択された.
+	void MainPage::image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		const float val = static_cast<float>(args.NewValue());
-		image_slider_set_header(val);
-		if (m_prop_page.back()->set_image_opacity(val / COLOR_MAX)) {
-			dialog_draw();
-		}
+		m_image_keep_aspect = !m_image_keep_aspect;
+		status_bar_set_pos();
 	}
-	*/
+
+	// 操作メニューの「画像の縦横比を維持」に印をつける.
+	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
+	{
+		tmfi_menu_meth_image_keep_asp().IsChecked(keep_aspect);
+		tmfi_menu_meth_image_keep_asp_2().IsChecked(keep_aspect);
+	}
 
 }

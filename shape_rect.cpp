@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 					return LOC_TYPE::LOC_STROKE;
 				}
 				// ü˜g‚ÌŒ‹‡‚ªŠÛ‚ß‚©”»’è‚·‚é.
-				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 					if (pt_in_circle(t, p[0], e_thick) ||
 						pt_in_circle(t, p[1], e_thick) ||
 						pt_in_circle(t, p[2], e_thick) ||
@@ -263,8 +263,8 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				// ü˜g‚ÌŒ‹‡‚ª–Êæ‚è, ‚Ü‚½‚Í, ë‚èE–Êæ‚è‚Å‚©‚Âë‚è§ŒÀ‚ªã2 –¢–‚©”»’è‚·‚é.
-				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
-					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
+					(m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
 						m_join_miter_limit < M_SQRT2)) {
 					const auto limit = static_cast<FLOAT>(e_thick);
 					const D2D1_POINT_2F q[4]{
@@ -279,8 +279,8 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				// ü˜g‚ÌŒ‹‡‚ªë‚è, ‚Ü‚½‚Í, ë‚è/–Êæ‚è‚Å‚©‚Âë‚è§ŒÀ‚ªã2 ˆÈã‚©”»’è‚·‚é.
-				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+					(m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
 						m_join_miter_limit >= M_SQRT2)) {
 					const auto limit =
 						static_cast<FLOAT>(M_SQRT2 * 0.5 * m_stroke_width * m_join_miter_limit);

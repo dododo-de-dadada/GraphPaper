@@ -172,8 +172,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// PDF には尖り (マイター) または面取り (ベベル) しかない.
 		else {
-			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
-			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
+			//if (equal(m_stroke_join, D2D1_LINE_JOIN_MITER) ||
+			//equal(m_stroke_join, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
 			// D2D の尖り制限とは異なるので注意.
 			// 尖り制限を超える部分があるとき, D2D では超えた部分だけが断ち切られるが, 
 			// PDF と SVG ではいきなり Bevel join　になる.
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 
 		len += export_pdf_stroke(
 			m_stroke_width, m_stroke_color, m_stroke_cap, //m_stroke_cap.m_start,
-			m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+			m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 		const double sx = m_start.x;
 		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
 		const double b1x = b_seg.point1.x;
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Line\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 
 		const double sx = m_start.x;
 		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(page_size.height);
@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;
 		len += dt_writer.WriteString(
 			L"% Polyline\n");
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		size_t len = 0;
 		len += dt_writer.WriteString(L"% Ellipse\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -451,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"% Rectangle\n");
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -494,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const double ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
@@ -1242,7 +1242,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_pat, m_join_style, m_join_miter_limit, dt_writer);
+			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_join_miter_limit, dt_writer);
 			// S = パスをストロークで描画
 			// パスは開いたまま.
 			wchar_t buf[1024];

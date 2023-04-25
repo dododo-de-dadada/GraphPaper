@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::xcvd_paste_image(void)
 	{
-		unselect_all();
+		unselect_shape_all();
 
 		// resume_background する前に UI 要素から値を得る.
 		const float win_w = static_cast<float>(scp_main_panel().ActualWidth());
@@ -430,7 +430,7 @@ namespace winrt::GraphPaper::implementation
 				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
 					m_mutex_draw.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
-					unselect_all();
+					unselect_shape_all();
 					// 得られたリストの各図形について以下を繰り返す.
 					for (auto s : slist_pasted) {
 						// 一覧が表示されてるか判定する.
@@ -470,7 +470,7 @@ namespace winrt::GraphPaper::implementation
 		// クリップボードから読み込むためのデータリーダーを得る.
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
 		if (!text.empty()) {
-			unselect_all();
+			unselect_shape_all();
 
 			// パネルの大きさで文字列図形を作成する,.
 			const float scale = m_main_scale;

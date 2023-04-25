@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		unselect_all();
+		unselect_shape_all();
 		undo_push_append(g);
 		for (const auto s : slist) {
 			// 図形の消去フラグが立っているか判定する.
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		if (g_list.empty()) {
 			return;
 		}
-		unselect_all();
+		unselect_shape_all();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : g_list) {
 			uint32_t i = 0;

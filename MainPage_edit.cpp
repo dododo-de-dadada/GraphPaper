@@ -64,6 +64,8 @@ namespace winrt::GraphPaper::implementation
 		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_meth_poly_close()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
+				mfi_menu_meth_poly_close().IsEnabled(false);
+				mfi_menu_meth_poly_open().IsEnabled(true);
 				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
@@ -72,6 +74,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_popup_poly_open()) {
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
+				mfi_menu_meth_poly_close().IsEnabled(true);
+				mfi_menu_meth_poly_open().IsEnabled(false);
 				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
@@ -81,13 +85,27 @@ namespace winrt::GraphPaper::implementation
 
 	IAsyncAction MainPage::meth_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		const auto str_arc_start{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": "};
-		const auto str_arc_end{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_end") + L": " };
-		const auto str_arc_rot{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot") + L": " };
-		const auto str_arc_sweep_direction{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction") };
-		const auto str_arc_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize") };
-		const auto str_arc_counter_clockwize{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize") };
-		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(L"str_arc_rotation") };
+		const auto str_arc_start{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": "
+		};
+		const auto str_arc_end{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_end") + L": "
+		};
+		const auto str_arc_rot{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot") + L": "
+		};
+		const auto str_arc_sweep_direction{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_sweep_direction")
+		};
+		const auto str_arc_clockwize{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_clockwize")
+		};
+		const auto str_arc_counter_clockwize{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_counter_clockwize")
+		};
+		const auto str_title{
+			ResourceLoader::GetForCurrentView().GetString(L"str_arc_rotation")
+		};
 
 		ShapeArc* t;	// 編集する円弧図形
 		if (m_event_shape_prev != nullptr &&
@@ -343,39 +361,6 @@ namespace winrt::GraphPaper::implementation
 			slist_clear(m_prop_page.m_shape_list);
 		}
 		status_bar_set_pos();
-	}
-
-	// 操作メニューの「画像を原画像に戻す」が選択された.
-	void MainPage::meth_image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
-	{
-		for (Shape* const s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
-				continue;
-			}
-			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-			undo_push_image(s);
-			static_cast<ShapeImage*>(s)->revert();
-		}
-		undo_push_null();
-		undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
-		main_panel_size();
-		main_draw();
-		status_bar_set_pos();
-	}
-
-	// 操作メニューの「画像の縦横比を維持」が選択された.
-	void MainPage::meth_image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept
-	{
-		m_image_keep_aspect = !m_image_keep_aspect;
-		status_bar_set_pos();
-	}
-
-	// 操作メニューの「画像の縦横比を維持」に印をつける.
-	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
-	{
-		tmfi_menu_meth_image_keep_asp().IsChecked(keep_aspect);
-		tmfi_menu_meth_image_keep_asp_2().IsChecked(keep_aspect);
 	}
 
 	// 操作メニューの「枠を文字列に合わせる」が選択された.

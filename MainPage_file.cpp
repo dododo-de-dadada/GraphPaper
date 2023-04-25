@@ -89,6 +89,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::Launcher;
 	using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::UI::Xaml::Window;
+	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 
 	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
@@ -348,23 +350,23 @@ namespace winrt::GraphPaper::implementation
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 
-		arrow_style_is_checked(m_main_page.m_arrow_style);
+		stroke_arrow_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_weight_is_checked(m_main_page.m_font_weight);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
-		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
-		prop_dash_style_is_checked(m_main_page.m_dash_style);
-		prop_join_style_is_checked(m_main_page.m_join_style);
+		stroke_cap_is_checked(m_main_page.m_stroke_cap);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
+		stroke_dash_is_checked(m_main_page.m_stroke_dash);
+		stroke_join_is_checked(m_main_page.m_stroke_join);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);
 		color_code_is_checked(m_color_code);
-		zoom_is_checked(m_main_scale);
+		page_zoom_is_checked(m_main_scale);
 		status_bar_is_checked(m_status_bar);
 		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 		background_color_is_checked(m_background_show, m_background_color);
@@ -1076,6 +1078,103 @@ m_snap_grid = dt_reader.ReadBoolean();
 		main_draw();
 
 	}
+
+	//-------------------------------
+	// ファイルメニューの「画像をインポート」が選択された.
+	//-------------------------------
+	IAsyncAction MainPage::file_import_image_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_mutex_event.lock();
+
+		// ファイルオープンピッカーを取得して開く.
+		FileOpenPicker open_picker{ FileOpenPicker() };
+		open_picker.FileTypeFilter().Append(L".bmp");
+		open_picker.FileTypeFilter().Append(L".gif");
+		open_picker.FileTypeFilter().Append(L".jpg");
+		open_picker.FileTypeFilter().Append(L".jpeg");
+		open_picker.FileTypeFilter().Append(L".png");
+		open_picker.FileTypeFilter().Append(L".tif");
+		open_picker.FileTypeFilter().Append(L".tiff");
+
+		// ピッカーを非同期に表示してストレージファイルを取得する.
+		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
+		StorageFile open_file{
+			co_await open_picker.PickSingleFileAsync()
+		};
+		open_picker = nullptr;
+
+		// ストレージファイルがヌルポインターか判定する.
+		if (open_file != nullptr) {
+
+			// 待機カーソルを表示, 表示する前のカーソルを得る.
+			const CoreCursor& prev_cur = wait_cursor_show();
+			unselect_shape_all();
+
+			IRandomAccessStream stream{
+				co_await open_file.OpenAsync(FileAccessMode::Read)
+			};
+			BitmapDecoder decoder{
+				co_await BitmapDecoder::CreateAsync(stream)
+			};
+			SoftwareBitmap bitmap{
+				SoftwareBitmap::Convert(
+					co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8)
+			};
+
+			// 表示された部分の中心の位置を求める.
+			const double scale = m_main_scale;
+			//const double scale = m_main_page.m_page_scale;
+			const double win_x = sb_horz().Value();
+			const double win_y = sb_vert().Value();
+			const double win_w = scp_main_panel().ActualWidth();
+			const double win_h = scp_main_panel().ActualHeight();
+			const double image_w = bitmap.PixelWidth();
+			const double image_h = bitmap.PixelHeight();
+			const D2D1_POINT_2F w_ctr{
+				static_cast<FLOAT>((win_x + (win_w - image_w) * 0.5) / scale),
+				static_cast<FLOAT>((win_y + (win_h - image_h) * 0.5) / scale)
+			};
+			const D2D1_SIZE_F i_size{
+				static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h)
+			};
+			ShapeImage* s = new ShapeImage(w_ctr, i_size, bitmap, 1.0);
+			D2D1_POINT_2F start;
+			s->get_pos_start(start);
+			xcvd_paste_pos(start, start);
+			s->set_pos_start(start);
+#if (_DEBUG)
+			debug_leak_cnt++;
+#endif
+			bitmap.Close();
+			bitmap = nullptr;
+			decoder = nullptr;
+			stream.Close();
+			stream = nullptr;
+
+			{
+				m_mutex_draw.lock();
+				undo_push_append(s);
+				undo_push_select(s);
+				undo_push_null();
+				undo_menu_is_enabled();
+				m_mutex_draw.unlock();
+			}
+
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_append(s);
+				summary_select(s);
+			}
+			xcvd_menu_is_enabled();
+			main_bbox_update(s);
+			main_panel_size();
+			main_draw();
+
+			// カーソルを元に戻す.
+			Window::Current().CoreWindow().PointerCursor(prev_cur);
+		}
+		m_mutex_event.unlock();
+	};
 
 	// ファイルシステムへのアクセス権を確認して, 設定を促す.
 	/*

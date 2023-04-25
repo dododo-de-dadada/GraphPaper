@@ -180,9 +180,9 @@ namespace winrt::GraphPaper::implementation
 		InitializeComponent();
 
 		// 「印刷」メニューの可否を設定する.
-		{
+		//{
 			//mfi_print().IsEnabled(PrintManager::IsSupported());
-		}
+		//}
 
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
@@ -226,16 +226,6 @@ namespace winrt::GraphPaper::implementation
 			background_get_brush();
 		}
 
-		// ステータスバーのコンテキストメニューを設定する
-		{
-			/*
-			MenuFlyout popup{};
-			for (const auto item : mfsi_menu_status_bar().Items()) {
-				popup.Items().Append(item);
-			}
-			sp_status_bar_panel().ContextFlyout(popup);
-			*/
-		}
 		auto _{ file_new_click_async(nullptr, nullptr) };
 	}
 
@@ -364,14 +354,6 @@ namespace winrt::GraphPaper::implementation
 			scroll_set(w, h);
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 		}
-	}
-
-	// 更新された図形をもとにメインのページの境界矩形を更新する.
-	void MainPage::main_bbox_update(
-		const Shape* s	// 更新された図形
-	) noexcept
-	{
-		s->get_bbox(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
 	// メインのページの境界矩形を更新する.

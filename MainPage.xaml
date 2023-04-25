@@ -67,7 +67,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_xcvd_select"/>
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="mfi_popup_select_all" x:Uid="mfi_menu_select_all" Click="select_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
+				<MenuFlyoutItem x:Name="mfi_popup_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -179,12 +179,12 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_edit_stroke"/>
 				<!-- 破線の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_dash_style" x:Uid="mfsi_menu_dash_style" Text="Style">
+				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_dash" x:Uid="mfsi_menu_stroke_dash" Text="Style">
 					<MenuFlyoutSubItem.Icon>
-						<PathIcon Data="{StaticResource data_dash_style}" />
+						<PathIcon Data="{StaticResource data_stroke_dash}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 実線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_dash_style_solid" x:Uid="rmfi_menu_dash_style_solid" GroupName="gn_popup_dash_style" Click="prop_dash_style_click" IsChecked="True" Text="Solid" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_dash_solid" x:Uid="rmfi_menu_stroke_dash_solid" GroupName="gn_popup_stroke_dash" Click="stroke_dash_click" IsChecked="True" Text="Solid" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -192,77 +192,77 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- 破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_dash_style_dash" x:Uid="rmfi_menu_dash_style_dash" GroupName="gn_popup_dash_style" Click="prop_dash_style_click" Text="Dash">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_dash_dash" x:Uid="rmfi_menu_stroke_dash_dash" GroupName="gn_popup_stroke_dash" Click="stroke_dash_click" Text="Dash">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 点線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_dash_style_dot" x:Uid="rmfi_menu_dash_style_dot" GroupName="gn_popup_dash_style" Click="prop_dash_style_click" Text="Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_dash_dot" x:Uid="rmfi_menu_stroke_dash_dot" GroupName="gn_popup_stroke_dash" Click="stroke_dash_click" Text="Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 一点破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_dash_style_dash_dot" x:Uid="rmfi_menu_dash_style_dash_dot" GroupName="gn_popup_dash_style" Click="prop_dash_style_click" Text="Dash Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_dash_dash_dot" x:Uid="rmfi_menu_stroke_dash_dash_dot" GroupName="gn_popup_stroke_dash" Click="stroke_dash_click" Text="Dash Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 二点破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_dash_style_dash_dot_dot" x:Uid="rmfi_menu_dash_style_dash_dot_dot" GroupName="gn_popup_dash_style" Click="prop_dash_style_click" Text="Dash Dot Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_dash_dash_dot_dot" x:Uid="rmfi_menu_stroke_dash_dash_dot_dot" GroupName="gn_popup_stroke_dash" Click="stroke_dash_click" Text="Dash Dot Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash_dot_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 破線の配置 -->
-				<MenuFlyoutItem x:Name="mfi_popup_dash_pat" x:Uid="mfi_menu_dash_pat" Click="prop_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
+				<MenuFlyoutItem x:Name="mfi_popup_dash_pat" x:Uid="mfi_menu_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線の太さ -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_width" x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_width}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 0px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_0px" x:Uid="rmfi_menu_stroke_width_0px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" IsChecked="true" Text="0 px" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_0px" x:Uid="rmfi_menu_stroke_width_0px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" IsChecked="true" Text="0 px" />
 					<!-- 1px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_1px" x:Uid="rmfi_menu_stroke_width_1px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" IsChecked="true" Text="1 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_1px" x:Uid="rmfi_menu_stroke_width_1px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" IsChecked="true" Text="1 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_1px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 2px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_2px" x:Uid="rmfi_menu_stroke_width_2px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="2 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_2px" x:Uid="rmfi_menu_stroke_width_2px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="2 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_popup_stroke_widthpx}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 3px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_3px" x:Uid="rmfi_menu_stroke_width_3px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="3 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_3px" x:Uid="rmfi_menu_stroke_width_3px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="3 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_3px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 4px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_4px" x:Uid="rmfi_menu_stroke_width_4px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="4 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_4px" x:Uid="rmfi_menu_stroke_width_4px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="4 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_4px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 8px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_8px" x:Uid="rmfi_menu_stroke_width_8px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="8 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_8px" x:Uid="rmfi_menu_stroke_width_8px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="8 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_8px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 12px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_12px" x:Uid="rmfi_menu_stroke_width_12px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="8 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_12px" x:Uid="rmfi_menu_stroke_width_12px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="8 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_12px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 16px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_16px" x:Uid="rmfi_menu_stroke_width_16px" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click" Text="16 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_16px" x:Uid="rmfi_menu_stroke_width_16px" GroupName="gn_popup_stroke_width" Click="stroke_width_click" Text="16 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_16px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -270,80 +270,80 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- その他 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_other" x:Uid="rmfi_menu_stroke_width_other" GroupName="gn_popup_stroke_width" Click="prop_stroke_width_click_async" Text="Others..." />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_other" x:Uid="rmfi_menu_stroke_width_other" GroupName="gn_popup_stroke_width" Click="stroke_width_click_async" Text="Others..." />
 				</MenuFlyoutSubItem>
 				<!-- 端の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_cap_style" x:Uid="mfsi_menu_cap_style" Text="Cap Style ">
+				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_cap" x:Uid="mfsi_menu_stroke_cap" Text="Cap Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_cap_square}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 平面 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_cap_style_flat" x:Uid="rmfi_menu_cap_style_flat" GroupName="gn_popup_cap_style" Click="prop_cap_style_click" IsChecked="true" Text="Flat">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_flat" x:Uid="rmfi_menu_stroke_cap_flat" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" IsChecked="true" Text="Flat">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_flat}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 正方形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_cap_style_square" x:Uid="rmfi_menu_cap_style_square" GroupName="gn_popup_cap_style"  Click="prop_cap_style_click" Text="Square" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_square" x:Uid="rmfi_menu_stroke_cap_square" GroupName="gn_popup_stroke_cap"  Click="stroke_cap_click" Text="Square" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_square}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 円形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_cap_style_round" x:Uid="rmfi_menu_cap_style_round" GroupName="gn_popup_cap_style" Click="prop_cap_style_click" Text="Round" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_round" x:Uid="rmfi_menu_stroke_cap_round" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Round" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_round}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 三角形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_cap_style_triangle" x:Uid="rmfi_menu_cap_style_triangle" GroupName="gn_popup_cap_style" Click="prop_cap_style_click" Text="Triangle">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_triangle" x:Uid="rmfi_menu_stroke_cap_triangle" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Triangle">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_triangle}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 線の結合の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_join_style" x:Uid="mfsi_menu_join_style" Text="Join Style ">
+				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_join" x:Uid="mfsi_menu_stroke_join" Text="Join Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_join_bevel}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 尖り -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_join_style_miter_or_bevel" x:Uid="rmfi_menu_join_style_miter_or_bevel" GroupName="gn_popup_join_style" Click="prop_join_style_click" Text="Miter" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_join_miter_or_bevel" x:Uid="rmfi_menu_stroke_join_miter_or_bevel" GroupName="gn_popup_stroke_join" Click="stroke_join_click" Text="Miter" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_miter}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 丸まり -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_join_style_round" x:Uid="rmfi_menu_join_style_round" GroupName="gn_popup_join_style" Click="prop_join_style_click" Text="Rounded" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_join_round" x:Uid="rmfi_menu_stroke_join_round" GroupName="gn_popup_stroke_join" Click="stroke_join_click" Text="Rounded" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_round}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 面取り -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_join_style_bevel" x:Uid="rmfi_menu_join_style_bevel" GroupName="gn_popup_join_style" Click="prop_join_style_click" Text="Beveled" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_join_bevel" x:Uid="rmfi_menu_stroke_join_bevel" GroupName="gn_popup_stroke_join" Click="stroke_join_click" Text="Beveled" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_bevel}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 尖り (使用不可) -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_join_style_miter" x:Uid="rmfi_menu_join_style_miter" GroupName="gn_popup_join_style" Click="prop_join_style_click" Text="Miter" Visibility="Collapsed">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_join_miter" x:Uid="rmfi_menu_stroke_join_miter" GroupName="gn_popup_stroke_join" Click="stroke_join_click" Text="Miter" Visibility="Collapsed">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_miter}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
 					<!-- 尖り制限 -->
-					<MenuFlyoutItem x:Name="mfi_popup_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="prop_join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_popup_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_stroke_arrow"/>
 				<!-- 矢じるしの形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_arrow_style" x:Uid="mfsi_menu_arrow_style" Text="Arrowhead Style">
+				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_arrow" x:Uid="mfsi_menu_stroke_arrow" Text="Arrowhead Style">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_arrow_opened}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- なし -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_arrow_style_none" x:Uid="rmfi_menu_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_popup_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_arrow_none" x:Uid="rmfi_menu_stroke_arrow_none" Click="stroke_arrow_click" IsChecked="True" Text="None" GroupName="gn_popup_stroke_arrow">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -351,29 +351,29 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- 開いた矢じるし -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_arrow_style_opened" x:Uid="rmfi_menu_arrow_style_opened" Click="arrow_style_click" Text="Opened" GroupName="gn_popup_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_arrow_opened" x:Uid="rmfi_menu_stroke_arrow_opened" Click="stroke_arrow_click" Text="Opened" GroupName="gn_popup_stroke_arrow">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_arrow_opened}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_arrow_style_filled" x:Uid="rmfi_menu_arrow_style_filled" Click="arrow_style_click" Text="Filled" GroupName="gn_popup_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_arrow_filled" x:Uid="rmfi_menu_stroke_arrow_filled" Click="stroke_arrow_click" Text="Filled" GroupName="gn_popup_stroke_arrow">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_arrow_filled}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 矢じるしの大きさ -->
-				<MenuFlyoutItem x:Name="mfi_popup_arrow_size" x:Uid="mfi_menu_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
+				<MenuFlyoutItem x:Name="mfi_popup_stroke_arrow_size" x:Uid="mfi_menu_stroke_arrow_size" Click="stroke_arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_arrow_color"/>
 				<!-- 線の色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_stroke_color" x:Uid="mfi_menu_stroke_color" Click="prop_stroke_color_click" Text="Stroke Color..." >
+				<MenuFlyoutItem x:Name="mfi_popup_stroke_color" x:Uid="mfi_menu_stroke_color" Click="color_stroke_click" Text="Stroke Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_color}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 塗りつぶしの色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_fill_color" x:Uid="mfi_menu_fill_color" Click="prop_fill_color_click" Text="Fill Color..." >
+				<MenuFlyoutItem x:Name="mfi_popup_fill_color" x:Uid="mfi_menu_fill_color" Click="color_fill_click" Text="Fill Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_fill_color}" />
 					</MenuFlyoutItem.Icon>
@@ -451,21 +451,21 @@
 				<!-- 余白 -->
 				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Margin..." />
 				<!-- 書体の色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="font_color_click" Icon="FontColor" Text="Font Color..." />
+				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
 				<!-- 画像の縦横比を維持 -->
-				<ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp_2" x:Uid="tmfi_menu_meth_image_keep_asp" Click="meth_image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
+				<ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp_2" x:Uid="tmfi_menu_meth_image_keep_asp" Click="image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
 					<ToggleMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_chain}" />
 					</ToggleMenuFlyoutItem.Icon>
 				</ToggleMenuFlyoutItem>
 				<!-- 画像を原画像に戻す -->
-				<MenuFlyoutItem x:Name="mfi_popup_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="meth_image_revert_click" Text="Revert Image to Original" >
+				<MenuFlyoutItem x:Name="mfi_popup_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_update_restore}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 画像の不透明度 -->
-				<MenuFlyoutItem x:Name="mfi_popup_image_opac" x:Uid="mfi_menu_image_opac" Click="prop_image_opac_click_async" Text="Image Opacity..." >
+				<MenuFlyoutItem x:Name="mfi_popup_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_image_opac}" />
 					</MenuFlyoutItem.Icon>
@@ -489,46 +489,44 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_grid_emph_3" x:Uid="rmfi_menu_grid_emph_3" Click="grid_emph_click" Text="Pattern 3" GroupName="gn_popup_grid_emph" />
 				</MenuFlyoutSubItem>
 				<!-- 方眼の色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_grid_color" x:Uid="mfi_menu_grid_color" Click="grid_color_click" Text="Grid Color..." />
+				<MenuFlyoutItem x:Name="mfi_popup_grid_color" x:Uid="mfi_menu_grid_color" Click="color_grid_click" Text="Grid Color..." />
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_grid_page"/>
 				<!-- ページの大きさ -->
 				<MenuFlyoutItem x:Name="mfi_popup_page_size" x:Uid="mfi_menu_page_size" Click="page_size_click_async" Text="Page Size..." />
 				<!-- ページの色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_page_color" x:Uid="mfi_menu_page_color" Click="page_color_click" Text="Page Color..." />
-				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_layout_zoom"/>
-				<!-- 拡大率 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_layout_zoom" x:Uid="mfsi_menu_layout_zoom" Icon="Zoom" Text="Zoom">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_025" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_050" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomOut" Text="50%">
+				<MenuFlyoutItem x:Name="mfi_popup_page_color" x:Uid="mfi_menu_page_color" Click="color_page_click" Text="Page Color..." />
+				<!-- ページの拡大率 -->
+				<MenuFlyoutSubItem x:Name="mfsi_popup_page_zoom" x:Uid="mfsi_menu_page_zoom" Icon="Zoom" Text="Page Zoom">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_025" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_050" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_075" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_075" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
 					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_popup_layout_zoom_100" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="Zoom" Text="100%">
+						x:Name="rmfi_popup_page_zoom_100" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="Zoom" Text="100%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_150" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_200" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomIn" Text="200%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_150" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_200" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_300" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomIn" Text="300%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_300" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_layout_zoom_400" GroupName="gn_popup_layout_zoom" Click="zoom_click" Icon="ZoomIn" Text="400%" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_400" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
@@ -707,7 +705,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="mfi_menu_select_all" x:Uid="mfi_menu_select_all" Click="select_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
+				<MenuFlyoutItem x:Name="mfi_menu_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -918,13 +916,13 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="meth_image_revert_click" Text="Revert Image to Original" >
+                <MenuFlyoutItem x:Name="mfi_menu_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像の縦横比を維持 -->
-                <ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp" x:Uid="tmfi_menu_meth_image_keep_asp" Click="meth_image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
+                <ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp" x:Uid="tmfi_menu_meth_image_keep_asp" Click="image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
                     <ToggleMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_chain}" />
                     </ToggleMenuFlyoutItem.Icon>
@@ -933,12 +931,12 @@
 			<!-- 属性メニュー -->
             <muxc:MenuBarItem x:Name="mbi_menu_property" x:Uid="mbi_menu_property" AccessKey="P" Title="Property">
 				<!-- 破線の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_menu_dash_style" x:Uid="mfsi_menu_dash_style" Text="Style">
+				<MenuFlyoutSubItem x:Name="mfsi_menu_stroke_dash" x:Uid="mfsi_menu_stroke_dash" Text="Style">
 					<MenuFlyoutSubItem.Icon>
-						<PathIcon Data="{StaticResource data_dash_style}" />
+						<PathIcon Data="{StaticResource data_stroke_dash}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 実線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_dash_style_solid" x:Uid="rmfi_menu_dash_style_solid" GroupName="gn_dash_style" Click="prop_dash_style_click" IsChecked="True" Text="Solid" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_dash_solid" x:Uid="rmfi_menu_stroke_dash_solid" GroupName="gn_stroke_dash" Click="stroke_dash_click" IsChecked="True" Text="Solid" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -946,77 +944,77 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- 破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_dash_style_dash" x:Uid="rmfi_menu_dash_style_dash" GroupName="gn_dash_style" Click="prop_dash_style_click" Text="Dash">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_dash_dash" x:Uid="rmfi_menu_stroke_dash_dash" GroupName="gn_stroke_dash" Click="stroke_dash_click" Text="Dash">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 点線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_dash_style_dot" x:Uid="rmfi_menu_dash_style_dot" GroupName="gn_dash_style" Click="prop_dash_style_click" Text="Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_dash_dot" x:Uid="rmfi_menu_stroke_dash_dot" GroupName="gn_stroke_dash" Click="stroke_dash_click" Text="Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 一点破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_dash_style_dash_dot" x:Uid="rmfi_menu_dash_style_dash_dot" GroupName="gn_dash_style" Click="prop_dash_style_click" Text="Dash Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_dash_dash_dot" x:Uid="rmfi_menu_stroke_dash_dash_dot" GroupName="gn_stroke_dash" Click="stroke_dash_click" Text="Dash Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 二点破線 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_dash_style_dash_dot_dot" x:Uid="rmfi_menu_dash_style_dash_dot_dot" GroupName="gn_dash_style" Click="prop_dash_style_click" Text="Dash Dot Dot">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_dash_dash_dot_dot" x:Uid="rmfi_menu_stroke_dash_dash_dot_dot" GroupName="gn_stroke_dash" Click="stroke_dash_click" Text="Dash Dot Dot">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_dash_dot_dot}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 破線の配置 -->
-				<MenuFlyoutItem x:Name="mfi_menu_dash_pat" x:Uid="mfi_menu_dash_pat" Click="prop_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
+				<MenuFlyoutItem x:Name="mfi_menu_dash_pat" x:Uid="mfi_menu_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線の太さ -->
 				<MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_width}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 0px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_0px" x:Uid="rmfi_menu_stroke_width_0px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" IsChecked="true" Text="0 px" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_0px" x:Uid="rmfi_menu_stroke_width_0px" GroupName="gn_stroke_width" Click="stroke_width_click" IsChecked="true" Text="0 px" />
 					<!-- 1px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_1px" x:Uid="rmfi_menu_stroke_width_1px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" IsChecked="true" Text="1 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_1px" x:Uid="rmfi_menu_stroke_width_1px" GroupName="gn_stroke_width" Click="stroke_width_click" IsChecked="true" Text="1 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_1px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 2px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_2px" x:Uid="rmfi_menu_stroke_width_2px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="2 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_2px" x:Uid="rmfi_menu_stroke_width_2px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="2 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_popup_stroke_widthpx}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 3px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_3px" x:Uid="rmfi_menu_stroke_width_3px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="3 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_3px" x:Uid="rmfi_menu_stroke_width_3px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="3 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_3px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 4px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_4px" x:Uid="rmfi_menu_stroke_width_4px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="4 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_4px" x:Uid="rmfi_menu_stroke_width_4px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="4 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_4px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 8px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_8px" x:Uid="rmfi_menu_stroke_width_8px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="8 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_8px" x:Uid="rmfi_menu_stroke_width_8px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="8 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_8px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 12px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_12px" x:Uid="rmfi_menu_stroke_width_12px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="12 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_12px" x:Uid="rmfi_menu_stroke_width_12px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="12 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_12px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 16px -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_16px" x:Uid="rmfi_menu_stroke_width_16px" GroupName="gn_stroke_width" Click="prop_stroke_width_click" Text="16 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_16px" x:Uid="rmfi_menu_stroke_width_16px" GroupName="gn_stroke_width" Click="stroke_width_click" Text="16 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_16px}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -1024,80 +1022,80 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- その他 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_other" x:Uid="rmfi_menu_stroke_width_other" GroupName="gn_stroke_width" Click="prop_stroke_width_click_async" Text="Others..." />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_width_other" x:Uid="rmfi_menu_stroke_width_other" GroupName="gn_stroke_width" Click="stroke_width_click_async" Text="Others..." />
 				</MenuFlyoutSubItem>
 				<!-- 端の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_menu_cap_style" x:Uid="mfsi_menu_cap_style" Text="Cap Style ">
+				<MenuFlyoutSubItem x:Name="mfsi_menu_stroke_cap" x:Uid="mfsi_menu_stroke_cap" Text="Cap Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_cap_square}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 平面 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_cap_style_flat" x:Uid="rmfi_menu_cap_style_flat" GroupName="gn_cap_style" Click="prop_cap_style_click" IsChecked="true" Text="Flat">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_cap_flat" x:Uid="rmfi_menu_stroke_cap_flat" GroupName="gn_stroke_cap" Click="stroke_cap_click" IsChecked="true" Text="Flat">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_flat}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 正方形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_cap_style_square" x:Uid="rmfi_menu_cap_style_square" GroupName="gn_cap_style" Click="prop_cap_style_click" Text="Square" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_cap_square" x:Uid="rmfi_menu_stroke_cap_square" GroupName="gn_stroke_cap" Click="stroke_cap_click" Text="Square" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_square}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 円形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_cap_style_round" x:Uid="rmfi_menu_cap_style_round" GroupName="gn_cap_style" Click="prop_cap_style_click" Text="Round" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_cap_round" x:Uid="rmfi_menu_stroke_cap_round" GroupName="gn_stroke_cap" Click="stroke_cap_click" Text="Round" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_round}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 三角形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_cap_style_triangle" x:Uid="rmfi_menu_cap_style_triangle" GroupName="gn_cap_style" Click="prop_cap_style_click" Text="Triangle">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_cap_triangle" x:Uid="rmfi_menu_stroke_cap_triangle" GroupName="gn_stroke_cap" Click="stroke_cap_click" Text="Triangle">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_triangle}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 線の結合の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_menu_join_style" x:Uid="mfsi_menu_join_style" Text="Join Style ">
+				<MenuFlyoutSubItem x:Name="mfsi_menu_stroke_join" x:Uid="mfsi_menu_stroke_join" Text="Join Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_join_bevel}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 尖り -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_join_style_miter_or_bevel" x:Uid="rmfi_menu_join_style_miter_or_bevel" GroupName="gn_join_style" Click="prop_join_style_click" Text="Miter" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_join_miter_or_bevel" x:Uid="rmfi_menu_stroke_join_miter_or_bevel" GroupName="gn_stroke_join" Click="stroke_join_click" Text="Miter" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_miter}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 丸まり -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_join_style_round" x:Uid="rmfi_menu_join_style_round" GroupName="gn_join_style" Click="prop_join_style_click" Text="Rounded" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_join_round" x:Uid="rmfi_menu_stroke_join_round" GroupName="gn_stroke_join" Click="stroke_join_click" Text="Rounded" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_round}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 面取り -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_join_style_bevel" x:Uid="rmfi_menu_join_style_bevel" GroupName="gn_join_style" Click="prop_join_style_click" Text="Beveled" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_join_bevel" x:Uid="rmfi_menu_stroke_join_bevel" GroupName="gn_stroke_join" Click="stroke_join_click" Text="Beveled" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_bevel}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 尖り (使用不可) -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_join_style_miter" x:Uid="rmfi_menu_join_style_miter" GroupName="gn_join_style" Click="prop_join_style_click" Text="Miter" Visibility="Collapsed">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_join_miter" x:Uid="rmfi_menu_stroke_join_miter" GroupName="gn_stroke_join" Click="stroke_join_click" Text="Miter" Visibility="Collapsed">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_join_miter}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
 					<!-- 尖り制限 -->
-					<MenuFlyoutItem x:Name="mfi_menu_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="prop_join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_menu_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 矢じるしの形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_menu_arrow_style" x:Uid="mfsi_menu_arrow_style" Text="Arrowhead Style">
+				<MenuFlyoutSubItem x:Name="mfsi_menu_stroke_arrow" x:Uid="mfsi_menu_stroke_arrow" Text="Arrowhead Style">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_arrow_opened}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- なし -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_arrow_style_none" x:Uid="rmfi_menu_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_arrow_none" x:Uid="rmfi_menu_stroke_arrow_none" Click="stroke_arrow_click" IsChecked="True" Text="None" GroupName="gn_arrow_style">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -1105,36 +1103,36 @@
 					<!-- ================ -->
 					<MenuFlyoutSeparator />
 					<!-- 開いた -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_arrow_style_opened" x:Uid="rmfi_menu_arrow_style_opened" Click="arrow_style_click" Text="Opened" GroupName="gn_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_arrow_opened" x:Uid="rmfi_menu_stroke_arrow_opened" Click="stroke_arrow_click" Text="Opened" GroupName="gn_arrow_style">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_arrow_opened}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- 塗りつぶし -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_arrow_style_filled" x:Uid="rmfi_menu_arrow_style_filled" Click="arrow_style_click" Text="Filled" GroupName="gn_arrow_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_stroke_arrow_filled" x:Uid="rmfi_menu_stroke_arrow_filled" Click="stroke_arrow_click" Text="Filled" GroupName="gn_arrow_style">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_arrow_filled}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 矢じるしの大きさ -->
-				<MenuFlyoutItem x:Name="mfi_menu_arrow_size" x:Uid="mfi_menu_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
+				<MenuFlyoutItem x:Name="mfi_menu_stroke_arrow_size" x:Uid="mfi_menu_stroke_arrow_size" Click="stroke_arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 線の色 -->
-				<MenuFlyoutItem x:Name="mfi_menu_stroke_color" x:Uid="mfi_menu_stroke_color" Click="prop_stroke_color_click" Text="Stroke Color..." >
+				<MenuFlyoutItem x:Name="mfi_menu_stroke_color" x:Uid="mfi_menu_stroke_color" Click="color_stroke_click" Text="Stroke Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_color}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 塗りつぶしの色 -->
-				<MenuFlyoutItem x:Name="mfi_menu_fill_color" x:Uid="mfi_menu_fill_color" Click="prop_fill_color_click" Text="Fill Color..." >
+				<MenuFlyoutItem x:Name="mfi_menu_fill_color" x:Uid="mfi_menu_fill_color" Click="color_fill_click" Text="Fill Color..." >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_fill_color}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
                 <!-- 画像の不透明度 -->
-                <MenuFlyoutItem x:Name="mfi_menu_image_opac" x:Uid="mfi_menu_image_opac" Click="prop_image_opac_click_async" Text="Image Opacity..." >
+                <MenuFlyoutItem x:Name="mfi_menu_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_image_opac}" />
                     </MenuFlyoutItem.Icon>
@@ -1226,7 +1224,7 @@
                 <!-- 文字列の余白 -->
 				<MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Margin..." />
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Uid="mfi_menu_font_color" Click="font_color_click" Icon="FontColor" Text="Font Color..." />
+				<MenuFlyoutItem x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
 			</muxc:MenuBarItem>
 			<!-- レイアウトメニュー -->
 			<muxc:MenuBarItem x:Name="mbi_menu_layout" x:Uid="mbi_menu_layout" AccessKey="L" Title="Layout">
@@ -1249,51 +1247,50 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_grid_emph_3" x:Uid="rmfi_menu_grid_emph_3" Click="grid_emph_click" Text="Pattern 3" GroupName="gn_grid_emph" />
 				</MenuFlyoutSubItem>
 				<!-- 方眼の色 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_grid_color" Click="grid_color_click" Text="Grid Color..." />
+				<MenuFlyoutItem x:Uid="mfi_menu_grid_color" Click="color_grid_click" Text="Grid Color..." />
 				<MenuFlyoutSeparator />
 				<!-- ページの大きさ -->
 				<MenuFlyoutItem x:Uid="mfi_menu_page_size" Click="page_size_click_async" Text="Page Size..." />
 				<!-- ページの色 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_page_color" Click="page_color_click" Text="Page Color..." />
-				<MenuFlyoutSeparator />
-				<!-- 拡大率 -->
-				<MenuFlyoutSubItem x:Uid="mfsi_menu_layout_zoom" Icon="Zoom" Text="Zoom">
+				<MenuFlyoutItem x:Uid="mfi_menu_page_color" Click="color_page_click" Text="Page Color..." />
+				<!-- ページのズーム -->
+				<MenuFlyoutSubItem x:Uid="mfsi_menu_page_zoom" Icon="Zoom" Text="Page Zoom">
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_025" Click="zoom_click" Icon="ZoomOut" Text="25%" />
+						x:Name="rmfi_menu_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_050" Click="zoom_click" Icon="ZoomOut" Text="50%">
+						x:Name="rmfi_menu_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_075" Click="zoom_click" Icon="ZoomOut" Text="75%" />
+						x:Name="rmfi_menu_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
 					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_menu_layout_zoom_100" Click="zoom_click" Icon="Zoom" Text="100%">
+						x:Name="rmfi_menu_page_zoom_100" Click="page_zoom_click" Icon="Zoom" Text="100%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_150" Click="zoom_click" Icon="ZoomIn" Text="150%" />
+						x:Name="rmfi_menu_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_200" Click="zoom_click" Icon="ZoomIn" Text="200%">
+						x:Name="rmfi_menu_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_300" Click="zoom_click" Icon="ZoomIn" Text="300%">
+						x:Name="rmfi_menu_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_layout_zoom_400" Click="zoom_click" Icon="ZoomIn" Text="400%" >
+						x:Name="rmfi_menu_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
@@ -1324,7 +1321,7 @@
 				</MenuFlyoutSubItem>
 				<!-- レイアウトを保存 -->
 				<MenuFlyoutItem x:Uid="mfi_menu_layout_save" Click="layout_save_click_async" Text="Save Layout" Icon="SaveLocal" />
-				<!-- レイアウトをリセット -->
+                <!-- レイアウトを既定値に戻す -->
 				<MenuFlyoutItem x:Name="mfi_menu_layout_reset" x:Uid="mfi_menu_layout_reset" Click="layout_reset_click_async" Text="Reset Layout" />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
@@ -1406,8 +1403,8 @@
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
 				<Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next" Click="find_text_next_click" Content="Find Next" />
-				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="find_replace_click" Content="Replace" />
-				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="find_replace_all_click" Content="Replace All" />
+				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_text_click" Content="Replace" />
+				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_text_all_click" Content="Replace All" />
 				<Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close"  Margin="0,0" />
 			</StackPanel>
 		</StackPanel>

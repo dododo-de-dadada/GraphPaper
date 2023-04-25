@@ -599,7 +599,7 @@ namespace winrt::GraphPaper::implementation
 				lt.y = m_event_pos_curr.y;
 				rb.y = m_event_pos_pressed.y;
 			}
-			if (toggle_inside(lt, rb)) {
+			if (toggle_shape_inside(lt, rb)) {
 				xcvd_menu_is_enabled();
 			}
 		}
@@ -623,7 +623,7 @@ namespace winrt::GraphPaper::implementation
 				lt.y = m_event_pos_curr.y;
 				rb.y = m_event_pos_pressed.y;
 			}
-			if (select_inside(lt, rb)) {
+			if (select_shape_inside(lt, rb)) {
 				xcvd_menu_is_enabled();
 			}
 		}
@@ -742,14 +742,14 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::event_menu_is_checked(void)
 	{
-		arrow_style_is_checked(m_main_page.m_arrow_style);
-		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-		prop_dash_style_is_checked(m_main_page.m_dash_style);
+		stroke_arrow_is_checked(m_main_page.m_arrow_style);
+		stroke_cap_is_checked(m_main_page.m_stroke_cap);
+		stroke_dash_is_checked(m_main_page.m_stroke_dash);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_weight_is_checked(m_main_page.m_font_weight);
-		prop_join_style_is_checked(m_main_page.m_join_style);
-		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
+		stroke_join_is_checked(m_main_page.m_stroke_join);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
@@ -762,30 +762,30 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_arrange_popup_prop(const bool visible, const Shape* s)
 	{
 		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
-		mfsi_popup_dash_style().Visibility(v);
+		mfsi_popup_stroke_dash().Visibility(v);
 		mfi_popup_dash_pat().Visibility(v);
 		mfsi_popup_stroke_width().Visibility(v);
 		if (visible && s->exist_cap()) {
-			mfsi_popup_cap_style().Visibility(Visibility::Visible);
+			mfsi_popup_stroke_cap().Visibility(Visibility::Visible);
 		}
 		else {
-			mfsi_popup_cap_style().Visibility(Visibility::Collapsed);
+			mfsi_popup_stroke_cap().Visibility(Visibility::Collapsed);
 		}
 		if (visible && s->exist_join()) {
-			mfsi_popup_join_style().Visibility(Visibility::Visible);
+			mfsi_popup_stroke_join().Visibility(Visibility::Visible);
 		}
 		else {
-			mfsi_popup_join_style().Visibility(Visibility::Collapsed);
+			mfsi_popup_stroke_join().Visibility(Visibility::Collapsed);
 		}
 		if (visible && s->exist_cap()) {
 			mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Visible);
-			mfsi_popup_arrow_style().Visibility(Visibility::Visible);
-			mfi_popup_arrow_size().Visibility(Visibility::Visible);
+			mfsi_popup_stroke_arrow().Visibility(Visibility::Visible);
+			mfi_popup_stroke_arrow_size().Visibility(Visibility::Visible);
 		}
 		else {
 			mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Collapsed);
-			mfsi_popup_arrow_style().Visibility(Visibility::Collapsed);
-			mfi_popup_arrow_size().Visibility(Visibility::Collapsed);
+			mfsi_popup_stroke_arrow().Visibility(Visibility::Collapsed);
+			mfi_popup_stroke_arrow_size().Visibility(Visibility::Collapsed);
 		}
 		mfs_popup_sepa_arrow_color().Visibility(v);
 		mfi_popup_stroke_color().Visibility(v);
@@ -827,8 +827,7 @@ namespace winrt::GraphPaper::implementation
 		mfs_popup_sepa_grid_page().Visibility(v);
 		mfi_popup_page_size().Visibility(v);
 		mfi_popup_page_color().Visibility(v);
-		mfs_popup_sepa_layout_zoom().Visibility(v);
-		mfsi_popup_layout_zoom().Visibility(v);
+		mfsi_popup_page_zoom().Visibility(v);
 		mfsi_popup_background_pattern().Visibility(v);
 	}
 
@@ -1001,11 +1000,11 @@ namespace winrt::GraphPaper::implementation
 			// 押された図形の属性値を表示に格納する.
 			m_main_page.set_attr_to(pressed);
 			// メニューバーを更新する
-			prop_dash_style_is_checked(m_main_page.m_dash_style);
-			prop_stroke_width_is_checked(m_main_page.m_stroke_width);
-			prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-			prop_join_style_is_checked(m_main_page.m_join_style);
-			arrow_style_is_checked(m_main_page.m_arrow_style);
+			stroke_dash_is_checked(m_main_page.m_stroke_dash);
+			stroke_width_is_checked(m_main_page.m_stroke_width);
+			stroke_cap_is_checked(m_main_page.m_stroke_cap);
+			stroke_join_is_checked(m_main_page.m_stroke_join);
+			stroke_arrow_is_checked(m_main_page.m_arrow_style);
 			font_weight_is_checked(m_main_page.m_font_weight);
 			font_stretch_is_checked(m_main_page.m_font_stretch);
 			font_style_is_checked(m_main_page.m_font_style);
@@ -1115,11 +1114,11 @@ namespace winrt::GraphPaper::implementation
 			m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 			m_main_page.set_attr_to(m_event_shape_pressed);
 			// メニューバーを更新する
-			prop_dash_style_is_checked(m_main_page.m_dash_style);
-			prop_stroke_width_is_checked(m_main_page.m_stroke_width);
-			prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-			prop_join_style_is_checked(m_main_page.m_join_style);
-			arrow_style_is_checked(m_main_page.m_arrow_style);
+			stroke_dash_is_checked(m_main_page.m_stroke_dash);
+			stroke_width_is_checked(m_main_page.m_stroke_width);
+			stroke_cap_is_checked(m_main_page.m_stroke_cap);
+			stroke_join_is_checked(m_main_page.m_stroke_join);
+			stroke_arrow_is_checked(m_main_page.m_arrow_style);
 			font_weight_is_checked(m_main_page.m_font_weight);
 			font_stretch_is_checked(m_main_page.m_font_stretch);
 			font_style_is_checked(m_main_page.m_font_style);
@@ -1133,7 +1132,7 @@ namespace winrt::GraphPaper::implementation
 				m_event_shape_prev = nullptr;
 				// 修飾キーが押されていないならば, すべての図形の選択を解除する.
 				// 解除された図形があるか判定する.
-				if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
+				if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_shape_all()) {
 					xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -1236,7 +1235,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 作図ツールが選択ツール以外.
 			else {
-				unselect_all();
+				unselect_shape_all();
 				// 頂点をくっつける閾値がゼロより大きいか判定する.
 				if (m_snap_point >= FLT_MIN) {
 					const bool boxed = (
@@ -1449,7 +1448,7 @@ namespace winrt::GraphPaper::implementation
 				//m_main_page.m_page_scale *= 1.1f;
 				//zoom_is_cheched(m_main_page.m_page_scale);
 				m_main_scale *= 1.1f;
-				zoom_is_checked(m_main_scale);
+				page_zoom_is_checked(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();
@@ -1460,7 +1459,7 @@ namespace winrt::GraphPaper::implementation
 				//m_main_page.m_page_scale /= 1.1f;
 				//zoom_is_cheched(m_main_page.m_page_scale);
 				m_main_scale /= 1.1f;
-				zoom_is_checked(m_main_scale);
+				page_zoom_is_checked(m_main_scale);
 				main_panel_size();
 				main_draw();
 				status_bar_set_pos();

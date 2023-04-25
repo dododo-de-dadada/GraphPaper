@@ -530,9 +530,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü˜g‚ÌŒ`®‚ğ“¾‚é.
-	bool ShapePage::get_dash_style(D2D1_DASH_STYLE& val) const noexcept
+	bool ShapePage::get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept
 	{
-		val = m_dash_style;
+		val = m_stroke_dash;
 		return true;
 	}
 
@@ -544,9 +544,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü•ª‚ÌŒ‹‡‚ğ“¾‚é.
-	bool ShapePage::get_join_style(D2D1_LINE_JOIN& val) const noexcept
+	bool ShapePage::get_stroke_join(D2D1_LINE_JOIN& val) const noexcept
 	{
-		val = m_join_style;
+		val = m_stroke_join;
 		return true;
 	}
 
@@ -736,7 +736,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
 		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID ||
 			d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM) {
-			m_dash_style = d_style;
+			m_stroke_dash = d_style;
 		}
 		// ü‚ÌŒ‹‡‚ÌŒ`ó
 		const D2D1_LINE_JOIN j_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
@@ -744,7 +744,7 @@ namespace winrt::GraphPaper::implementation
 			//j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL ||
 			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			m_join_style = j_style;
+			m_stroke_join = j_style;
 		}
 		// ü‚ÌŒ‹‡‚Ìë‚è§ŒÀ‹——£
 		const float j_limit = dt_reader.ReadSingle();
@@ -1097,10 +1097,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapePage::set_dash_style(const D2D1_DASH_STYLE val) noexcept
+	bool ShapePage::set_stroke_dash(const D2D1_DASH_STYLE val) noexcept
 	{
-		const auto old_val = m_dash_style;
-		return (m_dash_style = val) != old_val;
+		const auto old_val = m_stroke_dash;
+		return (m_stroke_dash = val) != old_val;
 	}
 
 	// ’l‚ğü•ª‚ÌŒ‹‡‚Ìë‚è§ŒÀ‚ÉŠi”[‚·‚é.
@@ -1114,10 +1114,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğü•ª‚ÌŒ‹‡‚ÉŠi”[‚·‚é.
-	bool ShapePage::set_join_style(const D2D1_LINE_JOIN& val) noexcept
+	bool ShapePage::set_stroke_join(const D2D1_LINE_JOIN& val) noexcept
 	{
-		const auto old_val = m_join_style;
-		return (m_join_style = val) != old_val;
+		const auto old_val = m_stroke_join;
+		return (m_stroke_join = val) != old_val;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
@@ -1174,7 +1174,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_arrow_join(m_arrow_join);
 			//s->get_dash_cap(m_dash_cap);
 			s->get_dash_pat(m_dash_pat);
-			s->get_dash_style(m_dash_style);
+			s->get_stroke_dash(m_stroke_dash);
 			s->get_fill_color(m_fill_color);
 			s->get_font_color(m_font_color);
 			s->get_font_family(m_font_family);
@@ -1188,7 +1188,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_grid_show(m_grid_show);
 			s->get_image_opacity(m_image_opac);
 			s->get_join_miter_limit(m_join_miter_limit);
-			s->get_join_style(m_join_style);
+			s->get_stroke_join(m_stroke_join);
 			s->get_page_color(m_page_color);
 			s->get_page_margin(m_page_margin);
 			s->get_stroke_cap(m_stroke_cap);
@@ -1264,9 +1264,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_dash_pat.m_[4]);
 		dt_writer.WriteSingle(m_dash_pat.m_[5]);
 		// ”jü‚ÌŒ`®
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash));
 		// ü•ª‚ÌŒ‹‡
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join));
 		// Œ‹‡‚Ìë‚è§ŒÀ
 		dt_writer.WriteSingle(m_join_miter_limit);
 		// “h‚è‚Â‚Ô‚µF

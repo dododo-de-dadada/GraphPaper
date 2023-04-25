@@ -183,7 +183,7 @@
 		a 15,15 0 0 1 15,15 l -1,0 
 		a 14,14 0 0 0 -14,-14 Z
 	</x:String>
-	<x:String x:Key="data_dash_style">
+	<x:String x:Key="data_stroke_dash">
 		M   0,   2 L  16,   2 L  16,  3 L   0,  3 Z
 		M   0,   7 L   3,   7 L   3,8.5 L   0,8.5 Z
 		M 6.5,   7 L 9.5,   7 L 9.5,8.5 L 6.5,8.5 Z

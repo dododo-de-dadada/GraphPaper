@@ -78,25 +78,25 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::equal;
 
-		D2D1_POINT_2F pos;
-		m_shape->get_pos_loc(m_loc, pos);
-		return !equal(pos, m_start);
+		D2D1_POINT_2F p;
+		m_shape->get_pos_loc(m_loc, p);
+		return !equal(p, m_p);
 	}
 
 	// 元に戻す操作を実行する.
 	void UndoDeform::exec(void)
 	{
-		D2D1_POINT_2F pos;
-		m_shape->get_pos_loc(m_loc, pos);
-		m_shape->set_pos_loc(m_start, m_loc, 0.0f, false);
-		m_start = pos;
+		D2D1_POINT_2F p;
+		m_shape->get_pos_loc(m_loc, p);
+		m_shape->set_pos_loc(m_p, m_loc, 0.0f, false);
+		m_p = p;
 	}
 
 	// データリーダーから操作を読み込む.
 	UndoDeform::UndoDeform(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_loc(static_cast<LOC_TYPE>(dt_reader.ReadUInt32())),
-		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
+		m_p(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
 	{}
 
 	// 指定した部位の点を保存する.
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 	) :
 		Undo(s),
 		m_loc(loc),
-		m_start(undo_get_pos_loc(s, loc))
+		m_p(undo_get_pos_loc(s, loc))
 	{}
 
 	// 図形の形の操作をデータライターに書き込む.
@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::DEFORM));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_loc));
-		dt_writer.WriteSingle(m_start.x);
-		dt_writer.WriteSingle(m_start.y);
+		dt_writer.WriteSingle(m_p.x);
+		dt_writer.WriteSingle(m_p.y);
 	}
 
 	// 操作を実行する.
@@ -450,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_T::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& val)
 	{
-		s->set_dash_style(val);
+		s->set_stroke_dash(val);
 	}
 
 	void UndoValue<UNDO_T::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
@@ -520,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_T::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& val)
 	{
-		s->set_join_style(val);
+		s->set_stroke_join(val);
 	}
 
 	void UndoValue<UNDO_T::MOVE>::SET(Shape* const s, const D2D1_POINT_2F& val)
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& val) noexcept
 	{
-		return s->get_dash_style(val);
+		return s->get_stroke_dash(val);
 	}
 
 	bool UndoValue<UNDO_T::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
@@ -706,7 +706,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept
 	{
-		return s->get_join_style(val);
+		return s->get_stroke_join(val);
 	}
 
 	bool UndoValue<UNDO_T::MOVE>::GET(const Shape* s, D2D1_POINT_2F& val) noexcept

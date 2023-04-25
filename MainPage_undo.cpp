@@ -322,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 			// 属性メニューの「矢じるしの形式」に印をつける.
 			ARROW_STYLE val;
 			m_main_page.get_arrow_style(val);
-			arrow_style_is_checked(val);
+			stroke_arrow_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 			//CAP_STYLE val;
 			D2D1_CAP_STYLE val;
 			m_main_page.get_stroke_cap(val);
-			prop_cap_style_is_checked(val);
+			stroke_cap_is_checked(val);
 		}
 		//else if (u_type == typeid(UndoValue<UNDO_T::DASH_CAP>)) {
 		//	D2D1_CAP_STYLE val;
@@ -373,18 +373,18 @@ namespace winrt::GraphPaper::implementation
 		//}
 		else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
-			m_main_page.get_dash_style(val);
-			prop_dash_style_is_checked(val);
+			m_main_page.get_stroke_dash(val);
+			stroke_dash_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
-			m_main_page.get_join_style(val);
-			prop_join_style_is_checked(val);
+			m_main_page.get_stroke_join(val);
+			stroke_join_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_WIDTH>)) {
 			float val;
 			m_main_page.get_stroke_width(val);
-			prop_stroke_width_is_checked(val);
+			stroke_width_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;

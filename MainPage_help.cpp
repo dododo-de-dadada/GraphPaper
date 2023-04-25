@@ -1,5 +1,5 @@
 //-----------------------------
-// MainPage_misc.cpp
+// MainPage_help.cpp
 // 長さの単位, 色の基数, ステータスバー, バージョン情報
 //-----------------------------
 #include "pch.h"
@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-	// その他メニューの「バージョン情報」が選択された.
+	// ヘルプメニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		tb_version().Visibility(Visibility::Visible);
@@ -60,39 +60,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
-	// その他メニューの「色の基数」のサブ項目が選択された.
-	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
-	{
-		if (sender == rmfi_menu_color_code_pct()) {
-			m_color_code = COLOR_CODE::PCT;
-		}
-		else if (sender == rmfi_menu_color_code_dec()) {
-			m_color_code = COLOR_CODE::DEC;
-		}
-		else if (sender == rmfi_menu_color_code_hex()) {
-			m_color_code = COLOR_CODE::HEX;
-		}
-		else if (sender == rmfi_menu_color_code_real()) {
-			m_color_code = COLOR_CODE::REAL;
-		}
-		else {
-			throw winrt::hresult_not_implemented();
-			return;
-		}
-		color_code_is_checked(m_color_code);
-		status_bar_set_pos();
-	}
-
-	// その他メニューの「色の基数」に印をつける.
-	void MainPage::color_code_is_checked(const COLOR_CODE val)
-	{
-		rmfi_menu_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
-		rmfi_menu_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
-		rmfi_menu_color_code_real().IsChecked(val == COLOR_CODE::REAL);
-		rmfi_menu_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
-	}
-
-	// その他メニューの「長さの単位」のサブ項目が選択された.
+	// ヘルプメニューの「長さの単位」のサブ項目が選択された.
 	void MainPage::len_unit_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		const auto old_unit = m_len_unit;
@@ -125,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// その他メニューの「長さの単位」に印をつける.
+	// ヘルプメニューの「長さの単位」に印をつける.
 	void MainPage::len_unit_is_checked(const LEN_UNIT val)
 	{
 		rmfi_menu_len_unit_grid().IsChecked(val == LEN_UNIT::GRID);
@@ -140,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 		cbi_len_unit_point().IsSelected(val == LEN_UNIT::POINT);
 	}
 
-	// その他メニューの「点を方眼にくっつける」が選択された.
+	// ヘルプメニューの「点を方眼にくっつける」が選択された.
 	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_snap_grid = tmfi_menu_snap_grid().IsChecked();
@@ -148,10 +116,12 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// その他メニューの「頂点をくっつける...」が選択された.
+	// ヘルプメニューの「頂点をくっつける...」が選択された.
 	IAsyncAction MainPage::snap_point_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		const winrt::hstring str_snap_point{ ResourceLoader::GetForCurrentView().GetString(L"str_snap_point") + L": " };
+		const winrt::hstring str_snap_point{
+			ResourceLoader::GetForCurrentView().GetString(L"str_snap_point") + L": "
+		};
 		const auto val = m_snap_point;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0, buf);

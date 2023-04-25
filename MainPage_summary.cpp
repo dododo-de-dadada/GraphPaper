@@ -214,11 +214,11 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_pressed = summary->get_shape();
 		m_main_page.set_attr_to(m_event_shape_pressed);
 		// メニューバーを更新する
-		prop_dash_style_is_checked(m_main_page.m_dash_style);
-		prop_stroke_width_is_checked(m_main_page.m_stroke_width);
-		prop_cap_style_is_checked(m_main_page.m_stroke_cap);
-		prop_join_style_is_checked(m_main_page.m_join_style);
-		arrow_style_is_checked(m_main_page.m_arrow_style);
+		stroke_dash_is_checked(m_main_page.m_stroke_dash);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
+		stroke_cap_is_checked(m_main_page.m_stroke_cap);
+		stroke_join_is_checked(m_main_page.m_stroke_join);
+		stroke_arrow_is_checked(m_main_page.m_arrow_style);
 		font_weight_is_checked(m_main_page.m_font_weight);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_style_is_checked(m_main_page.m_font_style);
@@ -451,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の一覧の項目を全て選択解除する.
-	void MainPage::summary_unselect_all(void)
+	void MainPage::summary_unselect_shape_all(void)
 	{
 		// 一覧が表示されてるか判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {

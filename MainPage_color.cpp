@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	template<UNDO_T U>
+	template<UNDO_T U>	// 操作の種類
 	static void color_get(const ShapePage& p, D2D1_COLOR_F& c)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
@@ -147,11 +147,21 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
 
-		const auto str_color_r{ ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " };
-		const auto str_color_g{ ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " };
-		const auto str_color_b{ ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " };
-		const auto str_opacity{ ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " };
-		const auto str_color_code{ mfsi_menu_color_code().Text() };
+		const auto str_color_r{
+			ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": "
+		};
+		const auto str_color_g{
+			ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": "
+		};
+		const auto str_color_b{
+			ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": "
+		};
+		const auto str_opacity{
+			ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": "
+		};
+		const auto str_color_code{
+			mfsi_menu_color_code().Text()
+		};
 
 		wchar_t* res = nullptr;
 		if constexpr (U == UNDO_T::FILL_COLOR) {
@@ -169,7 +179,9 @@ namespace winrt::GraphPaper::implementation
 		else if constexpr (U == UNDO_T::PAGE_COLOR) {
 			res = L"str_page_color";
 		}
-		const auto str_title{ ResourceLoader::GetForCurrentView().GetString(res) };
+		const auto str_title{
+			ResourceLoader::GetForCurrentView().GetString(res)
+		};
 
 		wchar_t buf[32];
 		conv_col_to_str(m_color_code, val0, buf);
@@ -352,4 +364,157 @@ namespace winrt::GraphPaper::implementation
 	template IAsyncAction MainPage::color_click_async<UNDO_T::GRID_COLOR>();
 	template IAsyncAction MainPage::color_click_async<UNDO_T::PAGE_COLOR>();
 	template IAsyncAction MainPage::color_click_async<UNDO_T::STROKE_COLOR>();
+
+	// その他メニューの「色の基数」に印をつける.
+	void MainPage::color_code_is_checked(const COLOR_CODE val)
+	{
+		rmfi_menu_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_menu_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_menu_color_code_real().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_menu_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
+	}
+
+	// その他メニューの「色の基数」のサブ項目が選択された.
+	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		if (sender == rmfi_menu_color_code_pct()) {
+			m_color_code = COLOR_CODE::PCT;
+		}
+		else if (sender == rmfi_menu_color_code_dec()) {
+			m_color_code = COLOR_CODE::DEC;
+		}
+		else if (sender == rmfi_menu_color_code_hex()) {
+			m_color_code = COLOR_CODE::HEX;
+		}
+		else if (sender == rmfi_menu_color_code_real()) {
+			m_color_code = COLOR_CODE::REAL;
+		}
+		else {
+			throw winrt::hresult_not_implemented();
+			return;
+		}
+		color_code_is_checked(m_color_code);
+		status_bar_set_pos();
+	}
+
+	// 属性メニューの「画像の不透明度...」が選択された.
+	IAsyncAction MainPage::color_image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		const winrt::hstring str_opacity{ 
+			ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": "
+		};
+		const winrt::hstring str_title{
+			ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")
+		};
+		const winrt::hstring str_color_code{
+			ResourceLoader::GetForCurrentView().GetString(L"str_color_code")
+		};
+
+		m_mutex_event.lock();
+		m_prop_page.set_attr_to(&m_main_page);
+
+		dialog_image_load_async(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()));
+
+		const float val = static_cast<float>(conv_color_comp(m_prop_page.m_image_opac));
+		dialog_slider_0().Minimum(0.0);
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val);
+		wchar_t buf[32];
+		conv_col_to_str(m_color_code, val, buf);
+		dialog_slider_0().Header(box_value(str_opacity + buf));
+		dialog_slider_0().Visibility(Visibility::Visible);
+
+		dialog_combo_box_0().Header(box_value(str_color_code));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_dec().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_hex().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_real().Text()));
+		dialog_combo_box_0().Items().Append(box_value(rmfi_menu_color_code_pct().Text()));
+		if (m_color_code == COLOR_CODE::DEC) {
+			dialog_combo_box_0().SelectedIndex(0);
+		}
+		else if (m_color_code == COLOR_CODE::HEX) {
+			dialog_combo_box_0().SelectedIndex(1);
+		}
+		else if (m_color_code == COLOR_CODE::REAL) {
+			dialog_combo_box_0().SelectedIndex(2);
+		}
+		else if (m_color_code == COLOR_CODE::PCT) {
+			dialog_combo_box_0().SelectedIndex(3);
+		}
+		dialog_combo_box_0().Visibility(Visibility::Visible);
+
+		cd_dialog_prop().Title(box_value(str_title));
+		{
+			const auto revoker{
+				dialog_slider_0().ValueChanged(
+					winrt::auto_revoke,
+					[this, str_opacity](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+						const float val = static_cast<float>(args.NewValue());
+						wchar_t buf[32];
+						conv_col_to_str(m_color_code, val, buf);
+						dialog_slider_0().Header(box_value(str_opacity + buf));
+						if (m_prop_page.back()->set_image_opacity(val / COLOR_MAX)) {
+							dialog_draw();
+						}
+					}
+				)
+			};
+			const auto revoker4{
+				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this, str_opacity](IInspectable const&, SelectionChangedEventArgs const&) {
+					COLOR_CODE c_code;
+					if (dialog_combo_box_0().SelectedIndex() == 0) {
+						c_code = COLOR_CODE::DEC;
+					}
+					else if (dialog_combo_box_0().SelectedIndex() == 1) {
+						c_code = COLOR_CODE::HEX;
+					}
+					else if (dialog_combo_box_0().SelectedIndex() == 2) {
+						c_code = COLOR_CODE::REAL;
+					}
+					else if (dialog_combo_box_0().SelectedIndex() == 3) {
+						c_code = COLOR_CODE::PCT;
+					}
+					else {
+						return;
+					}
+					wchar_t buf[32];
+					conv_col_to_str(c_code, dialog_slider_0().Value(), buf);
+					dialog_slider_0().Header(box_value(str_opacity + buf));
+				})
+			};
+			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+				float new_val;
+				m_prop_page.back()->get_image_opacity(new_val);
+				if (dialog_combo_box_0().SelectedIndex() == 0) {
+					m_color_code = COLOR_CODE::DEC;
+				}
+				else if (dialog_combo_box_0().SelectedIndex() == 1) {
+					m_color_code = COLOR_CODE::HEX;
+				}
+				else if (dialog_combo_box_0().SelectedIndex() == 2) {
+					m_color_code = COLOR_CODE::REAL;
+				}
+				else if (dialog_combo_box_0().SelectedIndex() == 3) {
+					m_color_code = COLOR_CODE::PCT;
+				}
+				color_code_is_checked(m_color_code);
+				if (undo_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
+					undo_push_null();
+					undo_menu_is_enabled();
+					main_draw();
+				}
+			}
+		}
+		slist_clear(m_prop_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box_0().Visibility(Visibility::Collapsed);
+		dialog_combo_box_0().Items().Clear();
+		main_draw();
+		m_mutex_event.unlock();
+	}
+
 }

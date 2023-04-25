@@ -13,8 +13,8 @@ namespace winrt::GraphPaper::implementation
 	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo) noexcept;
 	// 矢じるしの D2D ストローク特性を作成する.
 	//static void line_create_arrow_stroke(
-	//	ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, 
-	//	const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit,
+	//	ID2D1Factory3* const d_factory, const CAP_STYLE s_stroke_cap, 
+	//	const D2D1_LINE_JOIN s_stroke_join, const double s_join_miter_limit,
 	//	ID2D1StrokeStyle** s_arrow_style);
 
 	// 矢じるしの D2D1 パスジオメトリを作成する
@@ -317,9 +317,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の結合に格納する.
-	bool ShapeLine::set_join_style(const D2D1_LINE_JOIN& val) noexcept
+	bool ShapeLine::set_stroke_join(const D2D1_LINE_JOIN& val) noexcept
 	{
-		if (ShapeStroke::set_join_style(val)) {
+		if (ShapeStroke::set_stroke_join(val)) {
 			m_d2d_arrow_stroke = nullptr;
 			return true;
 		}
