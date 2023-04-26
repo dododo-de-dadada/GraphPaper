@@ -290,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 		slist.insert(std::find(slist.begin(), slist.end(), s_at), s_ins);
 	}
 
-	// リストの中の図形の順番を得る.
+	// リスト中の図形の順番を得る.
 	// S	探索する型
 	// T	得られた型
 	// slist	図形リスト
@@ -364,10 +364,8 @@ namespace winrt::GraphPaper::implementation
 		stack.clear();
 		return f;
 	}
-	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(
-		SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
-	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(
-		SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
+	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
+	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
 
 	// 選択された図形を移動する.
 	// slist	図形リスト

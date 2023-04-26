@@ -523,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// ”jü‚Ì”z’u‚ğ“¾‚é.
-	bool ShapePage::get_dash_pat(DASH_PAT& val) const noexcept
+	bool ShapePage::get_stroke_dash_pat(DASH_PAT& val) const noexcept
 	{
 		val = m_dash_pat;
 		return true;
@@ -537,9 +537,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü•ª‚ÌŒ‹‡‚Ìë‚è§ŒÀ‚ğ“¾‚é.
-	bool ShapePage::get_join_miter_limit(float& val) const noexcept
+	bool ShapePage::get_stroke_join_limit(float& val) const noexcept
 	{
-		val = m_join_miter_limit;
+		val = m_stroke_join_limit;
 		return true;
 	}
 
@@ -749,7 +749,7 @@ namespace winrt::GraphPaper::implementation
 		// ü‚ÌŒ‹‡‚Ìë‚è§ŒÀ‹——£
 		const float j_limit = dt_reader.ReadSingle();
 		if (j_limit >= 1.0f && j_limit <= 128.5f) {
-			m_join_miter_limit = j_limit;
+			m_stroke_join_limit = j_limit;
 		}
 		// “h‚è‚Â‚Ô‚µF
 		const D2D1_COLOR_F f_color{
@@ -1087,7 +1087,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
-	bool ShapePage::set_dash_pat(const DASH_PAT& val) noexcept
+	bool ShapePage::set_stroke_dash_pat(const DASH_PAT& val) noexcept
 	{
 		if (!equal(m_dash_pat, val)) {
 			m_dash_pat = val;
@@ -1104,10 +1104,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğü•ª‚ÌŒ‹‡‚Ìë‚è§ŒÀ‚ÉŠi”[‚·‚é.
-	bool ShapePage::set_join_miter_limit(const float& val) noexcept
+	bool ShapePage::set_stroke_join_limit(const float& val) noexcept
 	{
-		if (!equal(m_join_miter_limit, val)) {
-			m_join_miter_limit = val;
+		if (!equal(m_stroke_join_limit, val)) {
+			m_stroke_join_limit = val;
 			return true;
 		}
 		return false;
@@ -1173,7 +1173,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_arrow_cap(m_arrow_cap);
 			s->get_arrow_join(m_arrow_join);
 			//s->get_dash_cap(m_dash_cap);
-			s->get_dash_pat(m_dash_pat);
+			s->get_stroke_dash_pat(m_dash_pat);
 			s->get_stroke_dash(m_stroke_dash);
 			s->get_fill_color(m_fill_color);
 			s->get_font_color(m_font_color);
@@ -1187,7 +1187,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_grid_emph(m_grid_emph);
 			s->get_grid_show(m_grid_show);
 			s->get_image_opacity(m_image_opac);
-			s->get_join_miter_limit(m_join_miter_limit);
+			s->get_stroke_join_limit(m_stroke_join_limit);
 			s->get_stroke_join(m_stroke_join);
 			s->get_page_color(m_page_color);
 			s->get_page_margin(m_page_margin);
@@ -1268,7 +1268,7 @@ namespace winrt::GraphPaper::implementation
 		// ü•ª‚ÌŒ‹‡
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join));
 		// Œ‹‡‚Ìë‚è§ŒÀ
-		dt_writer.WriteSingle(m_join_miter_limit);
+		dt_writer.WriteSingle(m_stroke_join_limit);
 		// “h‚è‚Â‚Ô‚µF
 		dt_writer.WriteSingle(m_fill_color.r);
 		dt_writer.WriteSingle(m_fill_color.g);

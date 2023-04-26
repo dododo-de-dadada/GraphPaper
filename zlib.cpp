@@ -490,7 +490,7 @@ namespace winrt::Zlib::implementation
 		std::array<PACKAGE, PACKAGE_MAX / 2> pkg;
 		std::array<uint32_t, PACKAGE_MAX> idx;
 
-		// 出現回数 0 のアルファベットは取り除く.
+		// 出現回数 0 のアルファベットは削除する.
 		uint32_t tbl_cnt = 0;
 		for (int i = 0; i < N; i++) {
 			if (lit_tbl[i][FREQ] > 0) {
@@ -545,7 +545,7 @@ namespace winrt::Zlib::implementation
 				[tbl](const uint32_t& a, const uint32_t& b) {
 					return tbl[a].freq < tbl[b].freq;
 				});
-			// 奇数個なら末尾は取り除く
+			// 奇数個なら末尾は削除する
 			b = (a / 2) * 2;
 		}
 		for (uint32_t i = 0; i < b; i++) {

@@ -11,11 +11,6 @@ namespace winrt::GraphPaper::implementation
 {
 	// 矢じるしの D2D1 パスジオメトリを作成する.
 	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo) noexcept;
-	// 矢じるしの D2D ストローク特性を作成する.
-	//static void line_create_arrow_stroke(
-	//	ID2D1Factory3* const d_factory, const CAP_STYLE s_stroke_cap, 
-	//	const D2D1_LINE_JOIN s_stroke_join, const double s_join_miter_limit,
-	//	ID2D1StrokeStyle** s_arrow_style);
 
 	// 矢じるしの D2D1 パスジオメトリを作成する
 	static void line_create_arrow_geom(
@@ -63,14 +58,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの先端と返しの位置を求める.
-	// a_end	矢軸の後端の位置
-	// a_dir	矢軸の先端へのベクトル
-	// a_size	矢じるしの寸法
-	// barb	返しの位置
-	// tip		先端の位置
 	bool ShapeLine::line_get_pos_arrow(
-		const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_dir, const ARROW_SIZE& a_size,
-		/*--->*/D2D1_POINT_2F barb[2], D2D1_POINT_2F& tip) noexcept
+		const D2D1_POINT_2F a_end,	// 矢軸の後端の位置
+		const D2D1_POINT_2F a_dir,	// 矢軸の先端へのベクトル
+		const ARROW_SIZE& a_size,	// 矢じるしの寸法
+		D2D1_POINT_2F barb[2],	// 返しの位置
+		D2D1_POINT_2F& tip	// 先端の位置
+	) noexcept
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_dir));	// 矢軸の長さ
 		if (a_len >= FLT_MIN) {
@@ -307,9 +301,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の結合の尖り制限に格納する.
-	bool ShapeLine::set_join_miter_limit(const float& val) noexcept
+	bool ShapeLine::set_stroke_join_limit(const float& val) noexcept
 	{
-		if (ShapeStroke::set_join_miter_limit(val)) {
+		if (ShapeStroke::set_stroke_join_limit(val)) {
 			m_d2d_arrow_stroke = nullptr;
 			return true;
 		}
@@ -449,12 +443,13 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_pos.y);
 	}
 
-	// 近傍の頂点を見つける.
-	// pos	ある位置
-	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
-	// val	ある位置の近傍にある頂点
+	// 指定された点の近傍の頂点を見つける.
 	// 戻り値	見つかったら true
-	bool ShapeLine::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
+	bool ShapeLine::get_pos_nearest(
+		const D2D1_POINT_2F p,	// 指定された点
+		double& dd,	// 近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
+		D2D1_POINT_2F& val	// 見つかった点
+	) const noexcept
 	{
 		bool done = false;
 		D2D1_POINT_2F d;

@@ -217,7 +217,7 @@
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 破線の配置 -->
-				<MenuFlyoutItem x:Name="mfi_popup_dash_pat" x:Uid="mfi_menu_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
+				<MenuFlyoutItem x:Name="mfi_popup_stroke_dash_pat" x:Uid="mfi_menu_stroke_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線の太さ -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_width" x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
@@ -333,7 +333,7 @@
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
 					<!-- 尖り制限 -->
-					<MenuFlyoutItem x:Name="mfi_popup_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_popup_stroke_join_limit" x:Uid="mfi_menu_stroke_join_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_stroke_arrow"/>
@@ -969,7 +969,7 @@
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 破線の配置 -->
-				<MenuFlyoutItem x:Name="mfi_menu_dash_pat" x:Uid="mfi_menu_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
+				<MenuFlyoutItem x:Name="mfi_menu_stroke_dash_pat" x:Uid="mfi_menu_stroke_dash_pat" Click="stroke_dash_pat_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線の太さ -->
 				<MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
@@ -1085,7 +1085,7 @@
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
 					<!-- 尖り制限 -->
-					<MenuFlyoutItem x:Name="mfi_menu_join_miter_limit" x:Uid="mfi_menu_join_miter_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_menu_stroke_join_limit" x:Uid="mfi_menu_stroke_join_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />

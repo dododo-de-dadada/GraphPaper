@@ -8,8 +8,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 	constexpr auto INDEX_PAGE = static_cast<uint32_t>(-1);	// 表示図形の添え字
 
-	static SHAPE_LIST* undo_slist = nullptr;	// 参照する図形リスト
-	static ShapePage* undo_page = nullptr;	// 参照するページ
+	SHAPE_LIST* Undo::undo_slist = nullptr;	// 操作が参照する図形リスト
+	ShapePage* Undo::undo_page = nullptr;	// 操作が参照するページ
 
 	// 指定した部位の点を得る.
 	static D2D1_POINT_2F undo_get_pos_loc(const Shape* s, const uint32_t loc) noexcept;
@@ -38,65 +38,48 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = static_cast<Shape*>(nullptr);
 		const uint32_t i = dt_reader.ReadUInt32();
 		if (i == INDEX_PAGE) {
-			s = undo_page;
+			s = Undo::undo_page;
 		}
 		else if (i == INDEX_NIL) {
 			s = nullptr;
 		}
 		else {
-			slist_match<const uint32_t, Shape*>(*undo_slist, i, s);
+			slist_match<const uint32_t, Shape*>(*Undo::undo_slist, i, s);
 		}
 		return s;
 	}
 
 	// 図形をデータライターに書き込む.
-	// dt_reader	データリーダー
-	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
+	static void undo_write_shape(
+		Shape* const s,	// 書き込まれる図形
+		DataWriter const& dt_writer	// データリーダー
+	)
 	{
-		if (s == undo_page) {
+		// 図形がページ図形なら, ページを意味する添え字を書き込む.
+		if (s == Undo::undo_page) {
 			dt_writer.WriteUInt32(INDEX_PAGE);
 		}
+		// 図形がヌルなら, ヌルを意味する添え字を書き込む.
 		else if (s == nullptr) {
 			dt_writer.WriteUInt32(INDEX_NIL);
 		}
+		// それ以外なら, リスト中での図形の添え字を書き込む.
+		// リスト中に図形がなければ INDEX_NIL が書き込まれる.
 		else {
-			uint32_t i = 0;
-			slist_match<Shape* const, uint32_t>(*undo_slist, s, i);
+			uint32_t i = INDEX_NIL;
+			slist_match<Shape* const, uint32_t>(*Undo::undo_slist, s, i);
 			dt_writer.WriteUInt32(i);
 		}
-	}
-
-	// 操作が参照するための図形リストと表示図形を格納する.
-	void Undo::set(SHAPE_LIST* slist, ShapePage* page) noexcept
-	{
-		undo_slist = slist;
-		undo_page = page;
-	}
-
-	// 操作を実行すると値が変わるか判定する.
-	bool UndoDeform::changed(void) const noexcept
-	{
-		using winrt::GraphPaper::implementation::equal;
-
-		D2D1_POINT_2F p;
-		m_shape->get_pos_loc(m_loc, p);
-		return !equal(p, m_p);
-	}
-
-	// 元に戻す操作を実行する.
-	void UndoDeform::exec(void)
-	{
-		D2D1_POINT_2F p;
-		m_shape->get_pos_loc(m_loc, p);
-		m_shape->set_pos_loc(m_p, m_loc, 0.0f, false);
-		m_p = p;
 	}
 
 	// データリーダーから操作を読み込む.
 	UndoDeform::UndoDeform(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_loc(static_cast<LOC_TYPE>(dt_reader.ReadUInt32())),
-		m_p(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
+		m_p(D2D1_POINT_2F{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		})
 	{}
 
 	// 指定した部位の点を保存する.
@@ -110,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 	{}
 
 	// 図形の形の操作をデータライターに書き込む.
-	void UndoDeform::write(DataWriter const& dt_writer)
+	void UndoDeform::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::DEFORM));
 		undo_write_shape(m_shape, dt_writer);
@@ -120,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
-	void UndoOrder::exec(void)
+	void UndoOrder::exec(void) noexcept
 	{
 		if (m_shape == m_dst_shape) {
 			return;
@@ -145,34 +128,17 @@ namespace winrt::GraphPaper::implementation
 		m_dst_shape(undo_read_shape(dt_reader))
 	{}
 
-	// 操作を作成する.
-	UndoOrder::UndoOrder(Shape* const s, Shape* const t) :
-		Undo(s),
-		m_dst_shape(t)
-	{
-		UndoOrder::exec();
-	}
-
 	// 図形の入れ替え操作をデータライターに書き込む.
-	void UndoOrder::write(DataWriter const& dt_writer)
+	void UndoOrder::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::ORDER));
 		undo_write_shape(m_shape, dt_writer);
 		undo_write_shape(m_dst_shape, dt_writer);
 	}
 
-	// 操作を実行すると値が変わるか判定する.
-	template <UNDO_T U>
-	bool UndoValue<U>::changed(void) const noexcept
-	{
-		using winrt::GraphPaper::implementation::equal;
-		U_TYPE<U>::type val{};
-		return UndoValue<U>::GET(m_shape, val) && !equal(val, m_value);
-	}
-
 	// 操作を実行する.
 	template <UNDO_T U>
-	void UndoValue<U>::exec(void)
+	void UndoValue<U>::exec(void) noexcept
 	{
 		U_TYPE<U>::type old_val{};
 		if (UndoValue<U>::GET(m_shape, old_val)) {
@@ -181,21 +147,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形の属性値を保存する.
-	template <UNDO_T U>
-	UndoValue<U>::UndoValue(Shape* s) :
-		Undo(s)
-	{
-		UndoValue<U>::GET(m_shape, m_value);
-	}
-
-	// 図形の属性値を保存したあと値を格納する.
-	template <UNDO_T U>
-	UndoValue<U>::UndoValue(Shape* s, const U_TYPE<U>::type& val) :
-		UndoValue(s)
-	{
-		UndoValue<U>::SET(m_shape, val);
-	}
 	template UndoValue<UNDO_T::ARC_DIR>::UndoValue(Shape* s, const D2D1_SWEEP_DIRECTION& val);
 	template UndoValue<UNDO_T::ARC_END>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::ARC_ROT>::UndoValue(Shape* s, const float& val);
@@ -226,7 +177,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_T::PAGE_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
 	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const D2D1_FIGURE_END& val);
-	//template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
 	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -315,11 +265,6 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
-		//else if constexpr (
-		//	U == UNDO_T::POLY_END
-		//	) {
-		//	m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
-		//}
 		else if constexpr (
 			U == UNDO_T::GRID_EMPH ||
 			U == UNDO_T::TEXT_RANGE) {
@@ -328,14 +273,6 @@ namespace winrt::GraphPaper::implementation
 				dt_reader.ReadUInt32()
 			};
 		}
-		//else if constexpr (
-		//	U == UNDO_T::STROKE_CAP
-		//	) {
-		//	m_value = U_TYPE<U>::type{
-		//		static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
-		//		static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
-		//	};
-		//}
 		else if constexpr (
 			U == UNDO_T::FONT_FAMILY ||
 			U == UNDO_T::TEXT_CONTENT) {
@@ -393,208 +330,201 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
 
 	// 図形の属性値に値を格納する.
-	template <UNDO_T U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val)
+	template <UNDO_T U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val) noexcept
 	{
 		throw winrt::hresult_not_implemented();
 	}
 
-	void UndoValue<UNDO_T::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val)
+	void UndoValue<UNDO_T::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val) noexcept
 	{
 		s->set_arc_dir(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_END>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::ARC_END>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_arc_end(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_ROT>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::ARC_ROT>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_arc_rot(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_START>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::ARC_START>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_arc_start(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
+	void UndoValue<UNDO_T::ARROW_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
 	{
 		s->set_arrow_cap(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_JOIN>::SET(Shape* const s, const D2D1_LINE_JOIN& val)
+	void UndoValue<UNDO_T::ARROW_JOIN>::SET(Shape* const s, const D2D1_LINE_JOIN& val) noexcept
 	{
 		s->set_arrow_join(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& val)
+	void UndoValue<UNDO_T::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& val) noexcept
 	{
 		s->set_arrow_size(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& val)
+	void UndoValue<UNDO_T::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& val) noexcept
 	{
 		s->set_arrow_style(val);
 	}
 
-	//void UndoValue<UNDO_T::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
+	//void UndoValue<UNDO_T::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
 	//{
 	//	s->set_dash_cap(val);
 	//}
 
-	void UndoValue<UNDO_T::DASH_PAT>::SET(Shape* const s, const DASH_PAT& val)
+	void UndoValue<UNDO_T::DASH_PAT>::SET(Shape* const s, const DASH_PAT& val) noexcept
 	{
-		s->set_dash_pat(val);
+		s->set_stroke_dash_pat(val);
 	}
 
-	void UndoValue<UNDO_T::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& val)
+	void UndoValue<UNDO_T::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& val) noexcept
 	{
 		s->set_stroke_dash(val);
 	}
 
-	void UndoValue<UNDO_T::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_T::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_fill_color(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_T::FONT_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_font_color(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_FAMILY>::SET(Shape* const s, wchar_t* const& val)
+	void UndoValue<UNDO_T::FONT_FAMILY>::SET(Shape* const s, wchar_t* const& val) noexcept
 	{
 		s->set_font_family(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_SIZE>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::FONT_SIZE>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_font_size(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_STRETCH>::SET(Shape* const s, const DWRITE_FONT_STRETCH& val)
+	void UndoValue<UNDO_T::FONT_STRETCH>::SET(Shape* const s, const DWRITE_FONT_STRETCH& val) noexcept
 	{
 		s->set_font_stretch(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_STYLE>::SET(Shape* const s, const DWRITE_FONT_STYLE& val)
+	void UndoValue<UNDO_T::FONT_STYLE>::SET(Shape* const s, const DWRITE_FONT_STYLE& val) noexcept
 	{
 		s->set_font_style(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_WEIGHT>::SET(Shape* const s, const DWRITE_FONT_WEIGHT& val)
+	void UndoValue<UNDO_T::FONT_WEIGHT>::SET(Shape* const s, const DWRITE_FONT_WEIGHT& val) noexcept
 	{
 		s->set_font_weight(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_BASE>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::GRID_BASE>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_grid_base(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_T::GRID_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_grid_color(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_EMPH>::SET(Shape* const s, const GRID_EMPH& val)
+	void UndoValue<UNDO_T::GRID_EMPH>::SET(Shape* const s, const GRID_EMPH& val) noexcept
 	{
 		s->set_grid_emph(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_SHOW>::SET(Shape* const s, const GRID_SHOW& val)
+	void UndoValue<UNDO_T::GRID_SHOW>::SET(Shape* const s, const GRID_SHOW& val) noexcept
 	{
 		s->set_grid_show(val);
 	}
 
-	void UndoValue<UNDO_T::IMAGE_OPAC>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::IMAGE_OPAC>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_image_opacity(val);
 	}
 
-	void UndoValue<UNDO_T::JOIN_LIMIT>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::JOIN_LIMIT>::SET(Shape* const s, const float& val) noexcept
 	{
-		s->set_join_miter_limit(val);
+		s->set_stroke_join_limit(val);
 	}
 
-	void UndoValue<UNDO_T::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& val)
+	void UndoValue<UNDO_T::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& val) noexcept
 	{
 		s->set_stroke_join(val);
 	}
 
-	void UndoValue<UNDO_T::MOVE>::SET(Shape* const s, const D2D1_POINT_2F& val)
+	void UndoValue<UNDO_T::MOVE>::SET(Shape* const s, const D2D1_POINT_2F& val) noexcept
 	{
 		s->set_pos_start(val);
 	}
 
-	void UndoValue<UNDO_T::PAGE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_T::PAGE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_page_color(val);
 	}
 
-	void UndoValue<UNDO_T::PAGE_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val)
+	void UndoValue<UNDO_T::PAGE_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
 	{
 		s->set_page_size(val);
 	}
 
-	void UndoValue<UNDO_T::PAGE_PAD>::SET(Shape* const s, const D2D1_RECT_F& val)
+	void UndoValue<UNDO_T::PAGE_PAD>::SET(Shape* const s, const D2D1_RECT_F& val) noexcept
 	{
 		s->set_page_margin(val);
 	}
-
-	//void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const bool& val)
-	//{
-	//	s->set_poly_closed(val);
-	//}
-
-	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const D2D1_FIGURE_END& val)
+	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const D2D1_FIGURE_END& val) noexcept
 	{
 		s->set_poly_end(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val)
-	//void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
+	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
 	{
 		s->set_stroke_cap(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_T::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_stroke_color(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_WIDTH>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::STROKE_WIDTH>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_stroke_width(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val)
+	void UndoValue<UNDO_T::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
 	{
 		s->set_text_align_vert(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& val)
+	void UndoValue<UNDO_T::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& val) noexcept
 	{
 		s->set_text_align_horz(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& val)
+	void UndoValue<UNDO_T::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& val) noexcept
 	{
 		s->set_text_content(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_LINE_SP>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_T::TEXT_LINE_SP>::SET(Shape* const s, const float& val) noexcept
 	{
 		s->set_text_line_sp(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val)
+	void UndoValue<UNDO_T::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
 	{
 		s->set_text_pad(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val)
+	void UndoValue<UNDO_T::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val) noexcept
 	{
 		s->set_text_selected(val);
 	}
@@ -631,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::DASH_PAT>::GET(const Shape* s, DASH_PAT& val) noexcept
 	{
-		return s->get_dash_pat(val);
+		return s->get_stroke_dash_pat(val);
 	}
 
 	bool UndoValue<UNDO_T::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& val) noexcept
@@ -701,7 +631,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::JOIN_LIMIT>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_join_miter_limit(val);
+		return s->get_stroke_join_limit(val);
 	}
 
 	bool UndoValue<UNDO_T::JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept
@@ -729,10 +659,8 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_margin(val);
 	}
 
-	//bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, bool& val) noexcept
 	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, D2D1_FIGURE_END& val) noexcept
 	{
-		//return s->get_poly_closed(val);
 		return s->get_poly_end(val);
 	}
 
@@ -756,7 +684,6 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arc_start(val);
 	}
 
-	//bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
 	bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
 	{
 		return s->get_stroke_cap(val);
@@ -803,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の値の操作をデータライターに書き込む.
-	template <UNDO_T U> void UndoValue<U>::write(DataWriter const& dt_writer)
+	template <UNDO_T U> void UndoValue<U>::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(U));
 		undo_write_shape(m_shape, dt_writer);
@@ -837,14 +764,12 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::TEXT_ALIGN_T) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
-		else if constexpr (
-			U == UNDO_T::ARROW_SIZE) {
+		else if constexpr (U == UNDO_T::ARROW_SIZE) {
 			dt_writer.WriteSingle(static_cast<ARROW_SIZE>(m_value).m_width);
 			dt_writer.WriteSingle(static_cast<ARROW_SIZE>(m_value).m_length);
 			dt_writer.WriteSingle(static_cast<ARROW_SIZE>(m_value).m_offset);
 		}
-		else if constexpr (
-			U == UNDO_T::DASH_PAT) {
+		else if constexpr (U == UNDO_T::DASH_PAT) {
 			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[0]);
 			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[1]);
 			dt_writer.WriteSingle(static_cast<DASH_PAT>(m_value).m_[2]);
@@ -878,31 +803,18 @@ namespace winrt::GraphPaper::implementation
 			const auto data = reinterpret_cast<const uint8_t*>(m_value);
 			dt_writer.WriteBytes(array_view(data, data + 2 * static_cast<size_t>(len)));
 		}
-		else if constexpr (
-			U == UNDO_T::GRID_EMPH) {
+		else if constexpr (U == UNDO_T::GRID_EMPH) {
 			dt_writer.WriteUInt32(m_value.m_gauge_1);
 			dt_writer.WriteUInt32(m_value.m_gauge_2);
 		}
-		//else if constexpr (
-		//	U == UNDO_T::STROKE_CAP) {
-		//	dt_writer.WriteUInt32(m_value.m_start);
-		//	dt_writer.WriteUInt32(m_value.m_end);
-		//}
-		else if constexpr (
-			U == UNDO_T::TEXT_RANGE) {
+		else if constexpr (U == UNDO_T::TEXT_RANGE) {
 			dt_writer.WriteUInt32(m_value.startPosition);
 			dt_writer.WriteUInt32(m_value.length);
 		}
-		else if constexpr (
-			U == UNDO_T::MOVE) {
+		else if constexpr (U == UNDO_T::MOVE) {
 			dt_writer.WriteSingle(m_value.x);
 			dt_writer.WriteSingle(m_value.y);
 		}
-		//else if constexpr (
-		//	U == UNDO_T::POLY_END
-		//	) {
-		//	dt_writer.WriteBoolean(m_value);
-		//}
 		else if constexpr (
 			U == UNDO_T::TEXT_PAD ||
 			U == UNDO_T::PAGE_SIZE) {
@@ -928,7 +840,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す操作を実行する.
-	void UndoImage::exec(void)
+	void UndoImage::exec(void) noexcept
 	{
 		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
 		const auto pos = s->m_start;
@@ -974,7 +886,7 @@ namespace winrt::GraphPaper::implementation
 	{}
 
 	// 画像の操作をデータライターに書き込む.
-	void UndoImage::write(DataWriter const& dt_writer)
+	void UndoImage::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::IMAGE));
 		undo_write_shape(m_shape, dt_writer);
@@ -992,7 +904,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
-	void UndoList::exec(void)
+	void UndoList::exec(void) noexcept
 	{
 		if (m_insert) {
 			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
@@ -1021,35 +933,8 @@ namespace winrt::GraphPaper::implementation
 		m_shape_at = undo_read_shape(dt_reader);
 	}
 
-	// 図形をリストから取り除く.
-	// s	取り除く図形
-	// dont_exec	初期化のみで操作を実行しない.
-	UndoList::UndoList(Shape* const s, const bool dont_exec) :
-		Undo(s),
-		m_insert(false),
-		m_shape_at(static_cast<Shape*>(nullptr))
-	{
-		if (!dont_exec) {
-			exec();
-		}
-	}
-
-	// 図形をリストに挿入する
-	// s	挿入する図形
-	// p	挿入する位置にある図形
-	// dont_exec	初期化のみで操作を実行しない.
-	UndoList::UndoList(Shape* const s, Shape* const p, const bool dont_exec) :
-		Undo(s),
-		m_insert(true),
-		m_shape_at(p)
-	{
-		if (!dont_exec) {
-			exec();
-		}
-	}
-
 	// 追加と削除の操作をデータライターに書き込む.
-	void UndoList::write(DataWriter const& dt_writer)
+	void UndoList::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::LIST));
 		undo_write_shape(m_shape, dt_writer);
@@ -1058,7 +943,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
-	void UndoGroup::exec(void)
+	void UndoGroup::exec(void) noexcept
 	{
 		if (m_insert) {
 			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
@@ -1087,26 +972,8 @@ namespace winrt::GraphPaper::implementation
 		m_shape_group(static_cast<ShapeGroup*>(undo_read_shape(dt_reader)))
 	{}
 
-	// 図形をグループから取り除く.
-	// s	取り除く図形
-	UndoGroup::UndoGroup(ShapeGroup* const g, Shape* const s) :
-		UndoList(s, true),
-		m_shape_group(g)
-	{
-		exec();
-	}
-
-	// 図形をグループに追加する.
-	// s	取り除く図形
-	UndoGroup::UndoGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos) :
-		UndoList(s, s_pos, true),
-		m_shape_group(g)
-	{
-		exec();
-	}
-
 	// グループ操作をデータライターに書き込む.
-	void UndoGroup::write(DataWriter const& dt_writer)
+	void UndoGroup::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::GROUP));
 		undo_write_shape(m_shape, dt_writer);
@@ -1115,26 +982,13 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape_group, dt_writer);
 	}
 
-	// 操作を実行する.
-	void UndoSelect::exec(void)
-	{
-		m_shape->set_select(!m_shape->is_selected());
-	}
-
 	// データリーダーから操作を読み込む.
 	UndoSelect::UndoSelect(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{}
 
-	// 図形の選択を反転する.
-	UndoSelect::UndoSelect(Shape* const s) :
-		Undo(s)
-	{
-		exec();
-	}
-
 	// 図形の選択操作をデータライターに書き込む.
-	void UndoSelect::write(DataWriter const& dt_writer)
+	void UndoSelect::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::SELECT));
 		undo_write_shape(m_shape, dt_writer);

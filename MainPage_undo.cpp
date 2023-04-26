@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_ustack_rcnt > 0) {
 			auto flag = false;
-			// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を取り除く.
+			// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を削除する.
 			while (!m_ustack_undo.empty()) {
 				auto u = m_ustack_undo.back();
 				if (u == nullptr) {
@@ -424,47 +424,47 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	void MainPage::undo_push_image(Shape* const s)
-	{
-		m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
-	}
+	//void MainPage::undo_push_image(Shape* const s)
+	//{
+	//	m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
+	//}
 
 	// 指定した部位の点をスタックに保存する.
-	void MainPage::undo_push_position(
-		Shape* const s,	// 図形
-		const uint32_t loc	// 部位
-	)
-	{
-		m_ustack_undo.push_back(new UndoDeform(s, loc));
-	}
+	//void MainPage::undo_push_position(
+	//	Shape* const s,	// 図形
+	//	const uint32_t loc	// 部位
+	//)
+	//{
+	//	m_ustack_undo.push_back(new UndoDeform(s, loc));
+	//}
 
 	// 図形を追加して, その操作をスタックに積む.
 	// s	追加する図形
-	void MainPage::undo_push_append(Shape* s)
-	{
-		m_ustack_undo.push_back(new UndoAppend(s));
-	}
+	//void MainPage::undo_push_append(Shape* s)
+	//{
+	//	m_ustack_undo.push_back(new UndoAppend(s));
+	//}
 
 	// 図形をグループ図形に追加して, その操作をスタックに積む.
 	// g	グループ図形
 	// s	追加する図形
 	// 戻り値	なし
-	void MainPage::undo_push_append(ShapeGroup* g, Shape* s)
-	{
-		m_ustack_undo.push_back(new UndoAppendG(g, s));
-	}
+	//void MainPage::undo_push_append(ShapeGroup* g, Shape* s)
+	//{
+	//	m_ustack_undo.push_back(new UndoAppendG(g, s));
+	//}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
-	void MainPage::undo_push_order(Shape* const s, Shape* const t)
-	{
-		m_ustack_undo.push_back(new UndoOrder(s, t));
-	}
+	//void MainPage::undo_push_order(Shape* const s, Shape* const t)
+	//{
+	//	m_ustack_undo.push_back(new UndoOrder(s, t));
+	//}
 
 	// 図形を挿入して, その操作をスタックに積む.
-	void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
-	{
-		m_ustack_undo.push_back(new UndoInsert(s, s_pos));
-	}
+	//void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
+	//{
+	//	m_ustack_undo.push_back(new UndoInsert(s, s_pos));
+	//6}
 
 	// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
 	// pos	位置ベクトル
@@ -513,17 +513,17 @@ namespace winrt::GraphPaper::implementation
 	// 図形をグループから取り去り, その操作をスタックに積む.
 	// g	グループ図形
 	// s	取り去る図形
-	void MainPage::undo_push_remove(Shape* g, Shape* s)
-	{
-		m_ustack_undo.push_back(new UndoRemoveG(g, s));
-	}
+	//void MainPage::undo_push_remove(Shape* g, Shape* s)
+	//{
+	//	m_ustack_undo.push_back(new UndoRemoveG(g, s));
+	//}
 
 	// 図形を取り去り, その操作をスタックに積む.
 	// s	取り去る図形
-	void MainPage::undo_push_remove(Shape* s)
-	{
-		m_ustack_undo.push_back(new UndoRemove(s));
-	}
+	//void MainPage::undo_push_remove(Shape* s)
+	//{
+	//	m_ustack_undo.push_back(new UndoRemove(s));
+	//}
 
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
@@ -546,12 +546,12 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoSelect(s));
 	}
 
-	// 値を図形へ格納して, その操作をスタックに積む.
+	// 値を指定する図形へ格納して, その操作をスタックに積む.
 	// ただし, 図形がその値を持たない場合, またはすでに同値の場合は何もしない.
-	// s	図形
-	// val	値
-	// 戻り値	なし
-	template <UNDO_T U, typename T> void MainPage::undo_push_set(Shape* const s, T const& val)
+	template <UNDO_T U, typename T> void MainPage::undo_push_set(
+		Shape* const s,	// 図形
+		T const& val	// 値
+	)
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
 		T t_val;
@@ -616,7 +616,6 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::undo_push_set<UNDO_T::JOIN_LIMIT>(float const& val);
 	template bool MainPage::undo_push_set<UNDO_T::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
 	template bool MainPage::undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END const& val);
-	//template bool MainPage::undo_push_set<UNDO_T::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::undo_push_set<UNDO_T::STROKE_CAP>(D2D1_CAP_STYLE const& val);
 	template bool MainPage::undo_push_set<UNDO_T::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::undo_push_set<UNDO_T::STROKE_WIDTH>(float const& val);

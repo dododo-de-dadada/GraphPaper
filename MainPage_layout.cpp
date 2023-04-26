@@ -15,7 +15,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Setter;
 	using winrt::Windows::Storage::StorageDeleteOption;
 
-
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
@@ -284,7 +283,6 @@ namespace winrt::GraphPaper::implementation
 					undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
 					undo_push_null();
 					undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 
@@ -358,12 +356,18 @@ namespace winrt::GraphPaper::implementation
 	// g_show	方眼の表示
 	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
-		rmfi_menu_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
-		rmfi_popup_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
-		rmfi_menu_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
-		rmfi_popup_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
-		rmfi_menu_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
-		rmfi_popup_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
+		if (g_show == GRID_SHOW::BACK) {
+			rmfi_menu_grid_show_back().IsChecked(true);
+			rmfi_popup_grid_show_back().IsChecked(true);
+		}
+		else if (g_show == GRID_SHOW::FRONT) {
+			rmfi_menu_grid_show_front().IsChecked(true);
+			rmfi_popup_grid_show_front().IsChecked(true);
+		}
+		else if (g_show == GRID_SHOW::HIDE) {
+			rmfi_menu_grid_show_hide().IsChecked(true);
+			rmfi_popup_grid_show_hide().IsChecked(true);
+		}
 	}
 	// レイアウトメニューの「レイアウトを既定値に戻す」が選択された.
 	// データを保存したファイルがある場合, それを削除する.
@@ -402,8 +406,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::layout_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto setting_file{
-			co_await ApplicationData::Current().LocalFolder().CreateFileAsync(
-				LAYOUT_FILE, CreationCollisionOption::ReplaceExisting)
+			co_await ApplicationData::Current().LocalFolder().CreateFileAsync(LAYOUT_FILE, CreationCollisionOption::ReplaceExisting)
 		};
 		if (setting_file != nullptr) {
 			co_await file_write_gpf_async<false, true>(setting_file);
@@ -515,19 +518,15 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_grid_color(grid_color);
 			m_main_page.set_grid_emph(GRID_EMPH_0);
 			m_main_page.set_grid_show(GRID_SHOW::BACK);
-			//m_main_page.set_snap_grid(true);
 			m_main_page.set_page_color(COLOR_WHITE);
-			//m_main_page.set_page_scale(1.0);
-			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
 			m_main_page.set_page_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
-			//m_main_page.set_stroke_cap(CAP_STYLE_FLAT);
 			m_main_page.set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_page.set_stroke_color(COLOR_BLACK);
 			//m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_main_page.set_dash_pat(DASH_PAT_DEFVAL);
+			m_main_page.set_stroke_dash_pat(DASH_PAT_DEFVAL);
 			m_main_page.set_stroke_dash(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_main_page.set_join_miter_limit(JOIN_MITER_LIMIT_DEFVAL);
+			m_main_page.set_stroke_join_limit(JOIN_MITER_LIMIT_DEFVAL);
 			m_main_page.set_stroke_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 			m_main_page.set_stroke_width(1.0);
 			m_main_page.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -547,16 +546,16 @@ namespace winrt::GraphPaper::implementation
 
 		//event_menu_is_checked();
 
-		stroke_arrow_is_checked(m_main_page.m_arrow_style);
 		font_style_is_checked(m_main_page.m_font_style);
 		font_stretch_is_checked(m_main_page.m_font_stretch);
 		font_weight_is_checked(m_main_page.m_font_weight);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
+		stroke_arrow_is_checked(m_main_page.m_arrow_style);
 		stroke_cap_is_checked(m_main_page.m_stroke_cap);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
 		stroke_dash_is_checked(m_main_page.m_stroke_dash);
 		stroke_join_is_checked(m_main_page.m_stroke_join);
+		stroke_width_is_checked(m_main_page.m_stroke_width);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
 		background_color_is_checked(m_background_show, m_background_color);

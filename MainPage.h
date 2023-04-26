@@ -16,7 +16,7 @@
 //
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
-// MainPage_color.cpp	色 (線枠, 塗りつぶし, 書体, 方眼, ページ)
+// MainPage_color.cpp	色 (線枠, 塗りつぶし, 書体, 方眼, ページ), 画像の不透明度
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
 // MainPage_edit.cpp	円弧や文字列の編集
@@ -25,18 +25,16 @@
 // MainPage_find.cpp	文字列の編集, 検索と置換
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_group.cpp	グループ化とグループの解除
+// MainPage_help.cpp	長さの単位, 色の基数, ステータスバー, 頂点をくっつける閾値
 // NainPage_image.cpp	画像
 // MainPage_layout.cpp	レイアウト (方眼, ページ, 背景パターン, 保存/リセット)
-// MainPage_help.cpp	長さの単位, 色の基数, ステータスバー, 頂点をくっつける閾値
 // MainPage_order.cpp	並び替え
 // MainPage_dialog.cpp	属性ダイアログ
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
-// MainPage_page.cpp	ページの設定の保存とリセット
 // MainPage_status.cpp	ステータスバー
-// MainPage_prop.cpp	図形の属性 (破線, 線の太さ, 端点, 線の結合)
+// MainPage_stroke.cpp	図形の属性 (破線, 線の太さ, 端点, 線の結合)
 // MainPage_summary.cpp	図形の一覧
-// MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_undo.cpp	元に戻すとやり直し操作
 // MainPage_xcvd.cpp	切り取り (x) とコピー (c), 貼り付け (v), 削除 (d)
@@ -168,21 +166,22 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_NAME_NOT_APPEND = false;	// 単位名を付加しない
 
 	// ピクセル長さをある単位の文字列に変換する.
-	template <bool B> void conv_len_to_str(
-		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
-		const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// ピクセル長さをある単位の文字列に変換する.
 	template <bool B, size_t Z> inline void conv_len_to_str(
-		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
-		wchar_t(&t_buf)[Z]) noexcept
+		const LEN_UNIT len_unit,	// 長さの単位
+		const double val,	// 値 (ピクセル)
+		const double dpi,	// DPI
+		const double g_len,	// 方眼の大きさ
+		wchar_t(&t_buf)[Z]	// 文字列を格納するバッファ
+	) noexcept
 	{
 		conv_len_to_str<B>(len_unit, val, dpi, g_len, Z, t_buf);
 	}
 
 	// ある長さをピクセル単位の長さに変換する.
-	double conv_len_to_pixel(
-		const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
+	double conv_len_to_pixel(const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
 
 	//-------------------------------
 	// メッセージダイアログのアイコン
@@ -424,12 +423,14 @@ namespace winrt::GraphPaper::implementation
 		void event_show_popup(void);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
-
+		// ポップアップメニューの線枠と塗りつぶしの各項目を設定する.
 		void event_arrange_popup_prop(const bool visible, const Shape* s);
+		// ポップアップメニューの書体と文字列の各項目を設定する.
 		void event_arrange_popup_font(const bool visible);
+		// ポップアップメニューの画像の各項目を設定する.
 		void event_arrange_popup_image(const bool visible);
+		// ポップアップメニューの方眼とページ、背景パターンの各項目を設定する.
 		void event_arrange_popup_layout(const bool visible);
-		//void event_menu_is_checked(void);
 
 		//-------------------------------
 		// MainPage_file.cpp
@@ -744,11 +745,6 @@ namespace winrt::GraphPaper::implementation
 		void page_zoom_is_checked(float scale);
 
 		//-------------------------------
-		// MainPage_background.cpp
-		// 背景パターン, 色
-		//-------------------------------
-
-		//-------------------------------
 		// MainPage_status.cpp
 		// ステータスバー
 		//-------------------------------
@@ -924,32 +920,57 @@ namespace winrt::GraphPaper::implementation
 		// 無効な操作をポップする.
 		bool undo_pop_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
-		void undo_push_append(Shape* const s);
+		void undo_push_append(Shape* s)
+		{
+			m_ustack_undo.push_back(new UndoAppend(s));
+		}
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void undo_push_append(ShapeGroup* const g, Shape* const s);
+		void undo_push_append(ShapeGroup* g, Shape* s)
+		{
+			m_ustack_undo.push_back(new UndoAppendG(g, s));
+		}
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void undo_push_order(Shape* const s, Shape* const t);
+		void undo_push_order(Shape* const s, Shape* const t)
+		{
+			m_ustack_undo.push_back(new UndoOrder(s, t));
+		}
 		// 指定した部位の点をスタックに保存する.
-		void undo_push_position(Shape* const s, const uint32_t loc);
+		void undo_push_position(Shape* const s, const uint32_t loc)
+		{
+			m_ustack_undo.push_back(new UndoDeform(s, loc));
+		}
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-		void undo_push_image(Shape* const s);
+		void undo_push_image(Shape* const s)
+		{
+			m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
+		}
 		// 図形を挿入して, その操作をスタックに積む.
-		void undo_push_insert(Shape* const s, Shape* const s_pos);
+		void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
+		{
+			m_ustack_undo.push_back(new UndoInsert(s, s_pos));
+		}
+
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
 		void undo_push_move(const D2D1_POINT_2F pos, const bool any = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.
-		void undo_push_remove(Shape* const g, Shape* const s);
+		void undo_push_remove(Shape* g, Shape* s)
+		{
+			m_ustack_undo.push_back(new UndoRemoveG(g, s));
+		}
 		// 図形を取り去り, その操作をスタックに積む.
-		void undo_push_remove(Shape* const s);
+		void undo_push_remove(Shape* s)
+		{
+			m_ustack_undo.push_back(new UndoRemove(s));
+		}
 		// 図形の選択を反転して, その操作をスタックに積む.
 		void undo_push_select(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
 		template <UNDO_T U, typename T> void undo_push_set(Shape* const s, T const& val);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
 		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
-		// 図形の値をスタックに保存する.
+		// 図形の値の保存を実行して, その操作をスタックに積む.
 		template <UNDO_T U> void undo_push_set(Shape* const s);
 		// データリーダーから操作スタックを読み込む.
 		void undo_read_stack(DataReader const& dt_reader);
@@ -1022,6 +1043,10 @@ namespace winrt::GraphPaper::implementation
 			*/
 		}
 };
+	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
+	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
+
+
 
 }
 

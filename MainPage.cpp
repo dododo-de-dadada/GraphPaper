@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストとページをアンドゥ操作に格納する.
 		{
-			Undo::set(&m_main_page.m_shape_list, &m_main_page);
+			Undo::begin(&m_main_page.m_shape_list, &m_main_page);
 		}
 
 		// 背景パターン画像の読み込み.
@@ -234,49 +234,50 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::message_show(
 		winrt::hstring const& glyph,	// フォントアイコンのグリフの静的リソースのキー
 		winrt::hstring const& message,	// メッセージのアプリケーションリソースのキー
-		winrt::hstring const& desc	// 説明文のアプリケーションリソースのキー
+		winrt::hstring const& desc	// 説明のアプリケーションリソースのキー
 	)
 	{
 		constexpr wchar_t QUOT[] = L"\"";	// 引用符
 		constexpr wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
-
 		ResourceLoader const& r_loader = ResourceLoader::GetForCurrentView();
-		winrt::hstring text;
+
+		// メッセージをキーとしてリソースから文字列を得る.
+		// 文字列が空なら, メッセージをそのまま文字列に格納する.
+		winrt::hstring text;	// 文字列
 		try {
 			text = r_loader.GetString(message);
 		}
-		catch (winrt::hresult_error const&) {
-		}
+		catch (winrt::hresult_error const&) {}
 		if (text.empty()) {
-			// 文字列が空の場合,
 			text = message;
 		}
-		winrt::hstring added_text;
+		// 説明をキーとしてリソースから文字列を得る.
+		// 文字列が空なら, 説明をそのまま文字列に格納する.
+		winrt::hstring added_text;	// 追加の文字列
 		try {
 			added_text = r_loader.GetString(desc);
 		}
 		catch (winrt::hresult_error const&) {}
 		if (!added_text.empty()) {
-			// 追加する文字列が空以外の場合,
 			text = text + NEW_LINE + added_text;
 		}
 		else if (!desc.empty()) {
-			// 説明そのものが空以外の場合,
 			text = text + NEW_LINE + QUOT + desc + QUOT;
 		}
-		const IInspectable glyph_val = Resources().TryLookup(box_value(glyph));
+		const IInspectable glyph_val{
+			Resources().TryLookup(box_value(glyph))
+		};
 		const winrt::hstring font_icon{
 			glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph
 		};
 		fi_message().Glyph(font_icon);
 		tk_message().Text(text);
+		// メッセージダイアログを起動時からでも表示できるよう, RunIdleAsync を使用する.
 		// マイクロソフトによると,
 		// > アプリでの最も低速なステージとして、起動や、ビューの切り替えなどがあります。
 		// > ユーザーに最初に表示される UI を起動するために必要なもの以上の作業を実行しないでください。
 		// > たとえば、段階的に公開される UI の UI や、ポップアップのコンテンツなどは作成しないでください。
-		// メッセージダイアログを起動時からでも表示できるよう, RunIdleAsync を使用する.
-		Dispatcher().RunIdleAsync([=](
-			winrt::Windows::UI::Core::IdleDispatchedHandlerArgs) {
+		Dispatcher().RunIdleAsync([=](winrt::Windows::UI::Core::IdleDispatchedHandlerArgs) {
 			auto _{ cd_message_dialog().ShowAsync() };
 		});
 	}

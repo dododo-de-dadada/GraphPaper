@@ -79,24 +79,6 @@ namespace winrt::GraphPaper::implementation
 #endif
 	constexpr double PT_ROUND = 1.0 / 16.0;	// 位置を丸めるときの倍数
 
-	// 前方宣言
-	/*
-	struct Shape;
-	struct ShapeBezier;
-	struct ShapeEllipse;
-	struct ShapeGroup;
-	struct ShapeImage;
-	struct ShapeLine;
-	struct ShapePage;
-	struct ShapePath;
-	struct ShapePoly;
-	struct ShapeRect;
-	struct ShapeRRect;
-	struct ShapeRuler;
-	struct ShapeSelect;
-	struct ShapeStroke;
-	struct ShapeText;
-	*/
 	constexpr D2D1_COLOR_F COLOR_ACCENT{ 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor で上書き
 	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
 	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
@@ -181,28 +163,6 @@ namespace winrt::GraphPaper::implementation
 		ARROW_FILLED	// 閉じた矢じるし
 	};
 
-	// 線分の端点
-	// D2D は始点と終点に異なる形式をもてるが, ここでは両端が同じとする.
-	// ただし, 念のため両端点の形式を保持.
-	/*
-	struct CAP_STYLE {
-		D2D1_CAP_STYLE m_start;	// 始点
-		D2D1_CAP_STYLE m_end;	// 終点
-	};
-	constexpr CAP_STYLE CAP_STYLE_FLAT{
-		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT
-	};
-	constexpr CAP_STYLE CAP_STYLE_ROUND{
-		D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND
-	};
-	constexpr CAP_STYLE CAP_STYLE_SQUARE{
-		D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE
-	};
-	constexpr CAP_STYLE CAP_STYLE_TRIANGLE{
-		D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE
-	};
-	*/
-
 	// 破線の配置
 	union DASH_PAT {
 		float m_[6];
@@ -279,8 +239,6 @@ namespace winrt::GraphPaper::implementation
 	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
 	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
-	// 線の端点が同じか判定する.
-	//inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept;
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
 	// 位置が同じか判定する.
@@ -432,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		//virtual bool get_dash_cap(D2D1_CAP_STYLE& /*val*/) const noexcept { return false; }
 		// 破線の配置を得る.
-		virtual bool get_dash_pat(DASH_PAT& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_dash_pat(DASH_PAT& /*val*/) const noexcept { return false; }
 		// 破線の形式を得る.
 		virtual bool get_stroke_dash(D2D1_DASH_STYLE& /*val*/) const noexcept { return false; }
 		// 塗りつぶし色を得る.
@@ -460,11 +418,10 @@ namespace winrt::GraphPaper::implementation
 		// 画像の不透明度を得る.
 		virtual bool get_image_opacity(float&/*val*/) const noexcept { return false; }
 		// 線分の結合の尖り制限を得る.
-		virtual bool get_join_miter_limit(float&/*val*/) const noexcept { return false; }
+		virtual bool get_stroke_join_limit(float&/*val*/) const noexcept { return false; }
 		// 線分の結合の形式を得る.
 		virtual bool get_stroke_join(D2D1_LINE_JOIN&/*val*/) const noexcept { return false; }
 		// 多角形の終端の形式を得る.
-		//virtual bool get_poly_closed(bool& /*val*/) const noexcept { return false; }
 		virtual bool get_poly_end(D2D1_FIGURE_END& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F/*p*/, double&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept { return false; }
@@ -528,14 +485,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの先端の形式に格納する.
 		virtual bool set_arrow_join(const D2D1_LINE_JOIN/*val*/) noexcept { return false; }
 		// 値を端の形式に格納する.
-		//virtual bool set_stroke_cap(const CAP_STYLE&/*val*/) noexcept { return false; }
 		virtual bool set_stroke_cap(const D2D1_CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を角丸半径に格納する.
 		virtual bool set_corner_radius(const D2D1_POINT_2F&/*alue*/) noexcept { return false; }
 		// 値を破線の端の形式に格納する.
 		//virtual bool set_dash_cap(const D2D1_CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を破線の配置に格納する.
-		virtual bool set_dash_pat(const DASH_PAT&/*val*/) noexcept { return false; }
+		virtual bool set_stroke_dash_pat(const DASH_PAT&/*val*/) noexcept { return false; }
 		// 値を線枠の形式に格納する.
 		virtual bool set_stroke_dash(const D2D1_DASH_STYLE/*val*/) noexcept { return false; }
 		// 値を消去されたか判定に格納する.
@@ -567,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 		// 画像の不透明度を得る.
 		virtual bool set_image_opacity(const float/*val*/) noexcept { return false; }
 		// 値を線の結合の尖り制限に格納する.
-		virtual bool set_join_miter_limit(const float&/*val*/) noexcept { return false; }
+		virtual bool set_stroke_join_limit(const float&/*val*/) noexcept { return false; }
 		// 値を線の結合の形式に格納する.
 		virtual bool set_stroke_join(const D2D1_LINE_JOIN&/*val*/) noexcept { return false; }
 		// 多角形の終端を得る.
@@ -775,7 +731,7 @@ namespace winrt::GraphPaper::implementation
 		//D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PAT m_dash_pat{ DASH_PAT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = JOIN_MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
+		float m_stroke_join_limit = JOIN_MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
 		D2D1_LINE_JOIN m_stroke_join = JOIN_STYLE_DEFVAL;	// 線の結合の形式
 		//CAP_STYLE m_stroke_cap{ CAP_STYLE_FLAT };	// 線の端の形式
 		D2D1_CAP_STYLE m_stroke_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端の形式
@@ -854,7 +810,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		//virtual bool get_dash_cap(D2D1_CAP_STYLE& val) const noexcept final override;
 		// 破線の配置を得る.
-		virtual bool get_dash_pat(DASH_PAT& val) const noexcept final override;
+		virtual bool get_stroke_dash_pat(DASH_PAT& val) const noexcept final override;
 		// 破線の形式を得る.
 		virtual bool get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept final override;
 		// 塗りつぶし色を得る.
@@ -884,7 +840,7 @@ namespace winrt::GraphPaper::implementation
 		// 画像の不透明度を得る.
 		virtual bool get_image_opacity(float& val) const noexcept final override;
 		// 線の結合の尖り制限を得る.
-		virtual bool get_join_miter_limit(float& val) const noexcept final override;
+		virtual bool get_stroke_join_limit(float& val) const noexcept final override;
 		// 線の結合の形式を得る.
 		virtual bool get_stroke_join(D2D1_LINE_JOIN& val) const noexcept final override;
 		// ページの色を得る.
@@ -929,7 +885,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を破線の端の形式に格納する.
 		//virtual bool set_dash_cap(const D2D1_CAP_STYLE& val) noexcept final override;
 		// 値を破線の配置に格納する.
-		virtual bool set_dash_pat(const DASH_PAT& val) noexcept final override;
+		virtual bool set_stroke_dash_pat(const DASH_PAT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		virtual bool set_stroke_dash(const D2D1_DASH_STYLE val) noexcept final override;
 		// 値を塗りつぶし色に格納する.
@@ -957,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を方眼に合わせるに格納する.
 		//virtual bool set_snap_grid(const bool val) noexcept final override;
 		// 値を線の結合の尖り制限に格納する.
-		virtual bool set_join_miter_limit(const float& val) noexcept final override;
+		virtual bool set_stroke_join_limit(const float& val) noexcept final override;
 		// 値を線の結合の形式に格納する.
 		virtual bool set_stroke_join(const D2D1_LINE_JOIN& val) noexcept final override;
 		// 値をページの色に格納する.
@@ -1063,10 +1019,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_stroke_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
-		//D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PAT m_dash_pat{ DASH_PAT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = JOIN_MITER_LIMIT_DEFVAL;		// 線の結合の尖り制限
+		float m_stroke_join_limit = JOIN_MITER_LIMIT_DEFVAL;		// 線の結合の尖り制限
 		D2D1_LINE_JOIN m_stroke_join = JOIN_STYLE_DEFVAL;	// 線の結合の形式
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
@@ -1091,11 +1046,11 @@ namespace winrt::GraphPaper::implementation
 		// 破線の端の形式を得る.
 		//bool get_dash_cap(D2D1_CAP_STYLE& val) const noexcept final override;
 		// 破線の配置を得る.
-		bool get_dash_pat(DASH_PAT& val) const noexcept final override;
+		bool get_stroke_dash_pat(DASH_PAT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept final override;
 		// 線の結合の尖り制限を得る.
-		bool get_join_miter_limit(float& val) const noexcept final override;
+		bool get_stroke_join_limit(float& val) const noexcept final override;
 		// 線の結合の形式を得る.
 		bool get_stroke_join(D2D1_LINE_JOIN& val) const noexcept final override;
 		// 線枠の色を得る.
@@ -1110,11 +1065,11 @@ namespace winrt::GraphPaper::implementation
 		// 値を破線の端の形式に格納する.
 		//bool set_dash_cap(const D2D1_CAP_STYLE& val) noexcept final override;
 		// 値を破線の配置に格納する.
-		bool set_dash_pat(const DASH_PAT& val) noexcept final override;
+		bool set_stroke_dash_pat(const DASH_PAT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_stroke_dash(const D2D1_DASH_STYLE val) noexcept final override;
 		// 値を線の結合の尖り制限に格納する.
-		virtual bool set_join_miter_limit(const float& val) noexcept override;
+		virtual bool set_stroke_join_limit(const float& val) noexcept override;
 		// 値を線の結合の形式に格納する.
 		virtual bool set_stroke_join(const D2D1_LINE_JOIN& val) noexcept override;
 		// 値を線枠の色に格納する.
@@ -1338,7 +1293,7 @@ namespace winrt::GraphPaper::implementation
 				m_arrow_cap,	// endCap
 				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
 				m_arrow_join,	// lineJoin
-				static_cast<FLOAT>(m_join_miter_limit),	// miterLimit
+				static_cast<FLOAT>(m_stroke_join_limit),	// miterLimit
 				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 				0.0f	// dashOffset
 			};
@@ -1538,7 +1493,7 @@ namespace winrt::GraphPaper::implementation
 		//bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
 		bool set_stroke_cap(const D2D1_CAP_STYLE& val) noexcept final override;
 		// 値を線の結合の尖り制限に格納する.
-		bool set_join_miter_limit(const float& val) noexcept final override;
+		bool set_stroke_join_limit(const float& val) noexcept final override;
 		// 値を線の結合の形式に格納する.
 		bool set_stroke_join(const D2D1_LINE_JOIN& val) noexcept final override;
 	};

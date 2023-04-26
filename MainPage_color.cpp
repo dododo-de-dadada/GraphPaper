@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 			ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": "
 		};
 		const auto str_color_code{
-			mfsi_menu_color_code().Text()
+			mfsi_menu_color_code().Text() + L": "
 		};
 
 		wchar_t* res = nullptr;
@@ -407,7 +407,7 @@ namespace winrt::GraphPaper::implementation
 			ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")
 		};
 		const winrt::hstring str_color_code{
-			ResourceLoader::GetForCurrentView().GetString(L"str_color_code")
+			mfsi_menu_color_code().Text() + L": "
 		};
 
 		m_mutex_event.lock();

@@ -208,7 +208,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		// üE˜g‚ðo—Í
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 
 		// ‚¾‰~‚ð•Â‚¶‚é.
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteString(L"\" ");
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -401,7 +401,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -825,7 +825,7 @@ namespace winrt::GraphPaper::implementation
 				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);
-			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_join_miter_limit);
+			export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_stroke_dash, m_dash_pat, m_stroke_cap, m_stroke_join, m_stroke_join_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {

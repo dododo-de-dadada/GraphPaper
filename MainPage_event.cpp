@@ -739,31 +739,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	/*
-	void MainPage::event_menu_is_checked(void)
-	{
-		stroke_arrow_is_checked(m_main_page.m_arrow_style);
-		stroke_cap_is_checked(m_main_page.m_stroke_cap);
-		stroke_dash_is_checked(m_main_page.m_stroke_dash);
-		font_style_is_checked(m_main_page.m_font_style);
-		font_stretch_is_checked(m_main_page.m_font_stretch);
-		font_weight_is_checked(m_main_page.m_font_weight);
-		stroke_join_is_checked(m_main_page.m_stroke_join);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		text_align_horz_is_checked(m_main_page.m_text_align_horz);
-		text_align_vert_is_checked(m_main_page.m_text_align_vert);
-		grid_emph_is_checked(m_main_page.m_grid_emph);
-		grid_show_is_checked(m_main_page.m_grid_show);
-		background_color_is_checked(m_background_show, m_background_color);
-		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
-		background_color_is_checked(m_background_show, m_background_color);
-	}
-	*/
+	// ポップアップメニューの線枠と塗りつぶしの各項目を設定する.
 	void MainPage::event_arrange_popup_prop(const bool visible, const Shape* s)
 	{
 		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
 		mfsi_popup_stroke_dash().Visibility(v);
-		mfi_popup_dash_pat().Visibility(v);
+		mfi_popup_stroke_dash_pat().Visibility(v);
 		mfsi_popup_stroke_width().Visibility(v);
 		if (visible && s->exist_cap()) {
 			mfsi_popup_stroke_cap().Visibility(Visibility::Visible);
@@ -792,6 +773,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_fill_color().Visibility(v);
 	}
 
+	// ポップアップメニューの書体と文字列の各項目を設定する.
 	void MainPage::event_arrange_popup_font(const bool visible)
 	{
 		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
@@ -809,6 +791,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_font_color().Visibility(v);
 	}
 
+	// ポップアップメニューの画像の各項目を設定する.
 	void MainPage::event_arrange_popup_image(const bool visible)
 	{
 		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
@@ -817,6 +800,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_image_opac().Visibility(v);
 	}
 
+	// ポップアップメニューの方眼とページ、背景パターンの各項目を設定する.
 	void MainPage::event_arrange_popup_layout(const bool visible)
 	{
 		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
