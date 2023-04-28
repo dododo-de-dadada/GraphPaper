@@ -231,12 +231,40 @@ namespace winrt::GraphPaper::implementation
 	inline bool loc_hit_test(const D2D1_POINT_2F t, const D2D1_POINT_2F loc, const double len) noexcept;
 	// 実数 (0.0...1.0) の色成分を整数 (0...255) に変換する.
 	inline uint32_t conv_color_comp(const double c) noexcept;
+	// 32ビット整数が同じか判定する.
+	inline bool equal(const uint32_t a, const uint32_t b) noexcept { return a == b; };
 	// 単精度浮動小数が同じか判定する.
 	inline bool equal(const float a, const float b) noexcept;
 	// 倍精度浮動小数が同じか判定する.
 	inline bool equal(const double a, const double b) noexcept;
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const D2D1_CAP_STYLE a, const D2D1_CAP_STYLE b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const D2D1_LINE_JOIN a, const D2D1_LINE_JOIN b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const D2D1_SWEEP_DIRECTION a, const D2D1_SWEEP_DIRECTION b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	//inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept { return a.m_gauge_1 == b.m_gauge_1 && a.m_gauge_2 == b.m_gauge_2; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const D2D1_FIGURE_END a, const D2D1_FIGURE_END b) noexcept { return a == b; };
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept { return a == b; };
 	// 同値か判定する.
-	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
+	//template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
 	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 色が同じか判定する.
@@ -250,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字範囲が同じか判定する.
 	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 方眼の強調が同じか判定する.
-	inline bool equal(const GRID_EMPH& a, const GRID_EMPH& b) noexcept;
+	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
 	// 破線の配置が同じか判定する.
 	inline bool equal(const DASH_PAT& a, const DASH_PAT& b) noexcept;
 	// ワイド文字列が同じか判定する.
@@ -1804,6 +1832,8 @@ namespace winrt::GraphPaper::implementation
 		void create_text_layout(void) noexcept;
 		// 枠を文字列に合わせる.
 		bool fit_frame_to_text(const float g_len) noexcept;
+		float get_frame_width(void) const noexcept { return fabsf(m_pos.x); }
+		float get_frame_height(void) const noexcept { return fabsf(m_pos.y); }
 		// 図形を表示する.
 		virtual void draw(void) noexcept final override;
 		// 書体の色を得る.
@@ -1832,6 +1862,53 @@ namespace winrt::GraphPaper::implementation
 		bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
 		// 選択された文字範囲を得る.
 		bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
+		int get_text_len(void) const noexcept
+		{
+			return wchar_len(m_text);
+		}
+		// 指定した点の
+		int get_text_pos(const D2D1_POINT_2F p) const noexcept
+		{
+			// 図形の開始点を原点とする.
+			const double px = p.x - (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x);
+			const double py = p.y - (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y);
+			if (px >= 0.0 && px < m_pos.x && py >= 0.0 && py <= m_pos.y) {
+				const int t_cnt = m_dwrite_test_cnt;
+				const int t_len = static_cast<int>(wchar_len(m_text));
+				DWRITE_HIT_TEST_METRICS h;
+				FLOAT x, y;
+				for (int i = 0; i < t_cnt; i++) {
+					const auto t_start = m_dwrite_test_metrics[i].textPosition;	// 行頭の文字の位置
+					const auto t_end = t_start + m_dwrite_test_metrics[i].length;	// 行末の文字の位置
+					const auto t_bot = m_dwrite_test_metrics[i].top + m_dwrite_test_metrics[i].height;
+					// 点が i 行目の文字列に含まれているなら,
+					if (py < t_bot) {
+						// 行頭から行末の各文字について繰り返す.
+						for (uint32_t j = t_start; j < t_end; j++) {
+							m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &h);
+							if (px <= x + h.width * 0.5) {
+								return j;
+							}
+						}
+						// 行末を超えているなら行末の文字の位置, 超えてないなら行頭の文字の位置を返す.
+						if (px >= m_dwrite_test_metrics[i].left + m_dwrite_test_metrics[i].width) {
+							return t_end;
+						}
+						return t_start;
+					}
+				}
+				//for (int i = 0; i < t_len; i++) {
+				//	m_dwrite_text_layout->HitTestTextPosition(i, false, &x, &y, &h);
+				//	if (py <= y + h.height) {
+				//		if (px <= x + h.width * 0.5) {
+				//			return i;
+				//		}
+				//	}
+				//}
+				return t_len;
+			}
+			return -1;
+		}
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;
 		// 矩形に含まれるか判定する.
@@ -2032,7 +2109,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼の形式が同じか判定する.
-	inline bool equal(const GRID_EMPH& a, const GRID_EMPH& b) noexcept
+	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept
 	{
 		return a.m_gauge_1 == b.m_gauge_1 && a.m_gauge_2 == b.m_gauge_2;
 	}

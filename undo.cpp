@@ -994,4 +994,31 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape, dt_writer);
 	}
 
+	UndoText::UndoText(DataReader const& dt_reader) :
+		Undo(undo_read_shape(dt_reader)),
+		m_flag(dt_reader.ReadBoolean()),
+		m_at(dt_reader.ReadUInt32()),
+		m_len(dt_reader.ReadUInt32())
+	{
+		// ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é, ‚Â‚Ü‚è‘}“ü‚È‚ç‚Î, ‘}“ü‚·‚é•¶š—ñ‚ğ“Ç‚İ‚Ş.
+		if (m_flag) {
+			m_text = new wchar_t[m_len + 1];
+			dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(m_text), 2 * m_len));
+			m_text[m_len] = L'\0';
+		}
+	}
+
+	void UndoText::write(DataWriter const& dt_writer) const
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::TEXT_CONTENT));
+		undo_write_shape(m_shape, dt_writer);
+		dt_writer.WriteBoolean(m_flag);
+		dt_writer.WriteUInt32(m_at);
+		dt_writer.WriteUInt32(m_len);
+		// ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é, ‚Â‚Ü‚è‘}“ü‚È‚ç‚Î, ‘}“ü‚·‚é•¶š—ñ‚ğ‘‚«‚Ş.
+		if (m_flag) {
+			const auto bytes = reinterpret_cast<const uint8_t*>(m_text);
+			dt_writer.WriteBytes(array_view(bytes, bytes + 2 * static_cast<size_t>(m_len)));
+		}
+	}
 }

@@ -555,7 +555,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
 		T t_val;
-		if (!UndoValue<U>::GET(s, t_val) || equal(t_val, val)) {
+		if (!UndoValue<U>::GET(s, t_val) || equal(val, t_val)) {
 			// 終了する.
 			return;
 		}

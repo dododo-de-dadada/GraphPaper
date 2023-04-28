@@ -629,7 +629,7 @@ namespace winrt::GraphPaper::implementation
 		auto t = find_text_range_selected(m_main_page.m_shape_list.begin(), m_main_page.m_shape_list.end(), t_range);
 		if (t != nullptr) {
 			// }Œ`‚ªŒ©‚Â‚©‚Á‚½ê‡,
-			const auto w_pos = t_range.startPosition;
+			const auto w_pos = t_range.startPosition;	// ’PŒê‚ÌˆÊ’u
 			// ‰p•¶š‚ğ‹æ•Ê‚·‚é‚©”»’è‚·‚é.
 			if (m_find_text_case) {
 				flag = wcsncmp(t->m_text + w_pos, m_find_text, f_len) == 0;
@@ -640,11 +640,19 @@ namespace winrt::GraphPaper::implementation
 			if (flag) {
 				// ˆê’v‚µ‚½ê‡
 				const auto r_len = wchar_len(m_find_repl);
-				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				undo_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
-				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
-				undo_push_null();
-				undo_menu_is_enabled();
+				//const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
+				//undo_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
+				if (f_len > 0) {
+					m_ustack_undo.push_back(new UndoText(t, w_pos, f_len));
+				}
+				if (r_len > 0) {
+					m_ustack_undo.push_back(new UndoText(t, w_pos, m_find_repl));
+				}
+				if (f_len > 0 || r_len > 0) {
+					undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+					undo_push_null();
+					undo_menu_is_enabled();
+				}
 			}
 		}
 		// Ÿ‚ğŒŸõ‚·‚é.

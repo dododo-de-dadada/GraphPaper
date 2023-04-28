@@ -115,7 +115,7 @@ namespace winrt::GraphPaper::implementation
 		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
-		if (!equal(g_emph, val)) {
+		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
 			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
 			undo_push_null();
 			undo_menu_is_enabled();

@@ -184,6 +184,49 @@ namespace winrt::GraphPaper::implementation
 			//mfi_print().IsEnabled(PrintManager::IsSupported());
 		//}
 
+		// テキスト入力
+		{
+			auto cw{ CoreWindow::GetForCurrentThread() };
+			cw.KeyDown([this](auto sender, auto) {
+				if (m_edit_text_shape == nullptr) {
+					//__debugbreak();
+					return;
+				}
+				__debugbreak();
+				DWRITE_TEXT_RANGE tr;
+				m_edit_text_shape->get_text_selected(tr);
+			});
+			m_edit_context.InputPaneDisplayPolicy(winrt::Windows::UI::Text::Core::CoreTextInputPaneDisplayPolicy::Manual);
+			m_edit_context.InputScope(winrt::Windows::UI::Text::Core::CoreTextInputScope::Text);
+			m_edit_context.TextRequested([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.SelectionRequested([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.FocusRemoved([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.TextUpdating([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.SelectionUpdating([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.FormatUpdating([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.LayoutRequested([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.CompositionStarted([](auto, auto) {
+				__debugbreak();
+			});
+			m_edit_context.CompositionCompleted([](auto, auto) {
+				__debugbreak();
+			});
+		}
+
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
 			auto const& app{ Application::Current() };

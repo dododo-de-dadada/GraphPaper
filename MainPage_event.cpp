@@ -21,6 +21,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Input::PointerUpdateKind;
 
+	static auto const& CURS_IBEAM = CoreCursor(CoreCursorType::IBeam, 0);	// 文字列カーソル
 	static auto const& CURS_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
 	static auto const& CURS_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
 	static auto const& CURS_SIZE_ALL = CoreCursor(CoreCursorType::SizeAll, 0);	// 移動カーソル
@@ -691,6 +692,14 @@ namespace winrt::GraphPaper::implementation
 			m_event_pos_prev = m_event_pos_curr;
 			main_draw();
 		}
+		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
+			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr);
+			UINT32 start = static_cast<UINT32>(max(min(m_edit_text_start, m_edit_text_end), 0));
+			const int t_len = static_cast<int>(m_edit_text_shape->get_text_len());
+			UINT32 end = static_cast<UINT32>(min(max(m_edit_text_start, m_edit_text_end), t_len));
+			undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ start, end - start });
+			main_draw();
+		}
 		// 状態が, 左ボタンを押している状態, または
 		// クリック後に左ボタンを押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_LBTN || 
@@ -822,6 +831,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// ポップアップが表示されているならそれを解放する.
 		if (scp_main_panel().ContextFlyout() != nullptr) {
+			scp_main_panel().ContextFlyout().Hide();
 			scp_main_panel().ContextFlyout(nullptr);
 		}
 		Shape* pressed = m_event_shape_pressed;
@@ -1121,10 +1131,178 @@ namespace winrt::GraphPaper::implementation
 					main_draw();
 				}
 			}
+			//else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+				/*
+				TextBox tb = nullptr;
+				if (c_canvas().Children().Size() > 0) {
+					tb = c_canvas().Children().GetAt(0).as<TextBox>();
+					if (m_edit_text_shape != nullptr) {
+						wchar_t* old_text;
+						m_edit_text_shape->get_text_content(old_text);
+						const wchar_t* new_text = tb.Text().data();
+						if (wcscmp(old_text, new_text) != 0) {
+							undo_push_set<UNDO_T::TEXT_CONTENT>(m_edit_text_shape, wchar_cpy(new_text));
+							undo_push_null();
+						}
+					}
+				}
+				else {
+					tb = TextBox();
+				}
+				m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+				wchar_t* f_family;
+				m_edit_text_shape->get_font_family(f_family);
+				float f_size;
+				m_edit_text_shape->get_font_size(f_size);
+				DWRITE_FONT_STRETCH f_stretch;
+				m_edit_text_shape->get_font_stretch(f_stretch);
+				DWRITE_FONT_WEIGHT f_weight;
+				m_edit_text_shape->get_font_weight(f_weight);
+				DWRITE_FONT_STYLE f_style;
+				m_edit_text_shape->get_font_style(f_style);
+				wchar_t* text;
+				m_edit_text_shape->get_text_content(text);
+				D2D1_POINT_2F start;
+				m_edit_text_shape->get_pos_start(start);
+				int ti = m_edit_text_shape->get_text_pos(m_event_pos_pressed);
+				if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
+					tb.FontStyle(winrt::Windows::UI::Text::FontStyle::Italic);
+				}
+				else if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
+					tb.FontStyle(winrt::Windows::UI::Text::FontStyle::Oblique);
+				}
+				else {
+					tb.FontStyle(winrt::Windows::UI::Text::FontStyle::Normal);
+				}
+				if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::Condensed);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::Expanded);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::ExtraCondensed);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::ExtraExpanded);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::Normal);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::SemiCondensed);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::SemiExpanded);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::UltraCondensed);
+				}
+				else if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::UltraExpanded);
+				}
+				else {
+					tb.FontStretch(winrt::Windows::UI::Text::FontStretch::Normal);
+				}
+				if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Black());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Bold());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::ExtraBlack());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::ExtraBold());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::ExtraLight());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Light());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Medium());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Normal());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_LIGHT) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiLight());
+				}
+				else if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Thin());
+				}
+				else {
+					tb.FontWeight(winrt::Windows::UI::Text::FontWeights::Normal());
+				}
+				tb.FontSize(f_size);
+				tb.Width(m_edit_text_shape->get_frame_width() * m_main_scale);
+				tb.Height(m_edit_text_shape->get_frame_height() * m_main_scale);
+				tb.TextWrapping(winrt::Windows::UI::Xaml::TextWrapping::Wrap);
+				tb.AcceptsReturn(true);
+				tb.Text(text);
+				tb.SelectionStart(ti);
+				tb.IsHitTestVisible(true);
+				tb.PointerExited([this, tb](auto, auto) {
+					const wchar_t* new_text = tb.Text().data();
+					wchar_t* old_text;
+					m_edit_text_shape->get_text_content(old_text);
+					if (wcscmp(old_text, new_text) != 0) {
+						undo_push_set<UNDO_T::TEXT_CONTENT>(m_edit_text_shape, wchar_cpy(new_text));
+						undo_push_null();
+						main_draw();
+					}
+					while (c_canvas().Children().Size() > 0) {
+						c_canvas().Children().RemoveAtEnd();
+					}
+				});
+				c_canvas().Children().Append(tb);
+				c_canvas().SetLeft(tb, start.x);
+				c_canvas().SetTop(tb, start.y);
+				////////////////////////
+				auto f{ winrt::Windows::UI::Xaml::Controls::Flyout() };
+				f.Content(m_edit_text_box);
+				winrt::event_token et;
+				et = f.Closed([this, f, et](auto, auto) {
+					const wchar_t* new_text = m_edit_text_box.Text().data();
+					wchar_t* old_text;
+					m_edit_text_shape->get_text_content(old_text);
+					if (wcscmp(old_text, new_text) != 0) {
+						undo_push_set<UNDO_T::TEXT_CONTENT>(m_edit_text_shape, wchar_cpy(new_text));
+						undo_push_null();
+						main_draw();
+					}
+					f.Closed(et);
+					});
+				scp_main_panel().ContextFlyout(f);
+				auto pos{ winrt::Windows::Foundation::Point(start.x, start.y) };
+				auto opt{ winrt::Windows::UI::Xaml::Controls::Primitives::FlyoutShowOptions() };
+				opt.Position(pos);
+				opt.Placement(winrt::Windows::UI::Xaml::Controls::Primitives::FlyoutPlacementMode::Full);
+				opt.ShowMode(winrt::Windows::UI::Xaml::Controls::Primitives::FlyoutShowMode::Standard);
+				scp_main_panel().ContextFlyout().ShowAt(scp_main_panel(), opt);
+				*/
+			//}
 			else {
 				// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
 				if (m_event_state == EVENT_STATE::PRESS_LBTN ||
 					(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
+					if (scp_main_panel().ContextFlyout() != nullptr) {
+						scp_main_panel().ContextFlyout().Hide();
+						scp_main_panel().ContextFlyout(nullptr);
+					}
+					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_pressed);
+						if (m_edit_text_start >= 0 && m_edit_text_start <= m_edit_text_shape->get_text_len()) {
+							m_event_state = EVENT_STATE::PRESS_TEXT;
+						}
+					}
 					select_shape(m_event_shape_pressed, args.KeyModifiers());
 				}
 			}
@@ -1178,6 +1356,11 @@ namespace winrt::GraphPaper::implementation
 				if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 					event_eyedropper_detect(m_event_shape_pressed, m_event_loc_pressed);
 					status_bar_set_draw();
+				}
+				// 文字列図形の文字列が押されたいたなら.
+				// m_edit_text_shape は LOC_TEXT のときだけ設定される.
+				else if (m_edit_text_shape != nullptr) {
+					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr);
 				}
 				else {
 					// クリックした状態に遷移する.
@@ -1333,6 +1516,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (m_list_sel_cnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
+			}
+			else if (loc == LOC_TYPE::LOC_TEXT) {
+				Window::Current().CoreWindow().PointerCursor(CURS_IBEAM);
 			}
 			else {
 				switch (loc) {

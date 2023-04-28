@@ -78,6 +78,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Visibility;
+	using winrt::Windows::UI::Xaml::Controls::TextBox;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -148,6 +149,7 @@ namespace winrt::GraphPaper::implementation
 		PRESS_RECT,	// 左ボタンを押して, 矩形選択している状態
 		PRESS_MOVE,	// 左ボタンを押して, 図形を移動している状態
 		PRESS_DEFORM,	// 左ボタンを押して, 図形を変形している状態
+		PRESS_TEXT,	// 左ボタンを押して, 文字列を選択している状態
 		CLICK,	// クリックした状態
 		CLICK_LBTN,	// クリック後に左ボタンを押した状態
 	};
@@ -211,7 +213,17 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
+		// テキスト編集
+		winrt::Windows::UI::Text::Core::CoreTextEditContext m_edit_context{	// 編集コンテキスト (状態)
+			winrt::Windows::UI::Text::Core::CoreTextServicesManager::GetForCurrentView().CreateEditContext()
+		};
+		winrt::Windows::UI::ViewManagement::InputPane m_edit_input{	// 編集ペイン (枠)
+			winrt::Windows::UI::ViewManagement::InputPane::GetForCurrentView()
+		};
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
+		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
+		int m_edit_text_start = -1;
+		int m_edit_text_end = -1;
 
 		// 排他制御
 		// 1. 図形や描画環境の変更中に描画させないための排他制御
@@ -232,6 +244,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
+		//TextBox m_edit_text_box = nullptr;	// 編集のためのテキストボックス
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置

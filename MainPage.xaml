@@ -1445,8 +1445,7 @@
 				</ItemsControl.ItemTemplate>
 			</ListView>
 		</Grid>
-
-		<!-- メインパネル -->
+        <!-- メインパネル -->
 		<RelativePanel Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
 				x:Name="scp_main_panel"
@@ -1476,7 +1475,8 @@
 			<ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 			<ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 		</RelativePanel>
-		<!-- ステータスバー -->
+        <Canvas x:Name="c_canvas" Grid.Row="1" Grid.Column="0" Background="Transparent" IsHitTestVisible="False"/>
+        <!-- ステータスバー -->
 		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" 
 					PointerReleased="event_released"
 					>

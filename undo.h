@@ -59,9 +59,11 @@ namespace winrt::GraphPaper::implementation
 		TEXT_ALIGN_P,	// 段落の整列の操作
 		TEXT_ALIGN_T,	// 文字列の整列の操作
 		TEXT_CONTENT,	// 文字列の操作
+		TEXT_DEL,	// 文字列の削除の操作
+		TEXT_INS,	// 文字列の挿入の操作
 		TEXT_LINE_SP,	// 行間の操作
 		TEXT_PAD,	// 文字列の余白の操作
-		TEXT_RANGE,	// 選択された文字範囲の操作
+		TEXT_RANGE,	// 文字列選択の範囲の操作
 	};
 
 	// 操作スタック
@@ -204,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::GraphPaper::implementation::equal;
 			U_TYPE<U>::type val{};
-			return GET(m_shape, val) && !equal(val, m_value);
+			return GET(m_shape, val) && !equal(static_cast<const U_TYPE<U>::type>(val), m_value);
 		}
 		// 操作を実行する.
 		virtual void exec(void) noexcept final override;
@@ -304,6 +306,108 @@ namespace winrt::GraphPaper::implementation
 		// 図形をグループに追加する.
 		UndoGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos) : UndoList(s, s_pos, true), m_shape_group(g) { exec(); }
 		// 操作をデータライターに書き込む.
+		virtual void write(DataWriter const& dt_writer) const final override;
+	};
+
+	struct UndoText : Undo {
+		bool m_flag;	// 挿入/削除フラグ
+		uint32_t m_at;
+		uint32_t m_len;
+		wchar_t* m_text;
+
+		// 操作を実行すると値が変わるか判定する.
+		virtual bool changed(void) const noexcept override
+		{
+			if (m_flag) {
+				return wchar_len(m_text) > 0;
+			}
+			else {
+				return m_len > 0;
+			}
+		}
+		~UndoText(void)
+		{
+			if (m_text != nullptr) {
+				delete[] m_text;
+			}
+		}
+		// 文字列を挿入する.
+		UndoText(Shape* s, uint32_t ins_at, wchar_t* ins_text) :
+			Undo(s)
+		{
+			wchar_t* old_text;
+			s->get_text_content(old_text);
+			size_t ins_len = wchar_len(ins_text);
+			size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
+			size_t new_len = old_len + ins_len;
+			const uint32_t at = min(ins_at, old_len);
+			wchar_t* new_text = new wchar_t[new_len + 1];
+			for (uint32_t i = 0; i < ins_at; i++) {
+				new_text[i] = old_text[i];
+			}
+			for (uint32_t i = ins_at; i < ins_at + ins_len; i++) {
+				new_text[i] = ins_text[i - ins_at];
+			}
+			for (uint32_t i = ins_at + ins_len; i < new_len; i++) {
+				new_text[i] = old_text[i - ins_len];
+			}
+			new_text[new_len] = L'\0';
+			s->set_text_content(new_text);
+
+			delete[] old_text;
+
+			// 挿入された位置を削除する位置に, 挿入された文字列の長さを削除する長さに,
+			// 挿入された文字列は必要ないので, ヌルポインターを削除する文字列に格納する.
+			m_flag = false;
+			m_at = ins_at;
+			m_len = ins_len;
+			m_text = nullptr;
+		}
+
+		// 文字列を削除する.
+		UndoText(Shape* s, uint32_t del_at, uint32_t del_len) :
+			Undo(s)
+		{
+			wchar_t* old_text;
+			static_cast<ShapeText*>(s)->get_text_content(old_text);
+			size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
+			size_t new_len = old_len - min(old_len, del_len);
+			wchar_t* new_text = new wchar_t[new_len + 1];
+			for (uint32_t i = 0; i < del_at; i++) {
+				new_text[i] = old_text[i];
+			}
+			for (uint32_t i = del_at; i < new_len; i++) {
+				new_text[i] = old_text[i + del_len];
+			}
+			new_text[new_len] = L'\0';
+			s->set_text_content(new_text);
+
+			// 削除された位置を挿入された位置に, 削除された長さを挿入される長さに, 
+			// 削除された文字列を挿入される文字列に格納する.
+			// 挿入される文字列の長さは分かるので, その長さは必ずしも必要ないが,
+			// 削除操作の読み込みをするときにこの値を前提として文字列を読み込む.
+			m_flag = true;
+			m_at = del_at;
+			m_len = del_len;
+			m_text = new wchar_t[del_len + 1];
+			for (uint32_t i = 0; i < del_len; i++) {
+				m_text[i] = old_text[del_at + i];
+			}
+			m_text[del_len] = L'\0';
+			delete[] old_text;
+		}
+		virtual void exec(void) noexcept final override
+		{
+			if (m_flag) {
+				wchar_t* ins_text = m_text;
+				*this = UndoText(m_shape, m_at, ins_text);
+				delete[] ins_text;
+			}
+			else {
+				*this = UndoText(m_shape, m_at, m_len);
+			}
+		}
+		UndoText(DataReader const& dt_reader);
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
 

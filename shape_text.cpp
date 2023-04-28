@@ -203,6 +203,21 @@ namespace winrt::GraphPaper::implementation
 			// 文字列フォーマットを破棄する.
 			t_format = nullptr;
 
+			winrt::com_ptr<IDWriteTypography> tg;
+			if (hr == S_OK) {
+				hr = dwrite_factory->CreateTypography(tg.put());
+			}
+			if (hr == S_OK) {
+				DWRITE_FONT_FEATURE ft;
+				ft.nameTag = DWRITE_FONT_FEATURE_TAG::DWRITE_FONT_FEATURE_TAG_STANDARD_LIGATURES;
+				ft.parameter = 0;
+				hr = tg->AddFontFeature(ft);
+			}
+			if (hr == S_OK) {
+				hr = m_dwrite_text_layout->SetTypography(tg.get(), DWRITE_TEXT_RANGE{0, text_len});
+			}
+			tg = nullptr;
+
 			winrt::com_ptr<IDWriteTextLayout3> t3;
 			if (hr == S_OK && !m_dwrite_text_layout.try_as(t3)) {
 				hr = E_FAIL;
@@ -914,7 +929,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を文字列に格納する.
 	bool ShapeText::set_text_content(wchar_t* const val) noexcept
 	{
-		if (!equal(m_text, val)) {
+		if (!equal(static_cast<const wchar_t*>(m_text), val)) {
 			m_text = val;
 			m_text_selected_range.startPosition = 0;
 			m_text_selected_range.length = 0;

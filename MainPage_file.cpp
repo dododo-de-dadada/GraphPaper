@@ -161,9 +161,9 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// コンテキストメニューが開いているなら閉じる.
-		if (ContextFlyout() != nullptr) {
-			ContextFlyout().Hide();
-			ContextFlyout(nullptr);
+		if (scp_main_panel().ContextFlyout() != nullptr) {
+			scp_main_panel().ContextFlyout().Hide();
+			scp_main_panel().ContextFlyout(nullptr);
 		}
 
 		// コンテキストダイアログを閉じる.
