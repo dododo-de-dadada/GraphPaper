@@ -401,7 +401,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_flag) {
 				wchar_t* ins_text = m_text;
 				*this = UndoText(m_shape, m_at, ins_text);
-				delete[] ins_text;
+				//delete[] ins_text;
 			}
 			else {
 				*this = UndoText(m_shape, m_at, m_len);
