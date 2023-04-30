@@ -313,7 +313,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_flag;	// ‘}“ü/íœƒtƒ‰ƒO
 		uint32_t m_at;
 		uint32_t m_len;
-		wchar_t* m_text;
+		wchar_t* m_text = nullptr;
 
 		// ‘€ì‚ğÀs‚·‚é‚Æ’l‚ª•Ï‚í‚é‚©”»’è‚·‚é.
 		virtual bool changed(void) const noexcept override
@@ -331,80 +331,29 @@ namespace winrt::GraphPaper::implementation
 				delete[] m_text;
 			}
 		}
-		// •¶š—ñ‚ğ‘}“ü‚·‚é.
+		// }Œ`‚É•¶š—ñ‚ğ‘}“ü‚·‚é.
+		void ins(Shape* s, const uint32_t ins_at, const wchar_t* ins_text) noexcept;
+		// }Œ`‚©‚ç•¶š—ñ‚ğíœ‚·‚é.
+		void del(Shape* s, const uint32_t del_at, const uint32_t del_len) noexcept;
+		// }Œ`‚É•¶š—ñ‚ğ‘}“ü‚·‚é.
 		UndoText(Shape* s, uint32_t ins_at, wchar_t* ins_text) :
 			Undo(s)
 		{
-			wchar_t* old_text;
-			s->get_text_content(old_text);
-			size_t ins_len = wchar_len(ins_text);
-			size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
-			size_t new_len = old_len + ins_len;
-			const uint32_t at = min(ins_at, old_len);
-			wchar_t* new_text = new wchar_t[new_len + 1];
-			for (uint32_t i = 0; i < ins_at; i++) {
-				new_text[i] = old_text[i];
-			}
-			for (uint32_t i = ins_at; i < ins_at + ins_len; i++) {
-				new_text[i] = ins_text[i - ins_at];
-			}
-			for (uint32_t i = ins_at + ins_len; i < new_len; i++) {
-				new_text[i] = old_text[i - ins_len];
-			}
-			new_text[new_len] = L'\0';
-			s->set_text_content(new_text);
-
-			delete[] old_text;
-
-			// ‘}“ü‚³‚ê‚½ˆÊ’u‚ğíœ‚·‚éˆÊ’u‚É, ‘}“ü‚³‚ê‚½•¶š—ñ‚Ì’·‚³‚ğíœ‚·‚é’·‚³‚É,
-			// ‘}“ü‚³‚ê‚½•¶š—ñ‚Í•K—v‚È‚¢‚Ì‚Å, ƒkƒ‹ƒ|ƒCƒ“ƒ^[‚ğíœ‚·‚é•¶š—ñ‚ÉŠi”[‚·‚é.
-			m_flag = false;
-			m_at = ins_at;
-			m_len = ins_len;
-			m_text = nullptr;
+			ins(s, ins_at, ins_text);
 		}
-
-		// •¶š—ñ‚ğíœ‚·‚é.
+		// }Œ`‚©‚ç•¶š—ñ‚ğíœ‚·‚é.
 		UndoText(Shape* s, uint32_t del_at, uint32_t del_len) :
 			Undo(s)
 		{
-			wchar_t* old_text;
-			static_cast<ShapeText*>(s)->get_text_content(old_text);
-			size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
-			size_t new_len = old_len - min(old_len, del_len);
-			wchar_t* new_text = new wchar_t[new_len + 1];
-			for (uint32_t i = 0; i < del_at; i++) {
-				new_text[i] = old_text[i];
-			}
-			for (uint32_t i = del_at; i < new_len; i++) {
-				new_text[i] = old_text[i + del_len];
-			}
-			new_text[new_len] = L'\0';
-			s->set_text_content(new_text);
-
-			// íœ‚³‚ê‚½ˆÊ’u‚ğ‘}“ü‚³‚ê‚½ˆÊ’u‚É, íœ‚³‚ê‚½’·‚³‚ğ‘}“ü‚³‚ê‚é’·‚³‚É, 
-			// íœ‚³‚ê‚½•¶š—ñ‚ğ‘}“ü‚³‚ê‚é•¶š—ñ‚ÉŠi”[‚·‚é.
-			// ‘}“ü‚³‚ê‚é•¶š—ñ‚Ì’·‚³‚Í•ª‚©‚é‚Ì‚Å, ‚»‚Ì’·‚³‚Í•K‚¸‚µ‚à•K—v‚È‚¢‚ª,
-			// íœ‘€ì‚Ì“Ç‚İ‚İ‚ğ‚·‚é‚Æ‚«‚É‚±‚Ì’l‚ğ‘O’ñ‚Æ‚µ‚Ä•¶š—ñ‚ğ“Ç‚İ‚Ş.
-			m_flag = true;
-			m_at = del_at;
-			m_len = del_len;
-			m_text = new wchar_t[del_len + 1];
-			for (uint32_t i = 0; i < del_len; i++) {
-				m_text[i] = old_text[del_at + i];
-			}
-			m_text[del_len] = L'\0';
-			delete[] old_text;
+			del(s, del_at, del_len);
 		}
 		virtual void exec(void) noexcept final override
 		{
 			if (m_flag) {
-				wchar_t* ins_text = m_text;
-				*this = UndoText(m_shape, m_at, ins_text);
-				//delete[] ins_text;
+				ins(m_shape, m_at, m_text);
 			}
 			else {
-				*this = UndoText(m_shape, m_at, m_len);
+				del(m_shape, m_at, m_len);
 			}
 		}
 		UndoText(DataReader const& dt_reader);

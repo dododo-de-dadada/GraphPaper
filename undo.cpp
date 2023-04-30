@@ -1021,4 +1021,76 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteBytes(array_view(bytes, bytes + 2 * static_cast<size_t>(m_len)));
 		}
 	}
+
+	// 図形に文字列を挿入する.
+	void UndoText::ins(Shape* s, const uint32_t ins_at, const wchar_t* ins_text) noexcept
+	{
+		wchar_t* old_text;
+		s->get_text_content(old_text);
+		const size_t ins_len = wchar_len(ins_text);
+		const size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
+		const size_t new_len = old_len + ins_len;
+		const uint32_t new_at = min(ins_at, old_len);
+		wchar_t* new_text = new wchar_t[new_len + 1];
+		for (uint32_t i = 0; i < new_at; i++) {
+			new_text[i] = old_text[i];
+		}
+		for (uint32_t i = new_at; i < new_at + ins_len; i++) {
+			new_text[i] = ins_text[i - new_at];
+		}
+		for (uint32_t i = new_at + ins_len; i < new_len; i++) {
+			new_text[i] = old_text[i - ins_len];
+		}
+		new_text[new_len] = L'\0';
+		s->set_text_content(new_text);
+
+		delete[] old_text;
+
+		// 挿入された位置を削除する位置に, 挿入された文字列の長さを削除する長さに,
+		// 挿入された文字列は必要ないので, ヌルポインターを削除する文字列に格納する.
+		m_flag = false;
+		m_at = ins_at;
+		m_len = ins_len;
+		if (m_text != nullptr) {
+			delete[] m_text;
+		}
+		m_text = nullptr;
+	}
+
+	// 図形から文字列を削除する.
+	void UndoText::del(Shape* s, const uint32_t del_at, const uint32_t del_len) noexcept
+	{
+		wchar_t* old_text;
+		static_cast<ShapeText*>(s)->get_text_content(old_text);	// 元の文字列
+		const size_t old_len = static_cast<ShapeText*>(s)->get_text_len();	// 元の文字列の長さ
+		const size_t new_len = old_len - min(old_len, del_len);	// 新しい文字列の長さ
+		wchar_t* const new_text = new wchar_t[new_len + 1];	// 新しい文字列
+		wchar_t* const del_text = new wchar_t[del_len + 1];	// 削除された文字列
+		for (uint32_t i = 0; i < del_at; i++) {
+			new_text[i] = old_text[i];
+		}
+		for (uint32_t i = del_at; i < new_len; i++) {
+			new_text[i] = old_text[i + del_len];
+		}
+		new_text[new_len] = L'\0';
+		for (uint32_t i = 0; i < del_len; i++) {
+			del_text[i] = old_text[del_at + i];
+		}
+		del_text[del_len] = L'\0';
+		s->set_text_content(new_text);
+		delete[] old_text;
+
+		// 削除された位置を挿入された位置に, 削除された長さを挿入される長さに, 
+		// 削除された文字列を挿入される文字列に格納する.
+		// 挿入される文字列の長さは分かるので, その長さは必ずしも必要ないが,
+		// 削除操作の読み込みをするときにこの値を前提として文字列を読み込む.
+		m_flag = true;
+		m_at = del_at;
+		m_len = del_len;
+		if (m_text != nullptr) {
+			delete[] m_text;
+		}
+		m_text = del_text;
+	}
+
 }
