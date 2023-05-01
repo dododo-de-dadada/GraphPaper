@@ -378,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			if (s->move(pos) && !flag) {
+			if (s->move(pos)) {
 				flag = true;
 			}
 		}

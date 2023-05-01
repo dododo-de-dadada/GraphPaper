@@ -221,9 +221,6 @@ namespace winrt::GraphPaper::implementation
 			winrt::Windows::UI::ViewManagement::InputPane::GetForCurrentView()
 		};
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
-		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
-		int m_edit_text_start = -1;
-		int m_edit_text_end = -1;
 
 		// 排他制御
 		// 1. 図形や描画環境の変更中に描画させないための排他制御
@@ -244,7 +241,10 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
-		//TextBox m_edit_text_box = nullptr;	// 編集のためのテキストボックス
+		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
+		int m_edit_text_start = -1;
+		int m_edit_text_end = -1;
+		bool m_edit_text_trail = false;
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置

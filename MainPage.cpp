@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 					//__debugbreak();
 					return;
 				}
-				__debugbreak();
+				//__debugbreak();
 				DWRITE_TEXT_RANGE tr;
 				m_edit_text_shape->get_text_selected(tr);
 			});
@@ -201,8 +201,14 @@ namespace winrt::GraphPaper::implementation
 			m_edit_context.TextRequested([](auto, auto) {
 				__debugbreak();
 			});
-			m_edit_context.SelectionRequested([](auto, auto) {
+			m_edit_context.SelectionRequested([this](auto, auto args) {
 				__debugbreak();
+				using winrt::Windows::UI::Text::Core::CoreTextSelectionRequest;
+				using winrt::Windows::UI::Text::Core::CoreTextRange;
+				CoreTextSelectionRequest req{ args.Request() };
+				CoreTextRange ran{ m_edit_text_start, m_edit_text_end };
+				req.Selection(ran);
+
 			});
 			m_edit_context.FocusRemoved([](auto, auto) {
 				__debugbreak();
@@ -253,9 +259,8 @@ namespace winrt::GraphPaper::implementation
 
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
-			m_token_close_requested = 
-				SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
-					{ this, &MainPage::navi_close_requested });
+			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({
+				this, &MainPage::navi_close_requested });
 		}
 
 		// D2D/DWRITE ファクトリを図形クラスに, 
@@ -490,6 +495,27 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
 				m_main_page.auxiliary_draw_arc(m_event_pos_pressed, m_event_pos_curr);
 			}
+		}
+
+		if (m_edit_text_shape != nullptr && !m_edit_text_shape->is_deleted() && m_edit_text_shape->is_selected()) {
+			D2D1_POINT_2F c;
+			m_edit_text_shape->get_text_caret(m_edit_text_end, m_edit_text_trail, c);
+			D2D1_POINT_2F p{
+				c.x - 0.5f, c.y
+			};
+			D2D1_POINT_2F q{
+				c.x - 0.5f, c.y + m_edit_text_shape->m_font_size
+			};
+			D2D1_POINT_2F r{
+				c.x, c.y
+			};
+			D2D1_POINT_2F s{
+				c.x, c.y + m_edit_text_shape->m_font_size
+			};
+			m_main_page.m_d2d_color_brush->SetColor(COLOR_WHITE);
+			m_main_d2d.m_d2d_context->DrawLine(p, q, m_main_page.m_d2d_color_brush.get(), 2.0f);
+			m_main_page.m_d2d_color_brush->SetColor(COLOR_BLACK);
+			m_main_d2d.m_d2d_context->DrawLine(r, s, m_main_page.m_d2d_color_brush.get(), 1.0f);
 		}
 
 		// 描画を終了し結果を得る. 保存された描画環境を元に戻す.

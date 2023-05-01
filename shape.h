@@ -1788,6 +1788,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
+		int m_hit_position = 0;
+		bool m_hit_trailing = false;
+
 		DWRITE_FONT_METRICS m_dwrite_font_metrics{};	// 書体の計量
 		DWRITE_LINE_METRICS* m_dwrite_line_metrics = nullptr;	// 行の計量
 		UINT32 m_dwrite_selected_cnt = 0;	// 選択された文字範囲の計量の要素数
@@ -1866,48 +1869,89 @@ namespace winrt::GraphPaper::implementation
 		{
 			return wchar_len(m_text);
 		}
-		// 指定した点の
-		int get_text_pos(const D2D1_POINT_2F p) const noexcept
+		void get_text_caret(const uint32_t tp, const bool is_trailing, D2D1_POINT_2F& cp) const noexcept
 		{
-			// 図形の開始点を原点とする.
-			const double px = p.x - (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x);
-			const double py = p.y - (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y);
-			if (px >= 0.0 && px < m_pos.x && py >= 0.0 && py <= m_pos.y) {
-				const int t_cnt = m_dwrite_test_cnt;
-				const int t_len = static_cast<int>(wchar_len(m_text));
-				DWRITE_HIT_TEST_METRICS h;
-				FLOAT x, y;
-				for (int i = 0; i < t_cnt; i++) {
-					const auto t_start = m_dwrite_test_metrics[i].textPosition;	// 行頭の文字の位置
-					const auto t_end = t_start + m_dwrite_test_metrics[i].length;	// 行末の文字の位置
-					const auto t_bot = m_dwrite_test_metrics[i].top + m_dwrite_test_metrics[i].height;
-					// 点が i 行目の文字列に含まれているなら,
-					if (py < t_bot) {
-						// 行頭から行末の各文字について繰り返す.
-						for (uint32_t j = t_start; j < t_end; j++) {
-							m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &h);
-							if (px <= x + h.width * 0.5) {
-								return j;
-							}
-						}
-						// 行末を超えているなら行末の文字の位置, 超えてないなら行頭の文字の位置を返す.
-						if (px >= m_dwrite_test_metrics[i].left + m_dwrite_test_metrics[i].width) {
-							return t_end;
-						}
-						return t_start;
-					}
+			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
+				0.0f :
+				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
+			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
+
+			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
+				//const auto tl = m_dwrite_test_metrics[i].left;
+				//const auto tw = m_dwrite_test_metrics[i].width;
+				const auto tt = m_dwrite_test_metrics[i].top;
+				const auto bl = m_dwrite_line_metrics[i].baseline;
+				const auto s = m_dwrite_test_metrics[i].textPosition;
+				const auto e = m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length;
+				if (tp >= s && tp < e) {
+					DWRITE_HIT_TEST_METRICS tm{};
+					FLOAT x, y;
+					m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
+					cp.x = tx + x;
+					cp.y = ty + tt + bl + descent - m_font_size;
+					return;
 				}
-				//for (int i = 0; i < t_len; i++) {
-				//	m_dwrite_text_layout->HitTestTextPosition(i, false, &x, &y, &h);
-				//	if (py <= y + h.height) {
-				//		if (px <= x + h.width * 0.5) {
-				//			return i;
-				//		}
-				//	}
-				//}
-				return t_len;
 			}
-			return -1;
+			const auto tl = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].left;
+			const auto tw = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].width;
+			const auto tt = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top;
+			const auto bl = m_dwrite_line_metrics[m_dwrite_test_cnt - 1].baseline;
+			cp.x = tx + tl + tw;
+			cp.y = ty + tt + bl + descent - m_font_size;
+		}
+
+		// 指定した点の
+		int get_text_pos(const D2D1_POINT_2F p, bool& is_trailing) const noexcept
+		{
+			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
+				0.0f :
+				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			// 図形の開始点を原点とする.
+			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
+			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
+			const float px = p.x - tx;
+			const float py = p.y - ty;
+			if (py < m_dwrite_test_metrics[0].top) {
+				is_trailing = false;
+				return 0;
+			}
+			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
+				// Y 座標が各行の下端より小さいか判定する.
+				const auto tt = m_dwrite_test_metrics[i].top;
+				const auto bl = m_dwrite_line_metrics[i].baseline;
+				if (py <= tt + bl + descent) {
+					const auto s = m_dwrite_test_metrics[i].textPosition;
+					const auto e = m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length;
+					// 行の文字数がゼロなら
+					if (s == e) {
+						is_trailing = false;
+						return s;
+					}
+					// 行の文字数が 1 以上なら
+					for (auto j = s; j < e; j++) {
+						// X 座標が各文字の左端 + 文字幅/2 より小さいか判定する.
+						DWRITE_HIT_TEST_METRICS tm{};
+						FLOAT x, y;
+						m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &tm);
+						if (px <= x + tm.width * 0.5f) {
+							is_trailing = false;
+							return j;
+						}
+					}
+					is_trailing = true;
+					return e - 1;
+				}
+			}
+			// 最終行の末尾の文字位置を返す.
+			const auto s = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition;
+			const auto e = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].length;
+			if (s == e) {
+				is_trailing = false;
+				return s;
+			}
+			is_trailing = true;
+			return e - 1;
 		}
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;

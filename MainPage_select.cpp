@@ -268,10 +268,24 @@ namespace winrt::GraphPaper::implementation
 				unselect_shape_all();
 				undo_push_select(s);
 				xcvd_menu_is_enabled();
+				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+					m_edit_text_shape = static_cast<ShapeText*>(s);
+					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+					m_edit_text_shape->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(m_edit_text_start), 0});
+				}
 				main_draw();
 				// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 				if (summary_is_visible()) {
 					summary_select(s);
+				}
+			}
+			else {
+				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+					m_edit_text_shape = static_cast<ShapeText*>(s);
+					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+					if (m_edit_text_shape->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(m_edit_text_start), 0 })) {
+						main_draw();
+					}
 				}
 			}
 			m_event_shape_prev = s;

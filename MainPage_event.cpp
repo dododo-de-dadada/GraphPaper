@@ -676,28 +676,29 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
-			// ポインターの現在位置と前回位置の差分を得る.
-			D2D1_POINT_2F pos;
-			pt_sub(m_event_pos_curr, m_event_pos_prev, pos);
-			slist_move_selected(m_main_page.m_shape_list, pos);
+			// ポインターの現在位置と前回位置の差分だけ, 選択された図形を移動する.
 			// ポインターの現在位置を前回位置に格納する.
+			D2D1_POINT_2F p;
+			pt_sub(m_event_pos_curr, m_event_pos_prev, p);
+			slist_move_selected(m_main_page.m_shape_list, p);
 			m_event_pos_prev = m_event_pos_curr;
 			main_draw();
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			// ポインターの現在位置を, ポインターが押された図形の部位の点に格納する.
+			// ポインターの現在位置を, 図形の部位の点と, ポインターの前回位置に格納する.
 			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
-			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			main_draw();
 		}
+		// 状態が, 文字列を選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
-			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr);
-			UINT32 start = static_cast<UINT32>(max(min(m_edit_text_start, m_edit_text_end), 0));
+			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+			const auto t_end = (m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end);
 			const int t_len = static_cast<int>(m_edit_text_shape->get_text_len());
-			UINT32 end = static_cast<UINT32>(min(max(m_edit_text_start, m_edit_text_end), t_len));
-			undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ start, end - start });
+			const UINT32 s = static_cast<UINT32>(max(min(m_edit_text_start, t_end), 0));
+			const UINT32 e = static_cast<UINT32>(min(max(m_edit_text_start, t_end), t_len));
+			undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ s, e - s });
 			main_draw();
 		}
 		// 状態が, 左ボタンを押している状態, または
@@ -705,21 +706,18 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_LBTN || 
 			m_event_state == EVENT_STATE::CLICK_LBTN) {
 			// ポインターの現在位置と押された位置との差分を得る.
-			D2D1_POINT_2F pos;
-			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
+			D2D1_POINT_2F p;
+			pt_sub(m_event_pos_curr, m_event_pos_pressed, p);
 			// 差分がクリックの判定距離を超えるか判定する.
-			if (pt_abs2(pos) > m_event_click_dist / m_main_scale) {
+			if (pt_abs2(p) > m_event_click_dist / m_main_scale) {
 			//if (pt_abs2(pos) > m_event_click_dist / m_main_page.m_page_scale) {
-				// 作図ツールが選択ツール以外か判定する.
+				// 作図ツールが選択ツール以外なら, 矩形選択している状態に遷移する.
 				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
-					// 矩形選択している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_RECT;
 				}
-				// 押された図形がヌルか判定する.
+				// 押された図形がヌルなら, 矩形選択している状態に遷移する.
 				else if (m_event_shape_pressed == nullptr) {
-					// 矩形選択している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_RECT;
-					// 十字カーソルをカーソルに設定する.
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				}
 				// 選択された図形の数が 1 を超える,
@@ -732,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に保存する.
 					m_event_pos_prev = m_event_pos_curr;
-					undo_push_move(pos);
+					undo_push_move(p);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
@@ -1296,14 +1294,14 @@ namespace winrt::GraphPaper::implementation
 						scp_main_panel().ContextFlyout().Hide();
 						scp_main_panel().ContextFlyout(nullptr);
 					}
-					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
-						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_pressed);
-						if (m_edit_text_start >= 0 && m_edit_text_start <= m_edit_text_shape->get_text_len()) {
-							m_event_state = EVENT_STATE::PRESS_TEXT;
-						}
-					}
 					select_shape(m_event_shape_pressed, args.KeyModifiers());
+					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						m_event_state = EVENT_STATE::PRESS_TEXT;
+						m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+						m_edit_text_end = m_edit_text_start;
+						m_edit_context.NotifyFocusEnter();
+					}
 				}
 			}
 		}
@@ -1360,7 +1358,7 @@ namespace winrt::GraphPaper::implementation
 				// 文字列図形の文字列が押されたいたなら.
 				// m_edit_text_shape は LOC_TEXT のときだけ設定される.
 				else if (m_edit_text_shape != nullptr) {
-					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr);
+					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
 				}
 				else {
 					// クリックした状態に遷移する.

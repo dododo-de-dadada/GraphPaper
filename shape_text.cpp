@@ -549,14 +549,15 @@ namespace winrt::GraphPaper::implementation
 					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 				}
 
+				D2D1_POINT_2F p[4];
 				D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
+				//const UINT32 cp = m_text_selected_range.startPosition + m_text_selected_range.length;
 				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 				for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 					DWRITE_HIT_TEST_METRICS const& tm = m_dwrite_test_metrics[i];
 					DWRITE_LINE_METRICS const& lm = m_dwrite_line_metrics[i];
 					// 破線がずれて重なって表示されないように, 破線のオフセットを計算し,
 					// 文字列の枠を辺ごとに表示する.
-					D2D1_POINT_2F p[4];
 					p[0].x = t_lt.x + tm.left;
 					p[0].y = static_cast<FLOAT>(t_lt.y + tm.top + lm.baseline + descent - m_font_size);
 					p[2].x = p[0].x + tm.width;
@@ -583,7 +584,35 @@ namespace winrt::GraphPaper::implementation
 					target->DrawLine(p[1], p[2], color_brush, Shape::m_aux_width, selected_style.get());
 					target->DrawLine(p[0], p[3], color_brush, Shape::m_aux_width, selected_style.get());
 					selected_style = nullptr;
+					/*
+					if (cp > m_dwrite_test_metrics[i].textPosition && cp < m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length) {
+						FLOAT cx, cy;
+						DWRITE_HIT_TEST_METRICS ch;
+						m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
+						D2D1_POINT_2F s{ p[0].x + cx, p[1].y };
+						D2D1_POINT_2F e{ p[0].x + cx, p[2].y };
+						color_brush->SetColor(COLOR_BLACK);
+						target->DrawLine(s, e, color_brush, 1.0f, nullptr);
+					}
+					else if (cp == m_dwrite_test_metrics[i].textPosition) {
+						FLOAT cx, cy;
+						DWRITE_HIT_TEST_METRICS ch;
+						m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
+
+					}
+					*/
 				}
+				/*
+				if (cp == get_text_len()) {
+					FLOAT cx, cy;
+					DWRITE_HIT_TEST_METRICS ch;
+					m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
+					D2D1_POINT_2F s{ p[0].x + cx, p[1].y };
+					D2D1_POINT_2F e{ p[0].x + cx, p[2].y };
+					color_brush->SetColor(COLOR_BLACK);
+					target->DrawLine(s, e, color_brush, 1.0f, nullptr);
+				}
+				*/
 			}
 		}
 	}
@@ -688,14 +717,15 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の範囲の左上が原点になるよう, 判定される点を移動する.
 		D2D1_POINT_2F lt;
 		ShapeRect::get_bbox_lt(lt);
-		pt_sub(t, lt, lt);
+		D2D1_POINT_2F u;
+		pt_sub(t, lt, u);
 		pt_sub(lt, m_text_pad, lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const auto tl = m_dwrite_test_metrics[i].left;
 			const auto tw = m_dwrite_test_metrics[i].width;
 			const auto tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
-			if (pt_in_rect(lt, D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size }, D2D1_POINT_2F{ tl + tw, tt + bl + descent })) {
+			if (pt_in_rect(u, D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size }, D2D1_POINT_2F{ tl + tw, tt + bl + descent })) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
