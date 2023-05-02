@@ -642,6 +642,7 @@ namespace winrt::GraphPaper::implementation
 				const auto r_len = wchar_len(m_find_repl);
 				//const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
 				//undo_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
+				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos + r_len, f_len });
 				if (f_len > 0) {
 					m_ustack_undo.push_back(new UndoText(t, w_pos, f_len));
 				}
@@ -649,7 +650,6 @@ namespace winrt::GraphPaper::implementation
 					m_ustack_undo.push_back(new UndoText(t, w_pos, m_find_repl));
 				}
 				if (f_len > 0 || r_len > 0) {
-					undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 					undo_push_null();
 					undo_menu_is_enabled();
 				}

@@ -39,8 +39,10 @@
 #include <winrt/Windows.UI.Xaml.Input.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
 #include <winrt/Windows.UI.Xaml.Shapes.h>
+// 文字列
 #include <winrt/Windows.UI.Text.h>
 #include <winrt/Windows.UI.Text.Core.h>
+#include <winrt/Windows.UI.ViewManagement.Core.h>
 // 印刷関係
 #include <winrt/Windows.Graphics.Printing.h>
 #include <winrt/Windows.UI.Xaml.Printing.h>

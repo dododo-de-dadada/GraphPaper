@@ -700,35 +700,26 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template<> void MainPage::undo_push_set<UNDO_T::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
 	{
-		auto flag = false;
-		// 元に戻す操作スタックの各操作について
-		for (auto it = m_ustack_undo.rbegin(); it != m_ustack_undo.rend(); it++) {
-			const auto u = *it;
-			if (u == nullptr) {
-				// 操作がヌルの場合,
-				break;
-			}
-			else if (typeid(*u) != typeid(UndoValue<UNDO_T::TEXT_RANGE>)) {
-				// 操作が文字範囲の選択する操作でない場合,
-				if (typeid(*u) != typeid(UndoSelect)) {
-					// 操作が図形の選択を反転する操作でない場合,
-					// 中断する.
-					break;
+		m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
+		/*
+		if (typeid(*s) == typeid(ShapeText)) {
+			ShapeText* t = static_cast<ShapeText*>(s);
+			if (!equal(t->m_text_selected_range, val)) {
+				for (auto it = m_ustack_undo.rbegin(); it != m_ustack_undo.rend(); it++) {
+					const auto u = *it;
+					if (u == nullptr || (typeid(*u) != typeid(UndoValue<UNDO_T::TEXT_RANGE>) && typeid(*u) != typeid(UndoSelect))) {
+						m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
+						return;
+					}
+					else if (u->m_shape == s) {
+						s->set_text_selected(val);
+						return;
+					}
 				}
-			}
-			// 操作が文字範囲の選択する操作の場合,
-			else if (u->m_shape == s) {
-				// 操作する図形が引数の図形と同じ場合,
-				// 図形を直接操作してスタックには積まないようにする.
-				s->set_text_selected(val);
-				flag = true;
-				break;
+				m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
 			}
 		}
-		if (!flag) {
-			m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
-		}
-
+		*/
 	}
 
 	// データリーダーから操作スタックを読み込む.

@@ -79,6 +79,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Visibility;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
+	using winrt::Windows::UI::ViewManagement::InputPane;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -244,7 +245,9 @@ namespace winrt::GraphPaper::implementation
 		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
 		int m_edit_text_start = -1;
 		int m_edit_text_end = -1;
+		int m_edit_text_row = -1;
 		bool m_edit_text_trail = false;
+		//InputPane m_edit_text_pane{ InputPane::GetForCurrentView() };
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置

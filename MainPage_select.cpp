@@ -270,8 +270,13 @@ namespace winrt::GraphPaper::implementation
 				xcvd_menu_is_enabled();
 				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 					m_edit_text_shape = static_cast<ShapeText*>(s);
-					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
-					m_edit_text_shape->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(m_edit_text_start), 0});
+					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
+					m_edit_text_end = m_edit_text_start;
+					m_edit_text_trail = false;
+					const DWRITE_TEXT_RANGE new_ran{ static_cast<UINT32>(m_edit_text_start), 0 };
+					if (!equal(m_edit_text_shape->m_text_selected_range, new_ran)) {
+						undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, new_ran);
+					}
 				}
 				main_draw();
 				// 一覧が表示されてるか判定する.
@@ -282,8 +287,12 @@ namespace winrt::GraphPaper::implementation
 			else {
 				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 					m_edit_text_shape = static_cast<ShapeText*>(s);
-					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
-					if (m_edit_text_shape->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(m_edit_text_start), 0 })) {
+					m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
+					m_edit_text_end = m_edit_text_start;
+					m_edit_text_trail = false;
+					DWRITE_TEXT_RANGE new_ran{ static_cast<UINT32>(m_edit_text_start), 0 };
+					if (!equal(m_edit_text_shape->m_text_selected_range, new_ran)) {
+						undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, new_ran);
 						main_draw();
 					}
 				}
@@ -342,12 +351,12 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 文字列選択の範囲が { 0, 0 } か判定する.
-			constexpr DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
-			if (equal(s_range, d_range)) {
+			constexpr DWRITE_TEXT_RANGE zero_ran = DWRITE_TEXT_RANGE{ 0, 0 };
+			if (equal(zero_ran, d_range)) {
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			undo_push_set<UNDO_T::TEXT_RANGE>(s, zero_ran);
 			if (!done) {
 				done = true;
 			}

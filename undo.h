@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 		// }Œ`‚©‚ç•¶š—ñ‚ğíœ‚·‚é.
 		void del(Shape* s, const uint32_t del_at, const uint32_t del_len) noexcept;
 		// }Œ`‚É•¶š—ñ‚ğ‘}“ü‚·‚é.
-		UndoText(Shape* s, uint32_t ins_at, wchar_t* ins_text) :
+		UndoText(Shape* s, uint32_t ins_at, const wchar_t* ins_text) :
 			Undo(s)
 		{
 			ins(s, ins_at, ins_text);

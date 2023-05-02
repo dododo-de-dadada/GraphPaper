@@ -693,7 +693,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 文字列を選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
-			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
 			const auto t_end = (m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end);
 			const int t_len = static_cast<int>(m_edit_text_shape->get_text_len());
 			const UINT32 s = static_cast<UINT32>(max(min(m_edit_text_start, t_end), 0));
@@ -1295,11 +1295,19 @@ namespace winrt::GraphPaper::implementation
 						scp_main_panel().ContextFlyout(nullptr);
 					}
 					select_shape(m_event_shape_pressed, args.KeyModifiers());
+					// 編集中の文字列があるなら, 空にしてフォーカスをはずす.
+					if (m_edit_text_shape != nullptr && (m_edit_text_shape->is_deleted() || !m_edit_text_shape->is_selected())) {
+						m_edit_text_shape = nullptr;
+						m_edit_context.NotifyFocusLeave();
+						InputPane::GetForCurrentView().TryHide();
+					}
+					// 押された部位が文字列なら, 文字列の選択と編集を開始する.
 					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 						m_event_state = EVENT_STATE::PRESS_TEXT;
 						m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
-						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
 						m_edit_text_end = m_edit_text_start;
+						m_edit_text_trail = false;
 						m_edit_context.NotifyFocusEnter();
 					}
 				}
@@ -1358,7 +1366,7 @@ namespace winrt::GraphPaper::implementation
 				// 文字列図形の文字列が押されたいたなら.
 				// m_edit_text_shape は LOC_TEXT のときだけ設定される.
 				else if (m_edit_text_shape != nullptr) {
-					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);
+					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
 				}
 				else {
 					// クリックした状態に遷移する.

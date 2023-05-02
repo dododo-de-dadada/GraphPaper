@@ -1025,7 +1025,7 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚É•¶š—ñ‚ğ‘}“ü‚·‚é.
 	void UndoText::ins(Shape* s, const uint32_t ins_at, const wchar_t* ins_text) noexcept
 	{
-		wchar_t* old_text;
+		wchar_t* old_text = nullptr;
 		s->get_text_content(old_text);
 		const size_t ins_len = wchar_len(ins_text);
 		const size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
@@ -1043,7 +1043,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		new_text[new_len] = L'\0';
 		s->set_text_content(new_text);
-
+		//s->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(new_at + ins_len), 0});
 		delete[] old_text;
 
 		// ‘}“ü‚³‚ê‚½ˆÊ’u‚ğíœ‚·‚éˆÊ’u‚É, ‘}“ü‚³‚ê‚½•¶š—ñ‚Ì’·‚³‚ğíœ‚·‚é’·‚³‚É,
@@ -1078,6 +1078,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		del_text[del_len] = L'\0';
 		s->set_text_content(new_text);
+		//s->set_text_selected(DWRITE_TEXT_RANGE{ del_at, 0 });
 		delete[] old_text;
 
 		// íœ‚³‚ê‚½ˆÊ’u‚ğ‘}“ü‚³‚ê‚½ˆÊ’u‚É, íœ‚³‚ê‚½’·‚³‚ğ‘}“ü‚³‚ê‚é’·‚³‚É, 

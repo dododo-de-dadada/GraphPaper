@@ -17,6 +17,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Media::Brush;
 	using winrt::Windows::UI::Xaml::Window;
+	using winrt::Windows::Foundation::Rect;
+	using winrt::Windows::System::VirtualKey;
+	using winrt::Windows::System::VirtualKeyModifiers;
+	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
 
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
@@ -187,34 +191,121 @@ namespace winrt::GraphPaper::implementation
 		// テキスト入力
 		{
 			auto cw{ CoreWindow::GetForCurrentThread() };
-			cw.KeyDown([this](auto sender, auto) {
-				if (m_edit_text_shape == nullptr) {
+			cw.KeyDown([this, cw](auto sender, auto args) {
+				if (sender != cw) {
+					return;
+				}
+				if (m_edit_text_shape == nullptr || m_edit_text_shape->is_deleted() || !m_edit_text_shape->is_selected()) {
 					//__debugbreak();
 					return;
 				}
 				//__debugbreak();
-				DWRITE_TEXT_RANGE tr;
-				m_edit_text_shape->get_text_selected(tr);
+				if (args.VirtualKey() == VirtualKey::Back) {
+					const auto end = m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end;
+					if (end == m_edit_text_start && end > 0) {
+						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, end - 1, 1));
+						undo_push_null();
+						m_edit_text_start = end - 1;
+						m_edit_text_end = end - 1;
+						m_edit_text_trail = false;
+
+					}
+					else {
+						const auto s = min(m_edit_text_start, end);
+						const auto e = max(m_edit_text_start, end);
+						const auto del_len = static_cast<uint32_t>(e - s);
+						undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ static_cast<UINT32>(s), 0 });
+						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, del_len));
+						undo_push_null();
+						m_edit_text_start = s;
+						m_edit_text_end = s;
+						m_edit_text_trail = false;
+					}
+				}
+				else if (args.VirtualKey() == VirtualKey::Left) {
+					if ((cw.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down) {
+						const auto end = m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end;
+						if (end > 0) {
+							m_edit_text_end = end - 1;
+							m_edit_text_trail = false;
+							const auto s = min(m_edit_text_start, end);
+							const auto e = max(m_edit_text_start, end);
+							undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ static_cast<UINT32>(s), static_cast<UINT32>(e - s) });
+						}
+					}
+					else {
+						const auto end = m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end;
+						if (end == m_edit_text_start && end > 0) {
+							m_edit_text_end = end - 1;
+							m_edit_text_trail = false;
+							const auto s = min(m_edit_text_start, end);
+							const auto e = max(m_edit_text_start, end);
+							undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ static_cast<UINT32>(s), static_cast<UINT32>(e - s) });
+						}
+						else {
+							const auto s = min(m_edit_text_start, end);
+							undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ static_cast<UINT32>(s), 0 });
+							m_edit_text_start = s;
+							m_edit_text_end = s;
+							m_edit_text_trail = false;
+						}
+					}
+				}
 			});
 			m_edit_context.InputPaneDisplayPolicy(winrt::Windows::UI::Text::Core::CoreTextInputPaneDisplayPolicy::Manual);
 			m_edit_context.InputScope(winrt::Windows::UI::Text::Core::CoreTextInputScope::Text);
-			m_edit_context.TextRequested([](auto, auto) {
-				__debugbreak();
+			m_edit_context.TextRequested([this](auto, auto args) {
+				//__debugbreak();
+				using winrt::Windows::UI::Text::Core::CoreTextTextRequest;
+				CoreTextTextRequest req{ args.Request() };
+				const auto sub_len = min(req.Range().EndCaretPosition, m_edit_text_shape->get_text_len()) - req.Range().StartCaretPosition;	// 部分文字列の長さ
+				winrt::hstring sub_str{	// 部分文字列
+					m_edit_text_shape->m_text + req.Range().StartCaretPosition,
+					static_cast<winrt::hstring::size_type>(sub_len)
+				};
+				req.Text(sub_str);
 			});
 			m_edit_context.SelectionRequested([this](auto, auto args) {
-				__debugbreak();
+				//__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextSelectionRequest;
 				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextSelectionRequest req{ args.Request() };
-				CoreTextRange ran{ m_edit_text_start, m_edit_text_end };
+				CoreTextRange ran{};
+				ran.StartCaretPosition = m_edit_text_start;
+				ran.EndCaretPosition = m_edit_text_end;
 				req.Selection(ran);
-
 			});
 			m_edit_context.FocusRemoved([](auto, auto) {
 				__debugbreak();
 			});
-			m_edit_context.TextUpdating([](auto, auto) {
+			// 文字が入力される
+			m_edit_context.TextUpdating([this](auto, auto args) {
 				__debugbreak();
+				using winrt::Windows::UI::Text::Core::CoreTextRange;
+
+				const winrt::hstring new_text{ args.Text() };
+				const int text_len = m_edit_text_shape->get_text_len();
+				const int s = m_edit_text_start;
+				const int e = min(text_len, m_edit_text_end);
+				//winrt::hstring sub_pref{ m_edit_text_shape->m_text, s };
+				//winrt::hstring sub_surf{
+				//	m_edit_text_shape->m_text + e, static_cast<winrt::hstring::size_type>(text_len - e)
+				//};
+				if (s < e) {
+					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
+					m_edit_text_end = m_edit_text_start;
+					m_edit_text_trail = false;
+				}
+				if (new_text.size() > 0) {
+					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, new_text.data()));
+					m_edit_text_start = s + new_text.size();
+					m_edit_text_end = m_edit_text_start;
+					m_edit_text_trail = false;
+				}
+				if (s < e || new_text.size() > 0) {
+					undo_push_null();
+					main_draw();
+				}
 			});
 			m_edit_context.SelectionUpdating([](auto, auto) {
 				__debugbreak();
@@ -222,15 +313,39 @@ namespace winrt::GraphPaper::implementation
 			m_edit_context.FormatUpdating([](auto, auto) {
 				__debugbreak();
 			});
-			m_edit_context.LayoutRequested([](auto, auto) {
-				__debugbreak();
+			m_edit_context.LayoutRequested([this](auto, auto args) {
+				//__debugbreak();
+				using winrt::Windows::UI::Text::Core::CoreTextLayoutRequest;
+				Rect win_box{ Window::Current().CoreWindow().Bounds() };
+				CoreTextLayoutRequest req{ args.Request() };
+				Rect con_rect;	// テキストが表示されている範囲
+				Rect sel_rect;	// 選択範囲またはキャレットの位置
+				D2D1_POINT_2F con_start, con_end;
+				D2D1_POINT_2F sel_start, sel_end;
+				const DWRITE_HIT_TEST_METRICS& tm = m_edit_text_shape->m_dwrite_test_metrics[m_edit_text_row];
+				m_edit_text_shape->get_text_caret(tm.textPosition, false, m_edit_text_row, con_start);
+				m_edit_text_shape->get_text_caret(tm.textPosition + tm.length, false, m_edit_text_row, con_end);
+				m_edit_text_shape->get_text_caret(m_edit_text_start, false, m_edit_text_row, sel_start);
+				m_edit_text_shape->get_text_caret(m_edit_text_end, m_edit_text_trail, m_edit_text_row, sel_end);
+				con_rect.X = win_box.X + con_start.x / m_main_scale;
+				con_rect.Y = win_box.Y + con_start.y / m_main_scale;
+				con_rect.Width = con_end.x - con_start.x / m_main_scale;
+				con_rect.Height = m_edit_text_shape->m_font_size / m_main_scale;
+				sel_rect.X = win_box.X + sel_start.x / m_main_scale;
+				sel_rect.Y = win_box.Y + sel_start.y / m_main_scale;
+				sel_rect.Width = (sel_end.x - sel_start.x) / m_main_scale;
+				sel_rect.Height = m_edit_text_shape->m_font_size / m_main_scale;
+				req.LayoutBounds().TextBounds(con_rect);
+				req.LayoutBounds().ControlBounds(sel_rect);
 			});
+			// 入力変換が開始された
 			m_edit_context.CompositionStarted([](auto, auto) {
 				__debugbreak();
 			});
 			m_edit_context.CompositionCompleted([](auto, auto) {
 				__debugbreak();
 			});
+			
 		}
 
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
@@ -499,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_edit_text_shape != nullptr && !m_edit_text_shape->is_deleted() && m_edit_text_shape->is_selected()) {
 			D2D1_POINT_2F c;
-			m_edit_text_shape->get_text_caret(m_edit_text_end, m_edit_text_trail, c);
+			m_edit_text_shape->get_text_caret(m_edit_text_end, m_edit_text_row, m_edit_text_trail, c);
 			D2D1_POINT_2F p{
 				c.x - 0.5f, c.y
 			};

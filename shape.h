@@ -1869,7 +1869,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			return wchar_len(m_text);
 		}
-		void get_text_caret(const uint32_t tp, const bool is_trailing, D2D1_POINT_2F& cp) const noexcept
+		void get_text_caret(const uint32_t tp, const uint32_t r, const bool is_trailing, D2D1_POINT_2F& cp) const noexcept
 		{
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
@@ -1877,32 +1877,26 @@ namespace winrt::GraphPaper::implementation
 			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
 			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
 
-			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
-				//const auto tl = m_dwrite_test_metrics[i].left;
-				//const auto tw = m_dwrite_test_metrics[i].width;
-				const auto tt = m_dwrite_test_metrics[i].top;
-				const auto bl = m_dwrite_line_metrics[i].baseline;
-				const auto s = m_dwrite_test_metrics[i].textPosition;
-				const auto e = m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length;
-				if (tp >= s && tp < e) {
-					DWRITE_HIT_TEST_METRICS tm{};
-					FLOAT x, y;
-					m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
-					cp.x = tx + x;
-					cp.y = ty + tt + bl + descent - m_font_size;
-					return;
-				}
+			const auto tt = m_dwrite_test_metrics[r].top;
+			const auto bl = m_dwrite_line_metrics[r].baseline;
+			const auto s = m_dwrite_test_metrics[r].textPosition;
+			const auto e = m_dwrite_test_metrics[r].textPosition + m_dwrite_test_metrics[r].length;
+			if (tp >= s && tp < e) {
+				DWRITE_HIT_TEST_METRICS tm{};
+				FLOAT x, y;
+				m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
+				cp.x = tx + x;
+				cp.y = ty + tt + bl + descent - m_font_size;
+				return;
 			}
-			const auto tl = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].left;
-			const auto tw = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].width;
-			const auto tt = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top;
-			const auto bl = m_dwrite_line_metrics[m_dwrite_test_cnt - 1].baseline;
+			const auto tl = m_dwrite_test_metrics[r].left;
+			const auto tw = m_dwrite_test_metrics[r].width;
 			cp.x = tx + tl + tw;
 			cp.y = ty + tt + bl + descent - m_font_size;
 		}
 
 		// Žw’è‚µ‚½“_‚Ì
-		int get_text_pos(const D2D1_POINT_2F p, bool& is_trailing) const noexcept
+		int get_text_pos(const D2D1_POINT_2F p, bool& is_trailing, int& row) const noexcept
 		{
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
@@ -1914,6 +1908,7 @@ namespace winrt::GraphPaper::implementation
 			const float py = p.y - ty;
 			if (py < m_dwrite_test_metrics[0].top) {
 				is_trailing = false;
+				row = 0;
 				return 0;
 			}
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -1926,6 +1921,7 @@ namespace winrt::GraphPaper::implementation
 					// s‚Ì•¶Žš”‚ªƒ[ƒ‚È‚ç
 					if (s == e) {
 						is_trailing = false;
+						row = i;
 						return s;
 					}
 					// s‚Ì•¶Žš”‚ª 1 ˆÈã‚È‚ç
@@ -1936,10 +1932,12 @@ namespace winrt::GraphPaper::implementation
 						m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &tm);
 						if (px <= x + tm.width * 0.5f) {
 							is_trailing = false;
+							row = i;
 							return j;
 						}
 					}
 					is_trailing = true;
+					row = i;
 					return e - 1;
 				}
 			}
@@ -1948,9 +1946,11 @@ namespace winrt::GraphPaper::implementation
 			const auto e = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].length;
 			if (s == e) {
 				is_trailing = false;
+				row = m_dwrite_test_cnt - 1;
 				return s;
 			}
 			is_trailing = true;
+			row = m_dwrite_test_cnt - 1;
 			return e - 1;
 		}
 		// }Œ`‚ª“_‚ðŠÜ‚Þ‚©”»’è‚·‚é.
@@ -1988,7 +1988,7 @@ namespace winrt::GraphPaper::implementation
 		// ’l‚ð•¶Žš—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
 		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
 		// ’l‚ð•¶Žš”ÍˆÍ‚ÉŠi”[‚·‚é.
-		bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
+		virtual bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
 		// }Œ`‚ðì¬‚·‚é.
 		ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* prop);
 		// }Œ`‚ðƒf[ƒ^ƒŠ[ƒ_[‚©‚ç“Ç‚Ýž‚Þ.
