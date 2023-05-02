@@ -23,6 +23,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
+		undo_push_null();
 		unselect_shape_all();
 		undo_push_append(g);
 		for (const auto s : slist) {
@@ -38,7 +39,6 @@ namespace winrt::GraphPaper::implementation
 			undo_push_append(g, s);
 		}
 		undo_push_select(g);
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
@@ -58,6 +58,7 @@ namespace winrt::GraphPaper::implementation
 		if (g_list.empty()) {
 			return;
 		}
+		undo_push_null();
 		unselect_shape_all();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : g_list) {
@@ -89,7 +90,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			undo_push_remove(g);
 		}
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();

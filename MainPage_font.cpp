@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_stretch_ultra_expanded() || sender == rmfi_popup_font_stretch_ultra_expanded()) {
 			f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED;
 		}
+		undo_push_null();
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -200,8 +200,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_weight_extra_black() || sender == rmfi_popup_font_weight_extra_black()) {
 			f_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK;
 		}
+		undo_push_null();
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
@@ -262,8 +262,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				wchar_t* samp_val;
 				m_prop_page.back()->get_font_family(samp_val);
+				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
@@ -335,8 +335,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
 				m_prop_page.back()->get_font_size(samp_val);
+				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
@@ -379,8 +379,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_font_style_oblique() || sender == rmfi_popup_font_style_oblique()) {
 			f_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE;
 		}
+		undo_push_null();
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -404,8 +404,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
 			text_align_vert_is_checked(val);
+			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-				undo_push_null();
 				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
@@ -444,8 +444,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
 			text_align_horz_is_checked(val);
+			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-				undo_push_null();
 				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
@@ -538,8 +538,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
 				m_prop_page.back()->get_text_line_sp(samp_val);
+				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
@@ -638,8 +638,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
 				m_prop_page.back()->get_text_pad(samp_val);
+				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();

@@ -116,8 +116,8 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
 		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
-			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
 			undo_push_null();
+			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -280,8 +280,8 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.get_grid_base(page_val);
 				m_prop_page.get_grid_base(setting_val);
 				if (!equal(page_val, setting_val)) {
+					undo_menu_is_enabled();
 					undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
-					undo_push_null();
 					undo_menu_is_enabled();
 					main_draw();
 				}
@@ -302,8 +302,8 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			undo_push_null();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -317,8 +317,8 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			undo_push_null();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -344,8 +344,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		grid_show_is_checked(new_val);
 		if (m_main_page.m_grid_show != new_val) {
-			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
 			undo_push_null();
+			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -687,13 +687,13 @@ namespace winrt::GraphPaper::implementation
 			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
 			const bool flag_mar = !equal(p_mar, m_main_page.m_page_margin);
 			if (flag_size || flag_mar) {
+				undo_push_null();
 				if (flag_size) {
 					undo_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
 				}
 				if (flag_mar) {
 					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
@@ -803,6 +803,7 @@ namespace winrt::GraphPaper::implementation
 			const bool size_changed = !equal(p_size, m_main_page.m_page_size);
 			const bool mar_chanfed = !equal(p_mar, m_main_page.m_page_margin);
 			if (size_changed || mar_chanfed || dx > 0.0f || dy > 0.0f) {
+				undo_push_null();
 				// ‹éŒ`‚ªˆÚ“®‚µ‚½‚È‚ç, }Œ`‚ª‹éŒ`‚ÉŽû‚Ü‚é‚æ‚¤, }Œ`‚àˆÚ“®‚³‚¹‚é.
 				if (dx > 0.0f || dy > 0.0f) {
 					constexpr auto ANY = true;
@@ -816,7 +817,6 @@ namespace winrt::GraphPaper::implementation
 				if (mar_chanfed) {
 					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();

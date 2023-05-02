@@ -129,6 +129,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択された図形の数がゼロか判定する.
 		if (m_list_sel_cnt > 0) {
+			undo_push_null();
 			// 選択された図形のリストを得る.
 			SHAPE_LIST selected_list;
 			slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
@@ -143,7 +144,6 @@ namespace winrt::GraphPaper::implementation
 				undo_push_remove(s);
 			}
 			m_mutex_draw.unlock();
-			undo_push_null();
 			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_bbox_update();
@@ -368,11 +368,11 @@ namespace winrt::GraphPaper::implementation
 
 		{
 			m_mutex_draw.lock();
+			undo_push_null();
 			undo_push_append(s);
 			undo_push_select(s);
 			m_mutex_draw.unlock();
 		}
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 
@@ -430,6 +430,7 @@ namespace winrt::GraphPaper::implementation
 				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
 					m_mutex_draw.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
+					undo_push_null();
 					unselect_shape_all();
 					// 得られたリストの各図形について以下を繰り返す.
 					for (auto s : slist_pasted) {
@@ -441,7 +442,6 @@ namespace winrt::GraphPaper::implementation
 						main_bbox_update(s);
 					}
 					m_mutex_draw.unlock();
-					undo_push_null();
 					undo_menu_is_enabled();
 					xcvd_menu_is_enabled();
 					main_panel_size();
@@ -470,6 +470,7 @@ namespace winrt::GraphPaper::implementation
 		// クリップボードから読み込むためのデータリーダーを得る.
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
 		if (!text.empty()) {
+			undo_push_null();
 			unselect_shape_all();
 
 			// パネルの大きさで文字列図形を作成する,.
@@ -503,7 +504,6 @@ namespace winrt::GraphPaper::implementation
 				undo_push_select(t);
 				m_mutex_draw.unlock();
 			}
-			undo_push_null();
 			undo_menu_is_enabled();
 
 			// 一覧が表示されてるか判定する.

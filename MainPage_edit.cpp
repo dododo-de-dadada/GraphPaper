@@ -48,10 +48,10 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
 				m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 				if (m_fit_text_frame) {
+					undo_push_null();
 					undo_push_position(s, LOC_TYPE::LOC_SE);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
 			}
@@ -62,21 +62,21 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::meth_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_meth_poly_close()) {
+			undo_push_null();
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
 				mfi_menu_meth_poly_close().IsEnabled(false);
 				mfi_menu_meth_poly_open().IsEnabled(true);
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
 			}
 		}
 		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_popup_poly_open()) {
+			undo_push_null();
 			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
 			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
 				mfi_menu_meth_poly_close().IsEnabled(true);
 				mfi_menu_meth_poly_open().IsEnabled(false);
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
 			}
@@ -312,6 +312,7 @@ namespace winrt::GraphPaper::implementation
 					})
 				};
 				if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
+					undo_push_null();
 					s = m_prop_page.back();
 					// íçà”: èáî‘Ç™ OK Ç©Ç«Ç§Ç©.
 					D2D1_SWEEP_DIRECTION new_dir;
@@ -324,7 +325,6 @@ namespace winrt::GraphPaper::implementation
 					undo_push_set<UNDO_T::ARC_END>(new_val);
 					s->get_arc_rot(new_val);
 					undo_push_set<UNDO_T::ARC_ROT>(new_val);
-					undo_push_null();
 					undo_menu_is_enabled();
 					main_draw();
 				}
@@ -381,6 +381,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto u = new UndoDeform(s, LOC_TYPE::LOC_SE);
 			if (static_cast<ShapeText*>(s)->fit_frame_to_text(g_len)) {
+				undo_push_null();
 				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
@@ -391,7 +392,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_panel_size();
 			main_draw();

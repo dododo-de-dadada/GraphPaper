@@ -1153,9 +1153,9 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 			{
 				m_mutex_draw.lock();
+				undo_push_null();
 				undo_push_append(s);
 				undo_push_select(s);
-				undo_push_null();
 				undo_menu_is_enabled();
 				m_mutex_draw.unlock();
 			}

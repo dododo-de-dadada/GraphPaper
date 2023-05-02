@@ -16,6 +16,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作メニューの「画像を原画像に戻す」が選択された.
 	void MainPage::image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
+		undo_push_null();
 		for (Shape* const s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
@@ -24,7 +25,6 @@ namespace winrt::GraphPaper::implementation
 			undo_push_image(s);
 			static_cast<ShapeImage*>(s)->revert();
 		}
-		undo_push_null();
 		undo_menu_is_enabled();
 		//xcvd_menu_is_enabled();
 		main_panel_size();

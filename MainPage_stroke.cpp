@@ -31,8 +31,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
 			stroke_arrow_is_checked(a_style);
+			undo_push_null();
 			if (undo_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
 			}
@@ -333,12 +333,12 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_arrow_cap(new_cap);
 				m_prop_page.back()->get_arrow_join(new_join);
 				stroke_arrow_is_checked(new_style);
+				undo_push_null();
 				const bool flag_size = undo_push_set<UNDO_T::ARROW_SIZE>(new_size);
 				const bool flag_style = undo_push_set<UNDO_T::ARROW_STYLE>(new_style);
 				const bool flag_cap = undo_push_set<UNDO_T::ARROW_CAP>(new_cap);
 				const bool flag_join = undo_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					main_draw();
 				}
@@ -392,8 +392,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		stroke_cap_is_checked(new_val);
+		undo_push_null();
 		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -519,10 +519,10 @@ namespace winrt::GraphPaper::implementation
 				float new_width;
 				m_prop_page.back()->get_stroke_join_limit(new_limit);
 				m_prop_page.back()->get_stroke_width(new_width);
+				undo_push_null();
 				const bool limit_changed = undo_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
 				const bool width_changed = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					main_draw();
 				}
@@ -846,12 +846,12 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_stroke_cap(new_cap);
 				stroke_dash_is_checked(new_dash);
 				stroke_cap_is_checked(new_cap);
+				undo_push_null();
 				const bool flag_patt = undo_push_set<UNDO_T::DASH_PAT>(new_patt);
 				const bool flag_width = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				const bool flag_dash = undo_push_set<UNDO_T::DASH_STYLE>(new_dash);
 				const bool flag_cap = undo_push_set<UNDO_T::STROKE_CAP>(new_cap);
 				if (flag_patt || flag_width || flag_dash || flag_cap) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					main_draw();
 				}
@@ -892,8 +892,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (d_style != static_cast<D2D1_DASH_STYLE>(-1)) {
 			mfi_menu_stroke_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+			undo_push_null();
 			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-				undo_push_null();
 				undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
@@ -958,8 +958,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		stroke_join_is_checked(new_val);
+		undo_push_null();
 		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_draw();
 		}
@@ -1015,8 +1015,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s_width >= 0.0f) {
 			stroke_width_is_checked(s_width);
+			undo_push_null();
 			if (undo_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-				undo_push_null();
 				undo_menu_is_enabled();
 				main_draw();
 			}
@@ -1128,8 +1128,8 @@ namespace winrt::GraphPaper::implementation
 				float new_val;
 				m_prop_page.back()->get_stroke_width(new_val);
 				stroke_width_is_checked(new_val);
+				undo_push_null();
 				if (undo_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
-					undo_push_null();
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();

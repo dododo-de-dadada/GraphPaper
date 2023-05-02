@@ -30,6 +30,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_page.m_shape_list, slist);
 		if (slist.size() > 0) {
+			undo_push_null();
 			// 最前面 (リストでは末尾) に移動
 			for (Shape* const s : slist) {
 				if (summary_is_visible()) {
@@ -41,7 +42,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist.clear();
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
@@ -88,6 +88,7 @@ namespace winrt::GraphPaper::implementation
 			it_src++;
 		}
 		bool done = false;	// 交換済みか判定する
+		undo_push_null();
 		for (;;) {
 			// 交換元反復子を交換先反復子に格納して,
 			// 交換元反復子をインクリメントする.
@@ -98,7 +99,6 @@ namespace winrt::GraphPaper::implementation
 				if (it_src == it_end) {
 					// 交換済みか判定する
 					if (done) {
-						undo_push_null();
 						undo_menu_is_enabled();
 						xcvd_menu_is_enabled();
 						main_draw();
@@ -141,6 +141,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_page.m_shape_list, slist);
 		if (slist.size() > 0) {
+			undo_push_null();
 			// 最背面 (リストでは先頭) に移動
 			uint32_t i = 0;
 			Shape* const s = slist_front(m_main_page.m_shape_list);
@@ -154,7 +155,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist.clear();
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();

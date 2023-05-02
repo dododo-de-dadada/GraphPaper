@@ -290,9 +290,9 @@ namespace winrt::GraphPaper::implementation
 		D2D_UI m_prop_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
-		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
+		//uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
 		UNDO_STACK m_ustack_redo;	// やり直し操作スタック
-		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
+		//uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
 		bool m_ustack_is_changed = false;	// スタックが更新されたか判定
 

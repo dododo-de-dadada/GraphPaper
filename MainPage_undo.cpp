@@ -205,43 +205,29 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_ustack_rcnt > 0) {
-			auto flag = false;
-			// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を削除する.
-			while (!m_ustack_undo.empty()) {
-				auto u = m_ustack_undo.back();
-				if (u == nullptr) {
-					break;
-				}
-				m_ustack_undo.pop_back();
-				undo_exec(u);
-				flag = true;
-			}
-			// やり直し操作スタックから操作を取り出し, 実行して, 元に戻す操作に積む.
-			// 操作がヌルでないあいだこれを繰り返す.
-			while (m_ustack_redo.size() > 0) {
-				auto r = m_ustack_redo.back();
-				m_ustack_redo.pop_back();
-				m_ustack_undo.push_back(r);
-				if (r == nullptr) {
-					// 実行された操作があった場合, スタックの組数を変更する.
-					m_ustack_rcnt--;
-					m_ustack_ucnt++;
-					break;
-				}
-				undo_exec(r);
-				flag = true;
-			}
-			if (flag) {
-				undo_menu_is_enabled();
-				xcvd_menu_is_enabled();
-				main_bbox_update();
-				main_panel_size();
-				main_draw();
-				// 一覧が表示されてるか判定する.
-				if (summary_is_visible()) {
-					summary_update();
-				}
+		if (m_ustack_undo.size() > 0 && m_ustack_undo.back() != nullptr) {
+			m_ustack_undo.push_back(nullptr);
+		}
+		while (m_ustack_redo.size() > 0 && m_ustack_redo.back() == nullptr) {
+			m_ustack_redo.pop_back();
+		}
+		bool flag = false;
+		while (m_ustack_redo.size() > 0 && m_ustack_redo.back() != nullptr) {
+			Undo* u = m_ustack_redo.back();
+			undo_exec(u);
+			m_ustack_redo.pop_back();
+			m_ustack_undo.push_back(u);
+			flag = true;
+		}
+		if (flag) {
+			undo_menu_is_enabled();
+			xcvd_menu_is_enabled();
+			main_bbox_update();
+			main_panel_size();
+			main_draw();
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_update();
 			}
 		}
 		status_bar_set_pos();
@@ -251,53 +237,28 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::undo_clear(void)
 	{
 		m_ustack_is_changed = false;
-		m_ustack_rcnt -= undo_clear_stack(m_ustack_redo);
-		m_ustack_ucnt -= undo_clear_stack(m_ustack_undo);
-#if defined(_DEBUG)
-		if (m_ustack_rcnt == 0 && m_ustack_ucnt == 0) {
-			return;
-		}
-		//using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-		ContentDialog dialog;
-		dialog.Title(box_value(L"Undo is not empty."));
-		dialog.CloseButtonText(L"Close");
-		auto _{ dialog.ShowAsync() };
-#endif
+		undo_clear_stack(m_ustack_redo);
+		undo_clear_stack(m_ustack_undo);
 	}
 
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_ustack_ucnt > 0) {
-			auto st = 0;
-			while (!m_ustack_undo.empty()) {
-				auto u = m_ustack_undo.back();
-				if (st == 0) {
-					m_ustack_undo.pop_back();
-					if (u != nullptr) {
-						undo_exec(u);
-					}
-					else {
-						st = 1;
-					}
-					continue;
-				}
-				if (u == nullptr) {
-					break;
-				}
-				m_ustack_undo.pop_back();
-				undo_exec(u);
-				if (st == 1) {
-					m_ustack_redo.push_back(nullptr);
-					st = 2;
-				}
-				m_ustack_redo.push_back(u);
-			}
-			if (st == 2) {
-				// 実行された操作があった場合, スタックの組数を変更する.
-				m_ustack_ucnt--;
-				m_ustack_rcnt++;
-			}
+		if (m_ustack_redo.size() > 0 && m_ustack_redo.back() != nullptr) {
+			m_ustack_redo.push_back(nullptr);
+		}
+		while (m_ustack_undo.size() > 0 && m_ustack_undo.back() == nullptr) {
+			m_ustack_undo.pop_back();
+		}
+		bool flag = false;
+		while (m_ustack_undo.size() > 0 && m_ustack_undo.back() != nullptr) {
+			Undo* u = m_ustack_undo.back();
+			undo_exec(u);
+			m_ustack_undo.pop_back();
+			m_ustack_redo.push_back(u);
+			flag = true;
+		}
+		if (flag) {
 			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_bbox_update();
@@ -401,10 +362,10 @@ namespace winrt::GraphPaper::implementation
 	// 元に戻す/やり直しメニューの可否を設定する.
 	void MainPage::undo_menu_is_enabled(void)
 	{
-		mbi_menu_undo().IsEnabled(m_ustack_ucnt > 0);
-		mfi_popup_undo().IsEnabled(m_ustack_ucnt > 0);
-		mfi_menu_redo().IsEnabled(m_ustack_rcnt > 0);
-		mfi_popup_redo().IsEnabled(m_ustack_rcnt > 0);
+		mbi_menu_undo().IsEnabled(m_ustack_undo.size() > 0);
+		mfi_popup_undo().IsEnabled(m_ustack_undo.size() > 0);
+		mfi_menu_redo().IsEnabled(m_ustack_redo.size() > 0);
+		mfi_popup_redo().IsEnabled(m_ustack_redo.size() > 0);
 	}
 
 	// 無効な操作をポップする.
@@ -483,31 +444,25 @@ namespace winrt::GraphPaper::implementation
 	// 一連の操作の区切としてヌル操作をスタックに積む.
 	// やり直し操作スタックは消去される.
 	void MainPage::undo_push_null(void)
-	{
+	{		
 		// やり直し操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
-		m_ustack_rcnt -= undo_clear_stack(m_ustack_redo);
-		// 元に戻す操作スタックにヌルを積む.
-		m_ustack_undo.push_back(nullptr);
-		// true をスタックが更新されたか判定に格納する.
-		m_ustack_is_changed = true;
-		// 操作の組数をインクリメントする.
-		m_ustack_ucnt++;
-		// 操作の組数が最大の組数以下か判定する.
-		if (m_ustack_ucnt <= MAX_UCNT) {
-			return;
+		undo_clear_stack(m_ustack_redo);
+		if (m_ustack_undo.size() > 0 && m_ustack_undo.back() != nullptr) {
+			m_ustack_undo.push_back(nullptr);
 		}
-		// 元に戻す操作スタックが空でないか判定する.
-		while (!m_ustack_undo.empty()) {
-			// 操作スタックの一番底の操作を取り出す.
-			const auto u = m_ustack_undo.front();
-			m_ustack_undo.pop_front();
-			// 操作がヌルか判定する.
-			if (u == nullptr) {
-				break;
+		if (m_ustack_undo.size() > 256) {
+			while (m_ustack_undo.size() > 256) {
+				m_ustack_undo.pop_front();
+			}
+			while (m_ustack_undo.front() != nullptr) {
+				m_ustack_undo.pop_front();
+			}
+			if (m_ustack_undo.front() == nullptr) {
+				m_ustack_undo.pop_front();
 			}
 		}
-		// 操作の組数を 1 減じる.
-		m_ustack_ucnt--;
+		// true をスタックが更新されたか判定に格納する.
+		m_ustack_is_changed = true;
 	}
 
 	// 図形をグループから取り去り, その操作をスタックに積む.
@@ -731,12 +686,10 @@ namespace winrt::GraphPaper::implementation
 		while (undo_read_op(r, dt_reader)) {
 			m_ustack_redo.push_back(r);
 		}
-		m_ustack_rcnt = dt_reader.ReadUInt32();
 		Undo* u;
 		while (undo_read_op(u, dt_reader)) {
 			m_ustack_undo.push_back(u);
 		}
-		m_ustack_ucnt = dt_reader.ReadUInt32();
 		m_ustack_is_changed = dt_reader.ReadBoolean();
 	}
 
@@ -748,12 +701,10 @@ namespace winrt::GraphPaper::implementation
 			undo_write_op(r, dt_writer);
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::END));
-		dt_writer.WriteUInt32(m_ustack_rcnt);
 		for (const auto& u : m_ustack_undo) {
 			undo_write_op(u, dt_writer);
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::END));
-		dt_writer.WriteUInt32(m_ustack_ucnt);
 		dt_writer.WriteBoolean(m_ustack_is_changed);
 	}
 

@@ -431,9 +431,9 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
+		undo_push_null();
 		undo_push_append(s);
 		undo_push_select(s);
-		undo_push_null();
 		undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_bbox_update(s);
@@ -470,9 +470,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
+			undo_push_null();
 			undo_push_append(s);
 			undo_push_select(s);
-			undo_push_null();
 			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			m_event_shape_prev = s;
@@ -526,8 +526,8 @@ namespace winrt::GraphPaper::implementation
 			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, m_snap_point / m_main_scale, m_image_keep_aspect);
 		}
+		undo_push_null();
 		if (!undo_pop_invalid()) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
@@ -566,8 +566,8 @@ namespace winrt::GraphPaper::implementation
 				slist_move_selected(m_main_page.m_shape_list, p);
 			}
 		}
+		undo_push_null();
 		if (!undo_pop_invalid()) {
-			undo_push_null();
 			undo_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
@@ -1451,27 +1451,27 @@ namespace winrt::GraphPaper::implementation
 				Shape* s;
 				const uint32_t loc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (loc == LOC_TYPE::LOC_PAGE) {
-					undo_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 					undo_push_null();
+					undo_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 					undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
-						undo_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
 						undo_push_null();
+						undo_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						undo_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
 						undo_push_null();
+						undo_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
-						undo_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
 						undo_push_null();
+						undo_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
 						//xcvd_menu_is_enabled();
 					}

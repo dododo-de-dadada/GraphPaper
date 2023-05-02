@@ -203,8 +203,8 @@ namespace winrt::GraphPaper::implementation
 				if (args.VirtualKey() == VirtualKey::Back) {
 					const auto end = m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end;
 					if (end == m_edit_text_start && end > 0) {
-						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, end - 1, 1));
 						undo_push_null();
+						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, end - 1, 1));
 						m_edit_text_start = end - 1;
 						m_edit_text_end = end - 1;
 						m_edit_text_trail = false;
@@ -214,9 +214,9 @@ namespace winrt::GraphPaper::implementation
 						const auto s = min(m_edit_text_start, end);
 						const auto e = max(m_edit_text_start, end);
 						const auto del_len = static_cast<uint32_t>(e - s);
+						undo_push_null();
 						undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ static_cast<UINT32>(s), 0 });
 						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, del_len));
-						undo_push_null();
 						m_edit_text_start = s;
 						m_edit_text_end = s;
 						m_edit_text_trail = false;
@@ -291,6 +291,7 @@ namespace winrt::GraphPaper::implementation
 				//winrt::hstring sub_surf{
 				//	m_edit_text_shape->m_text + e, static_cast<winrt::hstring::size_type>(text_len - e)
 				//};
+				undo_push_null();
 				if (s < e) {
 					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
 					m_edit_text_end = m_edit_text_start;
@@ -303,7 +304,6 @@ namespace winrt::GraphPaper::implementation
 					m_edit_text_trail = false;
 				}
 				if (s < e || new_text.size() > 0) {
-					undo_push_null();
 					main_draw();
 				}
 			});
