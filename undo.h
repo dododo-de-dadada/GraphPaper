@@ -63,7 +63,8 @@ namespace winrt::GraphPaper::implementation
 		TEXT_INS,	// 文字列の挿入の操作
 		TEXT_LINE_SP,	// 行間の操作
 		TEXT_PAD,	// 文字列の余白の操作
-		TEXT_RANGE,	// 文字列選択の範囲の操作
+		//TEXT_RANGE,	// 文字列選択の範囲の操作
+		TEXT_SELECT	// 文字列選択の範囲の操作
 	};
 
 	// 操作スタック
@@ -109,7 +110,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_T::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::TEXT_PAD> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
+	//template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
 	//------------------------------
 	// 操作のひな型
@@ -306,6 +307,43 @@ namespace winrt::GraphPaper::implementation
 		// 図形をグループに追加する.
 		UndoGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos) : UndoList(s, s_pos, true), m_shape_group(g) { exec(); }
 		// 操作をデータライターに書き込む.
+		virtual void write(DataWriter const& dt_writer) const final override;
+	};
+
+	struct UndoTextSelect : Undo {
+		int m_start;
+		int m_end;
+		bool m_is_trail;
+		// 操作を実行すると値が変わるか判定する.
+		virtual bool changed(void) const noexcept override
+		{
+			return true;
+		}
+		UndoTextSelect(Shape* const s, const int start, const int end, const bool is_trail) :
+			Undo(s)
+		{
+			ShapeText* const t = static_cast<ShapeText* const>(s);
+			m_start = t->m_select_start;
+			m_end = t->m_select_end;
+			m_is_trail = t->m_select_trail;
+			t->m_select_start = start;
+			t->m_select_end = end;
+			t->m_select_trail = is_trail;
+		}
+		virtual void exec(void) noexcept final override
+		{
+			ShapeText* const t = static_cast<ShapeText* const>(m_shape);
+			const auto start = t->m_select_start;
+			const auto end = t->m_select_end;
+			const auto is_trail = t->m_select_trail;
+			t->m_select_start = m_start;
+			t->m_select_end = m_end;
+			t->m_select_trail = m_is_trail;
+			m_start = start;
+			m_end = end;
+			m_is_trail = is_trail;
+		}
+		UndoTextSelect(DataReader const& dt_reader);
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
 

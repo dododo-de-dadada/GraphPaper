@@ -179,8 +179,11 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_T::TEXT_PAD:
 			u = new UndoValue<UNDO_T::TEXT_PAD>(dt_reader);
 			break;
-		case UNDO_T::TEXT_RANGE:
-			u = new UndoValue<UNDO_T::TEXT_RANGE>(dt_reader);
+		//case UNDO_T::TEXT_RANGE:
+		//	u = new UndoValue<UNDO_T::TEXT_RANGE>(dt_reader);
+		//	break;
+		case UNDO_T::TEXT_SELECT:
+			u = new UndoTextSelect(dt_reader);
 			break;
 		default:
 			throw winrt::hresult_invalid_argument();
@@ -653,9 +656,9 @@ namespace winrt::GraphPaper::implementation
 	// s	操作する図形
 	// val	文字範囲の値
 	// 戻り値	なし
-	template<> void MainPage::undo_push_set<UNDO_T::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
-	{
-		m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
+	//template<> void MainPage::undo_push_set<UNDO_T::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
+	//{
+	//	m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
 		/*
 		if (typeid(*s) == typeid(ShapeText)) {
 			ShapeText* t = static_cast<ShapeText*>(s);
@@ -675,7 +678,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		*/
-	}
+	//}
 
 	// データリーダーから操作スタックを読み込む.
 	// dt_reader	データリーダー

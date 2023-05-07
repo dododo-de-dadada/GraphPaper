@@ -1108,7 +1108,6 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = wait_cursor_show();
-			unselect_shape_all();
 
 			IRandomAccessStream stream{
 				co_await open_file.OpenAsync(FileAccessMode::Read)
@@ -1117,8 +1116,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				co_await BitmapDecoder::CreateAsync(stream)
 			};
 			SoftwareBitmap bitmap{
-				SoftwareBitmap::Convert(
-					co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8)
+				SoftwareBitmap::Convert(co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8)
 			};
 
 			// 表示された部分の中心の位置を求める.
@@ -1154,6 +1152,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			{
 				m_mutex_draw.lock();
 				undo_push_null();
+				unselect_shape_all();
 				undo_push_append(s);
 				undo_push_select(s);
 				undo_menu_is_enabled();

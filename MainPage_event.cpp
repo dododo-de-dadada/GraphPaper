@@ -432,6 +432,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
 		undo_push_null();
+		unselect_shape_all();
 		undo_push_append(s);
 		undo_push_select(s);
 		undo_menu_is_enabled();
@@ -471,6 +472,7 @@ namespace winrt::GraphPaper::implementation
 			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
 			undo_push_null();
+			unselect_shape_all();
 			undo_push_append(s);
 			undo_push_select(s);
 			undo_menu_is_enabled();
@@ -693,12 +695,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 文字列を選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
-			m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
-			const auto t_end = (m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end);
-			const int t_len = static_cast<int>(m_edit_text_shape->get_text_len());
-			const UINT32 s = static_cast<UINT32>(max(min(m_edit_text_start, t_end), 0));
-			const UINT32 e = static_cast<UINT32>(min(max(m_edit_text_start, t_end), t_len));
-			undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ s, e - s });
+			bool trail;
+			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
+			const auto start = m_edit_text_shape->m_select_start;
+			undo_push_text_select(m_edit_text_shape, start, end, trail);
+			//m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);// , m_edit_text_row);
+			//const auto t_end = (m_edit_text_trail ? m_edit_text_end + 1 : m_edit_text_end);
+			//const int t_len = static_cast<int>(m_edit_text_shape->get_text_len());
+			//const UINT32 s = static_cast<UINT32>(max(min(m_edit_text_start, t_end), 0));
+			//const UINT32 e = static_cast<UINT32>(min(max(m_edit_text_start, t_end), t_len));
+			//undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, DWRITE_TEXT_RANGE{ s, e - s });
 			main_draw();
 		}
 		// 状態が, 左ボタンを押している状態, または
@@ -1305,10 +1311,15 @@ namespace winrt::GraphPaper::implementation
 					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 						m_event_state = EVENT_STATE::PRESS_TEXT;
 						m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
-						m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
-						m_edit_text_end = m_edit_text_start;
-						m_edit_text_trail = false;
+						bool trail;
+						const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
+						const auto start = trail ? end + 1 : end;
+						undo_push_text_select(m_edit_text_shape, start, end, trail);
 						m_edit_context.NotifyFocusEnter();
+					}
+					else {
+						m_edit_text_shape = nullptr;
+						m_edit_context.NotifyFocusLeave();
 					}
 				}
 			}
@@ -1366,7 +1377,11 @@ namespace winrt::GraphPaper::implementation
 				// 文字列図形の文字列が押されたいたなら.
 				// m_edit_text_shape は LOC_TEXT のときだけ設定される.
 				else if (m_edit_text_shape != nullptr) {
-					m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail, m_edit_text_row);
+					bool trail;
+					const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
+					const auto start = m_edit_text_shape->m_select_start;
+					undo_push_text_select(m_edit_text_shape, start, end, trail);
+					//m_edit_text_end = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);// , m_edit_text_row);
 				}
 				else {
 					// クリックした状態に遷移する.
@@ -1408,7 +1423,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 作図ツールが選択ツール以外.
 			else {
-				unselect_shape_all();
 				// 頂点をくっつける閾値がゼロより大きいか判定する.
 				if (m_snap_point >= FLT_MIN) {
 					const bool boxed = (
@@ -1431,17 +1445,19 @@ namespace winrt::GraphPaper::implementation
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
 					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
 				}
-
 				// ポインターの現在位置と押された位置の差分を求める.
-				D2D1_POINT_2F pos;	// 現在位置への位置ベクトル
-				pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
+				D2D1_POINT_2F p;	// 現在位置への位置ベクトル
+				pt_sub(m_event_pos_curr, m_event_pos_pressed, p);
 				// 差分の x 値または y 値のいずれかが 1 以上か判定する.
-				if (fabs(pos.x) >= 1.0f || fabs(pos.y) >= 1.0f) {
+				if (fabs(p.x) >= 1.0f || fabs(p.y) >= 1.0f) {
 					if (m_drawing_tool == DRAWING_TOOL::TEXT) {
-						event_finish_creating_text_async(m_event_pos_pressed, pos);
+						event_finish_creating_text_async(m_event_pos_pressed, p);
 						return;
 					}
-					event_finish_creating(m_event_pos_pressed, pos);
+					event_finish_creating(m_event_pos_pressed, p);
+				}
+				else {
+					unselect_shape_all();
 				}
 			}
 		}

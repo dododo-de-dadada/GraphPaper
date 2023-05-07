@@ -243,11 +243,9 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
 		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
-		int m_edit_text_start = -1;
-		int m_edit_text_end = -1;
-		int m_edit_text_row = -1;
-		bool m_edit_text_trail = false;
-		//InputPane m_edit_text_pane{ InputPane::GetForCurrentView() };
+		int m_edit_text_start = 0;
+		int m_edit_text_end = 0;
+		bool m_edit_text_comp = false;	// 変換中
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
@@ -816,7 +814,6 @@ namespace winrt::GraphPaper::implementation
 		// 属性メニューの「線枠の太さ」のサブ項目に印をつける.
 		void stroke_width_is_checked(const float s_width) noexcept;
 
-
 		//-------------------------------
 		// MainPage_summary.cpp
 		// 一覧
@@ -965,7 +962,6 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_ustack_undo.push_back(new UndoInsert(s, s_pos));
 		}
-
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
 		void undo_push_move(const D2D1_POINT_2F pos, const bool any = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
@@ -988,6 +984,26 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
 		// 図形の値の保存を実行して, その操作をスタックに積む.
 		template <UNDO_T U> void undo_push_set(Shape* const s);
+		// 文字列の選択を実行して, その操作をスタックに積む.
+		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
+		{
+			// 文字列の選択の操作が連続するかぎり,
+			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
+			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.
+			for (auto u = m_ustack_undo.rbegin();
+				u != m_ustack_undo.rend() && *u != nullptr &&
+				typeid(*u) == typeid(UndoTextSelect); u++) {
+				if ((*u)->m_shape == s) {
+					ShapeText* t = static_cast<ShapeText*>(s);
+					t->m_select_start = start;
+					t->m_select_end = end;
+					t->m_select_trail = trail;
+					return;
+				}
+			}
+			// そうでなければ, スタックに操作を積む.
+			m_ustack_undo.push_back(new UndoTextSelect(s, start, end, trail));
+		}
 		// データリーダーから操作スタックを読み込む.
 		void undo_read_stack(DataReader const& dt_reader);
 		// データリーダーに操作スタックを書き込む.

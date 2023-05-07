@@ -116,22 +116,27 @@ namespace winrt::GraphPaper::implementation
 		// ŠÜ‚Ü‚ê‚é•ûŒ`‚ª‚Ð‚Æ‚Â‚Å‚à‚ ‚ê‚Î false ‚ð•Ô‚·.
 		D2D1_POINT_2F t_lt{};
 		D2D1_POINT_2F t_rb{};
-		DWRITE_TEXT_RANGE t_range;
-		if (s->get_text_selected(t_range) && t_range.length > 0) {
-			const auto s_text = static_cast<ShapeText*>(s);
-			s_text->create_text_layout();
-			const auto cnt = s_text->m_dwrite_selected_cnt;
-			const auto met = s_text->m_dwrite_selected_metrics;
-			D2D1_POINT_2F start;
-			s->get_pos_start(start);
-			for (auto i = cnt; i > 0; i--) {
-				t_lt.x = start.x + met[i - 1].left;
-				t_lt.y = start.y + met[i - 1].top;
-				t_rb.x = t_lt.x + met[i - 1].width;
-				t_rb.y = t_lt.y + met[i - 1].height;
-				if (pt_in_rect(t_lt, v_lt, v_rb)
-					|| pt_in_rect(t_rb, v_lt, v_rb)) {
-					return false;
+		if (typeid(*s) == typeid(ShapeText)) {
+			ShapeText* t = static_cast<ShapeText*>(s);
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			if (t->m_select_start != end) {
+				//DWRITE_TEXT_RANGE t_range;
+				//if (s->get_text_selected(t_range) && t_range.length > 0) {
+				//const auto s_text = static_cast<ShapeText*>(s);
+				t->create_text_layout();
+				const auto cnt = t->m_dwrite_selected_cnt;
+				const auto met = t->m_dwrite_selected_metrics;
+				D2D1_POINT_2F start;
+				s->get_pos_start(start);
+				for (auto i = cnt; i > 0; i--) {
+					t_lt.x = start.x + met[i - 1].left;
+					t_lt.y = start.y + met[i - 1].top;
+					t_rb.x = t_lt.x + met[i - 1].width;
+					t_rb.y = t_lt.y + met[i - 1].height;
+					if (pt_in_rect(t_lt, v_lt, v_rb)
+						|| pt_in_rect(t_rb, v_lt, v_rb)) {
+						return false;
+					}
 				}
 			}
 		}

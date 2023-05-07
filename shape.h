@@ -276,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 	// 寸法が同じか判定する.
 	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
 	// 文字範囲が同じか判定する.
-	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
+	//inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 方眼の強調が同じか判定する.
 	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
 	// 破線の配置が同じか判定する.
@@ -481,7 +481,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_pad(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字範囲を得る
-		virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
+		//virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
@@ -588,7 +588,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_pad(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字範囲に格納する.
-		virtual bool set_text_selected(const DWRITE_TEXT_RANGE/*val*/) noexcept { return false; }
+		//virtual bool set_text_selected(const DWRITE_TEXT_RANGE/*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const&/*dt_writer*/) const {}
 	};
@@ -1786,12 +1786,14 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
-		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
+		//DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
-		int m_hit_position = 0;
-		bool m_hit_trailing = false;
+		int m_select_start = 0;
+		int m_select_end = 0;
+		bool m_select_trail = false;
 
 		DWRITE_FONT_METRICS m_dwrite_font_metrics{};	// 書体の計量
+		UINT32 m_dwrite_line_cnt = 0;	// 行数
 		DWRITE_LINE_METRICS* m_dwrite_line_metrics = nullptr;	// 行の計量
 		UINT32 m_dwrite_selected_cnt = 0;	// 選択された文字範囲の計量の要素数
 		DWRITE_HIT_TEST_METRICS* m_dwrite_selected_metrics = nullptr;	// 選択された文字範囲の計量
@@ -1864,19 +1866,25 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の余白を得る.
 		bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
 		// 選択された文字範囲を得る.
-		bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
+		//bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
 		int get_text_len(void) const noexcept
 		{
 			return wchar_len(m_text);
 		}
-		void get_text_caret(const uint32_t tp, const uint32_t r, const bool is_trailing, D2D1_POINT_2F& cp) const noexcept
+		void get_text_caret(const uint32_t tp, const uint32_t r, const bool is_trailing, D2D1_POINT_2F& car) const noexcept
 		{
+			// 文字列れアウトの左上点を得る.
+			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
+			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
+			// 文字列が空なら左上点をキャレット点の格納する.
+			if (m_dwrite_test_cnt == 0) {
+				car.x = tx;
+				car.y = ty;
+				return;
+			}
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
 				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
-			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
-			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
-
 			const auto tt = m_dwrite_test_metrics[r].top;
 			const auto bl = m_dwrite_line_metrics[r].baseline;
 			const auto s = m_dwrite_test_metrics[r].textPosition;
@@ -1885,18 +1893,32 @@ namespace winrt::GraphPaper::implementation
 				DWRITE_HIT_TEST_METRICS tm{};
 				FLOAT x, y;
 				m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
-				cp.x = tx + x;
-				cp.y = ty + tt + bl + descent - m_font_size;
+				car.x = tx + x;
+				car.y = ty + tt + bl + descent - m_font_size;
 				return;
 			}
 			const auto tl = m_dwrite_test_metrics[r].left;
 			const auto tw = m_dwrite_test_metrics[r].width;
-			cp.x = tx + tl + tw;
-			cp.y = ty + tt + bl + descent - m_font_size;
+			car.x = tx + tl + tw;
+			car.y = ty + tt + bl + descent - m_font_size;
 		}
 
+		int get_text_row(int t) const noexcept
+		{
+			if (m_dwrite_test_cnt <= 0) {
+				return 0;
+			}
+			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
+				const auto start = m_dwrite_test_metrics[i].textPosition;
+				const auto end = start + m_dwrite_test_metrics[i].length;
+				if (start <= t && t < end) {
+					return i;
+				}
+			}
+			return m_dwrite_test_cnt - 1;
+		}
 		// 指定した点の
-		int get_text_pos(const D2D1_POINT_2F p, bool& is_trailing, int& row) const noexcept
+		int get_text_pos(const D2D1_POINT_2F p, bool& is_trailing) const//, int& row) const noexcept
 		{
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
@@ -1908,7 +1930,7 @@ namespace winrt::GraphPaper::implementation
 			const float py = p.y - ty;
 			if (py < m_dwrite_test_metrics[0].top) {
 				is_trailing = false;
-				row = 0;
+				//row = 0;
 				return 0;
 			}
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -1921,7 +1943,7 @@ namespace winrt::GraphPaper::implementation
 					// 行の文字数がゼロなら
 					if (s == e) {
 						is_trailing = false;
-						row = i;
+						//row = i;
 						return s;
 					}
 					// 行の文字数が 1 以上なら
@@ -1930,14 +1952,14 @@ namespace winrt::GraphPaper::implementation
 						DWRITE_HIT_TEST_METRICS tm{};
 						FLOAT x, y;
 						m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &tm);
-						if (px <= x + tm.width * 0.5f) {
+						if (px < x + tm.width * 0.5f) {
 							is_trailing = false;
-							row = i;
+							//row = i;
 							return j;
 						}
 					}
 					is_trailing = true;
-					row = i;
+					//row = i;
 					return e - 1;
 				}
 			}
@@ -1946,11 +1968,11 @@ namespace winrt::GraphPaper::implementation
 			const auto e = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].length;
 			if (s == e) {
 				is_trailing = false;
-				row = m_dwrite_test_cnt - 1;
+				//row = m_dwrite_test_cnt - 1;
 				return s;
 			}
 			is_trailing = true;
-			row = m_dwrite_test_cnt - 1;
+			//row = m_dwrite_test_cnt - 1;
 			return e - 1;
 		}
 		// 図形が点を含むか判定する.
@@ -1988,7 +2010,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列の余白に格納する.
 		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
 		// 値を文字範囲に格納する.
-		virtual bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
+		//virtual bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* prop);
 		// 図形をデータリーダーから読み込む.
@@ -2141,10 +2163,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字範囲が同じか判定する.
-	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
-	{
-		return a.startPosition == b.startPosition && a.length == b.length;
-	}
+	//inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
+	//{
+	//	return a.startPosition == b.startPosition && a.length == b.length;
+	//}
 
 	// 単精度浮動小数が同じか判定する.
 	inline bool equal(const float a, const float b) noexcept

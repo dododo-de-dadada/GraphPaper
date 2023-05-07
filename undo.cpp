@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(Shape* s, wchar_t* const& val);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
-	template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(Shape* s, const DWRITE_TEXT_RANGE& val);
+	//template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(Shape* s, const DWRITE_TEXT_RANGE& val);
 
 	template <UNDO_T U> 
 	UndoValue<U>::UndoValue(DataReader const& dt_reader) :
@@ -266,9 +266,10 @@ namespace winrt::GraphPaper::implementation
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else if constexpr (
-			U == UNDO_T::GRID_EMPH ||
-			U == UNDO_T::TEXT_RANGE) {
-			m_value = U_TYPE<U>::type{
+			//U == UNDO_T::GRID_EMPH ||
+			//U == UNDO_T::TEXT_RANGE) {
+			U == UNDO_T::GRID_EMPH) {
+				m_value = U_TYPE<U>::type{
 				dt_reader.ReadUInt32(),
 				dt_reader.ReadUInt32()
 			};
@@ -327,7 +328,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
+	//template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
 
 	// 図形の属性値に値を格納する.
 	template <UNDO_T U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val) noexcept
@@ -524,10 +525,10 @@ namespace winrt::GraphPaper::implementation
 		s->set_text_pad(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val) noexcept
-	{
-		s->set_text_selected(val);
-	}
+	//void UndoValue<UNDO_T::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val) noexcept
+	//{
+	//	s->set_text_selected(val);
+	//}
 
 	template <UNDO_T U> bool UndoValue<U>::GET(const Shape* s, U_TYPE<U>::type& val) noexcept
 	{
@@ -724,10 +725,10 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text_pad(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& val) noexcept
-	{
-		return s->get_text_selected(val);
-	}
+	//bool UndoValue<UNDO_T::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& val) noexcept
+	//{
+	//	return s->get_text_selected(val);
+	//}
 
 	// 図形の値の操作をデータライターに書き込む.
 	template <UNDO_T U> void UndoValue<U>::write(DataWriter const& dt_writer) const
@@ -807,10 +808,10 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(m_value.m_gauge_1);
 			dt_writer.WriteUInt32(m_value.m_gauge_2);
 		}
-		else if constexpr (U == UNDO_T::TEXT_RANGE) {
-			dt_writer.WriteUInt32(m_value.startPosition);
-			dt_writer.WriteUInt32(m_value.length);
-		}
+		//else if constexpr (U == UNDO_T::TEXT_RANGE) {
+		//	dt_writer.WriteUInt32(m_value.startPosition);
+		//	dt_writer.WriteUInt32(m_value.length);
+		//}
 		else if constexpr (U == UNDO_T::MOVE) {
 			dt_writer.WriteSingle(m_value.x);
 			dt_writer.WriteSingle(m_value.y);
@@ -994,6 +995,14 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape, dt_writer);
 	}
 
+	UndoTextSelect::UndoTextSelect(DataReader const& dt_reader) :
+		Undo(undo_read_shape(dt_reader))
+	{
+		m_start = dt_reader.ReadInt32();
+		m_end = dt_reader.ReadInt32();
+		m_is_trail = dt_reader.ReadBoolean();
+	}
+
 	UndoText::UndoText(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_flag(dt_reader.ReadBoolean()),
@@ -1006,6 +1015,15 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(m_text), 2 * m_len));
 			m_text[m_len] = L'\0';
 		}
+	}
+
+	void UndoTextSelect::write(DataWriter const& dt_writer) const
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::TEXT_SELECT));
+		undo_write_shape(m_shape, dt_writer);
+		dt_writer.WriteInt32(static_cast<int32_t>(m_start));
+		dt_writer.WriteInt32(static_cast<int32_t>(m_end));
+		dt_writer.WriteBoolean(m_is_trail);
 	}
 
 	void UndoText::write(DataWriter const& dt_writer) const

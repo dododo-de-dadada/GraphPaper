@@ -359,18 +359,28 @@ namespace winrt::GraphPaper::implementation
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				DWRITE_TEXT_RANGE t_range;
-				if (!s->get_text_selected(t_range)) {
+				if (typeid(*s) != typeid(ShapeText)) {
 					continue;
 				}
+				const ShapeText* st = static_cast<ShapeText*>(s);
+				const auto end = st->m_select_trail ? st->m_select_end + 1 : st->m_select_end;
+				const auto ss = min(st->m_select_start, end);
+				const auto se = min(st->m_select_start, end);
+				//DWRITE_TEXT_RANGE t_range;
+				//if (!s->get_text_selected(t_range)) {
+				//	continue;
+				//}
 				if (t == nullptr) {
-					if (t_range.length == 0 && t_range.startPosition == 0) {
-						continue;
+					if (ss == se && ss == 0) {
+					//if (t_range.length == 0 && t_range.startPosition == 0) {
+							continue;
 					}
 					// 文字範囲が選択された図形の, 文字範囲より後ろの文字列を検索する.
 					t = static_cast<ShapeText*>(s);
-					t_pos = t_range.startPosition;
-					const auto t_end = t_pos + t_range.length;
+					//t_pos = t_range.startPosition;
+					t_pos = ss;
+					//const auto t_end = t_pos + t_range.length;
+					const auto t_end = se;
 					uint32_t f_pos;
 					if (find_text(t->m_text + t_end, wchar_len(t->m_text) - t_end, f_text, f_len, f_case, f_pos)) {
 						// 文字範囲より後ろの文字列の中で見つかった場合
@@ -469,10 +479,16 @@ namespace winrt::GraphPaper::implementation
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				if (!s->get_text_selected(t_range)) {
+				if (typeid(*s) != typeid(ShapeText)) {
 					continue;
 				}
-				if (t_range.startPosition > 0 || t_range.length > 0) {
+				//if (!s->get_text_selected(t_range)) {
+				//	continue;
+				//}
+				ShapeText* t = static_cast<ShapeText*>(s);
+				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+				if (end > 0 || t->m_select_start != end) {
+				//if (t_range.startPosition > 0 || t_range.length > 0) {
 					return static_cast<ShapeText*>(s);
 				}
 			}
@@ -606,6 +622,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				if (done2) {
+					undo_push_text_select(t, w_pos, w_pos, false);
 					undo_push_set<UNDO_T::TEXT_CONTENT>(t, w_text);
 				}
 			}
@@ -643,11 +660,13 @@ namespace winrt::GraphPaper::implementation
 				//const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
 				//undo_push_set<UNDO_T::TEXT_CONTENT>(t, r_text);
 				undo_push_null();
-				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos + r_len, f_len });
+				//undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos + r_len, f_len });
 				if (f_len > 0) {
+					undo_push_text_select(t, w_pos, w_pos, false);
 					m_ustack_undo.push_back(new UndoText(t, w_pos, f_len));
 				}
 				if (r_len > 0) {
+					undo_push_text_select(t, w_pos, w_pos + r_len, false);
 					m_ustack_undo.push_back(new UndoText(t, w_pos, m_find_repl));
 				}
 				if (f_len > 0 || r_len > 0) {
@@ -662,9 +681,13 @@ namespace winrt::GraphPaper::implementation
 			// 検索できたならば,
 			// 文字範囲が選択された図形があり, それが次の図形と異なるか判定する.
 			if (t != nullptr && s != t) {
-				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				undo_push_text_select(t, 0, 0, false);
+				//undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			const auto start = s_range.startPosition;
+			const auto end = start + s_range.length;
+			undo_push_text_select(s, start, end, false);
+			//undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -717,9 +740,13 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				undo_push_text_select(t, 0, 0, false);
+				//undo_push_set<UNDO_T::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
+			const auto start = s_range.startPosition;
+			const auto end = start + s_range.length;
+			undo_push_text_select(s, start, end, false);
+			//undo_push_set<UNDO_T::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			main_draw();
 		}

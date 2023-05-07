@@ -45,10 +45,12 @@ namespace winrt::GraphPaper::implementation
 			tx_edit_text().SelectAll();
 			ck_fit_text_frame().IsChecked(m_fit_text_frame);
 			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				const auto len = tx_edit_text().Text().size();
+				undo_push_null();
+				undo_push_text_select(s, len, len, false);
 				undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
 				m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 				if (m_fit_text_frame) {
-					undo_push_null();
 					undo_push_position(s, LOC_TYPE::LOC_SE);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}

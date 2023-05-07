@@ -571,7 +571,7 @@
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 		<!-- メニューバー -->
-		<muxc:MenuBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
+		<muxc:MenuBar x:Name="mb_menu" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
 			<!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
 				<!-- 新規 -->
