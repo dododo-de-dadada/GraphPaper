@@ -120,14 +120,17 @@ namespace winrt::GraphPaper::implementation
 		if (text_lay == nullptr) {
 			return E_FAIL;
 		}
+		const DWRITE_TEXT_ALIGNMENT alig_horz = text_lay->GetTextAlignment();
+		const DWRITE_PARAGRAPH_ALIGNMENT alig_vert = text_lay->GetParagraphAlignment();
 		HRESULT hr = S_OK;
+		// 行の計量を作成する.
+		text_lay->GetLineMetrics(nullptr, 0, &line_cnt);
+		line_met = new DWRITE_LINE_METRICS[line_cnt];
+		hr = text_lay->GetLineMetrics(line_met, line_cnt, &line_cnt);
 		// ヒットテストの計量を作成する.
-		hr = text_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
 		if (hr == S_OK) {
-			// 行の計量を作成する.
-			text_lay->GetLineMetrics(nullptr, 0, &line_cnt);
-			line_met = new DWRITE_LINE_METRICS[line_cnt];
-			hr = text_lay->GetLineMetrics(line_met, line_cnt, &line_cnt);
+			test_met = new DWRITE_HIT_TEST_METRICS[line_cnt];
+			hr = text_lay->HitTestTextRange(0, text_len, 0.0f, 0.0f, test_met, line_cnt, &test_cnt);
 		}
 		// 選択された文字範囲の計量を作成する.
 		if (sele_rng.length > 0) {
@@ -177,6 +180,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
 		HRESULT hr = S_OK;
+		bool updated = false;
 
 		// 新規作成
 		// 文字列レイアウトが空か判定する.
@@ -198,8 +202,8 @@ namespace winrt::GraphPaper::implementation
 				const double text_h = std::fabs(m_pos.y) - 2.0 * m_text_pad.height;
 				const FLOAT max_w = static_cast<FLOAT>(max(text_w, 0.0));
 				const FLOAT max_h = static_cast<FLOAT>(max(text_h, 0.0));
-				if (text_len == 0) {
-					hr = dwrite_factory->CreateTextLayout(L"\r", 1, t_format.get(), max_w, max_h, m_dwrite_text_layout.put());
+				if (m_text == nullptr) {
+					hr = dwrite_factory->CreateTextLayout(L"", 0, t_format.get(), max_w, max_h, m_dwrite_text_layout.put());
 				}
 				else {
 					hr = dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), max_w, max_h, m_dwrite_text_layout.put());
@@ -248,9 +252,6 @@ namespace winrt::GraphPaper::implementation
 				hr = text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 			}
 			if (m_text_line_sp >= FLT_MIN) {
-				//if (hr == S_OK && m_dwrite_font_metrics.designUnitsPerEm == 0) {
-				//	hr = text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
-				//}
 				new_sp.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
 				new_sp.height = m_font_size + m_text_line_sp;
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
@@ -271,47 +272,29 @@ namespace winrt::GraphPaper::implementation
 				hr = t3->SetLineSpacing(&new_sp);
 			}
 			t3 = nullptr;
-			// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
-			relese_metrics();
 			if (hr == S_OK) {
-				const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-				const auto s = min(m_select_start, end);
-				const auto e = max(m_select_start, end);
-				DWRITE_TEXT_RANGE ran{
-					static_cast<uint32_t>(s), static_cast<uint32_t>(e - s)
-				};
-				hr = text_create_text_metrics(
-					m_dwrite_text_layout.get(), wchar_len(m_text),
-					m_dwrite_test_cnt, m_dwrite_test_metrics,
-					m_dwrite_line_cnt, m_dwrite_line_metrics,
-					m_dwrite_selected_cnt, m_dwrite_selected_metrics,
-					ran);
-				//if (text_len > 0 && m_text[text_len - 1] == L'\r') {
-				//	m_
-				//}
+				updated = true;
 			}
 		}
 
 		// 変更.
 		else {
-			bool updated = false;
 
 			winrt::com_ptr<IDWriteTextLayout3> t3;
 			if (!m_dwrite_text_layout.try_as(t3)) {
 				hr = E_FAIL;
 			}
-			const UINT32 n_size = t3->GetFontFamilyNameLength() + 1;
-			std::vector<WCHAR> f_family(n_size);
-			const uint32_t text_len = wchar_len(m_text);
-			DWRITE_TEXT_RANGE range{ 0, text_len };
-			if (hr == S_OK) {
-				hr = t3->GetFontFamilyName(f_family.data(), n_size);
-			}
+			const DWRITE_TEXT_RANGE range{ 0, wchar_t(m_text) };
 			// 書体名が変更されたなら文字列レイアウトに格納する.
+			const UINT32 name_len = t3->GetFontFamilyNameLength();
+			std::vector<WCHAR> f_family(name_len + 1);
+			if (hr == S_OK) {
+				hr = t3->GetFontFamilyName(f_family.data(), name_len + 1);
+			}
 			if (hr == S_OK && wcscmp(f_family.data(), m_font_family) != 0) {
 				hr = t3->SetFontFamilyName(m_font_family, range);
 				if (hr == S_OK) {
-					text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
+					hr = text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 				}
 				if (hr == S_OK) {
 					updated = true;
@@ -323,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 			// 書体の大きさが変更されたなら文字列レイアウトに格納する.
 			FLOAT f_size = 0.0f;
 			if (hr == S_OK) {
-				hr = t3->GetFontSize(0, &f_size, &range);
+				hr = t3->GetFontSize(0, &f_size);
 			}
 			if (hr == S_OK && !equal(f_size, m_font_size)) {
 				hr = t3->SetFontSize(m_font_size, range);
@@ -335,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 			// 書体の幅が変更されたなら文字列レイアウトに格納する.
 			DWRITE_FONT_STRETCH f_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED;
 			if (hr == S_OK) {
-				hr = t3->GetFontStretch(0, &f_stretch, &range);
+				hr = t3->GetFontStretch(0, &f_stretch);
 			}
 			if (hr == S_OK && !equal(f_stretch, m_font_stretch)) {
 				hr = t3->SetFontStretch(m_font_stretch, range);
@@ -347,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 			// 書体の字体が変更されたなら文字列レイアウトに格納する.
 			DWRITE_FONT_STYLE f_style = static_cast<DWRITE_FONT_STYLE>(-1);
 			if (hr == S_OK) {
-				hr = t3->GetFontStyle(0, &f_style, &range);
+				hr = t3->GetFontStyle(0, &f_style);
 			}
 			if (hr == S_OK && !equal(f_style, m_font_style)) {
 				hr = t3->SetFontStyle(m_font_style, range);
@@ -359,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 			// 書体の太さが変更されたなら文字列レイアウトに格納する.
 			DWRITE_FONT_WEIGHT f_weight = static_cast<DWRITE_FONT_WEIGHT>(-1);
 			if (hr == S_OK) {
-				hr = t3->GetFontWeight(0, &f_weight, &range);
+				hr = t3->GetFontWeight(0, &f_weight);
 			}
 			if (hr == S_OK && !equal(f_weight, m_font_weight)) {
 				hr = t3->SetFontWeight(m_font_weight, range);
@@ -409,10 +392,6 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 行間が変更されたなら文字列レイアウトに格納する.
-			DWRITE_LINE_SPACING old_sp{};
-			if (hr == S_OK) {
-				hr = t3->GetLineSpacing(&old_sp);
-			}
 			DWRITE_LINE_SPACING new_sp;
 			new_sp.leadingBefore = 0.0f;
 			new_sp.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
@@ -437,6 +416,10 @@ namespace winrt::GraphPaper::implementation
 				new_sp.height = 0.0f;
 				new_sp.baseline = 0.0f;
 			}
+			DWRITE_LINE_SPACING old_sp{};
+			if (hr == S_OK) {
+				hr = t3->GetLineSpacing(&old_sp);
+			}
 			if (hr == S_OK && (!equal(old_sp.baseline, new_sp.baseline) ||
 				old_sp.fontLineGapUsage != new_sp.fontLineGapUsage ||
 				!equal(old_sp.height, new_sp.height) ||
@@ -447,16 +430,106 @@ namespace winrt::GraphPaper::implementation
 					updated = true;
 				}
 			}
-			// 計量の要素数が 0 なのに選択された文字範囲が 0 でない
-			// または, 選択範囲の長さが, それまでの選択された文字範囲の計量と異なるなら,
-			// 更新フラグをたてる.
-			if (m_dwrite_selected_cnt == 0) {
-				const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-				if (m_select_start != end) {
-				//if (m_text_selected_range.length > 0) {
-					if (!updated) {
-						updated = true;
+		}
+		if (hr == S_OK && updated) {
+			relese_metrics();
+
+			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
+			const auto s = min(m_select_start, end);
+			const auto e = max(m_select_start, end);
+			HRESULT hr = S_OK;
+
+			// 行の計量を作成する.
+			if (hr == S_OK) {
+				m_dwrite_text_layout->GetLineMetrics(nullptr, 0, &m_dwrite_line_cnt);
+				m_dwrite_line_metrics = new DWRITE_LINE_METRICS[m_dwrite_line_cnt];
+				hr = m_dwrite_text_layout->GetLineMetrics(m_dwrite_line_metrics, m_dwrite_line_cnt, &m_dwrite_line_cnt);
+			}
+			// ヒットテストの計量を作成する.
+			if (hr == S_OK) {
+				m_dwrite_test_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_line_cnt];
+				hr = m_dwrite_text_layout->HitTestTextRange(0, wchar_len(m_text), 0.0f, 0.0f, m_dwrite_test_metrics, m_dwrite_line_cnt, &m_dwrite_test_cnt);
+			}
+			// 必要なら, 選択された文字範囲の計量を作成する.
+			if (s < e) {
+				if (hr == S_OK) {
+					m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
+					m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
+					hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
+				}
+			}
+
+			// ヒットテストの計量は文字列の最後尾の改行はトリミングしてしまう.
+			// 必要なら, 行の計量をもとに, トリミングされた計量を補う.
+			if (hr == S_OK && m_dwrite_test_cnt < m_dwrite_line_cnt) {
+				float top;
+				float left;
+				float pos;
+				if (m_dwrite_test_cnt > 0) {
+					top = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].height;
+					pos = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_line_metrics[m_dwrite_test_cnt - 1].length;
+				}
+				else {
+					if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR) {
+						top = fabs(m_pos.y) - 2.0f * m_text_pad.height;
+						if (top < 0.0f) {
+							top = 0.0f;
+						}
+						pos = 0;
+						for (uint32_t i = m_dwrite_line_cnt; i > 0; i--) {
+							top = top - m_dwrite_line_metrics[i - 1].height;
+							pos = pos + m_dwrite_line_metrics[i - 1].length;
+						}
 					}
+					else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER) {
+						pos = 0;
+						float height = 0.0f;
+						for (uint32_t i = 0; i < m_dwrite_line_cnt; i++) {
+							height = height + (i == m_dwrite_line_cnt - 1 ? m_font_size : m_dwrite_line_metrics[i].height);
+							pos = pos + m_dwrite_line_metrics[i].length;
+						}
+						const auto h = m_dwrite_text_layout->GetMaxHeight();
+						top = 0.5 * height;
+					}
+					else {
+						pos = 0;
+						for (uint32_t i = 0; i < m_dwrite_line_cnt; i++) {
+							pos = pos + m_dwrite_line_metrics[i - 1].length;
+						}
+						top = 0.0f;
+					}
+				}
+				if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
+					left = fabs(m_pos.x);
+				}
+				else if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
+					m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
+					left = 0.5f * fabs(m_pos.x);
+				}
+				else {
+					left = 0.0;
+				}
+				for (uint32_t i = m_dwrite_test_cnt; i < m_dwrite_line_cnt; i++) {
+					m_dwrite_test_metrics[i].top = top;
+					m_dwrite_test_metrics[i].width = 0.0f;
+					m_dwrite_test_metrics[i].height = m_dwrite_line_metrics[i].height;
+					m_dwrite_test_metrics[i].left = left;
+					m_dwrite_test_metrics[i].length = m_dwrite_line_metrics[i].length;
+					m_dwrite_test_metrics[i].textPosition = pos;
+					top = top + m_dwrite_line_metrics[i].height;
+					pos = pos + m_dwrite_line_metrics[i].length;
+				}
+				m_dwrite_test_cnt = m_dwrite_line_cnt;
+			}
+		}
+		else if (hr == S_OK) {
+			// 属性値の変更がなくても, 選択された文字範囲が変更されたなら,
+			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
+			const auto s = min(m_select_start, end);
+			const auto e = max(m_select_start, end);
+			if (m_dwrite_selected_cnt == 0) {
+				if (m_select_start != end) {
+					updated = true;
 				}
 			}
 			else {
@@ -464,29 +537,14 @@ namespace winrt::GraphPaper::implementation
 				for (uint32_t i = 0; i < m_dwrite_selected_cnt; i++) {
 					s_len += m_dwrite_selected_metrics[i].length;
 				}
-				const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-				const auto s = min(m_select_start, end);
-				const auto e = max(m_select_start, end);
 				if (m_dwrite_selected_metrics[0].textPosition != s || s_len != e - s) {
-				//if (m_dwrite_selected_metrics[0].textPosition != m_text_selected_range.startPosition || s_len != m_text_selected_range.length) {
-					if (!updated) {
-						updated = true;
-					}
+					updated = true;
 				}
 			}
-			if (hr == S_OK && updated) {
-				const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-				const auto s = min(m_select_start, end);
-				const auto e = max(m_select_start, end);
-				DWRITE_TEXT_RANGE ran{
-					static_cast<uint32_t>(s), static_cast<uint32_t>(e - s)
-				};
-				relese_metrics();
-				text_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_cnt, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, ran);
-				//if (text_len > 0 && m_text[text_len - 1] == L'\r') {
-				//	m_dwrite_test_cnt++;
-				//	DWRITE_TEXT_METRICS *new_metrics = new 
-				//}
+			if (updated) {
+				m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
+				m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
+				hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
 			}
 		}
 	}
@@ -776,16 +834,30 @@ namespace winrt::GraphPaper::implementation
 		//const D2D1_POINT_2F u{
 		//	t.x - lt_x, t.y - lt_y
 		//};
+		float tt = 0.0f;
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const auto tl = m_dwrite_test_metrics[i].left;
 			const auto tw = m_dwrite_test_metrics[i].width;
-			const auto tt = m_dwrite_test_metrics[i].top;
+			tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
 			const D2D1_POINT_2F v{	// 行の左上点
 				lt_x/*tl*/, lt_y + tt + bl + descent - m_font_size
 			};
 			const D2D1_POINT_2F w{	// 行の右下点
 				rb_x/*tl + tw*/, lt_y + tt + bl + descent
+			};
+			if (pt_in_rect(t/*u*/, v, w)) {
+				return LOC_TYPE::LOC_TEXT;
+			}
+		}
+		for (uint32_t i = m_dwrite_test_cnt; i < m_dwrite_line_cnt; i++) {
+			tt += m_dwrite_line_metrics[i].height;
+			const auto bl = m_dwrite_line_metrics[i].baseline;
+			const D2D1_POINT_2F v{	// 行の左上点
+				lt_x, lt_y + tt + bl + descent - m_font_size
+			};
+			const D2D1_POINT_2F w{	// 行の右下点
+				rb_x, lt_y + tt + bl + descent
 			};
 			if (pt_in_rect(t/*u*/, v, w)) {
 				return LOC_TYPE::LOC_TEXT;

@@ -1885,22 +1885,56 @@ namespace winrt::GraphPaper::implementation
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
 				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
-			const auto tt = m_dwrite_test_metrics[r].top;
-			const auto bl = m_dwrite_line_metrics[r].baseline;
-			const auto s = m_dwrite_test_metrics[r].textPosition;
-			const auto e = m_dwrite_test_metrics[r].textPosition + m_dwrite_test_metrics[r].length;
-			if (tp >= s && tp < e) {
-				DWRITE_HIT_TEST_METRICS tm{};
-				FLOAT x, y;
-				m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
-				car.x = tx + x;
+			if (r < m_dwrite_test_cnt) {
+				const auto tt = m_dwrite_test_metrics[r].top;
+				const auto bl = m_dwrite_line_metrics[r].baseline;
+				const auto s = m_dwrite_test_metrics[r].textPosition;
+				const auto e = m_dwrite_test_metrics[r].textPosition + m_dwrite_test_metrics[r].length;
+				if (tp >= s && tp < e) {
+					DWRITE_HIT_TEST_METRICS tm{};
+					FLOAT x, y;
+					m_dwrite_text_layout->HitTestTextPosition(tp, is_trailing, &x, &y, &tm);
+					car.x = tx + x;
+					car.y = ty + tt + bl + descent - m_font_size;
+					return;
+				}
+				const auto tl = m_dwrite_test_metrics[r].left;
+				const auto tw = m_dwrite_test_metrics[r].width;
+				car.x = tx + tl + tw;
 				car.y = ty + tt + bl + descent - m_font_size;
-				return;
 			}
-			const auto tl = m_dwrite_test_metrics[r].left;
-			const auto tw = m_dwrite_test_metrics[r].width;
-			car.x = tx + tl + tw;
-			car.y = ty + tt + bl + descent - m_font_size;
+			else {
+				// テキスト矩形の上辺の位置決め.
+				float tt;
+				if (m_dwrite_test_cnt > 0) {
+					tt = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top;
+				}
+				else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR) {
+					tt = (m_pos.y >= 0.0f ? m_start.y + m_pos.y : m_start.y) - m_text_pad.height - m_font_size;
+				}
+				else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER) {
+					tt = m_start.y + 0.5f * m_pos.y - 0.5f * m_font_size;
+				}
+				else {
+					tt = 0.0f;
+				}
+				for (uint32_t i = m_dwrite_test_cnt; i < r && i < m_dwrite_line_cnt; i++) {
+					tt += m_dwrite_line_metrics[i].height;
+				}
+				const auto bl = m_dwrite_line_metrics[r].baseline;
+				car.y = ty + tt + bl + descent - m_font_size;
+
+				if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING) {
+					car.x = (m_pos.x >= 0.0f ? m_start.x + m_pos.x : m_start.x) - m_text_pad.width;
+				}
+				else if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
+					DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
+					car.x = m_start.x + 0.5f * m_pos.x;
+				}
+				else {
+					car.x = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
+				}
+			}
 		}
 
 		int get_text_row(int t) const noexcept
@@ -1923,6 +1957,10 @@ namespace winrt::GraphPaper::implementation
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 				0.0f :
 				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			if (m_dwrite_text_layout == nullptr) {
+				is_trailing = false;
+				return wchar_len(m_text);
+			}
 			// 図形の開始点を原点とする.
 			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;
 			const float ty = (m_pos.y >= 0.0f ? m_start.y : m_start.y + m_pos.y) + m_text_pad.height;
@@ -1933,13 +1971,16 @@ namespace winrt::GraphPaper::implementation
 				//row = 0;
 				return 0;
 			}
+			float tt = 0.0f;
+			uint32_t s = 0;
+			uint32_t e = 0;
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 				// Y 座標が各行の下端より小さいか判定する.
-				const auto tt = m_dwrite_test_metrics[i].top;
+				tt = m_dwrite_test_metrics[i].top;
+				s = m_dwrite_test_metrics[i].textPosition;
 				const auto bl = m_dwrite_line_metrics[i].baseline;
+				e = m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length;
 				if (py <= tt + bl + descent) {
-					const auto s = m_dwrite_test_metrics[i].textPosition;
-					const auto e = m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length;
 					// 行の文字数がゼロなら
 					if (s == e) {
 						is_trailing = false;
@@ -1964,16 +2005,31 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 最終行の末尾の文字位置を返す.
-			const auto s = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition;
-			const auto e = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].length;
-			if (s == e) {
+			for (uint32_t i = m_dwrite_test_cnt; i < m_dwrite_line_cnt; i++) {
+				tt += m_dwrite_line_metrics[i].height;
+				e += m_dwrite_line_metrics[i].length;
+				const auto bl = m_dwrite_line_metrics[i].baseline;
+				if (py <= tt + bl + descent) {
+					break;
+				}
+			}
+			if (e == 0) {
 				is_trailing = false;
-				//row = m_dwrite_test_cnt - 1;
-				return s;
+				return 0;
 			}
 			is_trailing = true;
-			//row = m_dwrite_test_cnt - 1;
 			return e - 1;
+			// 最終行の末尾の文字位置を返す.
+			//const auto s = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition;
+			//const auto e = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].length;
+			//if (s == e) {
+			//	is_trailing = false;
+				//row = m_dwrite_test_cnt - 1;
+			//	return s;
+			//}
+			//is_trailing = true;
+			//row = m_dwrite_test_cnt - 1;
+			//return e - 1;
 		}
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t) const noexcept final override;

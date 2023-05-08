@@ -357,9 +357,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列選択だけを解除ではない, かつ選択された図形か判定する.
 			if (!t_range_only) {
 				undo_push_select(s);
-				if (!done) {
-					done = true;
-				}
+				done = true;
 			}
 			if (typeid(*s) != typeid(ShapeText)) {
 				continue;
@@ -369,20 +367,6 @@ namespace winrt::GraphPaper::implementation
 				t->m_select_end != 0 ||
 				t->m_select_trail != false) {
 				undo_push_text_select(s, 0, 0, false);
-			}
-			// そもそも文字列選択がない図形か判定する.
-			//DWRITE_TEXT_RANGE d_range;
-			//if (!s->get_text_selected(d_range)) {
-			//	continue;
-			//}
-			// 文字列選択の範囲が { 0, 0 } か判定する.
-			//constexpr DWRITE_TEXT_RANGE zero_ran = DWRITE_TEXT_RANGE{ 0, 0 };
-			//if (equal(zero_ran, d_range)) {
-			//	continue;
-			//}
-			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			//undo_push_set<UNDO_T::TEXT_RANGE>(s, zero_ran);
-			if (!done) {
 				done = true;
 			}
 		}

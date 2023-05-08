@@ -214,6 +214,7 @@ namespace winrt::GraphPaper::implementation
 						m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
 					}
 					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, L"\r"));
+					main_draw();
 				}
 				else if (args.VirtualKey() == VirtualKey::Back) {
 					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
