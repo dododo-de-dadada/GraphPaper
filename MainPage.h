@@ -527,20 +527,24 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の編集と, 検索/置換
 		//-------------------------------
 
+		// 次を検索する.
+		bool find_next(void);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
 		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
-		void find_text_next_click(IInspectable const&, RoutedEventArgs const&);
+		void find_next_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの値を保存する.
 		void find_text_preserve(void);
 		// 検索文字列が変更された.
 		void find_text_what_changed(IInspectable const&, TextChangedEventArgs const&);
+		// 置換して次を検索する.
+		bool replace_and_find(void);
 		// 文字列検索パネルの「すべて置換」ボタンが押された.
-		void replace_text_all_click(IInspectable const&, RoutedEventArgs const&);
+		void replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
-		void replace_text_click(IInspectable const&, RoutedEventArgs const&);
+		void replace_and_find_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//　MainPage_font.cpp
@@ -684,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールバーの値を設定する.
 		void scroll_set(const double aw, const double ah);
 		// 図形が表示されるようパネルをスクロールする.
-		bool scroll_to(Shape* const s);
+		bool scroll_to(const Shape* const s);
 
 		//-------------------------------
 		// MainPage_select.cpp

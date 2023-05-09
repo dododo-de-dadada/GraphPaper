@@ -261,58 +261,37 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			}
 		}
-		else {
+		else if (k_mod == VirtualKeyModifiers::None) {
 			// 上記以外なら,
 			// 図形が選択されてるか判定する.
-			if (!s->is_selected()) {
+			if (s != nullptr && !s->is_selected()) {
 				unselect_shape_all();
 				undo_push_select(s);
 				xcvd_menu_is_enabled();
-				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-					m_edit_text_shape = static_cast<ShapeText*>(s);
-					bool trail;
-					const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-					if (m_edit_text_shape->m_select_start != end ||
-						m_edit_text_shape->m_select_end != end ||
-						m_edit_text_shape->m_select_trail != false) {
-						undo_push_text_select(m_edit_text_shape, end, end, false);
-						main_draw();
-					}
-					//m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);// , m_edit_text_row);
-					//m_edit_text_end = m_edit_text_start;
-					//m_edit_text_trail = false;
-					//const DWRITE_TEXT_RANGE new_ran{ static_cast<UINT32>(m_edit_text_start), 0 };
-					//if (!equal(m_edit_text_shape->m_text_selected_range, new_ran)) {
-					//	undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, new_ran);
-					//}
-				}
-				main_draw();
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_select(s);
 				}
 			}
-			else {
-				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+			if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+				if (m_edit_text_shape != static_cast<ShapeText*>(s)) {
+					if (m_edit_text_shape != nullptr) {
+						m_edit_context.NotifyFocusLeave();
+					}
 					m_edit_text_shape = static_cast<ShapeText*>(s);
 					bool trail;
 					const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-					if (m_edit_text_shape->m_select_start != end ||
-						m_edit_text_shape->m_select_end != end ||
-						m_edit_text_shape->m_select_trail != false) {
-						undo_push_text_select(m_edit_text_shape, end, end, false);
-						main_draw();
-					}
-					//m_edit_text_start = m_edit_text_shape->get_text_pos(m_event_pos_curr, m_edit_text_trail);// , m_edit_text_row);
-					//m_edit_text_end = m_edit_text_start;
-					//m_edit_text_trail = false;
-					//DWRITE_TEXT_RANGE new_ran{ static_cast<UINT32>(m_edit_text_start), 0 };
-					//if (!equal(m_edit_text_shape->m_text_selected_range, new_ran)) {
-					//	undo_push_set<UNDO_T::TEXT_RANGE>(m_edit_text_shape, new_ran);
-					//	main_draw();
-					//}
+					undo_push_text_select(m_edit_text_shape, end, end, false);
+					m_edit_context.NotifyFocusEnter();
 				}
 			}
+			else {
+				if (m_edit_text_shape != nullptr) {
+					m_edit_context.NotifyFocusLeave();
+					m_edit_text_shape = nullptr;
+				}
+			}
+			main_draw();
 			m_event_shape_prev = s;
 		}
 	}

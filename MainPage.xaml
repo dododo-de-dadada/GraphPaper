@@ -1402,9 +1402,9 @@
 				<TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" />
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
-				<Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next" Click="find_text_next_click" Content="Find Next" />
-				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_text_click" Content="Replace" />
-				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_text_all_click" Content="Replace All" />
+				<Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />
+				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_and_find_click" Content="Replace" />
+				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_all_click" Content="Replace All" />
 				<Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close"  Margin="0,0" />
 			</StackPanel>
 		</StackPanel>

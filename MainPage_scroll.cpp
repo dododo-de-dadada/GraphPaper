@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が表示されるよう表示をスクロールする.
 	// s	表示される図形
-	bool MainPage::scroll_to(Shape* const s)
+	bool MainPage::scroll_to(const Shape* const s)
 	{
 		// スクロールビューアのビューポートの座標を, 表示座標で求める.
 		const double ox = m_main_bbox_lt.x;	// 原点 x
@@ -104,49 +104,49 @@ namespace winrt::GraphPaper::implementation
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 表示の幅
 		const double vh = sb_vert().ViewportSize();	// 表示の高さ
-		const D2D1_POINT_2F v_lt{	// 表示の左上位置
+		const D2D1_POINT_2F view_lt{	// 表示矩形の左上位置
 			static_cast<FLOAT>(ox + ho),
 			static_cast<FLOAT>(oy + vo)
 		};
-		const D2D1_POINT_2F v_rb{	// 表示の右下位置
-			static_cast<FLOAT>(v_lt.x + vw),
-			static_cast<FLOAT>(v_lt.y + vh)
+		const D2D1_POINT_2F view_rb{	// 表示矩形の右下位置
+			static_cast<FLOAT>(view_lt.x + vw),
+			static_cast<FLOAT>(view_lt.y + vh)
 		};
-		// テスト行列の方形が, ビューポートに含まれるか判定し,
-		// 含まれる方形がひとつでもあれば false を返す.
-		D2D1_POINT_2F t_lt{};
-		D2D1_POINT_2F t_rb{};
-		if (typeid(*s) == typeid(ShapeText)) {
-			ShapeText* t = static_cast<ShapeText*>(s);
+
+		// 判定される矩形を得る.
+		D2D1_POINT_2F test_lt{};	// 判定される矩形の左上位置
+		D2D1_POINT_2F test_rb{};	// 判定される矩形の右下位置
+		// 表示される図形が編集対象の図形なら, 文字列の選択範囲を判定される矩形に格納する.
+		if (static_cast<const ShapeText*>(s) == m_edit_text_shape) {
+			const ShapeText* t = m_edit_text_shape;
 			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
 			if (t->m_select_start != end) {
+				// 文字列の選択範囲のキャレット点を得て, これを判定する矩形に格納する.
 				D2D1_POINT_2F car_start;
 				D2D1_POINT_2F car_end;
-				
 				t->get_text_caret(t->m_select_start, t->get_text_row(t->m_select_start), false, car_start);
 				t->get_text_caret(t->m_select_end, t->get_text_row(t->m_select_end), t->m_select_trail, car_end);
-				t_lt.x = min(car_start.x, car_end.x);
-				t_lt.y = min(car_start.y, car_end.y);
-				t_rb.x = max(car_start.x, car_end.x);
-				t_rb.y = max(car_start.y, car_end.y) + t->m_font_size;
-				if (pt_in_rect(t_lt, v_lt, v_rb) && pt_in_rect(t_rb, v_lt, v_rb)) {
-					return false;
-				}
+				test_lt.x = min(car_start.x, car_end.x);
+				test_lt.y = min(car_start.y, car_end.y);
+				test_rb.x = max(car_start.x, car_end.x);
+				test_rb.y = max(car_start.y, car_end.y) + t->m_font_size;
 			}
 		}
+		// それ以外なら, 図形の境界矩形を判定される矩形に格納する.
 		else {
-			if (s->is_inside(v_lt, v_rb)) {
-				return false;
-			}
-			s->get_bbox(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, t_lt, t_rb);
+			s->get_bbox(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, test_lt, test_rb);
+		}
+		// 判定される矩形が表示矩形に含まれているなら false を返す.
+		if (pt_in_rect(test_lt, view_lt, view_rb) && pt_in_rect(test_rb, view_lt, view_rb)) {
+			return false;
 		}
 
-		// 最初の方形の水平位置と垂直位置について, ビューポートの範囲外の場合, スクロールする.
-		if (t_rb.x < v_lt.x || v_rb.x < t_lt.x) {
-			sb_horz().Value(t_lt.x - ox);
+		// 最初の方形の水平位置と垂直位置について, 表示の範囲外の場合, スクロールする.
+		if (test_rb.x < view_lt.x || view_rb.x < test_lt.x) {
+			sb_horz().Value(test_lt.x - ox);
 		}
-		if (t_rb.y < v_lt.y || v_rb.y < t_lt.y) {
-			sb_vert().Value(t_lt.y - oy);
+		if (test_rb.y < view_lt.y || view_rb.y < test_lt.y) {
+			sb_vert().Value(test_lt.y - oy);
 		}
 		return true;
 	}

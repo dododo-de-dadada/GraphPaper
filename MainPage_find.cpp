@@ -13,14 +13,6 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
-	// 文字列の一部を置換する.
-	static wchar_t* find_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
-	// 文字列を検索して見つかった位置を得る.
-	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
-	// 図形リストから, それまで文字範囲が選択されていた図形, 新たに選択される図形を得る.
-	static bool find_text(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
-	// 文字範囲が選択されている図形を見つける.
-	static ShapeText* find_text_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
 	// 文字列を複製する. エスケープ文字列は文字コードに変換する.
 	static wchar_t* find_wchar_cpy(const wchar_t* const s) noexcept;
 	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
@@ -250,428 +242,64 @@ namespace winrt::GraphPaper::implementation
 		return t;
 	}
 
-	// 文字列の一部を置換する.
-	// w_text	置換される前の文字列
-	// f_pos	置換される文字列の開始位置
-	// f_len	置換される文字数
-	// r_text	置換文字列
-	// r_len	置換文字列の文字数
-	// 戻り値	置換された文字列
-	static wchar_t* find_replace(wchar_t const* w_text, const uint32_t f_pos, const uint32_t f_len, wchar_t const* r_text, const uint32_t r_len) noexcept
-	{
-		if (w_text != nullptr) {
-			// 置換される前の文字列の文字数を得る.
-			const uint32_t w_len = wchar_len(w_text);
-			// 置換される文字列の終了位置を得る.
-			const uint32_t f_end = f_pos + f_len;
-			if (f_end <= w_len) {
-				// 終了位置が文字数以下の場合,
-				// 置換された後の文字列の終了位置を得る.
-				const size_t r_end = static_cast<size_t>(f_pos) + static_cast<size_t>(r_len);
-				// 置換された後の文字列の文字数を得る.
-				const size_t n_len = static_cast<size_t>(w_len) + static_cast<size_t>(r_len) - static_cast<size_t>(f_len);
-				// 置換された後の文字列を格納する配列を確保する.
-				wchar_t* const n_text = new wchar_t[n_len + 1];
-				// 開始位置までの文字列を配列に格納する.
-				wcsncpy_s(n_text, n_len + 1, w_text, static_cast<size_t>(f_pos));
-				// 置換文字列を配列に格納する.
-				wcsncpy_s(n_text + f_pos, n_len - f_pos + 1, r_text, r_len);
-				// 終了位置から後の文字列を配列に格納する.
-				wcsncpy_s(n_text + r_end, n_len - r_end + 1, w_text + f_end, w_len - f_end);
-				// 置換された文字列を返す.
-				return n_text;
-			}
-		}
-		return wchar_cpy(r_text);
-	}
-
-	// 文字列を検索して見つかった位置を得る.
-	// w_text	検索される文字列
-	// w_len	検索される文字列の文字数
-	// w_pos	検索を開始する位置
-	// f_text	検索文字列
-	// f_len	検索文字列の文字数
-	// f_case	英文字を区別する
-	// f_break	改行を無視する
-	// f_pos	見つかった位置
-	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept
-	{
-		// 検索される文字列が非ヌル, かつ検索文字列が非ヌル, 
-		// かつ検索文字列の文字数がゼロより大きく, 検索される文字列の文字数以下か判定する.
-		if (w_text != nullptr && f_text != nullptr && f_len > 0 && f_len <= w_len) {
-			// 英文字を区別するか判定する.
-			if (f_case) {
-				// 区別するなら,
-				for (uint32_t i = 0; i <= w_len - f_len; i++) {
-					if (wcsncmp(w_text + i, f_text, f_len) == 0) {
-						f_pos = i;
-						return true;
-					}
-				}
-			}
-			else {
-				// 区別しないなら,
-				for (uint32_t i = 0; i <= w_len - f_len; i++) {
-					if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
-						f_pos = i;
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	// 図形リストから, それまで文字範囲が選択されていた図形, 新たに選択される図形を得る.
-	// slist	図形リスト
-	// f_text	検索文字列
-	// f_len	検索文字列の文字数
-	// f_case	英文字を区別する
-	// f_wrap	回り込み検索する
-	// t	それまで文字範囲が選択されていた図形
-	// s_found	新たに選択される図形
-	// s_range	新たに選択される文字範囲
-	static bool find_text(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s_found, DWRITE_TEXT_RANGE& s_range)
-	{
-		const auto f_len = wchar_len(f_text);
-		if (f_len == 0) {
-			return false;
-		}
-		std::list<SHAPE_LIST::iterator> stack;
-		stack.push_back(slist.begin());
-		stack.push_back(slist.end());
-		t = static_cast<ShapeText*>(nullptr);
-		uint32_t t_pos = 0;	// 文字列中の位置
-		while (!stack.empty()) {
-			auto j = stack.back();
-			stack.pop_back();
-			auto i = stack.back();
-			stack.pop_back();
-			while (i != j) {
-				auto s = *i++;
-				if (s == nullptr || s->is_deleted()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					stack.push_back(i);
-					stack.push_back(j);
-					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
-					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
-					continue;
-				}
-				if (typeid(*s) != typeid(ShapeText)) {
-					continue;
-				}
-				const ShapeText* st = static_cast<ShapeText*>(s);
-				const auto end = st->m_select_trail ? st->m_select_end + 1 : st->m_select_end;
-				const auto ss = min(st->m_select_start, end);
-				const auto se = max(st->m_select_start, end);
-				if (se == wchar_len(st->m_text)) {
-
-				}
-				//DWRITE_TEXT_RANGE t_range;
-				//if (!s->get_text_selected(t_range)) {
-				//	continue;
-				//}
-				if (t == nullptr) {
-					// 文字範囲が選択された図形の, 文字範囲より後ろの文字列を検索する.
-					t = static_cast<ShapeText*>(s);
-					t_pos = ss;
-					const auto t_end = se;
-					uint32_t f_pos;
-					if (find_text(t->m_text + t_end, wchar_len(t->m_text) - t_end, f_text, f_len, f_case, f_pos)) {
-						// 文字範囲より後ろの文字列の中で見つかった場合
-						s_found = s;
-						s_range.startPosition = t_end + f_pos;
-						s_range.length = f_len;
-						return true;
-					}
-					continue;
-				}
-				uint32_t f_pos;
-				const auto t_text = static_cast<ShapeText*>(s)->m_text;
-				if (find_text(t_text, wchar_len(t_text), f_text, f_len, f_case, f_pos)) {
-					s_found = s;
-					s_range.startPosition = f_pos;
-					s_range.length = f_len;
-					return true;
-				}
-			}
-		}
-		// 回り込み検索がない, かつ文字範囲が選択された図形が見つかったか判定する.
-		if (!f_wrap && t != nullptr) {
-			return false;
-		}
-		stack.push_back(slist.begin());
-		stack.push_back(slist.end());
-		while (!stack.empty()) {
-			auto j = stack.back();
-			stack.pop_back();
-			auto i = stack.back();
-			stack.pop_back();
-			while (i != j) {
-				auto s = *i++;
-				if (s == nullptr || s->is_deleted()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					stack.push_back(i);
-					stack.push_back(j);
-					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
-					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
-					continue;
-				}
-				if (typeid(*s) != typeid(ShapeText)) {
-					continue;
-				}
-				if (s == t) {
-					uint32_t f_pos;
-					const auto t_text = static_cast<ShapeText*>(s)->m_text;
-					if (t_pos != 0 && find_text(t_text, t_pos, f_text, f_len, f_case, f_pos)) {
-						s_found = s;
-						s_range.startPosition = f_pos;
-						s_range.length = f_len;
-						return true;
-					}
-					return false;
-				}
-				uint32_t f_pos;
-				const auto t_text = static_cast<ShapeText*>(s)->m_text;
-				if (find_text(t_text, wchar_len(t_text), f_text, f_len, f_case, f_pos)) {
-					s_found = s;
-					s_range.startPosition = f_pos;
-					s_range.length = f_len;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	// 文字範囲が選択されている図形を見つける.
-	// it_beg	最初の列挙子
-	// it_end	最後の列挙子 (の次）
-	// t_range	見つかった文字範囲
-	// 戻り値	見つかった文字列図形
-	static ShapeText* find_text_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range)
-	{
-		std::list<SHAPE_LIST::iterator> stack;
-		stack.push_back(it_beg);
-		stack.push_back(it_end);
-		while (!stack.empty()) {
-			auto j = stack.back();
-			stack.pop_back();
-			auto i = stack.back();
-			stack.pop_back();
-			while (i != j) {
-				auto k = i;
-				auto s = *i++;
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					stack.push_back(i);
-					stack.push_back(j);
-					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
-					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
-					continue;
-				}
-				if (typeid(*s) != typeid(ShapeText)) {
-					continue;
-				}
-				//if (!s->get_text_selected(t_range)) {
-				//	continue;
-				//}
-				ShapeText* t = static_cast<ShapeText*>(s);
-				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-				if (end > 0 || t->m_select_start != end) {
-					const auto s = min(t->m_select_start, end);
-					const auto e = max(t->m_select_start, end);
-					t_range.startPosition = s;
-					t_range.length = e - s;
-					return t;
-				}
-			}
-		}
-		return static_cast<ShapeText*>(nullptr);
-	}
-
-	// 図形が持つ文字列を編集する.
-	// s	文字列図形
-	/*
-	IAsyncAction MainPage::edit_text_async(ShapeText* s)
-	{
-		static winrt::event_token primary_token;
-		static winrt::event_token closed_token;
-
-		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
-		tx_edit_text().SelectAll();
-		ck_fit_text_frame().IsChecked(m_fit_text_frame);
-		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-			auto text = wchar_cpy(tx_edit_text().Text().c_str());
-			undo_push_set<UNDO_T::TEXT_CONTENT>(s, text);
-			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
-			if (m_fit_text_frame) {
-				undo_push_position(s, LOC_TYPE::LOC_SE);
-				s->fit_frame_to_text(m_main_page.m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
-			}
-			undo_push_null();
-			xcvd_menu_is_enabled();
-			main_draw();
-		}
-	}
-	*/
-
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
-	void MainPage::replace_text_all_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
-		// 検索文字列の文字数を得る.
-		const uint32_t f_len = wchar_len(m_find_text);
-		if (f_len == 0) {
-			// 文字数が 0 の場合,
+		const auto find_len = wchar_len(m_find_text);
+		if (find_len == 0) {
 			return;
 		}
 		undo_push_null();
-		for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend(); it++) {
-			if ((*it)->is_deleted() || typeid(*it) != typeid(ShapeText)) {
-				continue;
-			}
-			ShapeText* t = static_cast<ShapeText*>(*it);
-			const auto t_len = wchar_len(t->m_text);
-			for (uint32_t i = 0; i + f_len <= t_len; i++) {
-
-			}
-		}
-
-		// あらかじめ検索文字列を含む文字列図形があるか判定する.
-		bool done = false;
-		std::list <SHAPE_LIST::iterator> it_stack;
-		it_stack.push_back(m_main_page.m_shape_list.begin());
-		it_stack.push_back(m_main_page.m_shape_list.end());
-		while (!it_stack.empty()) {
-			SHAPE_LIST::iterator j = it_stack.back();
-			it_stack.pop_back();
-			SHAPE_LIST::iterator i = it_stack.back();
-			it_stack.pop_back();
-			while (i != j) {
-				auto s = *i++;
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					it_stack.push_back(i);
-					it_stack.push_back(j);
-					ShapeGroup* g = static_cast<ShapeGroup*>(s);
-					i = g->m_list_grouped.begin();
-					j = g->m_list_grouped.end();
-					continue;
-				}
-				wchar_t* w_text;
-				if (!s->get_text_content(w_text)) {
-					continue;
-				}
-				uint32_t f_pos = 0;
-				if (find_text(w_text, wchar_len(w_text), m_find_text, f_len, m_find_text_case, f_pos)) {
-					if (!done) {
-						done = true;
-					}
-					break;
-				}
-			}
-		}
-		it_stack.clear();
-		if (!done) {
-			// 図形がない場合,
-			// 「文字列は見つかりません」メッセージダイアログを表示する.
-			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-			return;
-		}
-		// 文字範囲の選択のみを解除する.
-		unselect_shape_all(true);
-
-		const uint32_t r_len = wchar_len(m_find_repl);
-		it_stack.push_back(m_main_page.m_shape_list.begin());
-		it_stack.push_back(m_main_page.m_shape_list.end());
-		while (!it_stack.empty()) {
-			SHAPE_LIST::iterator j = it_stack.back();
-			it_stack.pop_back();
-			SHAPE_LIST::iterator i = it_stack.back();
-			it_stack.pop_back();
-			while (i != j) {
-				Shape* s = *i++;
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					it_stack.push_back(i);
-					it_stack.push_back(j);
-					ShapeGroup* g = static_cast<ShapeGroup*>(s);
-					i = g->m_list_grouped.begin();
-					j = g->m_list_grouped.end();
-					continue;
-				}
-				else if (typeid(*s) != typeid(ShapeText)) {
-					continue;
-				}
-				ShapeText* t = static_cast<ShapeText*>(s); // 検索される文字列図形
-				wchar_t* w_text = wchar_cpy(t->m_text);	// 検索される文字列
-				uint32_t w_len = wchar_len(w_text);// 検索される文字列の文字数
-				uint32_t w_pos = 0;	// 検索される文字列中の位置
-				uint32_t f_pos = 0;
-				bool done2 = false;	// 一致したか判定する.
-				while (find_text(w_text + w_pos, w_len - w_pos, m_find_text, f_len, m_find_text_case, f_pos)) {
-					w_pos += f_pos;
-					wchar_t* t_text = find_replace(w_text, w_pos, f_len, m_find_repl, r_len);
-					delete[] w_text;
-					w_text = t_text;
-					w_len += r_len - f_len;
-					w_pos += r_len;
-					if (!done2) {
-						done2 = true;
-					}
-				}
-				if (done2) {
-					undo_push_text_select(t, w_pos, w_pos, false);
-					undo_push_set<UNDO_T::TEXT_CONTENT>(t, w_text);
-				}
-			}
-		}
-		undo_menu_is_enabled();
+		while (replace_and_find()) {}
 		main_draw();
-		status_bar_set_pos();
+	}
+
+	// 文字列の選択範囲があれば置換し, 次の一致を検索する.
+	// 選択範囲がなければ置換せず, 次の一致を検索する.
+	// 一致したなら true, そうでなければ false を返す.
+	bool MainPage::replace_and_find(void)
+	{
+		// 編集する図形がなければ検索する.
+		if (m_edit_text_shape != nullptr) {
+			// 編集する図形があっても選択された文字範囲がなければ検索する.
+			const ShapeText* t = m_edit_text_shape;
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			const auto s = min(t->m_select_start, end);
+			const auto e = max(t->m_select_start, end);
+			if (s < e) {
+				// 編集する図形があって選択された文字範囲があるなら置換する.
+				const auto repl_len = wchar_len(m_find_repl);
+				undo_push_select(m_edit_text_shape);
+				undo_push_text_select(m_edit_text_shape, s + repl_len, s + repl_len, false);
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, m_find_repl));
+				m_edit_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
+			}
+		}
+		// 次の文字列を検索する.
+		return find_next();
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
-	void MainPage::replace_text_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::replace_and_find_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
-		const auto f_len = wchar_len(m_find_text);
-		if (f_len == 0) {
+		const auto find_len = wchar_len(m_find_text);
+		if (find_len == 0) {
 			return;
 		}
-		if (m_edit_text_shape == nullptr) {
-			for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend(); it++) {
-				if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
-					continue;
-				}
-				m_edit_text_shape = static_cast<ShapeText*>(*it);
-				undo_push_text_select(m_edit_text_shape, 0, 0, false);
-				find_text_next_click(nullptr, nullptr);
-				return;
-			}
-			return;
-		}
-		ShapeText* t = m_edit_text_shape;
-		const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-		const auto s = min(t->m_select_start, end);
-		const auto e = max(t->m_select_start, end);
 		undo_push_null();
-		unselect_shape_all();
-		undo_push_text_select(t, s, s, false);
-		m_ustack_undo.push_back(new UndoText(t, s, e - s));
-		m_ustack_undo.push_back(new UndoText(t, s, m_find_repl));
-		find_text_next_click(nullptr, nullptr);
+		if (replace_and_find()) {
+			scroll_to(m_edit_text_shape);
+			main_draw();
+		}
+		else {
+			main_draw();
+			// 「文字列は見つかりません」メッセージダイアログを表示する.
+			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+			status_bar_set_pos();
+		}
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
@@ -704,112 +332,106 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	// 文字列検索パネルの「次を検索」ボタンが押された.
-	void MainPage::find_text_next_click(IInspectable const&, RoutedEventArgs const&)
+	bool MainPage::find_next(void)
 	{
-		bool found = false;
-		find_text_preserve();
-		const auto f_len = wchar_len(m_find_text);
-		if (f_len > 0) {
-			for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend(); it++) {
-				// 検索を始める図形 s を得る.
+		const auto find_len = wchar_len(m_find_text);
+		// 最後面から最前面の各文字列図形について.
+		for (auto it = m_main_page.m_shape_list.begin(); it != m_main_page.m_shape_list.end(); it++) {
+			// 編集対象の図形があるならその図形. なければ最後面にある文字列図形 s を得る.
+			if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
+				continue;
+			}
+			if (m_edit_text_shape != nullptr && m_edit_text_shape != *it) {
+				continue;
+			}
+			Shape* s = *it;
+			// 図形 s から最前面までの各文字列図形について
+			for (; it != m_main_page.m_shape_list.end(); it++) {
 				if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
 					continue;
 				}
-				if (m_edit_text_shape != nullptr && m_edit_text_shape != *it) {
-					continue;
-				}
-				Shape* s = *it;
-				// 検索を始める図形 s からリストの最後までの各図形について
-				for (; it != m_main_page.m_shape_list.rend(); it++) {
-					if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
-						continue;
-					}
-					// 図形のキャレットよりうしろに一致する文字列があるか調べる.
-					ShapeText* t = static_cast<ShapeText*>(*it);
-					const auto t_len = wchar_len(t->m_text);
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto e = max(t->m_select_start, end);
-					for (uint32_t i = e; i + f_len < t_len; i++) {
-						int cmp;
-						if (m_find_text_case) {
-							cmp = wcsncmp(t->m_text + e, m_find_text, f_len);
-						}
-						else {
-							cmp = _wcsnicmp(t->m_text + e, m_find_text, f_len);
-						}
-						if (cmp== 0) {
-							if (m_edit_text_shape != nullptr) {
-
-							}
-							m_edit_text_shape = t;
-							unselect_shape_all();
-							undo_push_select(t);
-							undo_push_text_select(t, i, i + f_len, false);
-							scroll_to(t);
-							main_draw();
-							return;
-						}
-					}
-				}
-				// 回り込み検索でなければ中断する.
-				if (!m_find_text_wrap) {
-					break;
-				}
-				// リストの先頭に戻って, 検索を始めた図形 s の直前までの図形について,
-				for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend() && *it != s; it++) {
-					if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
-						continue;
-					}
-					ShapeText* t = static_cast<ShapeText*>(*it);
-					const auto t_len = wchar_len(t->m_text);
-					for (uint32_t i = 0; i + f_len < t_len; i++) {
-						int cmp;
-						if (m_find_text_case) {
-							cmp = wcsncmp(t->m_text + i, m_find_text, f_len);
-						}
-						else {
-							cmp = _wcsnicmp(t->m_text + i, m_find_text, f_len);
-						}
-						if (cmp == 0) {
-							m_edit_text_shape = t;
-							unselect_shape_all();
-							undo_push_select(t);
-							undo_push_text_select(t, i, i + f_len, false);
-							scroll_to(t);
-							main_draw();
-							return;
-						}
-					}
-				}
-				// 検索を始めた図形 s について, 図形 s のキャレットより前に一致する文字列があるか調べる.
-				ShapeText* t = static_cast<ShapeText*>(s);
+				// 図形のキャレットよりうしろに一致する文字列があるか調べる.
+				const ShapeText* t = static_cast<ShapeText*>(*it);
+				const auto text_len = wchar_len(t->m_text);
 				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-				const auto e = min(t->m_select_start, end);
-				for (uint32_t i = 0; i + f_len < e; i++) {
-					int cmp;
-					if (m_find_text_case) {
-						cmp = wcsncmp(t->m_text + i, m_find_text, f_len);
-					}
-					else {
-						cmp = _wcsnicmp(t->m_text + i, m_find_text, f_len);
-					}
+				const auto e = max(t->m_select_start, end);
+				for (uint32_t i = e; i + find_len < text_len; i++) {
+					const int cmp = m_find_text_case ?
+						wcsncmp(t->m_text + e, m_find_text, find_len) :
+						_wcsnicmp(t->m_text + e, m_find_text, find_len);
 					if (cmp == 0) {
-						m_edit_text_shape = t;
 						unselect_shape_all();
-						undo_push_select(t);
-						undo_push_text_select(t, i, i + f_len, false);
-						scroll_to(t);
-						main_draw();
-						return;
+						m_edit_text_shape = static_cast<ShapeText*>(*it);
+						undo_push_select(m_edit_text_shape);
+						undo_push_text_select(m_edit_text_shape, i, i + find_len, false);
+						return true;
 					}
 				}
+			}
+			// 回り込み検索でなければ中断する.
+			if (!m_find_text_wrap) {
 				break;
 			}
+			// 最後面の図形に戻って, 検索を始めた図形 s の直前までの各図形について,
+			for (auto it = m_main_page.m_shape_list.begin(); it != m_main_page.m_shape_list.end() && *it != s; it++) {
+				if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
+					continue;
+				}
+				// 図形の文字列の先頭から一致する文字列があるか調べる.
+				const ShapeText* t = static_cast<ShapeText*>(*it);
+				const auto text_len = wchar_len(t->m_text);
+				for (uint32_t i = 0; i + find_len < text_len; i++) {
+					// 一致する文字列があれば,
+					const int cmp = m_find_text_case ?
+						wcsncmp(t->m_text + i, m_find_text, find_len) :
+						_wcsnicmp(t->m_text + i, m_find_text, find_len);
+					if (cmp == 0) {
+						unselect_shape_all();
+						m_edit_text_shape = static_cast<ShapeText*>(*it);
+						undo_push_select(m_edit_text_shape);
+						undo_push_text_select(m_edit_text_shape, i, i + find_len, false);
+						return true;
+					}
+				}
+			}
+			// 検索を始めた図形 s について, 図形 s のキャレットより前に一致する文字列があるか調べる.
+			const ShapeText* t = static_cast<ShapeText*>(s);
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			const auto e = min(t->m_select_start, end);
+			for (uint32_t i = 0; i + find_len < e; i++) {
+				const int cmp = m_find_text_case ?
+					wcsncmp(t->m_text + i, m_find_text, find_len) :
+					_wcsnicmp(t->m_text + i, m_find_text, find_len);
+				if (cmp == 0) {
+					unselect_shape_all();
+					m_edit_text_shape = static_cast<ShapeText*>(*it);
+					undo_push_select(m_edit_text_shape);
+					undo_push_text_select(m_edit_text_shape, i, i + find_len, false);
+					return true;
+				}
+			}
+			break;
 		}
-		// 「文字列は見つかりません」メッセージダイアログを表示する.
-		message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-		status_bar_set_pos();
+		return false;
+	}
+
+	// 文字列検索パネルの「次を検索」ボタンが押された.
+	void MainPage::find_next_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		find_text_preserve();
+		const auto find_len = wchar_len(m_find_text);
+		if (find_len == 0) {
+			return;
+		}
+		if (find_next()) {
+			scroll_to(m_edit_text_shape);
+			main_draw();
+		}
+		else {
+			// 「文字列は見つかりません」メッセージダイアログを表示する.
+			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+			status_bar_set_pos();
+		}
 	}
 
 	// 文字列検索パネルの値を保存する.
@@ -831,27 +453,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::find_text_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
 		const auto not_empty = !tx_find_text_what().Text().empty();
-		btn_find_text_next().IsEnabled(not_empty);
+		btn_find_next().IsEnabled(not_empty);
 		btn_find_replace().IsEnabled(not_empty);
 		btn_find_replace_all().IsEnabled(not_empty);
 	}
-
-	// 検索の値をデータリーダーに書き込む.
-	//void MainPage::find_text_write(DataWriter const& dt_writer)
-	//{
-	//	dt_write(m_find_text, dt_writer);
-	//	dt_write(m_find_repl, dt_writer);
-	//	uint16_t bit = 0;
-	//	if (m_fit_text_frame) {
-	//		bit |= 1;
-	//	}
-	//	if (m_find_text_case) {
-	//		bit |= 2;
-	//	}
-	//	if (m_find_text_wrap) {
-	//		bit |= 4;
-	//	}
-	//	dt_writer.WriteUInt16(bit);
-	//}
-
 }

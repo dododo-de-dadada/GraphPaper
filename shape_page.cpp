@@ -313,10 +313,9 @@ namespace winrt::GraphPaper::implementation
 			page_draw_grid(m_d2d_target, m_d2d_color_brush.get(), m_grid_base + 1.0f, m_grid_color, m_grid_emph, m_grid_offset, g_size);
 		}
 
-		// }Œ`‚ğ•\¦‚·‚é.
-		for (auto s : m_shape_list) {
-			if (!s->is_deleted()) {
-				s->draw();
+		for (auto t : m_shape_list) {
+			if (!t->is_deleted()) {
+				t->draw();
 			}
 		}
 

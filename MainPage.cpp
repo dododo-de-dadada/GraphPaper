@@ -345,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 			m_edit_context.InputPaneDisplayPolicy(winrt::Windows::UI::Text::Core::CoreTextInputPaneDisplayPolicy::Manual);
 			m_edit_context.InputScope(winrt::Windows::UI::Text::Core::CoreTextInputScope::Text);
 			m_edit_context.TextRequested([this](auto, auto args) {
-				//__debugbreak();
+				__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextTextRequest;
 				CoreTextTextRequest req{ args.Request() };
 				const auto sub_len = min(req.Range().EndCaretPosition, m_edit_text_shape->get_text_len()) - req.Range().StartCaretPosition;	// 部分文字列の長さ
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			});
 			// 文字が入力される
 			m_edit_context.TextUpdating([this](auto, auto args) {
-				//__debugbreak();
+				__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextRange ran{ args.Range() };
 				
@@ -416,12 +416,10 @@ namespace winrt::GraphPaper::implementation
 				undo_push_text_select(m_edit_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
 			});
 			m_edit_context.FormatUpdating([](auto, auto) {
-				//__debugbreak();
+				__debugbreak();
 			});
 			m_edit_context.LayoutRequested([this](auto, auto args) {
-				if (_debug_edit++ == 0) {
-					__debugbreak();
-				}
+				//__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextLayoutRequest;
 				using winrt::Windows::Graphics::Display::DisplayInformation;
 				using winrt::Windows::UI::Xaml::Media::GeneralTransform;
@@ -473,12 +471,12 @@ namespace winrt::GraphPaper::implementation
 			});
 			// 入力変換が開始された
 			m_edit_context.CompositionStarted([this](auto, auto) {
-				//__debugbreak();
+				__debugbreak();
 				m_edit_text_comp = true;
 				m_edit_text_start = m_edit_text_shape->m_select_start;
 			});
 			m_edit_context.CompositionCompleted([this](auto, auto) {
-				//__debugbreak();
+				__debugbreak();
 				m_edit_text_comp = false;
 			});
 		}
