@@ -453,14 +453,21 @@ namespace winrt::GraphPaper::implementation
 		if (m_ustack_undo.size() > 0 && m_ustack_undo.back() != nullptr) {
 			m_ustack_undo.push_back(nullptr);
 		}
-		if (m_ustack_undo.size() > 256) {
-			while (m_ustack_undo.size() > 256) {
+		if (m_ustack_undo.size() > 1024) {
+			// 1024 個を超える操作は問答無用でスタックの先頭から取りのぞいて削除する.
+			while (m_ustack_undo.size() > 1024) {
+				Undo* u = m_ustack_undo.front();
 				m_ustack_undo.pop_front();
+				delete u;
 			}
-			while (m_ustack_undo.front() != nullptr) {
+			// 空以外の操作をスタックの先頭から取りのぞいて削除する.
+			Undo* u;
+			while (!m_ustack_undo.empty() && (u = m_ustack_undo.front()) != nullptr) {
 				m_ustack_undo.pop_front();
+				delete u;
 			}
-			if (m_ustack_undo.front() == nullptr) {
+			// 最後の空操作を取り除いて削除する.
+			if (!m_ustack_undo.empty()) {
 				m_ustack_undo.pop_front();
 			}
 		}

@@ -58,12 +58,14 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
+                <MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete">
+                    <MenuFlyoutItem.KeyboardAcceleratorTextOverride>Del</MenuFlyoutItem.KeyboardAcceleratorTextOverride>
+                    <!--
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="D" Modifiers="Control" />
 						<KeyboardAccelerator Key="Delete" />
 					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
+                    -->
+                </MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_xcvd_select"/>
 				<!-- すべて選択 -->
@@ -697,10 +699,13 @@
 				</MenuFlyoutItem>
 				<!-- 削除 -->
 				<MenuFlyoutItem x:Name="mfi_menu_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem.KeyboardAcceleratorTextOverride>Del</MenuFlyoutItem.KeyboardAcceleratorTextOverride>
+                    <!--
+                    <MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="D" Modifiers="Control" />
 						<KeyboardAccelerator Key="Delete" />
 					</MenuFlyoutItem.KeyboardAccelerators>
+                    -->
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />

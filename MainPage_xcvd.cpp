@@ -22,6 +22,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+	using winrt::Windows::System::VirtualKey;
+	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
 
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
@@ -33,84 +35,101 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_list_sel_cnt > 0) {
-			// コルーチンが呼び出されたスレッドコンテキストを保存する.
-			winrt::apartment_context context;
-			// 選択された図形のリストを得る.
-			SHAPE_LIST selected_list;
-			slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
-			// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
-			wchar_t* text_ptr = nullptr;
-			RandomAccessStreamReference img_ref = nullptr;
-			for (auto it = selected_list.rbegin(); it != selected_list.rend(); it++) {
-				if (text_ptr == nullptr) {
-					// 文字列をポインターに格納する.
-					(*it)->get_text_content(text_ptr);
-				}
-				if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
-					// ビットマップをストリームに格納し, その参照を得る.
-					InMemoryRandomAccessStream img_stream{
-						InMemoryRandomAccessStream()
-					};
-					const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
-						BitmapEncoder::BmpEncoderId(), img_stream);
-					if (ret && img_stream.Size() > 0) {
-						img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
-					}
-				}
-				if (text_ptr != nullptr && img_ref != nullptr) {
-					// 文字列と画像図形, 両方とも見つかったなら中断する.
-					break;
-				}
-			}
-			// メモリストリームを作成して, そのデータライターを得る.
-			InMemoryRandomAccessStream mem_stream{
-				InMemoryRandomAccessStream()
-			};
-			IOutputStream out_stream{
-				mem_stream.GetOutputStreamAt(0)
-			};
-			DataWriter dt_writer{ DataWriter(out_stream) };
-			// データライターに選択された図形のリストを書き込む.
-			constexpr bool REDUCED = true;
-			slist_write<REDUCED>(selected_list, /*--->*/dt_writer);
-			// 選択された図形のリストを破棄する.
-			selected_list.clear();
-			// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
-			uint32_t n_byte{ co_await dt_writer.StoreAsync() };
-			if (n_byte > 0) {
-				// メインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(Dispatcher());
-				// データパッケージを作成し, データパッケージにメモリストリームを格納する.
+		if (m_edit_text_shape != nullptr) {
+			ShapeText* t = m_edit_text_shape;
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			const auto s = min(t->m_select_start, end);
+			const auto e = max(t->m_select_start, end);
+			if (s < e) {
+				// 部分文字列をデータパッケージに格納する.
 				DataPackage dt_pack{ DataPackage() };
 				dt_pack.RequestedOperation(DataPackageOperation::Copy);
-				dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
-				// 文字列が得られたか判定する.
-				if (text_ptr != nullptr) {
-					// データパッケージにテキストを格納する.
-					dt_pack.SetText(text_ptr);
-				}
-				// 画像が得られたか判定する.
-				if (img_ref != nullptr) {
-					// データパッケージに画像を格納する.
-					dt_pack.SetBitmap(img_ref);
-				}
+				dt_pack.SetText(winrt::hstring{ t->m_text + s, e - s });
 				// クリップボードにデータパッケージを格納する.
 				Clipboard::SetContent(dt_pack);
 				dt_pack = nullptr;
 			}
-			// データライターを閉じる.
-			dt_writer.Close();
-			dt_writer = nullptr;
-			// 出力ストリームを閉じる.
-			// メモリストリームは閉じちゃダメ.
-			out_stream.Close();
-			out_stream = nullptr;
-			xcvd_menu_is_enabled();
-			// スレッドコンテキストを復元する.
-			co_await context;
 		}
-		status_bar_set_pos();
+		else {
+			if (m_list_sel_cnt > 0) {
+				// コルーチンが呼び出されたスレッドコンテキストを保存する.
+				winrt::apartment_context context;
+				// 選択された図形のリストを得る.
+				SHAPE_LIST selected_list;
+				slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
+				// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
+				wchar_t* text_ptr = nullptr;
+				RandomAccessStreamReference img_ref = nullptr;
+				for (auto it = selected_list.rbegin(); it != selected_list.rend(); it++) {
+					if (text_ptr == nullptr) {
+						// 文字列をポインターに格納する.
+						(*it)->get_text_content(text_ptr);
+					}
+					if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
+						// ビットマップをストリームに格納し, その参照を得る.
+						InMemoryRandomAccessStream img_stream{
+							InMemoryRandomAccessStream()
+						};
+						const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
+							BitmapEncoder::BmpEncoderId(), img_stream);
+						if (ret && img_stream.Size() > 0) {
+							img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
+						}
+					}
+					if (text_ptr != nullptr && img_ref != nullptr) {
+						// 文字列と画像図形, 両方とも見つかったなら中断する.
+						break;
+					}
+				}
+				// メモリストリームを作成して, そのデータライターを得る.
+				InMemoryRandomAccessStream mem_stream{
+					InMemoryRandomAccessStream()
+				};
+				IOutputStream out_stream{
+					mem_stream.GetOutputStreamAt(0)
+				};
+				DataWriter dt_writer{ DataWriter(out_stream) };
+				// データライターに選択された図形のリストを書き込む.
+				constexpr bool REDUCED = true;
+				slist_write<REDUCED>(selected_list, /*--->*/dt_writer);
+				// 選択された図形のリストを破棄する.
+				selected_list.clear();
+				// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
+				uint32_t n_byte{ co_await dt_writer.StoreAsync() };
+				if (n_byte > 0) {
+					// メインページの UI スレッドに変える.
+					co_await winrt::resume_foreground(Dispatcher());
+					// データパッケージを作成し, データパッケージにメモリストリームを格納する.
+					DataPackage dt_pack{ DataPackage() };
+					dt_pack.RequestedOperation(DataPackageOperation::Copy);
+					dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
+					// 文字列が得られたか判定する.
+					if (text_ptr != nullptr) {
+						// データパッケージにテキストを格納する.
+						dt_pack.SetText(text_ptr);
+					}
+					// 画像が得られたか判定する.
+					if (img_ref != nullptr) {
+						// データパッケージに画像を格納する.
+						dt_pack.SetBitmap(img_ref);
+					}
+					// クリップボードにデータパッケージを格納する.
+					Clipboard::SetContent(dt_pack);
+					dt_pack = nullptr;
+				}
+				// データライターを閉じる.
+				dt_writer.Close();
+				dt_writer = nullptr;
+				// 出力ストリームを閉じる.
+				// メモリストリームは閉じちゃダメ.
+				out_stream.Close();
+				out_stream = nullptr;
+				xcvd_menu_is_enabled();
+				// スレッドコンテキストを復元する.
+				co_await context;
+			}
+			status_bar_set_pos();
+		}
 	}
 
 	//------------------------------
@@ -119,7 +138,26 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		co_await xcvd_copy_click_async(nullptr, nullptr);
-		xcvd_delete_click(nullptr, nullptr);
+		// 編集対象の文字列図形があり,
+		if (m_edit_text_shape != nullptr) {
+			auto core_win{ CoreWindow::GetForCurrentThread() };
+			const ShapeText* t = m_edit_text_shape;
+			const auto len = t->get_text_len();
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			const auto start = t->m_select_start;
+			// 選択範囲があるなら, 選択範囲を削除する.
+			if (end != start) {
+				const auto s = min(start, end);
+				const auto e = max(start, end);
+				undo_push_null();
+				undo_push_text_select(m_edit_text_shape, s, s, false);
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
+				main_draw();
+			}
+		}
+		else {
+			xcvd_delete_click(nullptr, nullptr);
+		}
 	}
 
 	//------------------------------
@@ -127,31 +165,56 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 選択された図形の数がゼロか判定する.
-		if (m_list_sel_cnt > 0) {
-			undo_push_null();
-			// 選択された図形のリストを得る.
-			SHAPE_LIST selected_list;
-			slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
-			// リストの各図形について以下を繰り返す.
-			m_mutex_draw.lock();
-			for (auto s : selected_list) {
-				// 一覧が表示されてるか判定する.
-				if (summary_is_visible()) {
-					summary_remove(s);
-				}
-				// 図形を取り去り, その操作をスタックに積む.
-				undo_push_remove(s);
+		if (m_edit_text_shape != nullptr) {
+			auto core_win{ CoreWindow::GetForCurrentThread() };
+			const ShapeText* t = m_edit_text_shape;
+			const auto len = t->get_text_len();
+			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+			const auto start = t->m_select_start;
+			const auto shift = ((core_win.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
+			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
+			if (!shift && end == start && end < len) {
+				undo_push_null();
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, end, 1));
+				main_draw();
 			}
-			m_mutex_draw.unlock();
-			undo_menu_is_enabled();
-			xcvd_menu_is_enabled();
-			main_bbox_update();
-			main_panel_size();
-			main_draw();
-			selected_list.clear();
+			// 選択範囲があるなら
+			else if (end != start) {
+				const auto s = min(start, end);
+				const auto e = max(start, end);
+				undo_push_null();
+				undo_push_text_select(m_edit_text_shape, s, s, false);
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
+				main_draw();
+			}
 		}
-		status_bar_set_pos();
+		else {
+			// 選択された図形の数がゼロか判定する.
+			if (m_list_sel_cnt > 0) {
+				undo_push_null();
+				// 選択された図形のリストを得る.
+				SHAPE_LIST selected_list;
+				slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
+				// リストの各図形について以下を繰り返す.
+				m_mutex_draw.lock();
+				for (auto s : selected_list) {
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
+						summary_remove(s);
+					}
+					// 図形を取り去り, その操作をスタックに積む.
+					undo_push_remove(s);
+				}
+				m_mutex_draw.unlock();
+				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
+				main_bbox_update();
+				main_panel_size();
+				main_draw();
+				selected_list.clear();
+			}
+			status_bar_set_pos();
+		}
 	}
 
 	//------------------------------
@@ -469,52 +532,68 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// クリップボードから読み込むためのデータリーダーを得る.
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
+
 		if (!text.empty()) {
-			undo_push_null();
-			unselect_shape_all();
+			if (m_edit_text_shape != nullptr) {
+				const ShapeText* t = m_edit_text_shape;
+				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
+				const auto s = min(t->m_select_start, end);
+				const auto e = max(t->m_select_start, end);
+				undo_push_null();
+				undo_push_text_select(m_edit_text_shape, s + text.size(), s + text.size(), false);
+				if (s < e) {
+					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
+				}
+				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, text.data()));
+				main_draw();
+			}
+			else {
+				undo_push_null();
+				unselect_shape_all();
 
-			// パネルの大きさで文字列図形を作成する,.
-			const float scale = m_main_scale;
-			//const float scale = m_main_page.m_page_scale;
-			const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
-			const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
-			const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
-				m_main_page.m_page_size.width); // ページの表示されている幅
-			const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale,
-				m_main_page.m_page_size.height); // ページの表示されている高さ
-			const float lt_x = m_main_bbox_lt.x;
-			const float lt_y = m_main_bbox_lt.y;
-			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_page);
+				// パネルの大きさで文字列図形を作成する,.
+				const float scale = m_main_scale;
+				//const float scale = m_main_page.m_page_scale;
+				const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
+				const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
+				const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
+					m_main_page.m_page_size.width); // ページの表示されている幅
+				const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale,
+					m_main_page.m_page_size.height); // ページの表示されている高さ
+				const float lt_x = m_main_bbox_lt.x;
+				const float lt_y = m_main_bbox_lt.y;
+				ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
-			debug_leak_cnt++;
+				debug_leak_cnt++;
 #endif
-			// 枠を文字列に合わせる.
-			const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-			t->fit_frame_to_text(static_cast<FLOAT>(g_len));
-			// パネルの中央になるよう左上位置を求める.
-			D2D1_POINT_2F pos{
-				static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
-				static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
-			};
-			xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / scale);
-			t->set_pos_start(pos);
-			{
-				m_mutex_draw.lock();
-				undo_push_append(t);
-				undo_push_select(t);
-				m_mutex_draw.unlock();
-			}
-			undo_menu_is_enabled();
+				// 枠を文字列に合わせる.
+				const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+				t->fit_frame_to_text(static_cast<FLOAT>(g_len));
+				// パネルの中央になるよう左上位置を求める.
+				D2D1_POINT_2F pos{
+					static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
+					static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
+				};
+				xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / scale);
+				t->set_pos_start(pos);
+				{
+					m_mutex_draw.lock();
+					undo_push_append(t);
+					undo_push_select(t);
+					m_mutex_draw.unlock();
+				}
+				undo_menu_is_enabled();
 
-			// 一覧が表示されてるか判定する.
-			if (summary_is_visible()) {
-				summary_append(t);
-				summary_select(t);
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
+					summary_append(t);
+					summary_select(t);
+				}
+				xcvd_menu_is_enabled();
+				main_bbox_update(t);
+				main_panel_size();
+				main_draw();
 			}
-			xcvd_menu_is_enabled();
-			main_bbox_update(t);
-			main_panel_size();
-			main_draw();
 		}
 		else {
 			message_show(ICON_ALERT, L"str_err_paste", L"");

@@ -284,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 			if (!m_dwrite_text_layout.try_as(t3)) {
 				hr = E_FAIL;
 			}
-			const DWRITE_TEXT_RANGE range{ 0, wchar_t(m_text) };
+			const DWRITE_TEXT_RANGE range{ 0, wchar_len(m_text) };
 			// ‘‘Ì–¼‚ª•ÏX‚³‚ê‚½‚È‚ç•¶Žš—ñƒŒƒCƒAƒEƒg‚ÉŠi”[‚·‚é.
 			const UINT32 name_len = t3->GetFontFamilyNameLength();
 			std::vector<WCHAR> f_family(name_len + 1);
@@ -464,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 			if (hr == S_OK && m_dwrite_test_cnt < m_dwrite_line_cnt) {
 				float top;
 				float left;
-				float pos;
+				uint32_t pos;
 				if (m_dwrite_test_cnt > 0) {
 					top = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top + m_dwrite_test_metrics[m_dwrite_test_cnt - 1].height;
 					pos = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].textPosition + m_dwrite_line_metrics[m_dwrite_test_cnt - 1].length;
@@ -489,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 							pos = pos + m_dwrite_line_metrics[i].length;
 						}
 						const auto h = m_dwrite_text_layout->GetMaxHeight();
-						top = 0.5 * height;
+						top = 0.5f * height;
 					}
 					else {
 						pos = 0;
@@ -584,7 +584,7 @@ namespace winrt::GraphPaper::implementation
 			HRESULT hr = S_OK;
 			// ‘I‘ð‚³‚ê‚½•¶Žš”ÍˆÍ‚ª‚ ‚é‚È‚ç, ”wŒi‚ð“h‚è‚Â‚Ô‚·.
 			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			if (m_select_start != end) {
+			if (m_loc_show && is_selected() && m_select_start != end) {
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
 					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 				}
@@ -632,7 +632,7 @@ namespace winrt::GraphPaper::implementation
 			color_brush->SetColor(m_font_color);
 			target->DrawTextLayout(t_lt, m_dwrite_text_layout.get(), color_brush);
 			//const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			if (m_select_start != end) {
+			if (m_loc_show && is_selected() && m_select_start != end) {
 			//if (m_text_selected_range.length > 0) {
 				if (hr == S_OK) {
 					hr = m_dwrite_text_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });

@@ -195,17 +195,17 @@ namespace winrt::GraphPaper::implementation
 				else {
 					[[fallthrough]];
 			case END:
-					if (s->is_selected()) {
-						undo_push_select(s);
-						// 一覧が表示されてるか判定する.
-						if (summary_is_visible()) {
-							summary_unselect(s);
-						}
-						if (!done) {
-							done = true;
-						}
+				if (s->is_selected()) {
+					undo_push_select(s);
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
+						summary_unselect(s);
 					}
-					break;
+					if (!done) {
+						done = true;
+					}
+				}
+				break;
 				}
 				[[fallthrough]];
 			case NEXT:
@@ -230,6 +230,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を選択する.
+	/*
 	void MainPage::select_shape(Shape* const s, const VirtualKeyModifiers k_mod)
 	{
 		// コントロールキーが押されているか判定する.
@@ -261,11 +262,12 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			}
 		}
+		// 修飾キーが押されてないなら
 		else if (k_mod == VirtualKeyModifiers::None) {
-			// 上記以外なら,
+			m_event_shape_prev = s;
+			unselect_shape_all();
 			// 図形が選択されてるか判定する.
 			if (s != nullptr && !s->is_selected()) {
-				unselect_shape_all();
 				undo_push_select(s);
 				xcvd_menu_is_enabled();
 				// 一覧が表示されてるか判定する.
@@ -292,9 +294,9 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			main_draw();
-			m_event_shape_prev = s;
 		}
 	}
+	*/
 
 	// 矩形に含まれる図形の選択を反転する.
 	// lt	矩形の左上点

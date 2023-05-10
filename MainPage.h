@@ -242,10 +242,11 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
-		ShapeText* m_edit_text_shape = nullptr;	// 編集対象の文字列図形
-		int m_edit_text_start = 0;
-		int m_edit_text_end = 0;
-		bool m_edit_text_comp = false;	// 変換中
+		ShapeText* m_edit_text_shape = nullptr;	// 編集中の文字列図形
+		bool m_edit_text_comp = false;	// 漢字変換中か判定 (変換中なら true, そうでなければ false)
+		int m_edit_text_start = 0;	// 漢字変換開始時の開始位置
+		int m_edit_text_end = 0;	// 漢字変換開始時の終了位置
+		bool m_edit_text_trail = false;	// 漢字変換開始時のキャレット
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
@@ -704,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
 		bool select_shape_range(Shape* const s_from, Shape* const s_to);
 		// 図形を選択する.
-		void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
+		//void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
 		// 矩形に含まれる図形の選択を反転する.
 		bool toggle_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
