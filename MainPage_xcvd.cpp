@@ -24,6 +24,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
+	using winrt::Windows::UI::Xaml::FocusState;
+
 
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
@@ -33,18 +35,19 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
 	//------------------------------
-	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (m_edit_text_shape != nullptr) {
-			ShapeText* t = m_edit_text_shape;
-			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-			const auto s = min(t->m_select_start, end);
-			const auto e = max(t->m_select_start, end);
-			if (s < e) {
+		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
+			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+			return;
+		}
+		if (is_text_editing()) {
+			const auto sele_text = text_sele_get();
+			if (!sele_text.empty()) {
 				// 部分文字列をデータパッケージに格納する.
 				DataPackage dt_pack{ DataPackage() };
 				dt_pack.RequestedOperation(DataPackageOperation::Copy);
-				dt_pack.SetText(winrt::hstring{ t->m_text + s, e - s });
+				dt_pack.SetText(sele_text);
 				// クリップボードにデータパッケージを格納する.
 				Clipboard::SetContent(dt_pack);
 				dt_pack = nullptr;
@@ -135,25 +138,17 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「切り取り」が選択された.
 	//------------------------------
-	IAsyncAction MainPage::xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::xcvd_cut_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
+			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+			return;
+		}
+
 		co_await xcvd_copy_click_async(nullptr, nullptr);
-		// 編集対象の文字列図形があり,
-		if (m_edit_text_shape != nullptr) {
-			auto core_win{ CoreWindow::GetForCurrentThread() };
-			const ShapeText* t = m_edit_text_shape;
-			const auto len = t->get_text_len();
-			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-			const auto start = t->m_select_start;
-			// 選択範囲があるなら, 選択範囲を削除する.
-			if (end != start) {
-				const auto s = min(start, end);
-				const auto e = max(start, end);
-				undo_push_null();
-				undo_push_text_select(m_edit_text_shape, s, s, false);
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
-				main_draw();
-			}
+
+		if (is_text_editing()) {
+			text_sele_delete();
 		}
 		else {
 			xcvd_delete_click(nullptr, nullptr);
@@ -165,28 +160,16 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_edit_text_shape != nullptr) {
-			auto core_win{ CoreWindow::GetForCurrentThread() };
-			const ShapeText* t = m_edit_text_shape;
-			const auto len = t->get_text_len();
-			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-			const auto start = t->m_select_start;
-			const auto shift = ((core_win.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
-			if (!shift && end == start && end < len) {
-				undo_push_null();
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, end, 1));
-				main_draw();
-			}
-			// 選択範囲があるなら
-			else if (end != start) {
-				const auto s = min(start, end);
-				const auto e = max(start, end);
-				undo_push_null();
-				undo_push_text_select(m_edit_text_shape, s, s, false);
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
-				main_draw();
-			}
+		// 文字列検索パネルのテキストボックスにフォーカスがあれば中断する.
+		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
+			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+			return;
+		}
+		// XAML のキーボードアクセラレーターに削除キーは指定されていて,
+		// CoreWWindow の KeyDow でなく, このハンドラーで処理される.
+		if (is_text_editing()) {
+			const auto shift_key = ((CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
+			text_char_delete(shift_key);
 		}
 		else {
 			// 選択された図形の数がゼロか判定する.
@@ -337,6 +320,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::xcvd_paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
+			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+			return;
+		}
 		// Clipboard::GetContent() は, 
 		// WinRT originate error 0x80040904
 		// を引き起こすので, try ... catch 文が必要.
@@ -534,20 +521,12 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
 
 		if (!text.empty()) {
-			if (m_edit_text_shape != nullptr) {
-				const ShapeText* t = m_edit_text_shape;
-				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-				const auto s = min(t->m_select_start, end);
-				const auto e = max(t->m_select_start, end);
-				undo_push_null();
-				undo_push_text_select(m_edit_text_shape, s + text.size(), s + text.size(), false);
-				if (s < e) {
-					m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
-				}
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, text.data()));
-				main_draw();
+			if (is_text_editing()) {
+				text_sele_insert(text.data(), static_cast<uint32_t>(text.size()));
 			}
+			// 文字列検索パネルのテキストボックスにフォーカスが無ければ文字列図形としてはりつける.
 			else {
+
 				undo_push_null();
 				unselect_shape_all();
 

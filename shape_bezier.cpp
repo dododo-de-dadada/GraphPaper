@@ -419,15 +419,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeBezier::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
-	) const noexcept
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
-		D2D1_POINT_2F tp;
-		pt_sub(t, m_start, tp);
+		const D2D1_POINT_2F tp{
+			pt.x - m_start.x, pt.y - m_start.y
+		};
+		//pt_sub(pt, m_start, tp);
 		// 判定される点によって精度が落ちないよう, 曲線の始点が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F cp[4];
 		cp[0].x = cp[0].y = 0.0;

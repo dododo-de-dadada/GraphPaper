@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 近傍の頂点を見つける.
-	// pos	ある位置
+	// p	ある位置
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true

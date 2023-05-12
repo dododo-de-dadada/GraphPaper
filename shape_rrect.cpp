@@ -212,9 +212,7 @@ namespace winrt::GraphPaper::implementation
 
 	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// –ß‚è’l	“_‚ğŠÜ‚Ş•”ˆÊ
-	uint32_t ShapeRRect::hit_test(
-		const D2D1_POINT_2F t	// ”»’è‚³‚ê‚é“_
-	) const noexcept
+	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		// ŠpŠÛ‚Ì‰~ŒÊ‚Ì’†S“_‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 		// +---------+
@@ -237,16 +235,16 @@ namespace winrt::GraphPaper::implementation
 		};
 		const D2D1_POINT_2F loc_r_ne{ loc_r_se.x, loc_r_nw.y };
 		const D2D1_POINT_2F loc_r_sw{ loc_r_nw.x, loc_r_se.y };
-		if (loc_hit_test(t, loc_r_se, m_loc_width)) {
+		if (loc_hit_test(pt, loc_r_se, m_loc_width)) {
 			loc_r = LOC_TYPE::LOC_R_SE;
 		}
-		else if (loc_hit_test(t, loc_r_nw, m_loc_width)) {
+		else if (loc_hit_test(pt, loc_r_nw, m_loc_width)) {
 			loc_r = LOC_TYPE::LOC_R_NW;
 		}
-		else if (loc_hit_test(t, loc_r_sw, m_loc_width)) {
+		else if (loc_hit_test(pt, loc_r_sw, m_loc_width)) {
 			loc_r = LOC_TYPE::LOC_R_SW;
 		}
-		else if (loc_hit_test(t, loc_r_ne, m_loc_width)) {
+		else if (loc_hit_test(pt, loc_r_ne, m_loc_width)) {
 			loc_r = LOC_TYPE::LOC_R_NE;
 		}
 		else {
@@ -259,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 			fabs(m_pos.x) > m_loc_width && fabs(m_pos.y) > 2.0f * m_loc_width) {
 			return loc_r;
 		}
-		const uint32_t loc_v = rect_loc_hit_test(m_start, m_pos, t, m_loc_width);
+		const uint32_t loc_v = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
 		if (loc_v != LOC_TYPE::LOC_PAGE) {
 			return loc_v;
 		}
@@ -293,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 		// ü˜g‚ª“§–¾‚Ü‚½‚Í‘¾‚³ 0 ‚©”»’è‚·‚é.
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾, ‚©‚ÂŠpŠÛ•ûŒ`‚»‚Ì‚à‚Ì‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (is_opaque(m_fill_color) && pt_in_rrect(t, r_lt, r_rb, r_rad)) {
+			if (is_opaque(m_fill_color) && pt_in_rrect(pt, r_lt, r_rb, r_rad)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
@@ -305,13 +303,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(r_lt, -ew * 0.5, e_lt);
 			pt_add(r_rb, ew * 0.5, e_rb);
 			pt_add(r_rad, ew * 0.5, e_rad);
-			if (pt_in_rrect(t, e_lt, e_rb, e_rad)) {
+			if (pt_in_rrect(pt, e_lt, e_rb, e_rad)) {
 				// k¬‚µ‚½ŠpŠÛ•ûŒ`‚ª‹t“]‚µ‚Ä‚È‚¢, ‚©‚ÂˆÊ’u‚ªk¬‚µ‚½ŠpŠÛ•ûŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 				D2D1_POINT_2F s_lt, s_rb, s_rad;	// k¬‚µ‚½ŠpŠÛ•ûŒ`
 				pt_add(e_lt, ew, s_lt);
 				pt_add(e_rb, -ew, s_rb);
 				pt_add(e_rad, -ew, s_rad);
-				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(t, s_lt, s_rb, s_rad)) {
+				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(pt, s_lt, s_rb, s_rad)) {
 					// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚È‚ç, LOC_FILL ‚ğ•Ô‚·.
 					if (is_opaque(m_fill_color)) {
 						return LOC_TYPE::LOC_FILL;

@@ -148,50 +148,48 @@ namespace winrt::GraphPaper::implementation
 
 	// ê}å`Ç™ì_Çä‹ÇﬁÇ©îªíËÇ∑ÇÈ.
 	// ñﬂÇËíl	ì_Çä‹Çﬁïîà 
-	uint32_t ShapeOblong::hit_test(
-		const D2D1_POINT_2F t	// îªíËÇ≥ÇÍÇÈì_
-	) const noexcept
+	uint32_t ShapeOblong::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		D2D1_POINT_2F p[4]{ m_start, };	// í∏ì_ÇÃîzóÒ
 
 		p[2].x = m_start.x + m_pos.x;
 		p[2].y = m_start.y + m_pos.y;
-		if (loc_hit_test(t, p[2], m_loc_width)) {
+		if (loc_hit_test(pt, p[2], m_loc_width)) {
 			return LOC_TYPE::LOC_SE;
 		}
 		p[3].x = m_start.x;
 		p[3].y = m_start.y + m_pos.y;
-		if (loc_hit_test(t, p[3], m_loc_width)) {
+		if (loc_hit_test(pt, p[3], m_loc_width)) {
 			return LOC_TYPE::LOC_SW;
 		}
 		p[1].x = m_start.x + m_pos.x;
 		p[1].y = m_start.y;
-		if (loc_hit_test(t, p[1], m_loc_width)) {
+		if (loc_hit_test(pt, p[1], m_loc_width)) {
 			return LOC_TYPE::LOC_NE;
 		}
-		if (loc_hit_test(t, p[0], m_loc_width)) {
+		if (loc_hit_test(pt, p[0], m_loc_width)) {
 			return LOC_TYPE::LOC_NW;
 		}
 
 		// äeï”ÇÃíÜì_ÇÃïîà Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
 		D2D1_POINT_2F bottom;
 		pt_avg(p[2], p[3], bottom);
-		if (loc_hit_test(t, bottom, m_loc_width)) {
+		if (loc_hit_test(pt, bottom, m_loc_width)) {
 			return LOC_TYPE::LOC_SOUTH;
 		}
 		D2D1_POINT_2F right;
 		pt_avg(p[1], p[2], right);
-		if (loc_hit_test(t, right, m_loc_width)) {
+		if (loc_hit_test(pt, right, m_loc_width)) {
 			return LOC_TYPE::LOC_EAST;
 		}
 		D2D1_POINT_2F left;
 		pt_avg(p[0], p[3], left);
-		if (loc_hit_test(t, left, m_loc_width)) {
+		if (loc_hit_test(pt, left, m_loc_width)) {
 			return LOC_TYPE::LOC_WEST;
 		}
 		D2D1_POINT_2F top;
 		pt_avg(p[0], p[1], top);
-		if (loc_hit_test(t, top, m_loc_width)) {
+		if (loc_hit_test(pt, top, m_loc_width)) {
 			return LOC_TYPE::LOC_NORTH;
 		}
 
@@ -215,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
-			if (is_opaque(m_fill_color) && pt_in_rect2(t, r_lt, r_rb)) {
+			if (is_opaque(m_fill_color) && pt_in_rect2(pt, r_lt, r_rb)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
@@ -236,13 +234,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(r_lt, -e_thick, e_lb);
 			pt_add(r_rb, e_thick, e_rb);
 			// ägëÂÇµÇΩï˚å`Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
-			if (pt_in_rect2(t, e_lb, e_rb)) {
+			if (pt_in_rect2(pt, e_lb, e_rb)) {
 				// ëæÇ≥ÇÃëÂÇ´Ç≥ÇæÇØì‡ë§Ç…, ägëÂÇµÇΩï˚å`Çèkè¨Ç∑ÇÈ.
 				D2D1_POINT_2F s_lb, s_rb;	// èkè¨ÇµÇΩï˚å`
 				pt_add(e_lb, s_thick, s_lb);
 				pt_add(e_rb, -s_thick, s_rb);
 				// èkè¨ÇµÇΩï˚å`Ç…ä‹Ç‹ÇÍÇÈ (ï”Ç…ä‹Ç‹ÇÍÇ»Ç¢) Ç©îªíËÇ∑ÇÈ.
-				if (pt_in_rect2(t, s_lb, s_rb)) {
+				if (pt_in_rect2(pt, s_lb, s_rb)) {
 					if (is_opaque(m_fill_color)) {
 						return LOC_TYPE::LOC_FILL;
 					}
@@ -250,31 +248,30 @@ namespace winrt::GraphPaper::implementation
 				// èkè¨ÇµÇΩï˚å`Ç™îΩì]Ç∑ÇÈ (ògÇ™ëæÇ∑Ç¨Çƒê}å`Çï¢Ç§),
 				// Ç‹ÇΩÇÕ, ï˚å`ÇÃäpÇ…ä‹Ç‹ÇÍÇƒÇ»Ç¢ (ï”Ç…ä‹Ç‹ÇÍÇÈ) Ç©îªíËÇ∑ÇÈ.
 				else if (s_rb.x <= s_lb.x || s_rb.y <= s_lb.y ||
-					r_lt.x <= t.x && t.x <= r_rb.x || r_lt.y <= t.y && t.y <= r_rb.y) {
+					r_lt.x <= pt.x && pt.x <= r_rb.x || r_lt.y <= pt.y && pt.y <= r_rb.y) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 				// ê¸ògÇÃåãçáÇ™ä€ÇﬂÇ©îªíËÇ∑ÇÈ.
 				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					if (pt_in_circle(t, p[0], e_thick) ||
-						pt_in_circle(t, p[1], e_thick) ||
-						pt_in_circle(t, p[2], e_thick) ||
-						pt_in_circle(t, p[3], e_thick)) {
+					if (pt_in_circle(pt, p[0], e_thick) ||
+						pt_in_circle(pt, p[1], e_thick) ||
+						pt_in_circle(pt, p[2], e_thick) ||
+						pt_in_circle(pt, p[3], e_thick)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
 				// ê¸ògÇÃåãçáÇ™ñ éÊÇË, Ç‹ÇΩÇÕ, êÎÇËÅEñ éÊÇËÇ≈Ç©Ç¬êÎÇËêßå¿Ç™Å„2 ñ¢ñûÇ©îªíËÇ∑ÇÈ.
 				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
-					(m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
-						m_stroke_join_limit < M_SQRT2)) {
+					(m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_stroke_join_limit < M_SQRT2)) {
 					const auto limit = static_cast<FLOAT>(e_thick);
 					const D2D1_POINT_2F q[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, 
 						D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
-					if (pt_in_poly(D2D1_POINT_2F{ t.x - p[0].x, t.y - p[0].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[1].x, t.y - p[1].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[2].x, t.y - p[2].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[3].x, t.y - p[3].y }, 4, q)) {
+					if (pt_in_poly(D2D1_POINT_2F{ pt.x - p[0].x, pt.y - p[0].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[1].x, pt.y - p[1].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[2].x, pt.y - p[2].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[3].x, pt.y - p[3].y }, 4, q)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
@@ -282,16 +279,15 @@ namespace winrt::GraphPaper::implementation
 				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 					(m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
 						m_stroke_join_limit >= M_SQRT2)) {
-					const auto limit =
-						static_cast<FLOAT>(M_SQRT2 * 0.5 * m_stroke_width * m_stroke_join_limit);
+					const auto limit = static_cast<FLOAT>(M_SQRT2 * 0.5 * m_stroke_width * m_stroke_join_limit);
 					const D2D1_POINT_2F q[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f },
 						D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
-					if (pt_in_poly(D2D1_POINT_2F{ t.x - p[0].x, t.y - p[0].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[1].x, t.y - p[1].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[2].x, t.y - p[2].y }, 4, q) ||
-						pt_in_poly(D2D1_POINT_2F{ t.x - p[3].x, t.y - p[3].y }, 4, q)) {
+					if (pt_in_poly(D2D1_POINT_2F{ pt.x - p[0].x, pt.y - p[0].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[1].x, pt.y - p[1].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[2].x, pt.y - p[2].y }, 4, q) ||
+						pt_in_poly(D2D1_POINT_2F{ pt.x - p[3].x, pt.y - p[3].y }, 4, q)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}

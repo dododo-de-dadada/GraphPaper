@@ -114,12 +114,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
-			if (m_event_shape_prev == nullptr) {
+			if (m_event_shape_last == nullptr) {
 				s = slist_front(m_main_page.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_next(m_main_page.m_shape_list, m_event_shape_prev);
+				s = slist_next(m_main_page.m_shape_list, m_event_shape_last);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -127,12 +127,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			if (m_event_shape_prev == nullptr) {
+			if (m_event_shape_last == nullptr) {
 				s = slist_back(m_main_page.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_prev(m_main_page.m_shape_list, m_event_shape_prev);
+				s = slist_prev(m_main_page.m_shape_list, m_event_shape_last);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -143,11 +143,11 @@ namespace winrt::GraphPaper::implementation
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
 			select_shape_range(m_event_shape_pressed, s);
-			m_event_shape_prev = s;
+			m_event_shape_last = s;
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
 			m_event_shape_pressed =
-			m_event_shape_prev = s;
+			m_event_shape_last = s;
 			unselect_shape_all();
 			undo_push_select(s);
 			// 一覧が表示されてるか判定する.
@@ -247,24 +247,24 @@ namespace winrt::GraphPaper::implementation
 					summary_unselect(s);
 				}
 			}
-			m_event_shape_prev = s;
+			m_event_shape_last = s;
 		}
 		// シフトキーが押されて, かつ直前に押された図形があり, その図形が選択されているか判定する.
-		else if (k_mod == VirtualKeyModifiers::Shift && m_event_shape_prev != nullptr && m_event_shape_prev->is_selected() && !m_event_shape_prev->is_deleted()) {
+		else if (k_mod == VirtualKeyModifiers::Shift && m_event_shape_last != nullptr && m_event_shape_last->is_selected() && !m_event_shape_last->is_deleted()) {
 			// 前回ポインターが押された図形が空か判定する.
-			//if (m_event_shape_prev == nullptr) {
+			//if (m_event_shape_last == nullptr) {
 			//	// 図形リストの先頭を前回ポインターが押された図形に格納する.
-			//	m_event_shape_prev = m_main_page.m_shape_list.front();
+			//	m_event_shape_last = m_main_page.m_shape_list.front();
 			//}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
-			if (select_shape_range(s, m_event_shape_prev)) {
+			if (select_shape_range(s, m_event_shape_last)) {
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
 		// 修飾キーが押されてないなら
 		else if (k_mod == VirtualKeyModifiers::None) {
-			m_event_shape_prev = s;
+			m_event_shape_last = s;
 			unselect_shape_all();
 			// 図形が選択されてるか判定する.
 			if (s != nullptr && !s->is_selected()) {

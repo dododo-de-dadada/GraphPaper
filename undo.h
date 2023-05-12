@@ -347,54 +347,109 @@ namespace winrt::GraphPaper::implementation
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
 
-	struct UndoText : Undo {
-		bool m_flag;	// 挿入/削除フラグ
-		uint32_t m_at;
-		uint32_t m_len;
-		wchar_t* m_text = nullptr;
+	struct UndoText2 : Undo {
+		uint32_t m_start = 0;
+		uint32_t m_end = 0;
+		bool m_trail = false;
+		wchar_t* m_text = nullptr;	// 保存された文字列
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept override
 		{
-			if (m_flag) {
-				return wchar_len(m_text) > 0;
+			if (m_start != (m_trail ? m_end + 1 : m_end)) {
+				return true;
+			}
+			return wchar_len(m_text) > 0;
+		}
+		~UndoText2(void)
+		{
+			delete[] m_text;
+		}
+
+		// 文字列の選択範囲を削除し, そこに指定した文字列を挿入する.
+		void edit(Shape* s, const wchar_t* ins_text) noexcept
+		{
+			wchar_t* old_text = static_cast<ShapeText*>(s)->m_text;
+			const auto old_len = wchar_len(old_text);
+
+			// 選択範囲と削除する文字列を保存する.
+			m_start = static_cast<ShapeText*>(s)->m_select_start;
+			m_end = static_cast<ShapeText*>(s)->m_select_end;
+			m_trail = static_cast<ShapeText*>(s)->m_select_trail;
+			const auto end = min(m_trail ? m_end + 1 : m_end, old_len);
+			const auto start = min(m_start, old_len);
+			const auto m = min(start, end);
+			const auto n = max(start, end);
+			const auto del_len = n - m;	// 削除する文字数.
+			if (del_len > 0) {
+				m_text = new wchar_t[del_len + 1];
+				memcpy(m_text, old_text + m, 2 * del_len);
+				//for (int i = 0; i < del_len; i++) {
+				//	m_text[i] = old_text[m + i];
+				//}
+				m_text[del_len] = L'\0';
 			}
 			else {
-				return m_len > 0;
+				m_text = nullptr;
 			}
-		}
-		~UndoText(void)
-		{
-			if (m_text != nullptr) {
-				delete[] m_text;
+
+			// 挿入後の文字数が元の文字数を超えるなら, 新しいメモリを確保して, 挿入される位置より前方をコピーする.
+			const auto ins_len = wchar_len(ins_text);
+			const auto new_len = old_len + ins_len - del_len;
+			wchar_t* new_text;
+			if (new_len > old_len) {
+				new_text = new wchar_t[new_len + 1];
+				//for (uint32_t i = 0; i < m; i++) {
+				//	new_text[i] = old_text[i];
+				//}
+				memcpy(new_text, old_text, 2 * m);
 			}
+
+			// 挿入後の文字数が元の文字数以下なら, 新しいメモリを確保せず, 元の文字列を利用する.
+			else {
+				new_text = old_text;
+			}
+
+			// 挿入する文字列をコピーする.
+			//for (uint32_t i = 0; i < ins_len; i++) {
+			//	new_text[m + i] = ins_text[i];
+			//}
+			memcpy(new_text + m, ins_text, 2 * ins_len);
+
+			// 元の文字列の選択範囲の終了位置より後方をコピーする.
+			//for (uint32_t i = 0; i < old_len - n; i++) {
+			//	new_text[m + ins_len + i] = old_text[n + i];
+			//}
+			memmove(new_text + m + ins_len, old_text + n, 2 * (old_len - n));
+			new_text[new_len] = L'\0';
+
+			// 挿入後の文字数が元の文字数を超えるなら, 元の文字列のメモリを解放して, 新しい文字列を格納する.
+			if (new_len > old_len) {
+				delete[] old_text;
+				static_cast<ShapeText*>(s)->m_text = new_text;
+			}
+
+			// 編集後の選択範囲は, 挿入された文字列になる.
+			static_cast<ShapeText*>(s)->m_select_start = m;
+			static_cast<ShapeText*>(s)->m_select_end = m + ins_len;
+			static_cast<ShapeText*>(s)->m_select_trail = false;
+			static_cast<ShapeText*>(s)->m_dwrite_text_layout = nullptr;
 		}
-		// 図形に文字列を挿入する.
-		void ins(Shape* s, const uint32_t ins_at, const wchar_t* ins_text) noexcept;
-		// 図形から文字列を削除する.
-		void del(Shape* s, const uint32_t del_at, const uint32_t del_len) noexcept;
-		// 図形に文字列を挿入する.
-		UndoText(Shape* s, uint32_t ins_at, const wchar_t* ins_text) :
+		// 図形の文字列を編集する.
+		UndoText2(Shape* s, const wchar_t* ins_text) :
 			Undo(s)
 		{
-			ins(s, ins_at, ins_text);
-		}
-		// 図形から文字列を削除する.
-		UndoText(Shape* s, uint32_t del_at, uint32_t del_len) :
-			Undo(s)
-		{
-			del(s, del_at, del_len);
+			edit(s, ins_text);
 		}
 		virtual void exec(void) noexcept final override
 		{
-			if (m_flag) {
-				ins(m_shape, m_at, m_text);
-			}
-			else {
-				del(m_shape, m_at, m_len);
-			}
+			// 保存された文字列は文字列は edit 関数内で確保されたメモリ (またはヌル) で必ず上書きされる.
+			// edit 関数後は必要なくなってるので解放する.
+			wchar_t* ins_text = m_text;
+			edit(m_shape, ins_text);
+			delete[] ins_text;
 		}
-		UndoText(DataReader const& dt_reader);
+		UndoText2(DataReader const& dt_reader);
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
 

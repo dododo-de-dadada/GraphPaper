@@ -15,9 +15,9 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::meth_text_edit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = static_cast<ShapeText*>(nullptr);	// 編集する文字列図形
-		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
+		if (m_event_shape_last != nullptr && typeid(*m_event_shape_last) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形ならその図形.
-			s = static_cast<ShapeText*>(m_event_shape_prev);
+			s = static_cast<ShapeText*>(m_event_shape_last);
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
@@ -110,9 +110,9 @@ namespace winrt::GraphPaper::implementation
 		};
 
 		ShapeArc* t;	// 編集する円弧図形
-		if (m_event_shape_prev != nullptr &&
-			typeid(*m_event_shape_prev) == typeid(ShapeArc)) {
-			t = static_cast<ShapeArc*>(m_event_shape_prev);
+		if (m_event_shape_last != nullptr &&
+			typeid(*m_event_shape_last) == typeid(ShapeArc)) {
+			t = static_cast<ShapeArc*>(m_event_shape_last);
 		}
 		else {
 			// 選択された図形のうち最前面にある円弧図形を得る.

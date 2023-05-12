@@ -251,11 +251,11 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
-		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
-		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
+		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
+		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
-		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
+		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 		bool m_eyedropper_filled = false;	// 抽出されたか判定
@@ -417,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 文字列図形の作成を終了する.
-		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		//IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 図形の変形を終了する.
 		void event_finish_deforming(void);
 		// 図形の移動を終了する.
@@ -446,6 +446,107 @@ namespace winrt::GraphPaper::implementation
 		void event_arrange_popup_image(const bool visible);
 		// ポップアップメニューの方眼とページ、背景パターンの各項目を設定する.
 		void event_arrange_popup_layout(const bool visible);
+
+		//-------------------------------
+		// MainPage_edit.cpp
+		// 文字列の編集
+		//-------------------------------
+
+		// 文字列の編集中か判定する.
+		bool is_text_editing(void) const noexcept
+		{
+			// 文字列編集中の図形があって, かつそれが最後に押された図形である
+			return m_edit_text_shape != nullptr && m_edit_text_shape == m_event_shape_last;
+		}
+
+		winrt::hstring text_sele_get(void) noexcept
+		{
+			ShapeText* t = m_edit_text_shape;
+			const auto len = t->get_text_len();
+			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
+			const auto s = min(t->m_select_start, end);
+			const auto e = max(t->m_select_start, end);
+			return winrt::hstring{ t->m_text + s, e - s };
+		}
+		void text_sele_delete(void) noexcept
+		{
+			const ShapeText* t = m_edit_text_shape;
+			const auto len = t->get_text_len();
+			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
+			const auto start = min(t->m_select_start, len);
+			// 選択範囲があるなら
+			if (end != start) {
+				undo_push_null();
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				undo_menu_is_enabled();
+				main_draw();
+			}
+
+		}
+		void text_sele_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
+		{
+			const ShapeText* t = m_edit_text_shape;
+			const auto old_len = t->get_text_len();
+			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, old_len);
+			const auto start = min(m_edit_text_comp ? m_edit_text_start : t->m_select_start, old_len);
+			const auto s = min(start, end);
+			const auto e = max(start, end);
+			if (s < e) {
+				if (!m_edit_text_comp) {
+					undo_push_null();
+				}
+				else {
+					for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
+						m_ustack_undo.pop_back();
+						u->exec();
+						delete u;
+					}
+				}
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
+				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
+				undo_menu_is_enabled();
+				main_draw();
+			}
+			else if (ins_len > 0) {
+				if (!m_edit_text_comp) {
+					undo_push_null();
+				}
+				else {
+					for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
+						m_ustack_undo.pop_back();
+						u->exec();
+						delete u;
+					}
+				}
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
+				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
+				undo_menu_is_enabled();
+				main_draw();
+			}
+		}
+
+		void text_char_delete(const bool shift_key) noexcept
+		{
+			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
+			const ShapeText* t = m_edit_text_shape;
+			const auto len = t->get_text_len();
+			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
+			const auto start = min(t->m_select_start, len);
+			if (!shift_key && end == start && end < len) {
+				undo_push_null();
+				undo_push_text_select(m_edit_text_shape, end, end + 1, false);
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				undo_menu_is_enabled();
+				main_draw();
+			}
+			// 選択範囲があるなら
+			else if (end != start) {
+				undo_push_null();
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				undo_menu_is_enabled();
+				main_draw();
+			}
+		}
 
 		//-------------------------------
 		// MainPage_file.cpp

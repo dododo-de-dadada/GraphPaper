@@ -14,7 +14,14 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニュー項目が選択された.
 	void MainPage::drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		// 選択ツールが選択されている.
 		if (sender == rmfi_menu_selection_tool()) {
+			// XAML のキーボードアクセラレーターにエスケープキーが設定されている.
+			if (m_edit_text_shape != nullptr) {
+				m_edit_context.NotifyFocusLeave();
+				m_edit_text_shape = nullptr;
+				main_draw();
+			}
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;

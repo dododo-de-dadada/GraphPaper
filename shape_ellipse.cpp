@@ -55,11 +55,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeEllipse::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
-	) const noexcept
+	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const auto loc = rect_loc_hit_test(m_start, m_pos, t, m_loc_width);
+		const auto loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
 		if (loc != LOC_TYPE::LOC_PAGE) {
 			return loc;
 		}
@@ -79,21 +77,21 @@ namespace winrt::GraphPaper::implementation
 			const double s_width = static_cast<double>(max(m_stroke_width, m_loc_width));
 			const double ox = rx + s_width * 0.5;
 			const double oy = ry + s_width * 0.5;
-			if (!pt_in_ellipse(t, c, ox, oy)) {
+			if (!pt_in_ellipse(pt, c, ox, oy)) {
 				// 外側なら LOC_PAGE を返す.
 				return LOC_TYPE::LOC_PAGE;
 			}
 			// だ円の内径に対し, 点の内外を判定する.
 			const double ix = ox - s_width;
 			const double iy = oy - s_width;
-			if (ix <= 0.0 || iy <= 0.0 || !pt_in_ellipse(t, c, ix, iy)) {
+			if (ix <= 0.0 || iy <= 0.0 || !pt_in_ellipse(pt, c, ix, iy)) {
 				// 内径が負数, 、または点が外側なら LOC_STROKE を返す.
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// だ円に点が含まれるか判定する.
-			if (pt_in_ellipse(t, c, rx, ry)) {
+			if (pt_in_ellipse(pt, c, rx, ry)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}

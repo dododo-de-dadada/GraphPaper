@@ -528,11 +528,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
-	// U	操作の識別子.
+	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
+	// U	操作の種類
 	// T	格納する型.
 	// val	格納する値
-	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
-	template<UNDO_T U, typename T> bool MainPage::undo_push_set(T const& val)
+	template<UNDO_T U, typename T> bool MainPage::undo_push_set(const T& val)
 	{
 		// メインページに属性ありなら, メインページの属性も変更する.
 		T page_val;

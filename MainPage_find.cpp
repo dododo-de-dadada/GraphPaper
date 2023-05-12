@@ -252,6 +252,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		while (replace_and_find()) {}
+		undo_menu_is_enabled();
 		main_draw();
 	}
 
@@ -260,20 +261,19 @@ namespace winrt::GraphPaper::implementation
 	// 一致したなら true, そうでなければ false を返す.
 	bool MainPage::replace_and_find(void)
 	{
-		// 編集する図形がなければ検索する.
-		if (m_edit_text_shape != nullptr) {
-			// 編集する図形があっても選択された文字範囲がなければ検索する.
+		// 編集する図形がある.
+		if (is_text_editing()) {
+			//選択された文字範囲がある.
 			const ShapeText* t = m_edit_text_shape;
 			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
 			const auto s = min(t->m_select_start, end);
 			const auto e = max(t->m_select_start, end);
 			if (s < e) {
-				// 編集する図形があって選択された文字範囲があるなら置換する.
-				const auto repl_len = wchar_len(m_find_repl);
+				// 置換して, 置換後の文字範囲を選択
 				undo_push_select(m_edit_text_shape);
+				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, m_find_repl));
+				const auto repl_len = wchar_len(m_find_repl);
 				undo_push_text_select(m_edit_text_shape, s + repl_len, s + repl_len, false);
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, e - s));
-				m_ustack_undo.push_back(new UndoText(m_edit_text_shape, s, m_find_repl));
 				m_edit_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
 			}
 		}
@@ -290,12 +290,13 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_null();
-		if (replace_and_find()) {
+		bool found = replace_and_find();
+		if (found) {
 			scroll_to(m_edit_text_shape);
-			main_draw();
+			undo_menu_is_enabled();
 		}
-		else {
-			main_draw();
+		main_draw();
+		if (!found) {
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			status_bar_set_pos();
@@ -311,6 +312,10 @@ namespace winrt::GraphPaper::implementation
 			find_text_preserve();
 		}
 		else {
+			if (m_edit_text_shape != nullptr) {
+				m_edit_context.NotifyFocusLeave();
+				m_edit_text_shape = nullptr;
+			}
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
@@ -332,12 +337,13 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
+	// 文字列を検索する.
 	bool MainPage::find_next(void)
 	{
 		const auto find_len = wchar_len(m_find_text);
 		// 最後面から最前面の各文字列図形について.
 		for (auto it = m_main_page.m_shape_list.begin(); it != m_main_page.m_shape_list.end(); it++) {
-			// 編集対象の図形があるならその図形. なければ最後面にある文字列図形 s を得る.
+			// 編集中の図形があるならその図形. なければ最後面にある文字列図形 s を得る.
 			if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
 				continue;
 			}
@@ -353,12 +359,10 @@ namespace winrt::GraphPaper::implementation
 				// 図形のキャレットよりうしろに一致する文字列があるか調べる.
 				const ShapeText* t = static_cast<ShapeText*>(*it);
 				const auto text_len = wchar_len(t->m_text);
-				const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-				const auto e = max(t->m_select_start, end);
-				for (uint32_t i = e; i + find_len < text_len; i++) {
+				const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, text_len);
+				for (uint32_t i = max(t->m_select_start, end); i + find_len <= text_len; i++) {
 					const int cmp = m_find_text_case ?
-						wcsncmp(t->m_text + e, m_find_text, find_len) :
-						_wcsnicmp(t->m_text + e, m_find_text, find_len);
+						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						unselect_shape_all();
 						m_edit_text_shape = static_cast<ShapeText*>(*it);
@@ -373,18 +377,17 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			// 最後面の図形に戻って, 検索を始めた図形 s の直前までの各図形について,
-			for (auto it = m_main_page.m_shape_list.begin(); it != m_main_page.m_shape_list.end() && *it != s; it++) {
+			for (it = m_main_page.m_shape_list.begin(); it != m_main_page.m_shape_list.end() && *it != s; it++) {
 				if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
 					continue;
 				}
 				// 図形の文字列の先頭から一致する文字列があるか調べる.
 				const ShapeText* t = static_cast<ShapeText*>(*it);
 				const auto text_len = wchar_len(t->m_text);
-				for (uint32_t i = 0; i + find_len < text_len; i++) {
+				for (uint32_t i = 0; i + find_len <= text_len; i++) {
 					// 一致する文字列があれば,
 					const int cmp = m_find_text_case ?
-						wcsncmp(t->m_text + i, m_find_text, find_len) :
-						_wcsnicmp(t->m_text + i, m_find_text, find_len);
+						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						unselect_shape_all();
 						m_edit_text_shape = static_cast<ShapeText*>(*it);
@@ -395,10 +398,10 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 検索を始めた図形 s について, 図形 s のキャレットより前に一致する文字列があるか調べる.
-			const ShapeText* t = static_cast<ShapeText*>(s);
+			const ShapeText* t = static_cast<const ShapeText*>(s);
 			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
 			const auto e = min(t->m_select_start, end);
-			for (uint32_t i = 0; i + find_len < e; i++) {
+			for (uint32_t i = 0; i + find_len <= e; i++) {
 				const int cmp = m_find_text_case ?
 					wcsncmp(t->m_text + i, m_find_text, find_len) :
 					_wcsnicmp(t->m_text + i, m_find_text, find_len);
@@ -428,6 +431,7 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 		}
 		else {
+			main_draw();
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			status_bar_set_pos();

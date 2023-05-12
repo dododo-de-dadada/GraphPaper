@@ -1003,20 +1003,6 @@ namespace winrt::GraphPaper::implementation
 		m_is_trail = dt_reader.ReadBoolean();
 	}
 
-	UndoText::UndoText(DataReader const& dt_reader) :
-		Undo(undo_read_shape(dt_reader)),
-		m_flag(dt_reader.ReadBoolean()),
-		m_at(dt_reader.ReadUInt32()),
-		m_len(dt_reader.ReadUInt32())
-	{
-		// ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é, ‚Â‚Ü‚è‘}“ü‚È‚ç‚Î, ‘}“ü‚·‚é•¶š—ñ‚ğ“Ç‚İ‚Ş.
-		if (m_flag) {
-			m_text = new wchar_t[m_len + 1];
-			dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(m_text), 2 * m_len));
-			m_text[m_len] = L'\0';
-		}
-	}
-
 	void UndoTextSelect::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::TEXT_SELECT));
@@ -1026,90 +1012,37 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(m_is_trail);
 	}
 
-	void UndoText::write(DataWriter const& dt_writer) const
+	UndoText2::UndoText2(DataReader const& dt_reader) :
+		Undo(undo_read_shape(dt_reader))
+	{
+		m_start = dt_reader.ReadUInt32();
+		m_end = dt_reader.ReadUInt32();
+		m_trail = dt_reader.ReadBoolean();
+		const auto len = dt_reader.ReadUInt32();
+		if (len > 0) {
+			const auto a = reinterpret_cast<uint8_t*>(m_text);
+			dt_reader.ReadBytes(array_view(a, a + 2 * static_cast<size_t>(len)));
+		}
+		else {
+			m_text = nullptr;
+		}
+	}
+
+	void UndoText2::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::TEXT_CONTENT));
 		undo_write_shape(m_shape, dt_writer);
-		dt_writer.WriteBoolean(m_flag);
-		dt_writer.WriteUInt32(m_at);
-		dt_writer.WriteUInt32(m_len);
-		// ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é, ‚Â‚Ü‚è‘}“ü‚È‚ç‚Î, ‘}“ü‚·‚é•¶š—ñ‚ğ‘‚«‚Ş.
-		if (m_flag) {
-			const auto bytes = reinterpret_cast<const uint8_t*>(m_text);
-			dt_writer.WriteBytes(array_view(bytes, bytes + 2 * static_cast<size_t>(m_len)));
+		dt_writer.WriteUInt32(m_start);
+		dt_writer.WriteUInt32(m_end);
+		dt_writer.WriteBoolean(m_trail);
+		const auto len = wchar_len(m_text);
+		if (len > 0) {
+			const auto a = reinterpret_cast<const uint8_t*>(m_text);
+			dt_writer.WriteBytes(array_view(a, a + 2 * static_cast<size_t>(len)));
 		}
-	}
-
-	// }Œ`‚É•¶š—ñ‚ğ‘}“ü‚·‚é.
-	void UndoText::ins(Shape* s, const uint32_t ins_at, const wchar_t* ins_text) noexcept
-	{
-		wchar_t* old_text = nullptr;
-		s->get_text_content(old_text);
-		const size_t ins_len = wchar_len(ins_text);
-		const size_t old_len = static_cast<ShapeText*>(s)->get_text_len();
-		const size_t new_len = old_len + ins_len;
-		const uint32_t new_at = min(ins_at, old_len);
-		wchar_t* new_text = new wchar_t[new_len + 1];
-		for (uint32_t i = 0; i < new_at; i++) {
-			new_text[i] = old_text[i];
+		else {
+			dt_writer.WriteUInt32(0);
 		}
-		for (uint32_t i = new_at; i < new_at + ins_len; i++) {
-			new_text[i] = ins_text[i - new_at];
-		}
-		for (uint32_t i = new_at + ins_len; i < new_len; i++) {
-			new_text[i] = old_text[i - ins_len];
-		}
-		new_text[new_len] = L'\0';
-		s->set_text_content(new_text);
-		//s->set_text_selected(DWRITE_TEXT_RANGE{ static_cast<UINT32>(new_at + ins_len), 0});
-		delete[] old_text;
-
-		// ‘}“ü‚³‚ê‚½ˆÊ’u‚ğíœ‚·‚éˆÊ’u‚É, ‘}“ü‚³‚ê‚½•¶š—ñ‚Ì’·‚³‚ğíœ‚·‚é’·‚³‚É,
-		// ‘}“ü‚³‚ê‚½•¶š—ñ‚Í•K—v‚È‚¢‚Ì‚Å, ƒkƒ‹ƒ|ƒCƒ“ƒ^[‚ğíœ‚·‚é•¶š—ñ‚ÉŠi”[‚·‚é.
-		m_flag = false;
-		m_at = ins_at;
-		m_len = ins_len;
-		if (m_text != nullptr) {
-			delete[] m_text;
-		}
-		m_text = nullptr;
-	}
-
-	// }Œ`‚©‚ç•¶š—ñ‚ğíœ‚·‚é.
-	void UndoText::del(Shape* s, const uint32_t del_at, const uint32_t del_len) noexcept
-	{
-		wchar_t* old_text;
-		static_cast<ShapeText*>(s)->get_text_content(old_text);	// Œ³‚Ì•¶š—ñ
-		const size_t old_len = static_cast<ShapeText*>(s)->get_text_len();	// Œ³‚Ì•¶š—ñ‚Ì’·‚³
-		const size_t new_len = old_len - min(old_len, del_len);	// V‚µ‚¢•¶š—ñ‚Ì’·‚³
-		wchar_t* const new_text = new wchar_t[new_len + 1];	// V‚µ‚¢•¶š—ñ
-		wchar_t* const del_text = new wchar_t[del_len + 1];	// íœ‚³‚ê‚½•¶š—ñ
-		for (uint32_t i = 0; i < del_at; i++) {
-			new_text[i] = old_text[i];
-		}
-		for (uint32_t i = del_at; i < new_len; i++) {
-			new_text[i] = old_text[i + del_len];
-		}
-		new_text[new_len] = L'\0';
-		for (uint32_t i = 0; i < del_len; i++) {
-			del_text[i] = old_text[del_at + i];
-		}
-		del_text[del_len] = L'\0';
-		s->set_text_content(new_text);
-		//s->set_text_selected(DWRITE_TEXT_RANGE{ del_at, 0 });
-		delete[] old_text;
-
-		// íœ‚³‚ê‚½ˆÊ’u‚ğ‘}“ü‚³‚ê‚½ˆÊ’u‚É, íœ‚³‚ê‚½’·‚³‚ğ‘}“ü‚³‚ê‚é’·‚³‚É, 
-		// íœ‚³‚ê‚½•¶š—ñ‚ğ‘}“ü‚³‚ê‚é•¶š—ñ‚ÉŠi”[‚·‚é.
-		// ‘}“ü‚³‚ê‚é•¶š—ñ‚Ì’·‚³‚Í•ª‚©‚é‚Ì‚Å, ‚»‚Ì’·‚³‚Í•K‚¸‚µ‚à•K—v‚È‚¢‚ª,
-		// íœ‘€ì‚Ì“Ç‚İ‚İ‚ğ‚·‚é‚Æ‚«‚É‚±‚Ì’l‚ğ‘O’ñ‚Æ‚µ‚Ä•¶š—ñ‚ğ“Ç‚İ‚Ş.
-		m_flag = true;
-		m_at = del_at;
-		m_len = del_len;
-		if (m_text != nullptr) {
-			delete[] m_text;
-		}
-		m_text = del_text;
 	}
 
 }

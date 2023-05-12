@@ -205,16 +205,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeLine::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
-	) const noexcept
+	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		D2D1_POINT_2F end;	// 終点
 		pt_add(m_start, m_pos, end);
-		if (loc_hit_test(t, end, m_loc_width)) {
+		if (loc_hit_test(pt, end, m_loc_width)) {
 			return LOC_TYPE::LOC_END;
 		}
-		if (loc_hit_test(t, m_start, m_loc_width)) {
+		if (loc_hit_test(pt, m_start, m_loc_width)) {
 			return LOC_TYPE::LOC_START;
 		}
 		const double e_width = 0.5 * max(m_stroke_width, m_loc_width);
@@ -234,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_start, -dx - ox, -dy - oy, q[1]);
 			pt_add(end, dx - ox, dy - oy, q[2]);
 			pt_add(end, dx + ox, dy + oy, q[3]);
-			if (pt_in_poly(t, 4, q)) {
+			if (pt_in_poly(pt, 4, q)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
@@ -256,13 +254,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end, -ox, -oy, h[3]);
 			pt_add(end, dx, dy, h[4]);
 			pt_add(end, ox, oy, h[5]);
-			if (pt_in_poly(t, 6, h)) {
+			if (pt_in_poly(pt, 6, h)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else {
 			if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
-				if (pt_in_circle(t, m_start, e_width) || pt_in_circle(t, end, e_width)) {
+				if (pt_in_circle(pt, m_start, e_width) || pt_in_circle(pt, end, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
@@ -277,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 				pt_add(m_start, -ox, -oy, q[1]);
 				pt_add(end, -ox, -oy, q[2]);
 				pt_add(end, ox, oy, q[3]);
-				if (pt_in_poly(t, 4, q)) {
+				if (pt_in_poly(pt, 4, q)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}

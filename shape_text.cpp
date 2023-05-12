@@ -808,11 +808,11 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 図形が点を含むか判定する.
-	// t	判定される点
+	// pt	判定される点
 	// 戻り値	点を含む部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, t, m_loc_width);
+		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
 		if (loc != LOC_TYPE::LOC_PAGE) {
 			return loc;
 		}
@@ -841,12 +841,12 @@ namespace winrt::GraphPaper::implementation
 			tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
 			const D2D1_POINT_2F v{	// 行の左上点
-				lt_x/*tl*/, lt_y + tt + bl + descent - m_font_size
+				lt_x, lt_y + tt + bl + descent - m_font_size
 			};
 			const D2D1_POINT_2F w{	// 行の右下点
-				rb_x/*tl + tw*/, lt_y + tt + bl + descent
+				rb_x, lt_y + tt + bl + descent
 			};
-			if (pt_in_rect(t/*u*/, v, w)) {
+			if (pt_in_rect(pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
@@ -859,11 +859,11 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F w{	// 行の右下点
 				rb_x, lt_y + tt + bl + descent
 			};
-			if (pt_in_rect(t/*u*/, v, w)) {
+			if (pt_in_rect(pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
-		return ShapeRect::hit_test(t);
+		return ShapeRect::hit_test(pt);
 	}
 
 	// 矩形に含まれるか判定する.

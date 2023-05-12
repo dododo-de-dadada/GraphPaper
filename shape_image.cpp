@@ -430,25 +430,23 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeImage::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
-	) const noexcept
+	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		D2D1_POINT_2F p[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(p);
-		if (loc_hit_test(t, p[2], m_loc_width)) {
+		if (loc_hit_test(pt, p[2], m_loc_width)) {
 			return LOC_TYPE::LOC_SE;
 		}
-		else if (loc_hit_test(t, p[3], m_loc_width)) {
+		else if (loc_hit_test(pt, p[3], m_loc_width)) {
 			return LOC_TYPE::LOC_SW;
 		}
-		else if (loc_hit_test(t, p[1], m_loc_width)) {
+		else if (loc_hit_test(pt, p[1], m_loc_width)) {
 			return LOC_TYPE::LOC_NE;
 		}
-		else if (loc_hit_test(t, p[0], m_loc_width)) {
+		else if (loc_hit_test(pt, p[0], m_loc_width)) {
 			return LOC_TYPE::LOC_NW;
 		}
 		else {
@@ -458,28 +456,28 @@ namespace winrt::GraphPaper::implementation
 			e[0].y = static_cast<FLOAT>(p[0].y - e_width);
 			e[1].x = p[1].x;
 			e[1].y = static_cast<FLOAT>(p[1].y + e_width);
-			if (pt_in_rect(t, e[0], e[1])) {
+			if (pt_in_rect(pt, e[0], e[1])) {
 				return LOC_TYPE::LOC_NORTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[1].x - e_width);
 			e[0].y = p[1].y;
 			e[1].x = static_cast<FLOAT>(p[2].x + e_width);
 			e[1].y = p[2].y;
-			if (pt_in_rect(t, e[0], e[1])) {
+			if (pt_in_rect(pt, e[0], e[1])) {
 				return LOC_TYPE::LOC_EAST;
 			}
 			e[0].x = p[3].x;
 			e[0].y = static_cast<FLOAT>(p[3].y - e_width);
 			e[1].x = p[2].x;
 			e[1].y = static_cast<FLOAT>(p[2].y + e_width);
-			if (pt_in_rect(t, e[0], e[1])) {
+			if (pt_in_rect(pt, e[0], e[1])) {
 				return LOC_TYPE::LOC_SOUTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[0].x - e_width);
 			e[0].y = p[0].y;
 			e[1].x = static_cast<FLOAT>(p[3].x + e_width);
 			e[1].y = p[3].y;
-			if (pt_in_rect(t, e[0], e[1])) {
+			if (pt_in_rect(pt, e[0], e[1])) {
 				return LOC_TYPE::LOC_WEST;
 			}
 		}
@@ -493,8 +491,8 @@ namespace winrt::GraphPaper::implementation
 			p[2].y = p[0].y;
 			p[0].y = less_y;
 		}
-		if (p[0].x <= t.x && t.x <= p[2].x &&
-			p[0].y <= t.y && t.y <= p[2].y) {
+		if (p[0].x <= pt.x && pt.x <= p[2].x &&
+			p[0].y <= pt.y && pt.y <= p[2].y) {
 			return LOC_TYPE::LOC_FILL;
 		}
 		return LOC_TYPE::LOC_PAGE;

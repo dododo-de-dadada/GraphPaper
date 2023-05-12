@@ -128,15 +128,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeGroup::hit_test(
-		const D2D1_POINT_2F t	// 判定される点
-	) const noexcept
+	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t) != LOC_TYPE::LOC_PAGE) {
+			if (s->hit_test(pt, false) != LOC_TYPE::LOC_PAGE) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}

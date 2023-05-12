@@ -261,20 +261,20 @@ namespace winrt::GraphPaper::implementation
 
 	// リスト中の図形が点を含むか判定する.
 	// slist	図形リスト
-	// t	判定される点
+	// pt	判定される点
 	// s	点を含む図形
 	// 戻り値	点を含む図形の部位
-	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t, Shape*& s) noexcept
+	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F pt, const bool ctrl_key, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
-			const auto i = *it;
-			if (i->is_deleted()) {
+			const auto t = *it;
+			if (t->is_deleted()) {
 				continue;
 			}
-			const uint32_t loc = i->hit_test(t);
+			const uint32_t loc = t->hit_test(pt, ctrl_key);
 			if (loc != LOC_TYPE::LOC_PAGE) {
-				s = i;
+				s = t;
 				return loc;
 			}
 		}

@@ -11,9 +11,9 @@ namespace winrt::GraphPaper::implementation
 {
 	// ê}å`Ç™ì_Çä‹ÇﬁÇ©îªíËÇ∑ÇÈ.
 	// t_pos	îªíËÇ≥ÇÍÇÈì_
-	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, t_pos, m_loc_width);
+		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
 		if (loc != LOC_TYPE::LOC_PAGE) {
 			return loc;
 		}
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 					const D2D1_POINT_2F p_max{
 						static_cast<FLOAT>(p0.x + m_loc_width * 0.5f), max(p0.y, p1.y)
 					};
-					if (pt_in_rect(t_pos, p_min, p_max)) {
+					if (pt_in_rect(pt, p_min, p_max)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 					const D2D1_POINT_2F p_max{
 						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_loc_width * 0.5)
 					};
-					if (pt_in_rect(t_pos, p_min, p_max)) {
+					if (pt_in_rect(pt, p_min, p_max)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 					r_lt.y = less_y;
 				}
 				*/
-				if (pt_in_rect(t_pos, r_lt, r_rb)) {
+				if (pt_in_rect(pt, r_lt, r_rb)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			*/
 			//if (pt_in_rect(t_pos, r_lt, r_rb)) {
-			if (pt_in_rect(t_pos, m_start, e_pos)) {
+			if (pt_in_rect(pt, m_start, e_pos)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
