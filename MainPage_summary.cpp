@@ -212,17 +212,15 @@ namespace winrt::GraphPaper::implementation
 		const winrt::impl::com_ref<Summary> summary = item.try_as<Summary>();
 		m_event_shape_pressed = summary->get_shape();
 		m_event_shape_last = m_event_shape_pressed;
-		if (m_edit_text_shape != static_cast<ShapeText*>(m_event_shape_pressed)) {
+		if (typeid(*m_event_shape_pressed) == typeid(ShapeText) &&
+			m_edit_text_shape != static_cast<ShapeText*>(m_event_shape_pressed)) {
 			// 編集対象の図形があるならフォーカスをはずす.
 			if (m_edit_text_shape != nullptr) {
 				m_edit_context.NotifyFocusLeave();
+				undo_push_text_unselect(m_edit_text_shape);
 			}
 			// 押された図形をあらたな編集対象の図形とする.
 			m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
-			bool trail;
-			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-			const auto start = trail ? end + 1 : end;
-			undo_push_text_select(m_edit_text_shape, start, end, trail);
 			m_edit_context.NotifyFocusEnter();
 		}
 		m_main_page.set_attr_to(m_event_shape_pressed);

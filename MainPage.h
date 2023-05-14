@@ -255,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
 		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
-		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形
+		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 		bool m_eyedropper_filled = false;	// 抽出されたか判定
@@ -801,12 +801,8 @@ namespace winrt::GraphPaper::implementation
 		void select_shape_all_click(IInspectable const&,RoutedEventArgs const&);
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
-		// 次の図形を選択する.
-		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
 		bool select_shape_range(Shape* const s_from, Shape* const s_to);
-		// 図形を選択する.
-		//void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
 		// 矩形に含まれる図形の選択を反転する.
 		bool toggle_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
@@ -1090,9 +1086,18 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
 		// 図形の値の保存を実行して, その操作をスタックに積む.
 		template <UNDO_T U> void undo_push_set(Shape* const s);
+		void undo_push_text_unselect(ShapeText* s)
+		{
+			const auto start = s->m_select_trail ? s->m_select_end + 1 : s->m_select_end;
+			undo_push_text_select(s, start, s->m_select_end, s->m_select_trail);
+		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
 		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
 		{
+			const ShapeText* r = static_cast<const ShapeText*>(s);
+			if (r->m_select_start == start && r->m_select_end == end && r->m_select_trail == trail) {
+				return;
+			}
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
 			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.

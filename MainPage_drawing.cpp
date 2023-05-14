@@ -19,6 +19,7 @@ namespace winrt::GraphPaper::implementation
 			// XAML のキーボードアクセラレーターにエスケープキーが設定されている.
 			if (m_edit_text_shape != nullptr) {
 				m_edit_context.NotifyFocusLeave();
+				undo_push_text_unselect(m_edit_text_shape);
 				m_edit_text_shape = nullptr;
 				main_draw();
 			}
