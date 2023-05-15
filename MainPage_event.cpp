@@ -707,7 +707,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
 			bool trail;
 			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-			const auto start = m_edit_text_shape->m_select_start;
+			const auto start = m_main_page.m_select_start;
 			undo_push_text_select(m_edit_text_shape, start, end, trail);
 			main_draw();
 		}
@@ -737,7 +737,6 @@ namespace winrt::GraphPaper::implementation
 					m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 					// 図形を移動している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_MOVE;
-					// ポインターの現在位置を前回位置に保存する.
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_move(p);
 				}
@@ -745,9 +744,8 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_TEXT;
 					bool trail;
 					const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-					const auto start = m_edit_text_shape->m_select_start;
+					const auto start = m_main_page.m_select_start;
 					undo_push_text_select(m_edit_text_shape, start, end, trail);
-					main_draw();
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
@@ -1124,11 +1122,30 @@ namespace winrt::GraphPaper::implementation
 			scp_main_panel().ContextFlyout().Hide();
 			scp_main_panel().ContextFlyout(nullptr);
 		}
+		m_event_shape_pressed = nullptr;
+		m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
+
+		if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
+			m_main_page.set_attr_to(m_event_shape_pressed);
+			// メニューバーを更新する
+			stroke_dash_is_checked(m_main_page.m_stroke_dash);
+			stroke_width_is_checked(m_main_page.m_stroke_width);
+			stroke_cap_is_checked(m_main_page.m_stroke_cap);
+			stroke_join_is_checked(m_main_page.m_stroke_join);
+			stroke_arrow_is_checked(m_main_page.m_arrow_style);
+			font_weight_is_checked(m_main_page.m_font_weight);
+			font_stretch_is_checked(m_main_page.m_font_stretch);
+			font_style_is_checked(m_main_page.m_font_style);
+			text_align_horz_is_checked(m_main_page.m_text_align_horz);
+			text_align_vert_is_checked(m_main_page.m_text_align_vert);
+			grid_emph_is_checked(m_main_page.m_grid_emph);
+			grid_show_is_checked(m_main_page.m_grid_show);
+		}
+
 		bool changed = false;
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
-					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						/////
 						if (m_edit_text_shape != nullptr) {
@@ -1194,7 +1211,6 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
-					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						////
 						// 編集中の文字列図形があるなら取り消す.
@@ -1212,7 +1228,7 @@ namespace winrt::GraphPaper::implementation
 							const ShapeText* t = m_edit_text_shape;
 							bool trail;
 							const auto end = t->get_text_pos(m_event_pos_curr, trail);
-							undo_push_text_select(m_edit_text_shape, t->m_select_start, end, trail);
+							undo_push_text_select(m_edit_text_shape, m_main_page.m_select_start, end, trail);
 							changed = true;
 						}
 						// 押された図形は編集中の図形以外
@@ -1224,21 +1240,31 @@ namespace winrt::GraphPaper::implementation
 							if (m_edit_text_shape != nullptr) {
 								m_edit_context.NotifyFocusLeave();
 								undo_push_text_unselect(m_edit_text_shape);
+								m_edit_text_shape = nullptr;
 							}
-							m_edit_text_shape = static_cast<ShapeText*>(m_edit_text_shape);
+							//m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
 							// 押された点にキャレット位置を設定する.
-							const ShapeText* t = m_edit_text_shape;
-							bool trail;
-							const auto end = t->get_text_pos(m_event_pos_curr, trail);
-							undo_push_text_select(m_edit_text_shape, t->m_select_start, end, trail);
+							//const ShapeText* t = m_edit_text_shape;
+							//bool trail;
+							//const auto end = t->get_text_pos(m_event_pos_curr, trail);
+							//undo_push_text_select(m_edit_text_shape, m_main_page.m_select_start, end, trail);
 
-							m_edit_context.NotifyFocusEnter();
+							//m_edit_context.NotifyFocusEnter();
 							changed = true;
 						}
 					}
 					else {
-						if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
-							changed = true;
+						if (m_event_shape_last != nullptr) {
+							if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
+								changed = true;
+							}
+						}
+						else {
+							if (!m_event_shape_pressed->is_selected()) {
+								undo_push_select(m_event_shape_pressed);
+								changed = true;
+							}
+
 						}
 						////
 						// 現在に編集中の文字列があれば中断する.
@@ -1251,7 +1277,6 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else {
-					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					// 押された図形はない.
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						if (unselect_shape_all()) {
@@ -1281,20 +1306,29 @@ namespace winrt::GraphPaper::implementation
 						else {
 							m_event_shape_last = m_event_shape_pressed;
 						}
-						///////
-						if (m_edit_text_shape != m_event_shape_pressed) {
+						if (m_list_sel_cnt > 1) {
 							if (m_edit_text_shape != nullptr) {
 								m_edit_context.NotifyFocusLeave();
 								undo_push_text_unselect(m_edit_text_shape);
+								m_edit_text_shape = nullptr;
 							}
-							m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
 						}
-						bool trail;
-						const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-						const auto start = trail ? end + 1 : end;
-						undo_push_text_select(m_edit_text_shape, start, end, trail);
-						m_edit_context.NotifyFocusEnter();
-						changed = true;
+						else {
+							///////
+							if (m_edit_text_shape != m_event_shape_pressed) {
+								if (m_edit_text_shape != nullptr) {
+									m_edit_context.NotifyFocusLeave();
+									undo_push_text_unselect(m_edit_text_shape);
+								}
+								m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+							}
+							bool trail;
+							const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
+							const auto start = trail ? end + 1 : end;
+							undo_push_text_select(m_edit_text_shape, start, end, trail);
+							m_edit_context.NotifyFocusEnter();
+							changed = true;
+						}
 					}
 					// 押された図形は文字列以外.
 					else {
@@ -1323,8 +1357,6 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-				Shape* s;
-				const auto loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, s);
 			}
 			else {
 
@@ -1667,10 +1699,8 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
 			bool trail;
 			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
-			const auto start = m_edit_text_shape->m_select_start;
+			const auto start = m_main_page.m_select_start;
 			undo_push_text_select(m_edit_text_shape, start, end, trail);
-			// 
-			m_edit_context.NotifyFocusEnter();
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
@@ -1735,26 +1765,22 @@ namespace winrt::GraphPaper::implementation
 					undo_push_null();
 					undo_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 					undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 						undo_push_null();
 						undo_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
-						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 						undo_push_null();
 						undo_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
-						//xcvd_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
 						undo_push_null();
 						undo_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
 						undo_menu_is_enabled();
-						//xcvd_menu_is_enabled();
 					}
 				}
 			}

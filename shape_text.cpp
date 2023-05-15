@@ -10,8 +10,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::GraphPaper::implementation::get_font_face;
-
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ COLOR_ACCENT };	// 文字範囲の背景色
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_RANGE };	// 文字範囲の文字色
@@ -19,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	// ヒットテストの計量を作成する.
 	static HRESULT text_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt) noexcept;
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を作成する.
-	static HRESULT text_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& line_cnt, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng) noexcept;
+	//static HRESULT text_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& line_cnt, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng) noexcept;
 	// 書体の計量を得る.
 	static HRESULT text_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met) noexcept;
 
@@ -30,12 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// test_met	ヒットテストの計量
 	// test_cnt	計量の要素数
 	//------------------------------
-	static HRESULT text_create_test_metrics(
-		IDWriteTextLayout* text_lay, 
-		const DWRITE_TEXT_RANGE text_rng,
-		DWRITE_HIT_TEST_METRICS*& test_met,
-		UINT32& test_cnt
-	) noexcept
+	static HRESULT text_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt) noexcept
 	{
 		const uint32_t pos = text_rng.startPosition;
 		const uint32_t len = text_rng.length;
@@ -105,6 +98,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を得る.
 	//------------------------------
+	/*
 	static HRESULT text_create_text_metrics(
 		IDWriteTextLayout* text_lay,	// 文字列レイアウト
 		const uint32_t text_len,	// 文字列の長さ
@@ -140,6 +134,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return hr;
 	}
+	*/
 
 	//------------------------------
 	// 枠を文字列に合わせる.
@@ -434,10 +429,10 @@ namespace winrt::GraphPaper::implementation
 		if (hr == S_OK && updated) {
 			relese_metrics();
 
-			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			const auto s = min(m_select_start, end);
-			const auto e = max(m_select_start, end);
-			HRESULT hr = S_OK;
+			//const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
+			//const auto s = min(m_select_start, end);
+			//const auto e = max(m_select_start, end);
+			//HRESULT hr = S_OK;
 
 			// 行の計量を作成する.
 			if (hr == S_OK) {
@@ -451,13 +446,13 @@ namespace winrt::GraphPaper::implementation
 				hr = m_dwrite_text_layout->HitTestTextRange(0, wchar_len(m_text), 0.0f, 0.0f, m_dwrite_test_metrics, m_dwrite_line_cnt, &m_dwrite_test_cnt);
 			}
 			// 必要なら, 選択された文字範囲の計量を作成する.
-			if (s < e) {
-				if (hr == S_OK) {
-					m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
-					m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
-					hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
-				}
-			}
+			//if (s < e) {
+			//	if (hr == S_OK) {
+			//		m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
+			//		m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
+			//		hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
+			//	}
+			//}
 
 			// ヒットテストの計量は文字列の最後尾の改行はトリミングしてしまう.
 			// 必要なら, 行の計量をもとに, トリミングされた計量を補う.
@@ -524,28 +519,115 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (hr == S_OK) {
 			// 属性値の変更がなくても, 選択された文字範囲が変更されたなら,
-			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			const auto s = min(m_select_start, end);
-			const auto e = max(m_select_start, end);
-			if (m_dwrite_selected_cnt == 0) {
-				if (m_select_start != end) {
-					updated = true;
+			//const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
+			//const auto s = min(m_select_start, end);
+			//const auto e = max(m_select_start, end);
+			//if (m_dwrite_selected_cnt == 0) {
+			//	if (m_select_start != end) {
+			//		updated = true;
+			//	}
+			//}
+			//else {
+			//	uint32_t s_len = 0;	// 選択範囲の長さ
+			//	for (uint32_t i = 0; i < m_dwrite_selected_cnt; i++) {
+			//		s_len += m_dwrite_selected_metrics[i].length;
+			//	}
+			//	if (m_dwrite_selected_metrics[0].textPosition != s || s_len != e - s) {
+			//		updated = true;
+			//	}
+			//}
+			//if (updated) {
+			//	m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
+			//	m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
+			//	hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
+			//}
+		}
+	}
+
+	// 選択範囲された文字列を表示する.
+	void ShapeText::draw_selection(const uint32_t sele_start, const uint32_t sele_end, const bool sele_trailing) noexcept
+	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const color_brush = Shape::m_d2d_color_brush.get();
+		ID2D1SolidColorBrush* const range_brush = Shape::m_d2d_range_brush.get();
+
+		// 余白分をくわえた, 文字列の左上位置を計算する.
+		const double h = min(m_text_pad.width, fabs(m_pos.x) * 0.5f);
+		const double v = min(m_text_pad.height, fabs(m_pos.y) * 0.5f);
+		D2D1_POINT_2F t_lt{
+			m_pos.x < 0.0f ? h + m_start.x + m_pos.x : h + m_start.x,
+			m_pos.y < 0.0f ? v + m_start.y + m_pos.y : v + m_start.y
+		};
+
+		// 選択範囲があれば選択範囲の計量を得る.
+		const auto len = get_text_len();
+		const auto end = sele_trailing ? sele_end + 1 : sele_end;
+		const auto s = min(min(sele_start, end), len);
+		const auto e = min(max(sele_start, end), len);
+		UINT32 sele_cnt = 0;
+		DWRITE_HIT_TEST_METRICS* sele_met = nullptr;
+		HRESULT hr = S_OK;
+		if (hr == S_OK && s < e) {
+			m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &sele_cnt);
+			sele_met = new DWRITE_HIT_TEST_METRICS[sele_cnt];
+			hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, sele_met, sele_cnt, &sele_cnt);
+		}
+
+		// 選択範囲の計量をもとに範囲を塗りつぶす.
+		if (hr == S_OK && s < e) {
+			if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
+				text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
+			}
+			const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			const uint32_t rc = sele_cnt;
+			const uint32_t tc = m_dwrite_test_cnt;
+			for (uint32_t i = 0; i < rc; i++) {
+				for (uint32_t j = 0; j < tc; j++) {
+					const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[j];
+					const DWRITE_LINE_METRICS& lm = m_dwrite_line_metrics[j];
+					if (tm.textPosition <= sele_met[i].textPosition &&
+						sele_met[i].textPosition + sele_met[i].length <= tm.textPosition + tm.length) {
+						D2D1_RECT_F sele_rect;
+						sele_rect.left = t_lt.x + sele_met[i].left;
+						sele_rect.top = static_cast<FLOAT>(t_lt.y + tm.top + lm.baseline + descent - m_font_size);
+						if (sele_met[i].width < FLT_MIN) {
+							const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
+							sele_rect.right = sele_rect.left + sp_len;
+						}
+						else {
+							sele_rect.right = sele_rect.left + sele_met[i].width;
+						}
+						sele_rect.bottom = sele_rect.top + m_font_size;
+						color_brush->SetColor(ShapeText::s_text_selected_foreground);
+						target->DrawRectangle(sele_rect, color_brush, 2.0, nullptr);
+						color_brush->SetColor(ShapeText::s_text_selected_background);
+						target->FillRectangle(sele_rect, color_brush);
+						break;
+					}
 				}
 			}
-			else {
-				uint32_t s_len = 0;	// 選択範囲の長さ
-				for (uint32_t i = 0; i < m_dwrite_selected_cnt; i++) {
-					s_len += m_dwrite_selected_metrics[i].length;
-				}
-				if (m_dwrite_selected_metrics[0].textPosition != s || s_len != e - s) {
-					updated = true;
-				}
-			}
-			if (updated) {
-				m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, nullptr, 0, &m_dwrite_selected_cnt);
-				m_dwrite_selected_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_selected_cnt];
-				hr = m_dwrite_text_layout->HitTestTextRange(s, e - s, 0.0f, 0.0f, m_dwrite_selected_metrics, m_dwrite_selected_cnt, &m_dwrite_selected_cnt);
-			}
+			delete[] sele_met;
+		}
+
+		// 文字列全体を透明化
+		if (hr == S_OK && s < e) {
+			constexpr D2D1_COLOR_F TRANSPALENT{ 0.0f, 0.0f, 0.0f, 0.0f };
+			color_brush->SetColor(TRANSPALENT);
+			hr = m_dwrite_text_layout->SetDrawingEffect(color_brush, DWRITE_TEXT_RANGE{ 0, len });
+		}
+		// 選択範囲だけ前景色を設定する.
+		if (hr == S_OK && s < e) {
+			DWRITE_TEXT_RANGE ran{
+				static_cast<uint32_t>(s), static_cast<uint32_t>(e - s)
+			};
+			range_brush->SetColor(ShapeText::s_text_selected_foreground);
+			hr = m_dwrite_text_layout->SetDrawingEffect(range_brush, ran);
+		}
+		// 文字列を表示したあと, 透明化を戻す
+		if (hr == S_OK && s < e) {
+			target->DrawTextLayout(t_lt, m_dwrite_text_layout.get(), color_brush);
+			color_brush->SetColor(m_font_color);
+			hr = m_dwrite_text_layout->SetDrawingEffect(color_brush, DWRITE_TEXT_RANGE{ 0, len });
 		}
 	}
 
@@ -561,166 +643,77 @@ namespace winrt::GraphPaper::implementation
 		// 方形を描く.
 		ShapeRect::draw();
 
-		// 文字列が空か判定する.
-		//if (m_text == nullptr || m_text[0] == L'\0') {
-			// 文字列レイアウトと計量を破棄する.
-		//	m_dwrite_text_layout = nullptr;
-		//	relese_metrics();
-		//}
-		//else {
-			create_text_layout();
+		create_text_layout();
 
-			// 余白分をくわえて, 文字列の左上位置を計算する.
-			D2D1_POINT_2F t_lt;
-			pt_add(m_start, m_pos, t_lt);
-			t_lt.x = m_start.x < t_lt.x ? m_start.x : t_lt.x;
-			t_lt.y = m_start.y < t_lt.y ? m_start.y : t_lt.y;
-			const FLOAT pw = m_text_pad.width;
-			const FLOAT ph = m_text_pad.height;
-			const double hm = min(pw, fabs(m_pos.x) * 0.5);
-			const double vm = min(ph, fabs(m_pos.y) * 0.5);
-			pt_add(t_lt, hm, vm, t_lt);
+		// 余白分をくわえた, 文字列の左上位置を計算する.
+		const double h = min(m_text_pad.width, fabs(m_pos.x) * 0.5f);
+		const double v = min(m_text_pad.height, fabs(m_pos.y) * 0.5f);
+		D2D1_POINT_2F t_lt{
+			m_pos.x < 0.0f ? h + m_start.x + m_pos.x : h + m_start.x,
+			m_pos.y < 0.0f ? v + m_start.y + m_pos.y : v + m_start.y
+		};
 
-			HRESULT hr = S_OK;
-			// 選択された文字範囲があるなら, 背景を塗りつぶす.
-			const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			if (m_loc_show && is_selected() && m_select_start != end) {
-				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
-				}
-				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
-				const uint32_t rc = m_dwrite_selected_cnt;
-				const uint32_t tc = m_dwrite_test_cnt;
-				for (uint32_t i = 0; i < rc; i++) {
-					const DWRITE_HIT_TEST_METRICS& rm = m_dwrite_selected_metrics[i];
-					for (uint32_t j = 0; j < tc; j++) {
-						const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[j];
-						const DWRITE_LINE_METRICS& lm = m_dwrite_line_metrics[j];
-						if (tm.textPosition <= rm.textPosition && rm.textPosition + rm.length <= tm.textPosition + tm.length) {
-							D2D1_RECT_F rect;
-							rect.left = t_lt.x + rm.left;
-							rect.top = static_cast<FLOAT>(t_lt.y + tm.top + lm.baseline + descent - m_font_size);
-							if (rm.width < FLT_MIN) {
-								const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
-								rect.right = rect.left + sp_len;
-							}
-							else {
-								rect.right = rect.left + rm.width;
-							}
-							rect.bottom = rect.top + m_font_size;
-							color_brush->SetColor(ShapeText::s_text_selected_foreground);
-							target->DrawRectangle(rect, color_brush, 2.0, nullptr);
-							color_brush->SetColor(ShapeText::s_text_selected_background);
-							target->FillRectangle(rect, color_brush);
-							break;
-						}
-					}
-				}
-				range_brush->SetColor(ShapeText::s_text_selected_foreground);
-				if (hr == S_OK) {
-					const auto s = min(m_select_start, end);
-					const auto e = min(m_select_start, end);
-					DWRITE_TEXT_RANGE ran{
-						static_cast<uint32_t>(s), static_cast<uint32_t>(e - s)
-					};
-					hr = m_dwrite_text_layout->SetDrawingEffect(range_brush, ran);
-					//hr = m_dwrite_text_layout->SetDrawingEffect(range_brush, m_text_selected_range);
-				}
+		HRESULT hr = S_OK;
+
+		// 文字列を表示する
+		color_brush->SetColor(m_font_color);
+		target->DrawTextLayout(t_lt, m_dwrite_text_layout.get(), color_brush);
+
+		// 図形が選択されているなら, 文字列の補助線を表示する
+		if (m_loc_show && is_selected()) {
+			const uint32_t d_cnt = Shape::m_aux_style->GetDashesCount();
+			if (d_cnt <= 0 || d_cnt > 6) {
+				return;
 			}
 
-			// 文字列を表示する
-			color_brush->SetColor(m_font_color);
-			target->DrawTextLayout(t_lt, m_dwrite_text_layout.get(), color_brush);
-			//const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			if (m_loc_show && is_selected() && m_select_start != end) {
-			//if (m_text_selected_range.length > 0) {
-				if (hr == S_OK) {
-					hr = m_dwrite_text_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });
-				}
+			FLOAT d_arr[6];
+			Shape::m_aux_style->GetDashes(d_arr, d_cnt);
+			double mod = d_arr[0];
+			for (uint32_t i = 1; i < d_cnt; i++) {
+				mod += d_arr[i];
+			}
+			if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
+				text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 			}
 
-			// 図形が選択されているなら, 文字列の補助線を表示する
-			if (m_loc_show && is_selected()) {
-				const uint32_t d_cnt = Shape::m_aux_style->GetDashesCount();
-				if (d_cnt <= 0 || d_cnt > 6) {
-					return;
-				}
+			D2D1_POINT_2F p[4];
+			D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
+			const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
+				DWRITE_HIT_TEST_METRICS const& tm = m_dwrite_test_metrics[i];
+				DWRITE_LINE_METRICS const& lm = m_dwrite_line_metrics[i];
+				// 破線がずれて重なって表示されないように, 破線のオフセットを計算し,
+				// 文字列の枠を辺ごとに表示する.
+				p[0].x = t_lt.x + tm.left;
+				p[0].y = static_cast<FLOAT>(t_lt.y + tm.top + lm.baseline + descent - m_font_size);
+				p[2].x = p[0].x + tm.width;
+				p[2].y = p[0].y + m_font_size;
+				p[1].x = p[2].x;
+				p[1].y = p[0].y;
+				p[3].x = p[0].x;
+				p[3].y = p[2].y;
+				const D2D1_RECT_F r{
+					p[0].x, p[0].y, p[2].x, p[2].y
+				};
 
-				FLOAT d_arr[6];
-				Shape::m_aux_style->GetDashes(d_arr, d_cnt);
-				double mod = d_arr[0];
-				for (uint32_t i = 1; i < d_cnt; i++) {
-					mod += d_arr[i];
-				}
-				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
-				}
-
-				D2D1_POINT_2F p[4];
-				D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
-				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
-				for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
-					DWRITE_HIT_TEST_METRICS const& tm = m_dwrite_test_metrics[i];
-					DWRITE_LINE_METRICS const& lm = m_dwrite_line_metrics[i];
-					// 破線がずれて重なって表示されないように, 破線のオフセットを計算し,
-					// 文字列の枠を辺ごとに表示する.
-					p[0].x = t_lt.x + tm.left;
-					p[0].y = static_cast<FLOAT>(t_lt.y + tm.top + lm.baseline + descent - m_font_size);
-					p[2].x = p[0].x + tm.width;
-					p[2].y = p[0].y + m_font_size;
-					p[1].x = p[2].x;
-					p[1].y = p[0].y;
-					p[3].x = p[0].x;
-					p[3].y = p[2].y;
-					const D2D1_RECT_F r{
-						p[0].x, p[0].y, p[2].x, p[2].y
-					};
-
-					color_brush->SetColor(ShapeText::s_text_selected_foreground);
-					target->DrawRectangle(r, color_brush, Shape::m_aux_width, nullptr);
-					color_brush->SetColor(ShapeText::s_text_selected_background);
-					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
-					winrt::com_ptr<ID2D1StrokeStyle1> selected_style;
-					static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt, selected_style.put());
-					target->DrawLine(p[0], p[1], color_brush, Shape::m_aux_width, selected_style.get());
-					target->DrawLine(p[3], p[2], color_brush, Shape::m_aux_width, selected_style.get());
-					selected_style = nullptr;
-					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
-					static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt, selected_style.put());
-					target->DrawLine(p[1], p[2], color_brush, Shape::m_aux_width, selected_style.get());
-					target->DrawLine(p[0], p[3], color_brush, Shape::m_aux_width, selected_style.get());
-					selected_style = nullptr;
-					/*
-					if (cp > m_dwrite_test_metrics[i].textPosition && cp < m_dwrite_test_metrics[i].textPosition + m_dwrite_test_metrics[i].length) {
-						FLOAT cx, cy;
-						DWRITE_HIT_TEST_METRICS ch;
-						m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
-						D2D1_POINT_2F s{ p[0].x + cx, p[1].y };
-						D2D1_POINT_2F e{ p[0].x + cx, p[2].y };
-						color_brush->SetColor(COLOR_BLACK);
-						target->DrawLine(s, e, color_brush, 1.0f, nullptr);
-					}
-					else if (cp == m_dwrite_test_metrics[i].textPosition) {
-						FLOAT cx, cy;
-						DWRITE_HIT_TEST_METRICS ch;
-						m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
-
-					}
-					*/
-				}
-				/*
-				if (cp == get_text_len()) {
-					FLOAT cx, cy;
-					DWRITE_HIT_TEST_METRICS ch;
-					m_dwrite_text_layout->HitTestTextPosition(cp, false, &cx, &cy, &ch);
-					D2D1_POINT_2F s{ p[0].x + cx, p[1].y };
-					D2D1_POINT_2F e{ p[0].x + cx, p[2].y };
-					color_brush->SetColor(COLOR_BLACK);
-					target->DrawLine(s, e, color_brush, 1.0f, nullptr);
-				}
-				*/
+				color_brush->SetColor(ShapeText::s_text_selected_foreground);
+				target->DrawRectangle(r, color_brush, Shape::m_aux_width, nullptr);
+				color_brush->SetColor(ShapeText::s_text_selected_background);
+				s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
+				winrt::com_ptr<ID2D1StrokeStyle1> selected_style;
+				static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt,
+					selected_style.put());
+				target->DrawLine(p[0], p[1], color_brush, Shape::m_aux_width, selected_style.get());
+				target->DrawLine(p[3], p[2], color_brush, Shape::m_aux_width, selected_style.get());
+				selected_style = nullptr;
+				s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
+				static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt,
+					selected_style.put());
+				target->DrawLine(p[1], p[2], color_brush, Shape::m_aux_width, selected_style.get());
+				target->DrawLine(p[0], p[3], color_brush, Shape::m_aux_width, selected_style.get());
+				selected_style = nullptr;
 			}
-		//}
+		}
 	}
 
 	// 書体の色を得る.
@@ -820,20 +813,14 @@ namespace winrt::GraphPaper::implementation
 			0.0f : 
 			(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
-		// 文字列の範囲の左上が原点になるよう, 判定される点を移動する.
-		//D2D1_POINT_2F lt;
-		//ShapeRect::get_bbox_lt(lt);
-		//pt_sub(lt, m_text_pad, lt);
-		//D2D1_POINT_2F u;
-		//pt_sub(t, lt, u);
+		// 文字列の矩形の左上点と右下の Y 値を得る.
+		const float h = fabs(m_pos.x) * 0.5f;
+		const float v = fabs(m_pos.y) * 0.5f;
+		const float f = m_font_size * 0.5f;
+		float left = (m_pos.x < 0.0f ? m_start.x + m_pos.x : m_start.x) + min(m_text_pad.width, h);
+		float right = (m_pos.x < 0.0f ? m_start.x : m_start.x + m_pos.x) - min(m_text_pad.width, h);
+		const float top = (m_pos.y < 0.0f ? m_start.y + m_pos.y : m_start.y) + min(m_text_pad.height, v);
 
-		// 文字列全体の矩形の左上を原点とする座標に, 判定される点を移動する.
-		const float lt_x = min(m_start.x, m_start.x + m_pos.x) + m_text_pad.width;
-		const float rb_x = max(m_start.x, m_start.x + m_pos.x) - m_text_pad.width;
-		const float lt_y = min(m_start.y, m_start.y + m_pos.y) + m_text_pad.height;
-		//const D2D1_POINT_2F u{
-		//	t.x - lt_x, t.y - lt_y
-		//};
 		float tt = 0.0f;
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const auto tl = m_dwrite_test_metrics[i].left;
@@ -841,23 +828,37 @@ namespace winrt::GraphPaper::implementation
 			tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
 			const D2D1_POINT_2F v{	// 行の左上点
-				lt_x, lt_y + tt + bl + descent - m_font_size
+				max(left, left + tl - f), top + tt + bl + descent - m_font_size
 			};
 			const D2D1_POINT_2F w{	// 行の右下点
-				rb_x, lt_y + tt + bl + descent
+				min(right, left + tw + f), top + tt + bl + descent
 			};
 			if (pt_in_rect(pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
+		float line_x;
+		if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
+			m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
+			left = max(left, (right - left) * 0.5f - f);
+			right = left + m_font_size;
+		}
+		else if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
+			left = max(left, right - f);
+			right = left + m_font_size;
+		}
+		else {
+			left = max(left, left - f);
+			right = left + m_font_size;
+		}
 		for (uint32_t i = m_dwrite_test_cnt; i < m_dwrite_line_cnt; i++) {
 			tt += m_dwrite_line_metrics[i].height;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
 			const D2D1_POINT_2F v{	// 行の左上点
-				lt_x, lt_y + tt + bl + descent - m_font_size
+				left, top + tt + bl + descent - m_font_size
 			};
 			const D2D1_POINT_2F w{	// 行の右下点
-				rb_x, lt_y + tt + bl + descent
+				right, top + tt + bl + descent
 			};
 			if (pt_in_rect(pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
@@ -1175,9 +1176,9 @@ namespace winrt::GraphPaper::implementation
 		prop->get_text_align_vert(m_text_align_vert);
 		m_text = text;
 		//m_text_selected_range = DWRITE_TEXT_RANGE{ 0, 0 };
-		m_select_end = wchar_len(text);
-		m_select_start = m_select_end;
-		m_select_trail = false;
+		//m_select_end = wchar_len(text);
+		//m_select_start = m_select_end;
+		//m_select_trail = false;
 		ShapeText::is_available_font(m_font_family);
 	}
 

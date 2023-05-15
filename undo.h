@@ -322,23 +322,22 @@ namespace winrt::GraphPaper::implementation
 		UndoTextSelect(Shape* const s, const int start, const int end, const bool is_trail) :
 			Undo(s)
 		{
-			ShapeText* const t = static_cast<ShapeText* const>(s);
-			m_start = t->m_select_start;
-			m_end = t->m_select_end;
-			m_is_trail = t->m_select_trail;
-			t->m_select_start = start;
-			t->m_select_end = end;
-			t->m_select_trail = is_trail;
+			m_start = undo_page->m_select_start;
+			m_end = undo_page->m_select_end;
+			m_is_trail = undo_page->m_select_trail;
+			undo_page->m_select_start = start;
+			undo_page->m_select_end = end;
+			undo_page->m_select_trail = is_trail;
 		}
 		virtual void exec(void) noexcept final override
 		{
-			ShapeText* const t = static_cast<ShapeText* const>(m_shape);
-			const auto start = t->m_select_start;
-			const auto end = t->m_select_end;
-			const auto is_trail = t->m_select_trail;
-			t->m_select_start = m_start;
-			t->m_select_end = m_end;
-			t->m_select_trail = m_is_trail;
+			//ShapeText* const t = static_cast<ShapeText* const>(m_shape);
+			const auto start = undo_page->m_select_start;
+			const auto end = undo_page->m_select_end;
+			const auto is_trail = undo_page->m_select_trail;
+			undo_page->m_select_start = m_start;
+			undo_page->m_select_end = m_end;
+			undo_page->m_select_trail = m_is_trail;
 			m_start = start;
 			m_end = end;
 			m_is_trail = is_trail;
@@ -373,9 +372,9 @@ namespace winrt::GraphPaper::implementation
 			const auto old_len = wchar_len(old_text);
 
 			// 選択範囲と削除する文字列を保存する.
-			m_start = static_cast<ShapeText*>(s)->m_select_start;
-			m_end = static_cast<ShapeText*>(s)->m_select_end;
-			m_trail = static_cast<ShapeText*>(s)->m_select_trail;
+			m_start = undo_page->m_select_start;
+			m_end = undo_page->m_select_end;
+			m_trail = undo_page->m_select_trail;
 			const auto end = min(m_trail ? m_end + 1 : m_end, old_len);
 			const auto start = min(m_start, old_len);
 			const auto m = min(start, end);
@@ -430,9 +429,9 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 編集後の選択範囲は, 挿入された文字列になる.
-			static_cast<ShapeText*>(s)->m_select_start = m;
-			static_cast<ShapeText*>(s)->m_select_end = m + ins_len;
-			static_cast<ShapeText*>(s)->m_select_trail = false;
+			undo_page->m_select_start = m;
+			undo_page->m_select_end = m + ins_len;
+			undo_page->m_select_trail = false;
 			static_cast<ShapeText*>(s)->m_dwrite_text_layout = nullptr;
 		}
 		// 図形の文字列を編集する.

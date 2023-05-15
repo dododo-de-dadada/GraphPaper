@@ -757,6 +757,19 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体 (システムリソースに値が無かった場合)
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ (システムリソースに値が無かった場合)
 
+		// 選択された文字範囲
+		// trail = false    trail = true
+		//   start  end        start end
+		//     |     |           |   |
+		// 0 1 2 3 4 5 6     0 1 2 3 4 5 6
+		//    +-----+           +-----+
+		// a b|c d e|f g     a b|c d e|f g
+		//    +-----+           +-----+
+		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
+		uint32_t m_select_start = 0;	// 選択範囲の開始位置
+		uint32_t m_select_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
+		bool m_select_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
+
 		// 線・枠
 		//D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PAT m_dash_pat{ DASH_PAT_DEFVAL };	// 破線の配置
@@ -1798,9 +1811,9 @@ namespace winrt::GraphPaper::implementation
 		// a b|c d e|f g     a b|c d e|f g
 		//    +-----+           +-----+
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		uint32_t m_select_start = 0;	// 選択範囲の開始位置
-		uint32_t m_select_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
-		bool m_select_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
+		//uint32_t m_select_start = 0;	// 選択範囲の開始位置
+		//uint32_t m_select_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
+		//bool m_select_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
 
 		DWRITE_FONT_METRICS m_dwrite_font_metrics{};	// 書体の計量
 		UINT32 m_dwrite_line_cnt = 0;	// 行数
@@ -1849,6 +1862,8 @@ namespace winrt::GraphPaper::implementation
 		bool fit_frame_to_text(const float g_len) noexcept;
 		float get_frame_width(void) const noexcept { return fabsf(m_pos.x); }
 		float get_frame_height(void) const noexcept { return fabsf(m_pos.y); }
+		// 選択範囲された文字列を表示する.
+		void draw_selection(const uint32_t sele_start, const uint32_t sele_end, const bool sele_trailing) noexcept;
 		// 図形を表示する.
 		virtual void draw(void) noexcept final override;
 		// 書体の色を得る.

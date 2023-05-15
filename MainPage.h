@@ -240,10 +240,19 @@ namespace winrt::GraphPaper::implementation
 		bool m_fit_text_frame = false;	// 枠を文字列に合わせる
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
-		bool m_find_text_case = false;	// 英文字の区別するか
-		bool m_find_text_wrap = false;	// 回り込み検索するか
+		bool m_find_text_case = false;	// 英文字の区別
+		bool m_find_text_wrap = false;	// 回り込み検索
+
+		// trail = false    trail = true
+		//   start  end        start end
+		//     |     |           |   |
+		// 0 1 2 3 4 5 6     0 1 2 3 4 5 6
+		//    +-----+           +-----+
+		// a b|c d e|f g     a b|c d e|f g
+		//    +-----+           +-----+
+		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
 		ShapeText* m_edit_text_shape = nullptr;	// 編集中の文字列図形
-		bool m_edit_text_comp = false;	// 漢字変換中か判定 (変換中なら true, そうでなければ false)
+		bool m_edit_text_comp = false;	// 漢字変換中 (変換中なら true, そうでなければ false)
 		int m_edit_text_start = 0;	// 漢字変換開始時の開始位置
 		int m_edit_text_end = 0;	// 漢字変換開始時の終了位置
 		bool m_edit_text_trail = false;	// 漢字変換開始時のキャレット
@@ -459,21 +468,22 @@ namespace winrt::GraphPaper::implementation
 			return m_edit_text_shape != nullptr && m_edit_text_shape == m_event_shape_last;
 		}
 
-		winrt::hstring text_sele_get(void) noexcept
+		winrt::hstring text_sele_get(void) const noexcept
 		{
-			ShapeText* t = m_edit_text_shape;
-			const auto len = t->get_text_len();
-			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
-			const auto s = min(t->m_select_start, end);
-			const auto e = max(t->m_select_start, end);
-			return winrt::hstring{ t->m_text + s, e - s };
+			//ShapeText* t = m_edit_text_shape;
+			const auto len = m_edit_text_shape->get_text_len();
+			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+			const auto s = min(m_main_page.m_select_start, end);
+			const auto e = max(m_main_page.m_select_start, end);
+			return winrt::hstring{ m_edit_text_shape->m_text + s, e - s };
 		}
+
 		void text_sele_delete(void) noexcept
 		{
 			const ShapeText* t = m_edit_text_shape;
 			const auto len = t->get_text_len();
-			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
-			const auto start = min(t->m_select_start, len);
+			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+			const auto start = min(m_main_page.m_select_start, len);
 			// 選択範囲があるなら
 			if (end != start) {
 				undo_push_null();
@@ -487,8 +497,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			const ShapeText* t = m_edit_text_shape;
 			const auto old_len = t->get_text_len();
-			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, old_len);
-			const auto start = min(m_edit_text_comp ? m_edit_text_start : t->m_select_start, old_len);
+			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, old_len);
+			const auto start = min(m_edit_text_comp ? m_edit_text_start : m_main_page.m_select_start, old_len);
 			const auto s = min(start, end);
 			const auto e = max(start, end);
 			if (s < e) {
@@ -530,8 +540,8 @@ namespace winrt::GraphPaper::implementation
 			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
 			const ShapeText* t = m_edit_text_shape;
 			const auto len = t->get_text_len();
-			const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
-			const auto start = min(t->m_select_start, len);
+			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+			const auto start = min(m_main_page.m_select_start, len);
 			if (!shift_key && end == start && end < len) {
 				undo_push_null();
 				undo_push_text_select(m_edit_text_shape, end, end + 1, false);
@@ -1088,16 +1098,12 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_T U> void undo_push_set(Shape* const s);
 		void undo_push_text_unselect(ShapeText* s)
 		{
-			const auto start = s->m_select_trail ? s->m_select_end + 1 : s->m_select_end;
-			undo_push_text_select(s, start, s->m_select_end, s->m_select_trail);
+			const auto start = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+			undo_push_text_select(s, start, m_main_page.m_select_end, m_main_page.m_select_trail);
 		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
 		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
 		{
-			const ShapeText* r = static_cast<const ShapeText*>(s);
-			if (r->m_select_start == start && r->m_select_end == end && r->m_select_trail == trail) {
-				return;
-			}
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
 			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.
@@ -1106,9 +1112,9 @@ namespace winrt::GraphPaper::implementation
 				typeid(*u) == typeid(UndoTextSelect); u++) {
 				if ((*u)->m_shape == s) {
 					ShapeText* t = static_cast<ShapeText*>(s);
-					t->m_select_start = start;
-					t->m_select_end = end;
-					t->m_select_trail = trail;
+					m_main_page.m_select_start = start;
+					m_main_page.m_select_end = end;
+					m_main_page.m_select_trail = trail;
 					return;
 				}
 			}

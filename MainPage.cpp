@@ -52,92 +52,91 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(
-		const COLOR_CODE c_code,	// 色成分の記法
-		const double c_val,	// 色成分の値
-		const size_t t_len,	// 文字列の最大長 ('\0' を含む長さ)
-		wchar_t t_buf[]	// 文字列の配列 [t_len]
-	) noexcept
+	// col_code	色成分の記法
+	// col_comp	色成分の値
+	// text_len	文字列の最大長 ('\0' を含む長さ)
+	// text_buf	文字列の配列 [t_len]
+	void conv_col_to_str(const COLOR_CODE col_code, const double col_comp, const size_t text_len, wchar_t text_buf[]) noexcept
 	{
 		// 色の基数が 10 進数か判定する.
-		if (c_code == COLOR_CODE::DEC) {
-			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_val));
+		if (col_code == COLOR_CODE::DEC) {
+			swprintf_s(text_buf, text_len, L"%.0lf", std::round(col_comp));
 		}
 		// 色の基数が 16 進数か判定する.
-		else if (c_code == COLOR_CODE::HEX) {
-			swprintf_s(t_buf, t_len, L"x%02X", static_cast<uint32_t>(std::round(c_val)));
+		else if (col_code == COLOR_CODE::HEX) {
+			swprintf_s(text_buf, text_len, L"x%02X", static_cast<uint32_t>(std::round(col_comp)));
 		}
 		// 色の基数が実数か判定する.
-		else if (c_code == COLOR_CODE::REAL) {
-			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
+		else if (col_code == COLOR_CODE::REAL) {
+			swprintf_s(text_buf, text_len, L"%.4lf", col_comp / COLOR_MAX);
 		}
 		// 色の基数がパーセントか判定する.
-		else if (c_code == COLOR_CODE::PCT) {
-			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
+		else if (col_code == COLOR_CODE::PCT) {
+			swprintf_s(text_buf, text_len, L"%.1lf%%", col_comp * 100.0 / COLOR_MAX);
 		}
 		else {
-			swprintf_s(t_buf, t_len, L"?");
+			swprintf_s(text_buf, text_len, L"?");
 		}
 	}
 
 	// 長さを文字列に変換する.
-	template <bool B>	// 単位付加フラグ
-	void conv_len_to_str(
-		const LEN_UNIT len_unit,	// 長さの単位
-		const double val,	// ピクセル単位の長さ
-		const double dpi,	// DPI
-		const double g_len,	// 方眼の大きさ
-		const uint32_t t_len,	// 文字列の最大長 ('\0' を含む長さ)
-		wchar_t *t_buf	// 文字列の配列
-	) noexcept
+	// B	単位付加フラグ
+	// LEN_UNIT	長さの単位
+	// len	ピクセル単位の長さ
+	// dpi	DPI
+	// grid_len	方眼の大きさ
+	// text_len	文字列の最大長 ('\0' を含む長さ)
+	// text_buf	文字列の配列
+	template <bool B>
+	void conv_len_to_str(const LEN_UNIT len_unit, const double len, const double dpi, const double grid_len, const uint32_t text_len, wchar_t *text_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, val);
+				swprintf_s(text_buf, text_len, FMT_PIXEL_UNIT, len);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_PIXEL, val);
+				swprintf_s(text_buf, text_len, FMT_PIXEL, len);
 			}
 		}
 		// 長さの単位がインチか判定する.
 		else if (len_unit == LEN_UNIT::INCH) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, val / dpi);
+				swprintf_s(text_buf, text_len, FMT_INCH_UNIT, len / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_INCH, val / dpi);
+				swprintf_s(text_buf, text_len, FMT_INCH, len / dpi);
 			}
 		}
 		// 長さの単位がミリメートルか判定する.
 		else if (len_unit == LEN_UNIT::MILLI) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
+				swprintf_s(text_buf, text_len, FMT_MILLI_UNIT, len * MM_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_MILLI, val * MM_PER_INCH / dpi);
+				swprintf_s(text_buf, text_len, FMT_MILLI, len * MM_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位がポイントか判定する.
 		else if (len_unit == LEN_UNIT::POINT) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
+				swprintf_s(text_buf, text_len, FMT_POINT_UNIT, len * PT_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_POINT, val * PT_PER_INCH / dpi);
+				swprintf_s(text_buf, text_len, FMT_POINT, len * PT_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位が方眼か判定する.
 		else if (len_unit == LEN_UNIT::GRID) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, val / g_len);
+				swprintf_s(text_buf, text_len, FMT_GRID_UNIT, len / grid_len);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_GRID, val / g_len);
+				swprintf_s(text_buf, text_len, FMT_GRID, len / grid_len);
 			}
 		}
 		else {
-			swprintf_s(t_buf, t_len, L"?");
+			swprintf_s(text_buf, text_len, L"?");
 		}
 	}
 
@@ -147,30 +146,29 @@ namespace winrt::GraphPaper::implementation
 	template void conv_len_to_str<LEN_UNIT_NAME_APPEND>(const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さををピクセル単位の値に変換する.
+	// len_unit	長さの単位
+	// len	長さの値
+	// dpi	DPI
+	// grid_len	方眼の大きさ
 	// 戻り値	ピクセル単位の値
-	double conv_len_to_pixel(
-		const LEN_UNIT l_unit,	// 長さの単位
-		const double l_val,	// 長さの値
-		const double dpi,	// DPI
-		const double g_len	// 方眼の大きさ
-	) noexcept
+	double conv_len_to_pixel(const LEN_UNIT len_unit, const double len, const double dpi, const double grid_len) noexcept
 	{
 		double ret;
 
-		if (l_unit == LEN_UNIT::INCH) {
-			ret = l_val * dpi;
+		if (len_unit == LEN_UNIT::INCH) {
+			ret = len * dpi;
 		}
-		else if (l_unit == LEN_UNIT::MILLI) {
-			ret = l_val * dpi / MM_PER_INCH;
+		else if (len_unit == LEN_UNIT::MILLI) {
+			ret = len * dpi / MM_PER_INCH;
 		}
-		else if (l_unit == LEN_UNIT::POINT) {
-			ret = l_val * dpi / PT_PER_INCH;
+		else if (len_unit == LEN_UNIT::POINT) {
+			ret = len * dpi / PT_PER_INCH;
 		}
-		else if (l_unit == LEN_UNIT::GRID) {
-			ret = l_val * g_len;
+		else if (len_unit == LEN_UNIT::GRID) {
+			ret = len * grid_len;
 		}
 		else {
-			ret = l_val;
+			ret = len;
 		}
 		return std::round(2.0 * ret) * 0.5;
 	}
@@ -216,8 +214,8 @@ namespace winrt::GraphPaper::implementation
 				//__debugbreak();
 				if (args.VirtualKey() == VirtualKey::Enter) {
 					undo_push_null();
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto start = t->m_select_start;
+					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+					const auto start = m_main_page.m_select_start;
 					const auto s = min(start, end);
 					m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, L"\r"));
 					undo_push_text_select(m_edit_text_shape, s + 1, s + 1, false);
@@ -226,8 +224,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (args.VirtualKey() == VirtualKey::Back) {
 					// 選択範囲がなくキャレット位置が文頭でないなら
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto start = t->m_select_start;
+					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+					const auto start = m_main_page.m_select_start;
 					if (end == start && end > 0) {
 						undo_push_null();
 						undo_push_text_select(m_edit_text_shape, end - 1, end, false);
@@ -269,8 +267,8 @@ namespace winrt::GraphPaper::implementation
 					*/
 				}
 				else if (args.VirtualKey() == VirtualKey::Left) {
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto start = t->m_select_start;
+					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+					const auto start = m_main_page.m_select_start;
 					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 					if (shift_key) {
 						if (end > 0) {
@@ -293,8 +291,8 @@ namespace winrt::GraphPaper::implementation
 				else if (args.VirtualKey() == VirtualKey::Right) {
 					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 					const auto len = t->get_text_len();
-					const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
-					const auto start = min(t->m_select_start, len);
+					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+					const auto start = min(m_main_page.m_select_start, len);
 					if (shift_key) {
 						if (end < len) {
 							undo_push_text_select(m_edit_text_shape, start, end + 1, false);
@@ -314,17 +312,17 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else if (args.VirtualKey() == VirtualKey::Up) {
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto start = t->m_select_start;
-					const auto row = t->get_text_row(t->m_select_end);
+					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+					const auto start = m_main_page.m_select_start;
+					const auto row = t->get_text_row(m_main_page.m_select_end);
 					if (end != start && row == 0) {
 						const auto shift = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						if (shift) {
-							undo_push_text_select(m_edit_text_shape, start, t->m_select_end, t->m_select_trail);
+							undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 						else {
-							undo_push_text_select(m_edit_text_shape, end, t->m_select_end, t->m_select_trail);
+							undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 					}
@@ -332,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 						const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						const auto line_h = t->m_dwrite_test_metrics[row].top - t->m_dwrite_test_metrics[row - 1].top;
 						D2D1_POINT_2F car;
-						t->get_text_caret(end, row, t->m_select_trail, car);
+						t->get_text_caret(end, row, m_main_page.m_select_trail, car);
 						const D2D1_POINT_2F new_car{ car.x, car.y - line_h };
 						bool new_trail;
 						const auto new_end = t->get_text_pos(new_car, new_trail);
@@ -348,18 +346,18 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else if (args.VirtualKey() == VirtualKey::Down) {
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;	// 選択範囲の終了位置
-					const auto start = t->m_select_start;	// 選択範囲の開始位置
-					const auto row = t->get_text_row(t->m_select_end);	// キャレットがある行
+					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;	// 選択範囲の終了位置
+					const auto start = m_main_page.m_select_start;	// 選択範囲の開始位置
+					const auto row = t->get_text_row(m_main_page.m_select_end);	// キャレットがある行
 					const auto last = t->m_dwrite_test_cnt - 1;	// 最終行
 					if (end != start && row == last) {
 						const bool shift = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						if (shift) {
-							undo_push_text_select(m_edit_text_shape, start, t->m_select_end, t->m_select_trail);
+							undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 						else {
-							undo_push_text_select(m_edit_text_shape, end, t->m_select_end, t->m_select_trail);
+							undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 					}
@@ -367,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 						const bool shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						const auto line_h = t->m_dwrite_test_metrics[row + 1].top - t->m_dwrite_test_metrics[row].top;
 						D2D1_POINT_2F car;
-						t->get_text_caret(end, row, t->m_select_trail, car);
+						t->get_text_caret(end, row, m_main_page.m_select_trail, car);
 						const D2D1_POINT_2F new_car{ car.x, car.y + line_h };
 						bool new_trail;
 						const auto new_end = t->get_text_pos(new_car, new_trail);
@@ -406,8 +404,8 @@ namespace winrt::GraphPaper::implementation
 				CoreTextRange ran{};
 				const ShapeText* t = m_edit_text_shape;
 				const auto len = t->get_text_len();
-				const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, len);
-				const auto start = min(t->m_select_start, len);
+				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+				const auto start = min(m_main_page.m_select_start, len);
 				ran.StartCaretPosition = min(start, end);
 				ran.EndCaretPosition = max(start, end);
 				req.Selection(ran);
@@ -428,48 +426,6 @@ namespace winrt::GraphPaper::implementation
 				CoreTextRange ran{ args.Range() };
 				const winrt::hstring ins_text{ args.Text() };
 				text_sele_insert(ins_text.data(), static_cast<uint32_t>(ins_text.size()));
-				/*
-				const winrt::hstring new_text{ args.Text() };
-				const auto new_len = new_text.size();
-				const int old_len = m_edit_text_shape->get_text_len();
-				// 漢字変換中なら変換が開始されたときの開始位置, そうでなければ現在の開始位置.
-				const int end = m_edit_text_shape->m_select_trail ? m_edit_text_shape->m_select_end + 1 : m_edit_text_shape->m_select_end;
-				const int start = (m_edit_text_comp ? m_edit_text_start : m_edit_text_shape->m_select_start);
-				const int s = max(min(start, end), 0);
-				const int e = min(max(start, end), old_len);
-				if (s < e) {
-					if (!m_edit_text_comp) {
-						undo_push_null();
-					}
-					else {
-						for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-							m_ustack_undo.pop_back();
-							u->exec();
-							delete u;
-						}
-					}
-					m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, new_text.data()));
-					undo_push_text_select(m_edit_text_shape, s + new_len, s + new_len, false);
-					undo_menu_is_enabled();
-					main_draw();
-				}
-				else if (new_len > 0) {
-					if (!m_edit_text_comp) {
-						undo_push_null();
-					}
-					else {
-						for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-							m_ustack_undo.pop_back();
-							u->exec();
-							delete u;
-						}
-					}
-					m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, new_text.data()));
-					undo_push_text_select(m_edit_text_shape, s + new_len, s + new_len, false);
-					undo_menu_is_enabled();
-					main_draw();
-				}
-				*/
 			});
 			// 変換中, キャレットが移動した
 			m_edit_context.SelectionUpdating([this](auto, auto args) {
@@ -498,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 				if (t->m_dwrite_text_layout == nullptr) {
 					m_edit_text_shape->create_text_layout();
 				}
-				const auto end = (t->m_select_trail ? t->m_select_end + 1 : t->m_select_end);
+				const auto end = (m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end);
 				const auto row = t->get_text_row(end);	// キャレットがある行
 				// キャレット行の両端の座標を得る.
 				const auto row_start = t->m_dwrite_test_metrics[row].textPosition;
@@ -506,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 				t->get_text_caret(row_start, false, row, con_start);
 				t->get_text_caret(row_end, false, row, con_end);
 				// キャレット行と選択範囲の共通部分の両端の座標を得る.
-				const auto start = t->m_select_start;
+				const auto start = m_main_page.m_select_start;
 				t->get_text_caret(max(start, row_start), false, row, sel_start);
 				t->get_text_caret(min(end, row_end), false, row, sel_end);
 				Rect win_rect{	// ウィンドウのクライアント矩形
@@ -543,9 +499,9 @@ namespace winrt::GraphPaper::implementation
 				//__debugbreak();
 				// 変換開始時の文字列の選択範囲を保存しておく.
 				m_edit_text_comp = true;
-				m_edit_text_start = m_edit_text_shape->m_select_start;
-				m_edit_text_end = m_edit_text_shape->m_select_end;
-				m_edit_text_trail = m_edit_text_shape->m_select_trail;
+				m_edit_text_start = m_main_page.m_select_start;
+				m_edit_text_end = m_main_page.m_select_end;
+				m_edit_text_trail = m_main_page.m_select_trail;
 				undo_push_null();
 
 			});
@@ -819,10 +775,12 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (m_edit_text_shape != nullptr && !m_edit_text_shape->is_deleted() && m_edit_text_shape->is_selected()) {
-			const int row = m_edit_text_shape->get_text_row(m_edit_text_shape->m_select_end);
+			m_edit_text_shape->draw_selection(m_main_page.m_select_start, m_main_page.m_select_end, m_main_page.m_select_trail);
+
+			const int row = m_edit_text_shape->get_text_row(m_main_page.m_select_end);
 			//const int row = m_edit_text_shape->get_text_row(m_edit_text_end);
 			D2D1_POINT_2F car;	// キャレットの点
-			m_edit_text_shape->get_text_caret(m_edit_text_shape->m_select_end, row, m_edit_text_shape->m_select_trail, car);
+			m_edit_text_shape->get_text_caret(m_main_page.m_select_end, row, m_main_page.m_select_trail, car);
 			//m_edit_text_shape->get_text_caret(m_edit_text_end, row, m_edit_text_trail, car);
 			D2D1_POINT_2F p{
 				car.x - 0.5f, car.y

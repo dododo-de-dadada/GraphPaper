@@ -275,9 +275,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const ShapeText* t = static_cast<ShapeText*>(s);
-			if (t->m_select_start != 0 ||
-				t->m_select_end != 0 ||
-				t->m_select_trail != false) {
+			if (m_main_page.m_select_start != 0 ||
+				m_main_page.m_select_end != 0 ||
+				m_main_page.m_select_trail != false) {
 				undo_push_text_select(s, 0, 0, false);
 				done = true;
 			}

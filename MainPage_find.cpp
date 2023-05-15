@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集する図形がある.
 		if (is_text_editing()) {
 			//選択された文字範囲がある.
-			const ShapeText* t = m_edit_text_shape;
+			const ShapePage* t = &m_main_page;
 			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
 			const auto s = min(t->m_select_start, end);
 			const auto e = max(t->m_select_start, end);
@@ -360,8 +360,8 @@ namespace winrt::GraphPaper::implementation
 				// 図形のキャレットよりうしろに一致する文字列があるか調べる.
 				const ShapeText* t = static_cast<ShapeText*>(*it);
 				const auto text_len = wchar_len(t->m_text);
-				const auto end = min(t->m_select_trail ? t->m_select_end + 1 : t->m_select_end, text_len);
-				for (uint32_t i = max(t->m_select_start, end); i + find_len <= text_len; i++) {
+				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, text_len);
+				for (uint32_t i = max(m_main_page.m_select_start, end); i + find_len <= text_len; i++) {
 					const int cmp = m_find_text_case ?
 						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
@@ -400,8 +400,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 検索を始めた図形 s について, 図形 s のキャレットより前に一致する文字列があるか調べる.
 			const ShapeText* t = static_cast<const ShapeText*>(s);
-			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-			const auto e = min(t->m_select_start, end);
+			const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+			const auto e = min(m_main_page.m_select_start, end);
 			for (uint32_t i = 0; i + find_len <= e; i++) {
 				const int cmp = m_find_text_case ?
 					wcsncmp(t->m_text + i, m_find_text, find_len) :

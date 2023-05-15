@@ -771,7 +771,7 @@ namespace winrt::GraphPaper::implementation
 					if (pd > FLT_MIN) {
 						float old_rot;
 						get_arc_rot(old_rot);
-						const double new_rot = old_rot + 90.0 - acos((px * ax + py * ay) / (ad * pd)) * 180.0 / M_PI;
+						const double new_rot = old_rot - 90.0 + acos((px * ax + py * ay) / (ad * pd)) * 180.0 / M_PI;
 						if (fabs(new_rot) < 45.0) {
 							set_arc_rot(new_rot);
 						}
