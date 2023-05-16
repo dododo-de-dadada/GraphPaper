@@ -501,6 +501,22 @@
     <value>Text Padding...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfsi_menu_text_wrap.Text" xml:space="preserve">
+    <value>Overflow Wrap</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_menu_text_wrap.Text" xml:space="preserve">
+    <value>Word Wrap</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_menu_text_no_wrap.Text" xml:space="preserve">
+    <value>No Wrap</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_menu_text_wrap_char.Text" xml:space="preserve">
+    <value>Break Word</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mbi_menu_undo.Text" xml:space="preserve">
     <value>Undo</value>
     <comment>MenuFlyoutItem</comment>

@@ -558,6 +558,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_width_is_checked(m_main_page.m_stroke_width);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
 		background_color_is_checked(m_background_show, m_background_color);
 		page_zoom_is_checked(m_main_scale);
 

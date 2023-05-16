@@ -362,6 +362,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_join_is_checked(m_main_page.m_stroke_join);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
 
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		len_unit_is_checked(m_len_unit);

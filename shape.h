@@ -239,34 +239,32 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal(const float a, const float b) noexcept;
 	// 倍精度浮動小数が同じか判定する.
 	inline bool equal(const double a, const double b) noexcept;
-	// 倍精度浮動小数が同じか判定する.
+	// 線端の形式が同じか判定する.
 	inline bool equal(const D2D1_CAP_STYLE a, const D2D1_CAP_STYLE b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 線結合の形式が同じか判定する.
 	inline bool equal(const D2D1_LINE_JOIN a, const D2D1_LINE_JOIN b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 書体の幅が同じか判定する.
 	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 字体が同じか判定する.
 	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 書体の太さが同じか判定する.
 	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 段落のそろえが同じか判定する.
 	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 文字列のそろえが同じか判定する.
 	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 文字列の折り返しが同じか判定する.
+	inline bool equal(const DWRITE_WORD_WRAPPING a, const DWRITE_WORD_WRAPPING b) noexcept { return a == b; };
+	// 円弧の描画方向が同じか判定する.
 	inline bool equal(const D2D1_SWEEP_DIRECTION a, const D2D1_SWEEP_DIRECTION b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 破線の形式が同じか判定する.
 	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
-	//inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept { return a.m_gauge_1 == b.m_gauge_1 && a.m_gauge_2 == b.m_gauge_2; };
-	// 倍精度浮動小数が同じか判定する.
+	// 方眼の表示が同じか判定する.
 	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 多角形の終端が同じか判定する.
 	inline bool equal(const D2D1_FIGURE_END a, const D2D1_FIGURE_END b) noexcept { return a == b; };
-	// 倍精度浮動小数が同じか判定する.
+	// 矢じるしの形式が同じか判定する.
 	inline bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept { return a == b; };
-	// 同値か判定する.
-	//template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
 	// 矢じるしの大きさが同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 色が同じか判定する.
@@ -482,6 +480,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_line_sp(float&/*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_pad(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
+		// 文字列の折り返しを得る.
+		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING&/*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		//virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
@@ -589,8 +589,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_line_sp(const float/*val*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_pad(const D2D1_SIZE_F/*val*/) noexcept { return false; }
-		// 値を文字範囲に格納する.
-		//virtual bool set_text_selected(const DWRITE_TEXT_RANGE/*val*/) noexcept { return false; }
+		// 値を文字列の折り返しに格納する.
+		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING/*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const&/*dt_writer*/) const {}
 	};
@@ -783,11 +783,10 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
-		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = 	// 段落の揃え
-			DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
-		DWRITE_TEXT_ALIGNMENT m_text_align_horz = 	// 文字列の揃え
-			DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
+		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR; 	// 段落の揃え
+		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING; 	// 文字列の揃え
 		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の左右と上下の余白
+		DWRITE_WORD_WRAPPING m_text_word_wrap = DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP;	// 文字列の折り返し (自動改行)
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
@@ -806,7 +805,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_RECT_F m_page_margin{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
 
 		// 図形リストの最後の図形を得る.
-		Shape* back() const noexcept
+		Shape* slist_back() const noexcept
 		{
 			return m_shape_list.back();
 		}
@@ -908,6 +907,12 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_line_sp(float& val) const noexcept final override;
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
+		// 文字列の折り返しを得る.
+		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING& val) const noexcept final override
+		{
+			val = m_text_word_wrap;
+			return true;
+		}
 		// 図形をデータリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 値を矢じるしの返しの形式に格納する.
@@ -982,6 +987,15 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept final override;
 		// 値を文字列のそろえに格納する.
 		virtual bool set_text_align_horz(const DWRITE_TEXT_ALIGNMENT val) noexcept final override;
+		// 値を文字列のそろえに格納する.
+		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING val) noexcept final override
+		{
+			if (!equal(m_text_word_wrap, val)) {
+				m_text_word_wrap = val;
+				return true;
+			}
+			return false;
+		}
 		// 値を行間に格納する.
 		virtual bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
@@ -1801,7 +1815,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
-		//DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
+		DWRITE_WORD_WRAPPING m_text_word_wrap = DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP;	// 文字列の折り返し (自動改行)
 
 		// trail = false    trail = true
 		//   start  end        start end
@@ -2057,6 +2071,12 @@ namespace winrt::GraphPaper::implementation
 			//row = m_dwrite_test_cnt - 1;
 			//return e - 1;
 		}
+		// 文字列の折り返しを得る.
+		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING& val) const noexcept final override
+		{
+			val = m_text_word_wrap;
+			return true;
+		}
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F pt, const bool ctrl_key = false) const noexcept final override;
 		// 矩形に含まれるか判定する.
@@ -2091,8 +2111,15 @@ namespace winrt::GraphPaper::implementation
 		bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
 		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
-		// 値を文字範囲に格納する.
-		//virtual bool set_text_selected(const DWRITE_TEXT_RANGE val) noexcept final override;
+		// 文字列の折り返しを得る.
+		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING val) noexcept final override
+		{
+			if (m_text_word_wrap != val) {
+				m_text_word_wrap = val;
+				return true;
+			}
+			return false;
+		}
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* prop);
 		// 図形をデータリーダーから読み込む.
@@ -2208,12 +2235,6 @@ namespace winrt::GraphPaper::implementation
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}
 
-	// 線の端点が同じか判定する.
-	//inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept
-	//{
-	//	return a.m_start == b.m_start && a.m_end == b.m_end;
-	//}
-
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
 	{
@@ -2243,12 +2264,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		return fabs(a - b) <= FLT_EPSILON * fmax(1.0, fmax(fabs(a), fabs(b)));
 	}
-
-	// 文字範囲が同じか判定する.
-	//inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
-	//{
-	//	return a.startPosition == b.startPosition && a.length == b.length;
-	//}
 
 	// 単精度浮動小数が同じか判定する.
 	inline bool equal(const float a, const float b) noexcept

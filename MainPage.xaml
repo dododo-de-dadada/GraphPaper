@@ -448,8 +448,14 @@
 				<!-- 行間 -->
 				<MenuFlyoutItem x:Name="mfi_popup_text_line_sp" x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<!-- 余白 -->
-				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Margin..." />
-				<!-- 書体の色 -->
+				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
+                <!-- 文字列の折り返し -->
+                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Overflow wrap">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Word Wrap" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="No Wrap" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Break Word" />
+                </MenuFlyoutSubItem>
+                <!-- 書体の色 -->
 				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
 				<!-- 画像の縦横比を維持 -->
 				<ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp_2" x:Uid="tmfi_menu_meth_image_keep_asp" Click="image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
@@ -1191,19 +1197,19 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
                     <!-- 右よせ -->
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_right" x:Uid="rmfi_menu_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" >
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_right" x:Uid="rmfi_menu_text_align_right" Click="text_align_horz_click" GroupName="gn_menu_text_align_horz" Text="Right" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_align_right}"/>
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
                     <!-- 中央よせ -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_center" x:Uid="rmfi_menu_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" >
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_center" x:Uid="rmfi_menu_text_align_center" Click="text_align_horz_click" GroupName="gn_menu_text_align_horz" Text="Center" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_align_center}"/>
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
                     <!-- 均等 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_just" x:Uid="rmfi_menu_text_align_just" Click="text_align_horz_click" Text="Justified" GroupName="gn_text_align_horz">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_just" x:Uid="rmfi_menu_text_align_just" Click="text_align_horz_click" GroupName="gn_menu_text_align_horz" Text="Justified" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_align_just}" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -1211,21 +1217,22 @@
 				</MenuFlyoutSubItem>
 				<!-- 段落の整列 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_menu_text_align_vert" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_text_align_top" x:Uid="rmfi_menu_text_align_top" GroupName="gn_text_align_vert"
-						Click="text_align_vert_click" IsChecked="True" Text="Top" />
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_text_align_bot" x:Uid="rmfi_menu_text_align_bot" GroupName="gn_text_align_vert"
-						Click="text_align_vert_click" Text="Bottom" />
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_text_align_mid" x:Uid="rmfi_menu_text_align_mid" GroupName="gn_text_align_vert"
-						Click="text_align_vert_click" Text="Middle" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_top" x:Uid="rmfi_menu_text_align_top" Click="text_align_vert_click" GroupName="gn_menu_text_align_vert" IsChecked="True" Text="Top" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_bot" x:Uid="rmfi_menu_text_align_bot" Click="text_align_vert_click" GroupName="gn_menu_text_align_vert" Text="Bottom" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_mid" x:Uid="rmfi_menu_text_align_mid" Click="text_align_vert_click" GroupName="gn_menu_text_align_vert" Text="Middle" />
 				</MenuFlyoutSubItem>
                 <!-- 行間 -->
 				<MenuFlyoutItem x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <!-- 文字列の余白 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Margin..." />
-				<MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
+                <!-- 文字列の折り返し -->
+                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Overflow Wrap">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Word Wrap" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="No Wrap" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Break Word" />
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator />
+                <!-- 書体の色 -->
 				<MenuFlyoutItem x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
 			</muxc:MenuBarItem>
 			<!-- レイアウトメニュー -->

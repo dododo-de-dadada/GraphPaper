@@ -179,9 +179,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_T::TEXT_PAD:
 			u = new UndoValue<UNDO_T::TEXT_PAD>(dt_reader);
 			break;
-		//case UNDO_T::TEXT_RANGE:
-		//	u = new UndoValue<UNDO_T::TEXT_RANGE>(dt_reader);
-		//	break;
+		case UNDO_T::TEXT_WRAP:
+			u = new UndoValue<UNDO_T::TEXT_WRAP>(dt_reader);
+			break;
 		case UNDO_T::TEXT_SELECT:
 			u = new UndoTextSelect(dt_reader);
 			break;
@@ -331,10 +331,6 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.get_stroke_cap(val);
 			stroke_cap_is_checked(val);
 		}
-		//else if (u_type == typeid(UndoValue<UNDO_T::DASH_CAP>)) {
-		//	D2D1_CAP_STYLE val;
-		//	m_main_page.get_dash_cap(val);
-		//}
 		else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
 			m_main_page.get_stroke_dash(val);
@@ -359,6 +355,11 @@ namespace winrt::GraphPaper::implementation
 			DWRITE_PARAGRAPH_ALIGNMENT val;
 			m_main_page.get_text_align_vert(val);
 			text_align_vert_is_checked(val);
+		}
+		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_WRAP>)) {
+			DWRITE_WORD_WRAPPING val;
+			m_main_page.get_text_wrap(val);
+			text_word_wrap_is_checked(val);
 		}
 	}
 
@@ -511,49 +512,48 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoSelect(s));
 	}
 
-	// 値を指定する図形へ格納して, その操作をスタックに積む.
-	// ただし, 図形がその値を持たない場合, またはすでに同値の場合は何もしない.
-	template <UNDO_T U, typename T> void MainPage::undo_push_set(
-		Shape* const s,	// 図形
-		T const& val	// 値
-	)
+	// 値を指定する図形へ格納し, その操作をスタックに積む.
+	// U	操作の種類
+	// T	値の型
+	// s	図形
+	// val	値
+	template <UNDO_T U, typename T> void MainPage::undo_push_set(Shape* const s, T const& val)
 	{
-		// 図形がその値を持たない場合, またはすでに同値の場合,
-		T t_val;
-		if (!UndoValue<U>::GET(s, t_val) || equal(val, t_val)) {
-			// 終了する.
+		// 図形がその値を持たない, または同値なら中断する.
+		T old_val;
+		if (!UndoValue<U>::GET(s, old_val) || equal(val, old_val)) {
 			return;
 		}
+		// それ以外なら, 値を格納してその操作をスタックに積む.
 		m_ustack_undo.push_back(new UndoValue<U>(s, val));
 	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
 	// U	操作の種類
-	// T	格納する型.
-	// val	格納する値
+	// T	値の型
+	// val	値
 	template<UNDO_T U, typename T> bool MainPage::undo_push_set(const T& val)
 	{
 		// メインページに属性ありなら, メインページの属性も変更する.
 		T page_val;
-		if (UndoValue<U>::GET(&m_main_page, page_val)) {
+		if (UndoValue<U>::GET(&m_main_page, page_val) && !equal(page_val, val)) {
 			m_ustack_undo.push_back(new UndoValue<U>(&m_main_page, val));
 		}
-		auto flag = false;
+		auto changed = false;	// 値が変わった図形があるか.
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
 			undo_push_set<U>(s, val);
-			flag = true;
+			changed = true;
 		}
-		return flag;
+		return changed;
 	}
 
-	// 図形の値の保存を実行して, その操作をスタックに積む.
+	// 図形の値の保存し, その操作をスタックに積む.
 	// U	操作の種類.
-	// s	値を保存する図形
-	// 戻り値	なし
+	// s	図形
 	template <UNDO_T U> void MainPage::undo_push_set(Shape* const s)
 	{
 		m_ustack_undo.push_back(new UndoValue<U>(s));
@@ -588,6 +588,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::undo_push_set<UNDO_T::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
 	template bool MainPage::undo_push_set<UNDO_T::TEXT_LINE_SP>(float const& val);
 	template bool MainPage::undo_push_set<UNDO_T::TEXT_PAD>(D2D1_SIZE_F const& val);
+	template bool MainPage::undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING const& val);
 
 	template void MainPage::undo_push_set<UNDO_T::GRID_BASE>(Shape* const s, float const& val);
 	template void MainPage::undo_push_set<UNDO_T::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
@@ -601,95 +602,8 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
 	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
 
-	// 完全特殊化
-	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	/*
-	template<> bool MainPage::undo_push_set<UNDO_T::ARC_ROT, float>(float const& val)
-	{
-		auto flag = false;
-		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() || 
-				typeid(*s) != typeid(ShapeArc)) {
-				continue;
-			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_ROT>(s, val));
-			flag = true;
-		}
-		return flag;
-	}
-	*/
-
-	// 完全特殊化
-	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	/*
-	template<> bool MainPage::undo_push_set<UNDO_T::ARC_START, float>(float const& val)
-	{
-		auto flag = false;
-		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() ||
-				typeid(*s) != typeid(ShapeArc)) {
-				continue;
-			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_START>(s, val));
-			flag = true;
-		}
-		return flag;
-	}
-	*/
-
-	// 完全特殊化
-	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	/*
-	template<> bool MainPage::undo_push_set<UNDO_T::ARC_END, float>(float const& val)
-	{
-		auto flag = false;
-		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() ||
-				typeid(*s) != typeid(ShapeArc)) {
-				continue;
-			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_T::ARC_END>(s, val));
-			flag = true;
-		}
-		return flag;
-	}
-	*/
-
-	// 完全特殊化
-	// 文字範囲の値を図形に格納して, その操作をスタックに積む.
-	// スタックの一番上の操作の組の中に、すでに文字範囲の操作が積まれている場合,
-	// その値が書き換えられる.
-	// そうでない場合, 新たな操作としてスタックに積む.
-	// s	操作する図形
-	// val	文字範囲の値
-	// 戻り値	なし
-	//template<> void MainPage::undo_push_set<UNDO_T::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
-	//{
-	//	m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
-		/*
-		if (typeid(*s) == typeid(ShapeText)) {
-			ShapeText* t = static_cast<ShapeText*>(s);
-			if (!equal(t->m_text_selected_range, val)) {
-				for (auto it = m_ustack_undo.rbegin(); it != m_ustack_undo.rend(); it++) {
-					const auto u = *it;
-					if (u == nullptr || (typeid(*u) != typeid(UndoValue<UNDO_T::TEXT_RANGE>) && typeid(*u) != typeid(UndoSelect))) {
-						m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
-						return;
-					}
-					else if (u->m_shape == s) {
-						s->set_text_selected(val);
-						return;
-					}
-				}
-				m_ustack_undo.push_back(new UndoValue<UNDO_T::TEXT_RANGE>(s, val));
-			}
-		}
-		*/
-	//}
-
 	// データリーダーから操作スタックを読み込む.
 	// dt_reader	データリーダー
-	// 戻り値	なし
 	void MainPage::undo_read_stack(DataReader const& dt_reader)
 	{
 		Undo* r;

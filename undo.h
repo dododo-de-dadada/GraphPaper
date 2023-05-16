@@ -63,6 +63,7 @@ namespace winrt::GraphPaper::implementation
 		TEXT_INS,	// 文字列の挿入の操作
 		TEXT_LINE_SP,	// 行間の操作
 		TEXT_PAD,	// 文字列の余白の操作
+		TEXT_WRAP,	// 文字列の折り返しの操作
 		//TEXT_RANGE,	// 文字列選択の範囲の操作
 		TEXT_SELECT	// 文字列選択の範囲の操作
 	};
@@ -110,6 +111,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_T::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::TEXT_PAD> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_T::TEXT_WRAP> { using type = DWRITE_WORD_WRAPPING; };
 	//template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
 	//------------------------------

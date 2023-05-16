@@ -219,11 +219,12 @@ namespace winrt::GraphPaper::implementation
 				m_edit_context.NotifyFocusLeave();
 				undo_push_text_unselect(m_edit_text_shape);
 			}
-			// 押された図形をあらたな編集対象の図形とする.
+			// 一覧で押された図形をあらたな編集対象の図形とする.
 			m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
 			m_edit_context.NotifyFocusEnter();
 		}
 		m_main_page.set_attr_to(m_event_shape_pressed);
+
 		// メニューバーを更新する
 		stroke_dash_is_checked(m_main_page.m_stroke_dash);
 		stroke_width_is_checked(m_main_page.m_stroke_width);
@@ -235,6 +236,7 @@ namespace winrt::GraphPaper::implementation
 		font_style_is_checked(m_main_page.m_font_style);
 		text_align_horz_is_checked(m_main_page.m_text_align_horz);
 		text_align_vert_is_checked(m_main_page.m_text_align_vert);
+		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
 		grid_emph_is_checked(m_main_page.m_grid_emph);
 		grid_show_is_checked(m_main_page.m_grid_show);
 	}

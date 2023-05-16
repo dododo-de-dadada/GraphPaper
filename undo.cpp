@@ -185,6 +185,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(Shape* s, wchar_t* const& val);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_T::TEXT_WRAP>::UndoValue(Shape* s, const DWRITE_WORD_WRAPPING& val);
 	//template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(Shape* s, const DWRITE_TEXT_RANGE& val);
 
 	template <UNDO_T U> 
@@ -262,7 +263,8 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::POLY_END ||
 			U == UNDO_T::STROKE_CAP ||
 			U == UNDO_T::TEXT_ALIGN_P ||
-			U == UNDO_T::TEXT_ALIGN_T) {
+			U == UNDO_T::TEXT_ALIGN_T ||
+			U == UNDO_T::TEXT_WRAP) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else if constexpr (
@@ -328,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(DataReader const& dt_reader);
-	//template UndoValue<UNDO_T::TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_T::TEXT_WRAP>::UndoValue(DataReader const& dt_reader);
 
 	// 図形の属性値に値を格納する.
 	template <UNDO_T U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val) noexcept
@@ -523,6 +525,11 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_T::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
 	{
 		s->set_text_pad(val);
+	}
+
+	void UndoValue<UNDO_T::TEXT_WRAP>::SET(Shape* const s, const DWRITE_WORD_WRAPPING& val) noexcept
+	{
+		s->set_text_wrap(val);
 	}
 
 	//void UndoValue<UNDO_T::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& val) noexcept
@@ -725,10 +732,10 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text_pad(val);
 	}
 
-	//bool UndoValue<UNDO_T::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& val) noexcept
-	//{
-	//	return s->get_text_selected(val);
-	//}
+	bool UndoValue<UNDO_T::TEXT_WRAP>::GET(const Shape* s, DWRITE_WORD_WRAPPING& val) noexcept
+	{
+		return s->get_text_wrap(val);
+	}
 
 	// 図形の値の操作をデータライターに書き込む.
 	template <UNDO_T U> void UndoValue<U>::write(DataWriter const& dt_writer) const
@@ -762,7 +769,8 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_T::POLY_END ||
 			U == UNDO_T::STROKE_CAP ||
 			U == UNDO_T::TEXT_ALIGN_P ||
-			U == UNDO_T::TEXT_ALIGN_T) {
+			U == UNDO_T::TEXT_ALIGN_T ||
+			U == UNDO_T::TEXT_WRAP) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
 		else if constexpr (U == UNDO_T::ARROW_SIZE) {
@@ -808,10 +816,6 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(m_value.m_gauge_1);
 			dt_writer.WriteUInt32(m_value.m_gauge_2);
 		}
-		//else if constexpr (U == UNDO_T::TEXT_RANGE) {
-		//	dt_writer.WriteUInt32(m_value.startPosition);
-		//	dt_writer.WriteUInt32(m_value.length);
-		//}
 		else if constexpr (U == UNDO_T::MOVE) {
 			dt_writer.WriteSingle(m_value.x);
 			dt_writer.WriteSingle(m_value.y);

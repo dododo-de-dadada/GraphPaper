@@ -556,6 +556,14 @@ namespace winrt::GraphPaper::implementation
 				undo_menu_is_enabled();
 				main_draw();
 			}
+			winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
+				start, end
+			};
+			winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
+				m_main_page.m_select_start,
+				m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end
+			};
+			m_edit_context.NotifyTextChanged(modified_ran, 0, new_ran);
 		}
 
 		//-------------------------------
@@ -990,18 +998,22 @@ namespace winrt::GraphPaper::implementation
 		//　文字列の配置
 		//-------------------------------
 
-		// 書体メニューの「文字列のそろえ」に印をつける.
+		// 書体メニューの「文字列のそろえ」のサブ項目が選択された
+		void text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 書体メニューの「文字列のそろえ」のサブ項目に印をつける.
 		void text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val);
-		// 書体メニューの「段落のそろえ」に印をつける.
+		// 書体メニューの「段落のそろえ」のサブ項目が選択された
+		void text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 書体メニューの「段落のそろえ」のサブ項目に印をつける.
 		void text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.
 		IAsyncAction text_pad_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「段落のそろえ」が選択された.
-		void text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 書体メニューの「文字列のそろえ」が選択された.
-		void text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 書体メニューの「文字列の折り返し」のサブ項目が選択された
+		void text_word_wrap_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 書体メニューの「文字列の折り返し」のサブ項目に印をつける
+		void text_word_wrap_is_checked(const DWRITE_WORD_WRAPPING val);
 
 		//-------------------------------
 		// MainPage_thread.cpp

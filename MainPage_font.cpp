@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 				[this](auto, auto)
 				{
 					auto i = lv_dialog_list().SelectedIndex();
-					m_prop_page.back()->set_font_family(ShapeText::s_available_fonts[i]);
+					m_prop_page.slist_back()->set_font_family(ShapeText::s_available_fonts[i]);
 					if (scp_dialog_panel().IsLoaded()) {
 						dialog_draw();
 					}
@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				wchar_t* samp_val;
-				m_prop_page.back()->get_font_family(samp_val);
+				m_prop_page.slist_back()->get_font_family(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 					undo_menu_is_enabled();
@@ -327,14 +327,14 @@ namespace winrt::GraphPaper::implementation
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_4().Header(box_value(str_font_size + buf));
-					if (m_prop_page.back()->set_font_size(val)) {
+					if (m_prop_page.slist_back()->set_font_size(val)) {
 						dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_prop_page.back()->get_font_size(samp_val);
+				m_prop_page.slist_back()->get_font_size(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					undo_menu_is_enabled();
@@ -424,6 +424,23 @@ namespace winrt::GraphPaper::implementation
 		rmfi_popup_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 		rmfi_menu_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 		rmfi_popup_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	}
+
+	// 書体メニューの「文字列の折り返し」のサブ項目に印をつける
+	void MainPage::text_word_wrap_is_checked(const DWRITE_WORD_WRAPPING val)
+	{
+		if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP) {
+			rmfi_menu_text_wrap().IsChecked(true);
+			rmfi_popup_text_wrap().IsChecked(true);
+		}
+		else if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_NO_WRAP) {
+			rmfi_menu_text_no_wrap().IsChecked(true);
+			rmfi_popup_text_no_wrap().IsChecked(true);
+		}
+		else if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER) {
+			rmfi_menu_text_wrap_char().IsChecked(true);
+			rmfi_popup_text_wrap_char().IsChecked(true);
+		}
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
@@ -529,7 +546,7 @@ namespace winrt::GraphPaper::implementation
 							wcscpy_s(buf, str_def_val.data());
 						}
 						dialog_slider_0().Header(box_value(str_text_line_sp + buf));
-						if (m_prop_page.back()->set_text_line_sp(val)) {
+						if (m_prop_page.slist_back()->set_text_line_sp(val)) {
 							dialog_draw();
 						}
 					}
@@ -537,7 +554,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_prop_page.back()->get_text_line_sp(samp_val);
+				m_prop_page.slist_back()->get_text_line_sp(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					undo_menu_is_enabled();
@@ -551,7 +568,28 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
-	// 書体メニューの「余白」が選択された.
+	// 書体メニューの「文字列の折り返し」のサブ項目が選択された
+	void MainPage::text_word_wrap_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		bool changed = false;
+		if (sender == rmfi_menu_text_wrap() || sender == rmfi_popup_text_wrap()) {
+			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP);
+		}
+		else if (sender == rmfi_menu_text_no_wrap() || sender == rmfi_popup_text_no_wrap()) {
+			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_NO_WRAP);
+		}
+		else if (sender == rmfi_menu_text_wrap_char() || sender == rmfi_popup_text_wrap_char()) {
+			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER);
+		}
+		if (changed) {
+			undo_menu_is_enabled();
+			text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
+			main_draw();
+		}
+		status_bar_set_pos();
+	}
+
+	// 書体メニューの「余白...」が選択された.
 	IAsyncAction MainPage::text_pad_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		const auto str_text_pad_horz{
@@ -611,9 +649,9 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
 					D2D1_SIZE_F pad;
-					m_prop_page.back()->get_text_pad(pad);
+					m_prop_page.slist_back()->get_text_pad(pad);
 					pad.width = static_cast<FLOAT>(val);
-					if (m_prop_page.back()->set_text_pad(pad)) {
+					if (m_prop_page.slist_back()->set_text_pad(pad)) {
 						dialog_draw();
 					}
 				})
@@ -628,16 +666,16 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_vert + buf));
 					D2D1_SIZE_F pad;
-					m_prop_page.back()->get_text_pad(pad);
+					m_prop_page.slist_back()->get_text_pad(pad);
 					pad.height = static_cast<FLOAT>(val);
-					if (m_prop_page.back()->set_text_pad(pad)) {
+					if (m_prop_page.slist_back()->set_text_pad(pad)) {
 						dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
-				m_prop_page.back()->get_text_pad(samp_val);
+				m_prop_page.slist_back()->get_text_pad(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					undo_menu_is_enabled();

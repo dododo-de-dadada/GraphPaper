@@ -501,6 +501,22 @@
     <value>文字列の余白...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfsi_menu_text_wrap.Text" xml:space="preserve">
+    <value>文字列の折り返し</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="rmfi_menu_text_wrap.Text" xml:space="preserve">
+    <value>単語で折り返す</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="rmfi_menu_text_no_wrap.Text" xml:space="preserve">
+    <value>折り返さない</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_menu_text_wrap_char.Text" xml:space="preserve">
+    <value>改行を強制</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mbi_menu_undo.Text" xml:space="preserve">
     <value>元に戻す</value>
     <comment>MenuFlyoutItem</comment>

@@ -14,46 +14,50 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	template<UNDO_T U>	// 操作の種類
-	static void color_get(const ShapePage& p, D2D1_COLOR_F& c)
+	// 色を得る.
+	// U	操作の種類
+	// page	ページ図形
+	// color	得られた色
+	template<UNDO_T U>
+	static void color_get(const ShapePage& page, D2D1_COLOR_F& color)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
-			p.back()->get_fill_color(c);
+			page.slist_back()->get_fill_color(color);
 		}
 		else if constexpr (U == UNDO_T::FONT_COLOR) {
-			p.back()->get_font_color(c);
+			page.slist_back()->get_font_color(color);
 		}
 		else if constexpr (U == UNDO_T::GRID_COLOR) {
-			p.get_grid_color(c);
+			page.get_grid_color(color);
 		}
 		else if constexpr (U == UNDO_T::PAGE_COLOR) {
-			p.get_page_color(c);
+			page.get_page_color(color);
 		}
 		else if constexpr (U == UNDO_T::STROKE_COLOR) {
-			p.back()->get_stroke_color(c);
+			page.slist_back()->get_stroke_color(color);
 		}
 	}
 
 	template<UNDO_T U>
-	static bool color_set(ShapePage& p, const D2D1_COLOR_F& c)
+	static bool color_set(ShapePage& page, const D2D1_COLOR_F& color)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
-			return p.back()->set_fill_color(c);
+			return page.slist_back()->set_fill_color(color);
 		}
 		else if constexpr (U == UNDO_T::FONT_COLOR) {
-			return p.back()->set_font_color(c);
+			return page.slist_back()->set_font_color(color);
 		}
 		else if constexpr (U == UNDO_T::GRID_COLOR) {
-			return p.set_grid_color(c);
+			return page.set_grid_color(color);
 		}
 		else if constexpr (U == UNDO_T::IMAGE_OPAC) {
-			return p.set_image_opacity(c);
+			return page.set_image_opacity(color);
 		}
 		else if constexpr (U == UNDO_T::PAGE_COLOR) {
-			return p.set_page_color(c);
+			return page.set_page_color(color);
 		}
 		else if constexpr (U == UNDO_T::STROKE_COLOR) {
-			return p.back()->set_stroke_color(c);
+			return page.slist_back()->set_stroke_color(color);
 		}
 		else {
 			return false;
@@ -114,14 +118,14 @@ namespace winrt::GraphPaper::implementation
 		};
 		if constexpr (U == UNDO_T::FILL_COLOR) {
 			m_prop_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_prop_page));
-			m_prop_page.back()->set_select(true);
+			m_prop_page.slist_back()->set_select(true);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
 		}
 		else if constexpr (U == UNDO_T::STROKE_COLOR) {
 			m_prop_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_prop_page));
-			m_prop_page.back()->set_select(true);
+			m_prop_page.slist_back()->set_select(true);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -461,7 +465,7 @@ namespace winrt::GraphPaper::implementation
 						wchar_t buf[32];
 						conv_col_to_str(m_color_code, val, buf);
 						dialog_slider_0().Header(box_value(str_opacity + buf));
-						if (m_prop_page.back()->set_image_opacity(val / COLOR_MAX)) {
+						if (m_prop_page.slist_back()->set_image_opacity(val / COLOR_MAX)) {
 							dialog_draw();
 						}
 					}
@@ -492,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float new_val;
-				m_prop_page.back()->get_image_opacity(new_val);
+				m_prop_page.slist_back()->get_image_opacity(new_val);
 				if (dialog_combo_box_0().SelectedIndex() == 0) {
 					m_color_code = COLOR_CODE::DEC;
 				}

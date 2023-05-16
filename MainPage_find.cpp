@@ -246,11 +246,24 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
+		// ŒŸõ•¶Žš—ñ‚ª‹ó‚È‚ç’†’f‚·‚é.
 		const auto find_len = wchar_len(m_find_text);
 		if (find_len == 0) {
 			return;
 		}
+		// ‚Å‚«‚é‚¾‚¯”w–Ê‚É‚ ‚é•¶Žš—ñ}Œ`‚ð’T‚µ, –³‚¯‚ê‚Î’†’f‚·‚é.
+		ShapeText* t = nullptr;
+		for (auto s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || typeid(*s) != typeid(ShapeText)) {
+				continue;
+			}
+			t = static_cast<ShapeText*>(s);
+		}
+		if (t == nullptr) {
+			return;
+		}
 		undo_push_null();
+		undo_push_text_select(t, 0, 0, false);
 		while (replace_and_find()) {}
 		undo_menu_is_enabled();
 		main_draw();

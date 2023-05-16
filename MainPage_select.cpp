@@ -165,9 +165,9 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
 	*/
 
-	// 範囲の中の図形を選択して, それ以外の図形は選択をはずす.
-	// s_from	最初の図形
-	// s_to	最後の図形
+	// 指定した範囲の図形を選択, 範囲外の図形の選択を外す.
+	// s_from	範囲の最初
+	// s_to	範囲の最後
 	// 戻り値	選択が変更された true
 	bool MainPage::select_shape_range(Shape* const s_from, Shape* const s_to)
 	{
@@ -230,13 +230,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矩形に含まれる図形の選択を反転する.
-	// lt	矩形の左上点
-	// rb	矩形の右下点
-	bool MainPage::toggle_shape_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
+	// left_top	矩形の左上点
+	// right_bot	矩形の右下点
+	bool MainPage::toggle_shape_inside(const D2D1_POINT_2F left_top, const D2D1_POINT_2F right_bot)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_inside(lt, rb)) {
+			if (s->is_deleted() || !s->is_inside(left_top, right_bot)) {
 				continue;
 			}
 			undo_push_select(s);
@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	選択が解除された図形があるなら true
 	bool MainPage::unselect_shape_all(const bool t_range_only)
 	{
-		bool done = false;
+		bool changed = false;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列選択だけを解除ではない, かつ選択された図形か判定する.
 			if (!t_range_only) {
 				undo_push_select(s);
-				done = true;
+				changed = true;
 			}
 			if (typeid(*s) != typeid(ShapeText)) {
 				continue;
@@ -279,14 +279,14 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.m_select_end != 0 ||
 				m_main_page.m_select_trail != false) {
 				undo_push_text_select(s, 0, 0, false);
-				done = true;
+				changed = true;
 			}
 		}
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_unselect_shape_all();
 		}
-		return done;
+		return changed;
 	}
 
 }
