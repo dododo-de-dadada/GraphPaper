@@ -500,6 +500,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool exist_join(void) const noexcept { return false; }
 		// 図形を移動する.
 		virtual	bool move(const D2D1_POINT_2F /*pos*/) noexcept { return false; }
+		// 線の方向を反転する.
+		virtual bool reverse_path(void) noexcept { return false; }
 		// 値を円弧の始点の角度に格納する.
 		virtual bool set_arc_start(const float/* val*/) noexcept { return false; }
 		// 値を円弧の終点の角度に格納する.
@@ -1455,7 +1457,7 @@ namespace winrt::GraphPaper::implementation
 				prop->get_arrow_join(a_join);
 				return a_join;
 			}())
-			{}
+		{}
 
 		ShapeArrow(const DataReader& dt_reader) :
 			ShapeStroke(dt_reader)
@@ -1534,6 +1536,16 @@ namespace winrt::GraphPaper::implementation
 		virtual uint32_t hit_test(const D2D1_POINT_2F pt, const bool ctrl_key = false) const noexcept override;
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
+		// 線の方向を反転する.
+		virtual bool reverse_path(void) noexcept final override
+		{
+			m_start.x += m_pos.x;
+			m_start.y += m_pos.y;
+			m_pos.x = -m_pos.x;
+			m_pos.y = -m_pos.y;
+			m_d2d_arrow_geom = nullptr;
+			return true;
+		}
 		// 値を, 指定した部位の点に格納する.
 		virtual bool set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する.
@@ -1565,6 +1577,25 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
+		// 線の方向を反転する.
+		virtual bool reverse_path(void) noexcept override
+		{
+			const size_t p_cnt = m_pos.size();
+			for (size_t i = 0; i < p_cnt; i++) {
+				m_start.x += m_pos[i].x;
+				m_start.y += m_pos[i].y;
+				m_pos[i].x = -m_pos[i].x;
+				m_pos[i].y = -m_pos[i].y;
+			}
+			for (size_t i = 0; i < p_cnt / 2; i++) {
+				D2D1_POINT_2F p{ m_pos[i] };
+				m_pos[i] = m_pos[p_cnt - 1 - i];
+				m_pos[p_cnt - 1 - i] = p;
+			}
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			return true;
+		}
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
 		// 近傍の頂点を見つける.
@@ -1760,6 +1791,13 @@ namespace winrt::GraphPaper::implementation
 		// 円弧
 		//------------------------------
 
+		// 線の方向を反転する.
+		virtual bool reverse_path(void) noexcept final override
+		{
+			ShapePath::reverse_path();
+			m_d2d_fill_geom = nullptr;
+			return true;
+		}
 		// 指定した部位の点を得る.
 		virtual void get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 指定した部位の点に格納する.
@@ -1810,6 +1848,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+		uint32_t m_text_len = 0;	// 文字列の長さ (終端ヌルは含まない)
 		wchar_t* m_text = nullptr;	// 文字列
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
@@ -1908,7 +1947,12 @@ namespace winrt::GraphPaper::implementation
 		//bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
 		uint32_t get_text_len(void) const noexcept
 		{
-			return wchar_len(m_text);
+#ifdef _DEBUG
+			if (m_text_len != wchar_len(m_text)) {
+				__debugbreak();
+			}
+#endif
+			return m_text_len;
 		}
 		void get_text_caret(const uint32_t text_pos, const uint32_t text_row, const bool is_trailing, D2D1_POINT_2F& caret) const noexcept
 		{
@@ -1999,7 +2043,7 @@ namespace winrt::GraphPaper::implementation
 				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 			if (m_dwrite_text_layout == nullptr) {
 				is_trailing = false;
-				return wchar_len(m_text);
+				return get_text_len();
 			}
 			// 図形の開始点を原点とする.
 			const float tx = (m_pos.x >= 0.0f ? m_start.x : m_start.x + m_pos.x) + m_text_pad.width;

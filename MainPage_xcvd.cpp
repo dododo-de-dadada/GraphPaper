@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
 			return;
 		}
-		if (is_text_editing()) {
+		if (m_edit_text_shape != nullptr) {
 			const auto sele_text = text_sele_get();
 			if (!sele_text.empty()) {
 				// 部分文字列をデータパッケージに格納する.
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 
 		co_await xcvd_copy_click_async(nullptr, nullptr);
 
-		if (is_text_editing()) {
+		if (m_edit_text_shape != nullptr) {
 			text_sele_delete();
 		}
 		else {
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// XAML のキーボードアクセラレーターに削除キーは指定されていて,
 		// CoreWWindow の KeyDow でなく, このハンドラーで処理される.
-		if (is_text_editing()) {
+		if (m_edit_text_shape != nullptr) {
 			const auto shift_key = ((CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			text_char_delete(shift_key);
 		}
@@ -521,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
 
 		if (!text.empty()) {
-			if (is_text_editing()) {
+			if (m_edit_text_shape != nullptr) {
 				text_sele_insert(text.data(), static_cast<uint32_t>(text.size()));
 			}
 			// 文字列検索パネルのテキストボックスにフォーカスが無ければ文字列図形としてはりつける.

@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F barb[3];	// –î‚¶‚é‚µ‚Ì•Ô‚µ‚Ì’[“_	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 		HRESULT hr = S_OK;
-		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, barb)) {
+		if (!ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, barb)) {
 			hr = E_FAIL;
 		}
 		if (hr == S_OK) {

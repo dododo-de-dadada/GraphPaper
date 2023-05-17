@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			auto core_win{ CoreWindow::GetForCurrentThread() };
 			core_win.KeyDown([this](auto sender, auto args) {
-				if (!is_text_editing()) {
+				if (m_edit_text_shape == nullptr) {
 					return;
 				}
 				const ShapeText* t = m_edit_text_shape;
@@ -269,32 +269,12 @@ namespace winrt::GraphPaper::implementation
 				else if (args.VirtualKey() == VirtualKey::Delete) {
 					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 					text_char_delete(shift_key);
-					/*
-					// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
-					const auto len = t->get_text_len();
-					const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-					const auto start = t->m_select_start;
-					const auto shift = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					if (!shift && end == start && end < len) {
-						undo_push_null();
-						undo_push_text_select(m_edit_text_shape, end, end + 1, false);
-						m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-						undo_menu_is_enabled();
-						main_draw();
-					}
-					// 選択範囲があるなら
-					else if (end != start) {
-						undo_push_null();
-						m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-						undo_menu_is_enabled();
-						main_draw();
-					}
-					*/
 				}
 				else if (args.VirtualKey() == VirtualKey::Left) {
-					const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					const auto start = m_main_page.m_select_start;
 					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
+					const auto len = t->get_text_len();
+					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
+					const auto start = min(m_main_page.m_select_start, len);
 					if (shift_key) {
 						if (end > 0) {
 							undo_push_text_select(m_edit_text_shape, start, end - 1, false);
@@ -366,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 							main_draw();
 						}
 					}
-					else if (row > 0) {
+					else if (row != 0) {
 						const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						const auto line_h = t->m_dwrite_test_metrics[row].top - t->m_dwrite_test_metrics[row - 1].top;
 						D2D1_POINT_2F car;
@@ -409,7 +389,7 @@ namespace winrt::GraphPaper::implementation
 							main_draw();
 						}
 					}
-					else if (row < last) {
+					else if (row != last) {
 						const bool shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						const auto line_h = t->m_dwrite_test_metrics[row + 1].top - t->m_dwrite_test_metrics[row].top;
 						D2D1_POINT_2F car;
@@ -537,7 +517,9 @@ namespace winrt::GraphPaper::implementation
 				const auto car_row = t->get_text_row(end);	// キャレット行
 				const auto row_start = t->m_dwrite_test_metrics[car_row].textPosition;	// キャレット行の開始位置
 				const auto row_end = row_start + t->m_dwrite_test_metrics[car_row].length;	// キャレット行の終了位置
-				// 選択範囲が複数行の場合, どうすれば適切なのか分からないので, とりあえず選択範囲はキャレットがある行に限定する.
+
+				// 選択範囲が複数行の場合, 選択範囲の矩形をどう設定すれば適切なのか分からない.
+				// とりあえず選択範囲はキャレットがある行に限定する.
 				t->get_text_caret(max(min(start, end), row_start), car_row, false, sel_start);
 				t->get_text_caret(min(max(start, end), row_end), car_row, false, sel_end);
 				sel_rect.X = win_rect.X + pane.X + sel_start.x / m_main_scale;

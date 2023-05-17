@@ -461,13 +461,6 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の編集
 		//-------------------------------
 
-		// 文字列の編集中か判定する.
-		bool is_text_editing(void) const noexcept
-		{
-			// 文字列編集中の図形があって, かつそれが最後に押された図形である
-			return m_edit_text_shape != nullptr && m_edit_text_shape == m_event_shape_last;
-		}
-
 		winrt::hstring text_sele_get(void) const noexcept
 		{
 			//ShapeText* t = m_edit_text_shape;
@@ -1108,6 +1101,7 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
 		// 図形の値の保存を実行して, その操作をスタックに積む.
 		template <UNDO_T U> void undo_push_set(Shape* const s);
+		// 文字列の選択範囲を解除する. キャレット位置は変わらない.
 		void undo_push_text_unselect(ShapeText* s)
 		{
 			const auto start = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
@@ -1161,6 +1155,26 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_text(void);
 		// 貼り付ける点を得る
 		void xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept;
+
+		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
+		{
+			bool changed = false;
+			for (Shape* s : m_main_page.m_shape_list) {
+				if (s->is_deleted() || !s->is_selected() || dynamic_cast<ShapeArrow*>(s) == nullptr) {
+					continue;
+				}
+				if (!changed) {
+					changed = true;
+					undo_push_null();
+				}
+				m_ustack_undo.push_back(new UndoReverse(s));
+			}
+			if (changed) {
+				undo_menu_is_enabled();
+				main_draw();
+				status_bar_set_pos();
+			}
+		}
 
 		void Page_Loaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{

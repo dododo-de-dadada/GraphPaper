@@ -5,9 +5,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
-	constexpr auto INDEX_PAGE = static_cast<uint32_t>(-1);	// 表示図形の添え字
-
 	SHAPE_LIST* Undo::undo_slist = nullptr;	// 操作が参照する図形リスト
 	ShapePage* Undo::undo_page = nullptr;	// 操作が参照するページ
 
@@ -33,14 +30,15 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから添え字を読み込んで図形を得る.
 	// dt_reader	データリーダー
+	/*
 	static Shape* undo_read_shape(DataReader const& dt_reader)
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
 		const uint32_t i = dt_reader.ReadUInt32();
-		if (i == INDEX_PAGE) {
+		if (i == UNDO_SHAPE_PAGE) {
 			s = Undo::undo_page;
 		}
-		else if (i == INDEX_NIL) {
+		else if (i == UNDO_SHAPE_NIL) {
 			s = nullptr;
 		}
 		else {
@@ -48,8 +46,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		return s;
 	}
+	*/
 
 	// 図形をデータライターに書き込む.
+	/*
 	static void undo_write_shape(
 		Shape* const s,	// 書き込まれる図形
 		DataWriter const& dt_writer	// データリーダー
@@ -57,39 +57,39 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形がページ図形なら, ページを意味する添え字を書き込む.
 		if (s == Undo::undo_page) {
-			dt_writer.WriteUInt32(INDEX_PAGE);
+			dt_writer.WriteUInt32(UNDO_SHAPE_PAGE);
 		}
 		// 図形がヌルなら, ヌルを意味する添え字を書き込む.
 		else if (s == nullptr) {
-			dt_writer.WriteUInt32(INDEX_NIL);
+			dt_writer.WriteUInt32(UNDO_SHAPE_NIL);
 		}
 		// それ以外なら, リスト中での図形の添え字を書き込む.
-		// リスト中に図形がなければ INDEX_NIL が書き込まれる.
+		// リスト中に図形がなければ UNDO_SHAPE_NIL が書き込まれる.
 		else {
-			uint32_t i = INDEX_NIL;
+			uint32_t i = UNDO_SHAPE_NIL;
 			slist_match<Shape* const, uint32_t>(*Undo::undo_slist, s, i);
 			dt_writer.WriteUInt32(i);
 		}
 	}
-
+	*/
+	/*
 	// データリーダーから操作を読み込む.
 	UndoDeform::UndoDeform(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_loc(static_cast<LOC_TYPE>(dt_reader.ReadUInt32())),
-		m_p(D2D1_POINT_2F{
+		m_pt(D2D1_POINT_2F{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		})
 	{}
 
 	// 指定した部位の点を保存する.
-	UndoDeform::UndoDeform(
-		Shape* const s,	// 図形
-		const uint32_t loc	// 部位
-	) :
+	// s	図形
+	// loc	部位
+	UndoDeform::UndoDeform(Shape* const s, const uint32_t loc) :
 		Undo(s),
 		m_loc(loc),
-		m_p(undo_get_pos_loc(s, loc))
+		m_pt(undo_get_pos_loc(s, loc))
 	{}
 
 	// 図形の形の操作をデータライターに書き込む.
@@ -98,9 +98,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::DEFORM));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_loc));
-		dt_writer.WriteSingle(m_p.x);
-		dt_writer.WriteSingle(m_p.y);
+		dt_writer.WriteSingle(m_pt.x);
+		dt_writer.WriteSingle(m_pt.y);
 	}
+	*/
 
 	// 操作を実行する.
 	void UndoOrder::exec(void) noexcept

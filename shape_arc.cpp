@@ -948,12 +948,6 @@ namespace winrt::GraphPaper::implementation
 		else if (loc_hit_test(pt, p[AXIS_Y], m_loc_width)) {
 			return ctrl_key ? LOC_TYPE::LOC_A_AXIS_Y : LOC_TYPE::LOC_P0;
 		}
-		else if (!ctrl_key && loc_hit_test(pt, p[END], m_loc_width)) {
-			return LOC_TYPE::LOC_A_END;
-		}
-		else if (!ctrl_key && loc_hit_test(pt, p[START], m_loc_width)) {
-			return LOC_TYPE::LOC_A_START;
-		}
 		else if (loc_hit_test(pt, p[CENTER], m_loc_width)) {
 			return LOC_TYPE::LOC_FILL;
 		}

@@ -538,12 +538,12 @@ namespace winrt::GraphPaper::implementation
 			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, m_snap_point / m_main_scale, m_image_keep_aspect);
 		}
-		undo_push_null();
-		if (!undo_pop_invalid()) {
-			undo_menu_is_enabled();
-			main_bbox_update();
-			main_panel_size();
-		}
+		//undo_push_null();
+		//if (!undo_pop_invalid()) {
+		//	undo_menu_is_enabled();
+		//	main_bbox_update();
+		//	main_panel_size();
+		//}
 	}
 
 	//------------------------------
@@ -570,19 +570,13 @@ namespace winrt::GraphPaper::implementation
 			if (event_get_nearby_grid(m_main_page.m_shape_list, m_main_page.m_grid_base + 1.0f, p)) {
 				slist_move_selected(m_main_page.m_shape_list, p);
 			}
-		} 
+		}
 		// 頂点にくっつける
 		else if (m_snap_point / m_main_scale >= FLT_MIN) {
 			D2D1_POINT_2F p{};	// 頂点との差分
 			if (event_get_nearby_point(m_main_page.m_shape_list, m_snap_point / m_main_scale, p)) {
 				slist_move_selected(m_main_page.m_shape_list, p);
 			}
-		}
-		undo_push_null();
-		if (!undo_pop_invalid()) {
-			undo_menu_is_enabled();
-			main_bbox_update();
-			main_panel_size();
 		}
 	}
 
@@ -751,10 +745,12 @@ namespace winrt::GraphPaper::implementation
 				else if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
 					// 図形を変形している状態に遷移する.
 					// ポインターの現在位置を前回位置に保存する.
-					m_event_state = EVENT_STATE::PRESS_DEFORM;
-					m_event_pos_prev = m_event_pos_curr;
-					undo_push_position(m_event_shape_pressed, m_event_loc_pressed);
-					m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+					if (m_event_shape_pressed->is_selected()) {
+						m_event_state = EVENT_STATE::PRESS_DEFORM;
+						m_event_pos_prev = m_event_pos_curr;
+						undo_push_position(m_event_shape_pressed, m_event_loc_pressed);
+						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+					}
 				}
 				main_draw();
 			}
@@ -1123,8 +1119,6 @@ namespace winrt::GraphPaper::implementation
 			scp_main_panel().ContextFlyout().Hide();
 			scp_main_panel().ContextFlyout(nullptr);
 		}
-		m_event_shape_pressed = nullptr;
-		m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 
 		// 押された図形があるなら, その属性をページに反映し, メニューバーを更新する
 		if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
@@ -1147,6 +1141,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
+					m_event_shape_pressed = nullptr;
+					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						/////
 						// 編集中の文字列図形があるならフォーカスを取り消す.
@@ -1216,6 +1212,8 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
+					m_event_shape_pressed = nullptr;
+					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						////
 						// 編集中の文字列図形があるならフォーカスを取り消す.
@@ -1276,6 +1274,8 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else {
+					m_event_shape_pressed = nullptr;
+					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
 					// 押された図形はない.
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
 						if (unselect_shape_all()) {
@@ -1695,6 +1695,7 @@ namespace winrt::GraphPaper::implementation
 				//}
 			}
 		}
+		// 状態が, 文字列を押している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
 			bool trail;
 			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
@@ -1703,11 +1704,27 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
-			event_finish_moving();
+			if (args.KeyModifiers() != VirtualKeyModifiers::Control) {
+				event_finish_moving();
+			}
+			undo_push_null();
+			if (!undo_pop_invalid()) {
+				undo_menu_is_enabled();
+				main_bbox_update();
+				main_panel_size();
+			}
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			event_finish_deforming();
+			if (args.KeyModifiers() != VirtualKeyModifiers::Control) {
+				event_finish_deforming();
+			}
+			undo_push_null();
+			if (!undo_pop_invalid()) {
+				undo_menu_is_enabled();
+				main_bbox_update();
+				main_panel_size();
+			}
 		}
 		// 状態が, 矩形選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RECT) {

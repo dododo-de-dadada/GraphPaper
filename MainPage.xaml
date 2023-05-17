@@ -450,10 +450,10 @@
 				<!-- 余白 -->
 				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
                 <!-- 文字列の折り返し -->
-                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Overflow wrap">
+                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Word Wrap" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="No Wrap" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Break Word" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Wrap Between Any" />
                 </MenuFlyoutSubItem>
                 <!-- 書体の色 -->
 				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
@@ -768,7 +768,8 @@
 						<KeyboardAccelerator Key="U" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-			</muxc:MenuBarItem>
+                <MenuFlyoutItem x:Name="mfi_menu_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
+            </muxc:MenuBarItem>
 			<!-- 作図メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
 				<!-- 選択ツール -->
@@ -1226,10 +1227,10 @@
                 <!-- 文字列の余白 -->
                 <MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
                 <!-- 文字列の折り返し -->
-                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Overflow Wrap">
+                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Word Wrap" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="No Wrap" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Break Word" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Wrap Between Any" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 書体の色 -->

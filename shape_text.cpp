@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 			// 既定のロケール名を得る.
 			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-			const UINT32 text_len = wchar_len(m_text);
+			const UINT32 text_len = get_text_len();
 
 			// 文字列フォーマットを作成する.
 			// 属性値がなんであれ, DWRITE_FONT_STRETCH_NORMAL でテキストフォーマットは作成する.
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 			if (!m_dwrite_text_layout.try_as(t3)) {
 				hr = E_FAIL;
 			}
-			const DWRITE_TEXT_RANGE range{ 0, wchar_len(m_text) };
+			const DWRITE_TEXT_RANGE range{ 0, get_text_len() };
 			// 書体名が変更されたなら文字列レイアウトに格納する.
 			const UINT32 name_len = t3->GetFontFamilyNameLength();
 			std::vector<WCHAR> f_family(name_len + 1);
@@ -451,15 +451,15 @@ namespace winrt::GraphPaper::implementation
 				m_dwrite_line_metrics = new DWRITE_LINE_METRICS[m_dwrite_line_cnt];
 				hr = m_dwrite_text_layout->GetLineMetrics(m_dwrite_line_metrics, m_dwrite_line_cnt, &m_dwrite_line_cnt);
 			}
+
 			// ヒットテストの計量を作成する.
 			if (hr == S_OK) {
 				m_dwrite_test_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_line_cnt];
-				hr = m_dwrite_text_layout->HitTestTextRange(0, wchar_len(m_text), 0.0f, 0.0f, m_dwrite_test_metrics, m_dwrite_line_cnt, &m_dwrite_test_cnt);
+				hr = m_dwrite_text_layout->HitTestTextRange(0, get_text_len(), 0.0f, 0.0f, m_dwrite_test_metrics, m_dwrite_line_cnt, &m_dwrite_test_cnt);
 			}
 
-			// ヒットテストの計量は文字列の最後尾の改行はトリミングしてしまうので,
+			// ヒットテストの計量は文字列末尾の改行はトリミングしてしまうので,
 			// 必要なら, 行の計量をもとに, トリミングされた計量を補う.
-			// パディングは考慮せず, 文字列の左上点を原点とする.
 			if (hr == S_OK && m_dwrite_test_cnt < m_dwrite_line_cnt) {
 				float last_top;	// 最終行の上端
 				float last_left;	// 最終行の左端
@@ -500,15 +500,18 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 				}
+				// 段落のそろえが右よせなら, 最終行の左端には文字列レイアウトの幅を格納する.
 				if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
 					//last_left = fabs(m_pos.x) - min(fabs(m_pos.x), 2.0f * m_text_pad.width);
 					last_left = m_dwrite_text_layout->GetMaxWidth();
 				}
+				// 段落のそろえが中央または均等なら, 最終行の左端には文字列レイアウトの幅の半分を格納する.
 				else if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
 					m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
 					//last_left = 0.5f * fabs(m_pos.x);
 					last_left = m_dwrite_text_layout->GetMaxWidth() * 0.5f;
 				}
+				// 段落のそろえがそれ以外なら, 最終行の左端には 0 を格納する.
 				else {
 					last_left = 0.0;
 				}
@@ -1104,9 +1107,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(static_cast<const wchar_t*>(m_text), val)) {
 			m_text = val;
-			//m_select_end = wchar_len(val);
-			//m_select_start = m_select_end;
-			//m_select_trail = false;
+			m_text_len = wchar_len(val);
 			m_dwrite_text_layout = nullptr;
 			return true;
 		}
@@ -1164,12 +1165,11 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 図形を作成する.
-	ShapeText::ShapeText(
-		const D2D1_POINT_2F start,	// 始点
-		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
-		wchar_t* const text,	// 文字列
-		const Shape* prop	// 属性
-	) :
+	// start	始点
+	// pos	終点への位置ベクトル
+	// text	文字列
+	// prop	属性
+	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* prop) :
 		ShapeRect::ShapeRect(start, pos, prop)
 	{
 		prop->get_font_color(m_font_color);
@@ -1182,11 +1182,9 @@ namespace winrt::GraphPaper::implementation
 		prop->get_text_pad(m_text_pad),
 		prop->get_text_align_horz(m_text_align_horz);
 		prop->get_text_align_vert(m_text_align_vert);
+		m_text_len = wchar_len(text);
 		m_text = text;
-		//m_text_selected_range = DWRITE_TEXT_RANGE{ 0, 0 };
-		//m_select_end = wchar_len(text);
-		//m_select_start = m_select_end;
-		//m_select_trail = false;
+
 		ShapeText::is_available_font(m_font_family);
 	}
 
@@ -1213,12 +1211,27 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		},
-		m_font_family(text_read_text(dt_reader)),
+		m_font_family([](DataReader const& dt_reader, const uint32_t text_len)->wchar_t* {
+			wchar_t* text = new wchar_t[text_len + 1];
+			if (text != nullptr) {
+				dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(text), 2 * text_len));
+				text[text_len] = L'\0';
+			}
+			return text;
+		}(dt_reader, dt_reader.ReadUInt32())),
 		m_font_size(dt_reader.ReadSingle()),
 		m_font_stretch(static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32())),
 		m_font_style(static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32())),
 		m_font_weight(static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32())),
-		m_text(text_read_text(dt_reader)),
+		m_text_len(dt_reader.ReadUInt32()),
+		m_text([](DataReader const& dt_reader, const uint32_t text_len)->wchar_t* {
+			wchar_t* text = new wchar_t[text_len + 1];
+			if (text != nullptr) {
+				dt_reader.ReadBytes(winrt::array_view(reinterpret_cast<uint8_t*>(text), 2 * text_len));
+				text[text_len] = L'\0';
+			}
+			return text;
+		}(dt_reader, m_text_len)),
 		m_text_align_vert(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32())),
 		m_text_align_horz(static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32())),
 		m_text_line_sp(dt_reader.ReadSingle()),
@@ -1317,7 +1330,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
 
-		const uint32_t t_len = wchar_len(m_text);
+		const uint32_t t_len = get_text_len();
 		dt_writer.WriteUInt32(t_len);
 		const auto t_data = reinterpret_cast<const uint8_t*>(m_text);
 		dt_writer.WriteBytes(array_view(t_data, t_data + 2 * static_cast<size_t>(t_len)));

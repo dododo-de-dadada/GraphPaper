@@ -53,6 +53,7 @@ namespace winrt::GraphPaper::implementation
 		PAGE_SIZE,	// ページの大きさの操作
 		PAGE_PAD,	// ページの内余白の操作
 		POLY_END,	// 多角形の端の操作
+		REVERSE_PATH,	// 線の方向を反転する操作
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
@@ -114,6 +115,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::TEXT_WRAP> { using type = DWRITE_WORD_WRAPPING; };
 	//template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
+	constexpr auto UNDO_SHAPE_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
+	constexpr auto UNDO_SHAPE_PAGE = static_cast<uint32_t>(-1);	// ページ図形の添え字
+
 	//------------------------------
 	// 操作のひな型
 	//------------------------------
@@ -143,12 +147,77 @@ namespace winrt::GraphPaper::implementation
 		Undo(Shape* s) : m_shape(s) {}
 		// データライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
+		// データリーダーから添え字を読み込んで図形を得る.
+		static Shape* undo_read_shape(DataReader const& dt_reader)
+		{
+			Shape* s = static_cast<Shape*>(nullptr);
+			const uint32_t i = dt_reader.ReadUInt32();
+			if (i == UNDO_SHAPE_PAGE) {
+				s = Undo::undo_page;
+			}
+			else if (i == UNDO_SHAPE_NIL) {
+				s = nullptr;
+			}
+			else {
+				slist_match<const uint32_t, Shape*>(*Undo::undo_slist, i, s);
+			}
+			return s;
+		}
+		// 図形をデータライターに書き込む.
+		static void undo_write_shape(
+			Shape* const s,	// 書き込まれる図形
+			DataWriter const& dt_writer	// データリーダー
+		)
+		{
+			// 図形がページ図形なら, ページを意味する添え字を書き込む.
+			if (s == Undo::undo_page) {
+				dt_writer.WriteUInt32(UNDO_SHAPE_PAGE);
+			}
+			// 図形がヌルなら, ヌルを意味する添え字を書き込む.
+			else if (s == nullptr) {
+				dt_writer.WriteUInt32(UNDO_SHAPE_NIL);
+			}
+			// それ以外なら, リスト中での図形の添え字を書き込む.
+			// リスト中に図形がなければ UNDO_SHAPE_NIL が書き込まれる.
+			else {
+				uint32_t i = UNDO_SHAPE_NIL;
+				slist_match<Shape* const, uint32_t>(*Undo::undo_slist, s, i);
+				dt_writer.WriteUInt32(i);
+			}
+		}
+	};
+
+	struct UndoReverse : Undo {
+		UndoReverse(Shape* s) :
+			Undo(s)
+		{
+			exec();
+		}
+		UndoReverse(DataReader const& dt_reader) :
+			Undo(undo_read_shape(dt_reader))
+		{}
+		virtual bool changed(void) const noexcept final override
+		{
+			return true;
+		}
+		// 元に戻す操作を実行する.
+		virtual void exec(void) noexcept final override
+		{
+			m_shape->reverse_path();
+		}
+		// データライターに書き込む.
+		virtual void write(DataWriter const& dt_writer) const final override
+		{
+			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::REVERSE_PATH));
+			undo_write_shape(m_shape, dt_writer);
+		}
+
 	};
 
 	// 図形を変形する操作
 	struct UndoDeform : Undo {
 		uint32_t m_loc;	// 変形される部位
-		D2D1_POINT_2F m_p;	// 変形前の部位の点
+		D2D1_POINT_2F m_pt;	// 変形前の部位の点
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept final override
@@ -156,22 +225,44 @@ namespace winrt::GraphPaper::implementation
 			using winrt::GraphPaper::implementation::equal;
 			D2D1_POINT_2F p;
 			m_shape->get_pos_loc(m_loc, p);
-			return !equal(p, m_p);
+			return !equal(p, m_pt);
 		}
 		// 元に戻す操作を実行する.
 		virtual void exec(void) noexcept final override
 		{
-			D2D1_POINT_2F p;
-			m_shape->get_pos_loc(m_loc, p);
-			m_shape->set_pos_loc(m_p, m_loc, 0.0f, false);
-			m_p = p;
+			D2D1_POINT_2F pt;
+			m_shape->get_pos_loc(m_loc, pt);
+			m_shape->set_pos_loc(m_pt, m_loc, 0.0f, false);
+			m_pt = pt;
 		}
 		// データリーダーから操作を読み込む.
-		UndoDeform(DataReader const& dt_reader);
+		UndoDeform(DataReader const& dt_reader) :
+			Undo(undo_read_shape(dt_reader)),
+			m_loc(static_cast<LOC_TYPE>(dt_reader.ReadUInt32())),
+			m_pt(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle()})
+		{}
+
 		// 指定した部位の点を保存する.
-		UndoDeform(Shape* const s, const uint32_t loc);
-		// データライターに書き込む.
-		virtual void write(DataWriter const& dt_writer) const final override;
+		UndoDeform::UndoDeform(Shape* const s, const uint32_t loc) :
+			Undo(s),
+			m_loc(loc),
+			m_pt([](Shape* const s, const uint32_t loc)->D2D1_POINT_2F {
+				D2D1_POINT_2F pt;
+				s->get_pos_loc(loc, pt);
+				return pt;
+			}(s, loc))
+		{}
+
+		// 図形の形の操作をデータライターに書き込む.
+		void UndoDeform::write(DataWriter const& dt_writer) const final override
+		{
+			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::DEFORM));
+			undo_write_shape(m_shape, dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_loc));
+			dt_writer.WriteSingle(m_pt.x);
+			dt_writer.WriteSingle(m_pt.y);
+		}
+
 	};
 
 	//------------------------------
@@ -384,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 			const auto del_len = n - m;	// 削除する文字数.
 			if (del_len > 0) {
 				m_text = new wchar_t[del_len + 1];
-				memcpy(m_text, old_text + m, 2 * del_len);
+				memcpy(m_text, old_text + m, del_len * 2);
 				//for (int i = 0; i < del_len; i++) {
 				//	m_text[i] = old_text[m + i];
 				//}
@@ -403,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 				//for (uint32_t i = 0; i < m; i++) {
 				//	new_text[i] = old_text[i];
 				//}
-				memcpy(new_text, old_text, 2 * m);
+				memcpy(new_text, old_text, m * 2);
 			}
 
 			// 挿入後の文字数が元の文字数以下なら, 新しいメモリを確保せず, 元の文字列を利用する.
@@ -415,13 +506,13 @@ namespace winrt::GraphPaper::implementation
 			//for (uint32_t i = 0; i < ins_len; i++) {
 			//	new_text[m + i] = ins_text[i];
 			//}
-			memcpy(new_text + m, ins_text, 2 * ins_len);
+			memcpy(new_text + m, ins_text, ins_len * 2);
 
 			// 元の文字列の選択範囲の終了位置より後方をコピーする.
 			//for (uint32_t i = 0; i < old_len - n; i++) {
 			//	new_text[m + ins_len + i] = old_text[n + i];
 			//}
-			memmove(new_text + m + ins_len, old_text + n, 2 * (old_len - n));
+			memmove(new_text + m + ins_len, old_text + n, (old_len - n) * 2);
 			new_text[new_len] = L'\0';
 
 			// 挿入後の文字数が元の文字数を超えるなら, 元の文字列のメモリを解放して, 新しい文字列を格納する.
@@ -429,6 +520,7 @@ namespace winrt::GraphPaper::implementation
 				delete[] old_text;
 				static_cast<ShapeText*>(s)->m_text = new_text;
 			}
+			static_cast<ShapeText*>(s)->m_text_len = new_len;
 
 			// 編集後の選択範囲は, 挿入された文字列になる.
 			undo_page->m_select_start = m;
