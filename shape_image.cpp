@@ -263,16 +263,30 @@ namespace winrt::GraphPaper::implementation
 			target->DrawRectangle(rect, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
 			target->DrawRectangle(rect, brush, m_aux_width, m_aux_style.get());
-			const D2D1_POINT_2F a[4]{
-				m_start,
+
+			// 部位を表示する.
+			// 0---1
+			// |   |
+			// 3---2
+			D2D1_POINT_2F a_pos[4]{	// 方形の頂点
+				{ m_start.x, m_start.y },
 				{ m_start.x + m_view.width, m_start.y },
 				{ m_start.x + m_view.width, m_start.y + m_view.height },
-				{ m_start.x, m_start.y + m_view.height },
+				{ m_start.x, m_start.y + m_view.height }
 			};
-			loc_draw_square(a[0], target, brush);
-			loc_draw_square(a[1], target, brush);
-			loc_draw_square(a[2], target, brush);
-			loc_draw_square(a[3], target, brush);
+			D2D1_POINT_2F a_mid;	// 方形の辺の中点
+			pt_avg(a_pos[0], a_pos[3], a_mid);
+			loc_draw_square(a_mid, target, brush);
+			pt_avg(a_pos[0], a_pos[1], a_mid);
+			loc_draw_square(a_mid, target, brush);
+			pt_avg(a_pos[1], a_pos[2], a_mid);
+			loc_draw_square(a_mid, target, brush);
+			pt_avg(a_pos[2], a_pos[3], a_mid);
+			loc_draw_square(a_mid, target, brush);
+			loc_draw_square(a_pos[0], target, brush);
+			loc_draw_square(a_pos[1], target, brush);
+			loc_draw_square(a_pos[3], target, brush);
+			loc_draw_square(a_pos[2], target, brush);
 		}
 	}
 

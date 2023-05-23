@@ -1723,6 +1723,7 @@ namespace winrt::GraphPaper::implementation
 		// ベジェ曲線
 		//------------------------------
 
+		static uint32_t hit_test(const D2D1_POINT_2F tp, const D2D1_POINT_2F b_pt[4], const D2D1_POINT_2F b_vec[3], const D2D1_CAP_STYLE stroke_cap, const bool f_opaque, const double ew) noexcept;
 		// 矢じりの返しと先端の点を得る
 		static bool bezi_get_pos_arrow(const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
@@ -1795,6 +1796,12 @@ namespace winrt::GraphPaper::implementation
 		virtual bool reverse_path(void) noexcept final override
 		{
 			ShapePath::reverse_path();
+			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
+			}
+			else {
+				m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;
+			}
 			m_d2d_fill_geom = nullptr;
 			return true;
 		}
@@ -1817,7 +1824,7 @@ namespace winrt::GraphPaper::implementation
 		// 円弧をベジェ曲線で近似する.
 		void alter_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
-		static bool arc_get_pos_arrow(const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad, const double deg_start, const double deg_end, const double deg_rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+		static bool arc_get_pos_arrow(const D2D1_POINT_2F pos, const D2D1_POINT_2F ctr, const D2D1_SIZE_F rad, const double deg_start, const double deg_end, const double deg_rot, const ARROW_SIZE a_size, const D2D1_SWEEP_DIRECTION sweep_dir, D2D1_POINT_2F arrow[]);
 		// 図形を描く
 		virtual void draw(void) noexcept final override;
 		// 図形をデータライターに SVG として書き込む.

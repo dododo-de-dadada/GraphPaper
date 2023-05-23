@@ -64,6 +64,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			main_draw();
 		}
+		m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();
 		status_bar_set_pos();
 	}
 

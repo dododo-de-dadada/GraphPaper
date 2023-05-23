@@ -507,7 +507,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形の変形を終了する.
 	//------------------------------
-	void MainPage::event_finish_deforming(void)
+	void MainPage::event_finish_deforming(const VirtualKeyModifiers key_mod)
 	{
 		//const auto g_snap = m_main_page.m_snap_grid;
 		const auto g_snap = m_snap_grid;
@@ -525,18 +525,21 @@ namespace winrt::GraphPaper::implementation
 				dist = static_cast<float>(sqrt(pt_abs2(d))) / m_main_scale;
 			}
 			// 近傍の頂点によって点が変わらなかったか判定する.
-			if (!m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, dist, m_image_keep_aspect)) {
+			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
+			if (!m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, dist, keep_aspect)) {
 				// 変わらなかったならば, 方眼に合わせる.
-				m_event_shape_pressed->set_pos_loc(p, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+				m_event_shape_pressed->set_pos_loc(p, m_event_loc_pressed, 0.0f, keep_aspect);
 			}
 		}
 		else if (g_snap) {
+			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 			pt_round(m_event_pos_curr, m_main_page.m_grid_base + 1.0, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
 		}
 		else if (m_snap_point / m_main_scale >= FLT_MIN) {
+			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 			slist_find_vertex_closest(m_main_page.m_shape_list, m_event_pos_curr, m_snap_point / m_main_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, m_snap_point / m_main_scale, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, m_snap_point / m_main_scale, keep_aspect);
 		}
 		//undo_push_null();
 		//if (!undo_pop_invalid()) {
@@ -582,12 +585,12 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 矩形選択を終了する.
-	// k_mod	修飾キー
+	// key_mod	修飾キー
 	//------------------------------
-	void MainPage::event_finish_rect_selection(const VirtualKeyModifiers k_mod)
+	void MainPage::event_finish_rect_selection(const VirtualKeyModifiers key_mod)
 	{
 		// 修飾キーがコントロールか判定する.
-		if (k_mod == VirtualKeyModifiers::Control) {
+		if ((key_mod & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control) {
 			D2D1_POINT_2F lt{};
 			D2D1_POINT_2F rb{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
@@ -611,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 修飾キーが押されてないか判定する.
-		else if (k_mod == VirtualKeyModifiers::None) {
+		else if (key_mod == VirtualKeyModifiers::None) {
 			D2D1_POINT_2F lt{};
 			D2D1_POINT_2F rb{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
@@ -663,15 +666,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が. クリックした状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK) {
-			// ポインターの現在位置と押された位置の長さを求め,
-			// 長さがクリック判定距離を超えるか判定する.
+			// ポインターの現在点と押された点の間の長さを求め, 長さがクリック判定距離を超えたら初期状態に戻る.
 			const auto raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			D2D1_POINT_2F pos;	// 近傍への位置ベクトル
-			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
-			if (pt_abs2(pos) * m_main_scale > m_event_click_dist * raw_dpi / log_dpi) {
-			//if (pt_abs2(pos) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
-				// 初期状態に戻る.
+			const D2D1_POINT_2F p{
+				m_event_pos_curr.x - m_event_pos_pressed.x, m_event_pos_curr.y - m_event_pos_pressed.y
+			};
+			if (pt_abs2(p) * m_main_scale > m_event_click_dist * raw_dpi / log_dpi) {
 				m_event_state = EVENT_STATE::BEGIN;
 				event_set_cursor();
 			}
@@ -683,17 +684,22 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
 			// ポインターの現在位置と前回位置の差分だけ, 選択された図形を移動する.
-			// ポインターの現在位置を前回位置に格納する.
-			D2D1_POINT_2F p;
-			pt_sub(m_event_pos_curr, m_event_pos_prev, p);
+			//D2D1_POINT_2F p;
+			//pt_sub(m_event_pos_curr, m_event_pos_prev, p);
+			const D2D1_POINT_2F p{
+				m_event_pos_curr.x - m_event_pos_prev.x, m_event_pos_curr.y - m_event_pos_prev.y
+			};
 			slist_move_selected(m_main_page.m_shape_list, p);
+			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			main_draw();
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			// ポインターの現在位置を, 図形の部位の点と, ポインターの前回位置に格納する.
-			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+			// ポインターの現在位置を, 図形の部位の点に格納する.
+			const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
+			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
+			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			main_draw();
 		}
@@ -707,34 +713,44 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 左ボタンを押している状態, または
 		// クリック後に左ボタンを押した状態か判定する.
-		else if (m_event_state == EVENT_STATE::PRESS_LBTN || 
-			m_event_state == EVENT_STATE::CLICK_LBTN) {
-			// ポインターの現在位置と押された位置との差分を得る.
-			D2D1_POINT_2F p;
-			pt_sub(m_event_pos_curr, m_event_pos_pressed, p);
-			// 差分がクリックの判定距離を超えるか判定する.
-			if (pt_abs2(p) > m_event_click_dist / m_main_scale) {
-			//if (pt_abs2(pos) > m_event_click_dist / m_main_page.m_page_scale) {
-				// 作図ツールが選択ツール以外なら, 矩形選択している状態に遷移する.
-				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
+		else if (m_event_state == EVENT_STATE::PRESS_LBTN || m_event_state == EVENT_STATE::CLICK_LBTN) {
+			const auto raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
+			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+			// ポインターの現在位置と押された位置の間の長さが, クリックの判定距離を超えるか判定する.
+			//D2D1_POINT_2F p;
+			//pt_sub(m_event_pos_curr, m_event_pos_pressed, p);
+			const D2D1_POINT_2F p{
+				m_event_pos_curr.x - m_event_pos_pressed.x, m_event_pos_curr.y - m_event_pos_pressed.y
+			};
+			if (pt_abs2(p) * m_main_scale > m_event_click_dist) {
+				// 作図ツールが図形作成なら, 矩形選択している状態に遷移する.
+				if (m_drawing_tool == DRAWING_TOOL::ARC ||
+					m_drawing_tool == DRAWING_TOOL::BEZIER ||
+					m_drawing_tool == DRAWING_TOOL::ELLIPSE ||
+					m_drawing_tool == DRAWING_TOOL::LINE ||
+					m_drawing_tool == DRAWING_TOOL::POLY ||
+					m_drawing_tool == DRAWING_TOOL::RECT ||
+					m_drawing_tool == DRAWING_TOOL::RRECT ||
+					m_drawing_tool == DRAWING_TOOL::RULER ||
+					m_drawing_tool == DRAWING_TOOL::TEXT) {
 					m_event_state = EVENT_STATE::PRESS_RECT;
 				}
 				// 押された図形がヌルなら, 矩形選択している状態に遷移する.
-				else if (m_event_shape_pressed == nullptr) {
+				else if (m_drawing_tool == DRAWING_TOOL::SELECT && m_event_shape_pressed == nullptr) {
 					m_event_state = EVENT_STATE::PRESS_RECT;
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				}
 				// 選択された図形の数が 1 を超える,
 				// または押された図形の部位が線枠, 内側.
-				else if (m_list_sel_cnt > 1 ||
-					m_event_loc_pressed == LOC_TYPE::LOC_STROKE ||
-					m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
+				else if (m_drawing_tool == DRAWING_TOOL::SELECT &&
+					(m_list_sel_cnt > 1 || m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL)) {
 					// 図形を移動している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					m_event_pos_prev = m_event_pos_curr;
+					undo_push_null();
 					undo_push_move(p);
 				}
-				else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+				else if (m_drawing_tool == DRAWING_TOOL::SELECT && m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 					m_event_state = EVENT_STATE::PRESS_TEXT;
 					bool trail;
 					const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
@@ -742,14 +758,15 @@ namespace winrt::GraphPaper::implementation
 					undo_push_text_select(m_edit_text_shape, start, end, trail);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
-				else if (m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
+				else if (m_drawing_tool == DRAWING_TOOL::SELECT && m_event_loc_pressed != LOC_TYPE::LOC_PAGE) {
 					// 図形を変形している状態に遷移する.
-					// ポインターの現在位置を前回位置に保存する.
 					if (m_event_shape_pressed->is_selected()) {
 						m_event_state = EVENT_STATE::PRESS_DEFORM;
 						m_event_pos_prev = m_event_pos_curr;
+						undo_push_null();
 						undo_push_position(m_event_shape_pressed, m_event_loc_pressed);
-						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, m_image_keep_aspect);
+						const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
+						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
 					}
 				}
 				main_draw();
@@ -1060,16 +1077,14 @@ namespace winrt::GraphPaper::implementation
 
 		Focus(winrt::Windows::UI::Xaml::FocusState::Programmatic);
 
-		// ポインターのキャプチャを始める.
-		// 引数の値をポンインターの現在位置に格納する.
-		// ポインターのイベント発生時間を得る.
-		// ポインターの拡張情報を得る.
 		const SwapChainPanel& swap_chain_panel{
 			sender.as<SwapChainPanel>()
 		};
+
+		// ポインターのキャプチャを始める.
 		swap_chain_panel.CapturePointer(args.Pointer());
-		const uint64_t t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
-		const PointerPointProperties& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
+		const uint64_t t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();	// イベント発生時間
+		const PointerPointProperties& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();	// ポインターの拡張情報
 		event_set_position(args);
 
 		// ポインターのデバイスタイプを判定する.
@@ -1113,8 +1128,10 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
+
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
+
 		if (scp_main_panel().ContextFlyout() != nullptr) {
 			scp_main_panel().ContextFlyout().Hide();
 			scp_main_panel().ContextFlyout(nullptr);
@@ -1140,7 +1157,7 @@ namespace winrt::GraphPaper::implementation
 		bool changed = false;
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-				if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
+				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control) {
 					m_event_shape_pressed = nullptr;
 					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
@@ -1211,7 +1228,7 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 				}
-				else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
+				else if ((args.KeyModifiers() & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
 					m_event_shape_pressed = nullptr;
 					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
@@ -1239,14 +1256,15 @@ namespace winrt::GraphPaper::implementation
 						else if (m_edit_text_shape != m_event_shape_pressed) {
 							if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
 								xcvd_menu_is_enabled();
+								changed = true;
 							}
 							// 現在に編集中の文字列があれば中断し, 押された文字列を編集中の図形にする.
 							if (m_edit_text_shape != nullptr) {
 								m_edit_context.NotifyFocusLeave();
 								undo_push_text_unselect(m_edit_text_shape);
 								m_edit_text_shape = nullptr;
+								changed = true;
 							}
-							changed = true;
 						}
 					}
 					else {
@@ -1299,7 +1317,7 @@ namespace winrt::GraphPaper::implementation
 							if (summary_is_visible()) {
 								summary_select(m_event_shape_pressed);
 							}
-							xcvd_menu_is_enabled();
+							changed = true;
 						}
 						// 押された図形がすでに選択ずみなら
 						else {
@@ -1310,6 +1328,7 @@ namespace winrt::GraphPaper::implementation
 								m_edit_context.NotifyFocusLeave();
 								undo_push_text_unselect(m_edit_text_shape);
 								m_edit_text_shape = nullptr;
+								changed = true;
 							}
 						}
 						else {
@@ -1667,7 +1686,6 @@ namespace winrt::GraphPaper::implementation
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 			const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			if (t_stamp - m_event_time_pressed <= c_time) {
-				// クリックの確定
 				// クリックした状態に遷移する.
 				m_event_state = EVENT_STATE::CLICK;
 				event_set_cursor();
@@ -1704,10 +1722,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
-			if (args.KeyModifiers() != VirtualKeyModifiers::Control) {
+			if ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control) {
 				event_finish_moving();
 			}
-			undo_push_null();
+			//undo_push_null();
 			if (!undo_pop_invalid()) {
 				undo_menu_is_enabled();
 				main_bbox_update();
@@ -1716,8 +1734,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			if (args.KeyModifiers() != VirtualKeyModifiers::Control) {
-				event_finish_deforming();
+			if ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control) {
+				event_finish_deforming(args.KeyModifiers());
 			}
 			undo_push_null();
 			if (!undo_pop_invalid()) {
@@ -1734,37 +1752,36 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 作図ツールが選択ツール以外.
 			else {
-				// 頂点をくっつける閾値がゼロより大きいか判定する.
-				if (m_snap_point >= FLT_MIN) {
-					const bool boxed = (
-						m_drawing_tool == DRAWING_TOOL::ELLIPSE ||
-						m_drawing_tool == DRAWING_TOOL::POLY ||
-						m_drawing_tool == DRAWING_TOOL::RECT ||
-						m_drawing_tool == DRAWING_TOOL::RRECT ||
-						m_drawing_tool == DRAWING_TOOL::RULER ||
-						m_drawing_tool == DRAWING_TOOL::TEXT
-					);
-					const float interval = m_snap_point / m_main_scale;
-					const double g_len = max(m_main_page.m_grid_base, 0.0) + 1.0;
-					event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
+				// 制御キーが押されてないなら, ポインター点を頂点または方眼に合わせる.
+				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control) {
+					// 点と点をくっつける閾値がゼロより大きいなら, ほかの頂点に合わせる.
+					if (m_snap_point >= FLT_MIN) {
+						const bool boxed = (
+							m_drawing_tool == DRAWING_TOOL::ELLIPSE ||
+							m_drawing_tool == DRAWING_TOOL::POLY ||
+							m_drawing_tool == DRAWING_TOOL::RECT ||
+							m_drawing_tool == DRAWING_TOOL::RRECT ||
+							m_drawing_tool == DRAWING_TOOL::RULER ||
+							m_drawing_tool == DRAWING_TOOL::TEXT
+							);
+						const float interval = m_snap_point / m_main_scale;
+						const double g_len = max(m_main_page.m_grid_base, 0.0) + 1.0;
+						event_pos_snap_to(m_main_page.m_shape_list, boxed, interval, m_snap_grid, g_len, m_event_pos_pressed, m_event_pos_curr);
+					}
+					// 方眼に合わせるか判定する.
+					else if (m_snap_grid) {
+						// 押された位置よ離された位置を方眼の大きさで丸める.
+						const double g_len = max(m_main_page.m_grid_base + 1.0, 1.0);
+						pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
+						pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
+					}
 				}
-				// 方眼に合わせるか判定する.
-				//else if (m_main_page.m_snap_grid) {
-				else if (m_snap_grid) {
-					// 押された位置よ離された位置を方眼の大きさで丸める.
-					const double g_len = max(m_main_page.m_grid_base + 1.0, 1.0);
-					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
-					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
-				}
-				// ポインターの現在位置と押された位置の差分を求める.
-				D2D1_POINT_2F p;	// 現在位置への位置ベクトル
-				pt_sub(m_event_pos_curr, m_event_pos_pressed, p);
-				// 差分の x 値または y 値のいずれかが 1 以上か判定する.
+				// ポインターの現在位置と押された位置の差分の x 値または y 値が 1 以上か判定する.
+				const D2D1_POINT_2F p{
+					m_event_pos_curr.x - m_event_pos_pressed.x,
+					m_event_pos_curr.y - m_event_pos_pressed.y
+				};
 				if (fabs(p.x) >= 1.0f || fabs(p.y) >= 1.0f) {
-					//if (m_drawing_tool == DRAWING_TOOL::TEXT) {
-					//	event_finish_creating_text_async(m_event_pos_pressed, p);
-					//	return;
-					//}
 					event_finish_creating(m_event_pos_pressed, p);
 				}
 				else {
@@ -1853,6 +1870,8 @@ namespace winrt::GraphPaper::implementation
 				switch (loc) {
 				case LOC_TYPE::LOC_A_START:
 				case LOC_TYPE::LOC_A_END:
+				case LOC_TYPE::LOC_A_AXIS_X:
+				case LOC_TYPE::LOC_A_AXIS_Y:
 				case LOC_TYPE::LOC_R_NW:
 				case LOC_TYPE::LOC_R_NE:
 				case LOC_TYPE::LOC_R_SE:
@@ -1937,9 +1956,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_event.unlock();
 
-		// コントロールキーが押されてるか判定する.
+		// 制御キーが押されてるか判定する.
 		const auto mod = args.KeyModifiers();
-		if (mod == VirtualKeyModifiers::Control) {
+		if ((mod & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control) {
 			// 拡大縮小
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (w_delta > 0 && m_main_scale < 16.f / 1.1f - FLT_MIN) {
@@ -1966,7 +1985,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// シフトキーが押されてるか判定する.
-		else if (mod == VirtualKeyModifiers::Shift) {
+		else if ((mod & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, m_main_scale)) {

@@ -264,14 +264,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 点 { tx, ty } が凸包に含まれるか判定する.
+	// 点が凸包に含まれるか判定する.
 	// 交差数判定を用いる.
+	// tx, ty	点
 	// c_cnt	凸包の頂点の数
 	// c	凸包の頂点の配列
 	// 戻り値	含まれるなら true を, 含まれないなら false を返す.
 	//------------------------------
-	static bool bezi_in_convex(
-		const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept
+	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept
 	{
 		int k = 0;	// 点をとおる水平線が凸包の辺と交差する回数.
 		for (size_t i = c_cnt - 1, j = 0; j < c_cnt; i = j++) {
@@ -299,8 +299,7 @@ namespace winrt::GraphPaper::implementation
 	// t	助変数
 	// p	求まった位置
 	//------------------------------
-	static inline void bezi_point_by_param(
-		const POINT_2D c[4], const double t, POINT_2D& p) noexcept
+	static inline void bezi_point_by_param(const POINT_2D c[4], const double t, POINT_2D& p) noexcept
 	{
 		const double s = 1.0 - t;
 		const double ss = s * s;
@@ -417,6 +416,161 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F tp, const D2D1_POINT_2F b_pt[4], const D2D1_POINT_2F b_vec[3], const D2D1_CAP_STYLE stroke_cap, const bool f_opaque, const double ew) noexcept
+	{
+		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
+		if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
+			if (pt_in_circle(tp, b_pt[0], ew)) {
+				return LOC_TYPE::LOC_STROKE;
+			}
+			if (pt_in_circle(tp, b_pt[3], ew)) {
+				return LOC_TYPE::LOC_STROKE;
+			}
+		}
+		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, b_pt, b_vec, ew)) {
+				return LOC_TYPE::LOC_STROKE;
+			}
+		}
+		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, b_pt, b_vec, ew)) {
+				return LOC_TYPE::LOC_STROKE;
+			}
+		}
+		// 最初の制御点の組をプッシュする.
+		// ４つの点のうち端点は, 次につまれる組と共有するので, 1 + 3 * D_MAX 個の配列を確保する.
+		constexpr int32_t D_MAX = 64;	// 分割する深さの最大値
+		POINT_2D s[1 + D_MAX * 3]{};	// 制御点のスタック
+		int32_t s_cnt = 0;	// スタックに積まれた点の数
+		s[0] = b_pt[0];
+		s[1] = b_pt[1];
+		s[2] = b_pt[2];
+		s[3] = b_pt[3];
+		s_cnt += 4;
+		// スタックに 一組以上の制御点が残っているか判定する.
+		while (s_cnt >= 4) {
+			// 制御点をポップする.
+			POINT_2D c[10];
+			c[3] = s[s_cnt - 1];
+			c[2] = s[s_cnt - 2];
+			c[1] = s[s_cnt - 3];
+			c[0] = s[s_cnt - 4];
+			// 端点は共有なのでピークする;
+			s_cnt -= 4 - 1;
+			// 制御点の組から凸包 c0 を得る (実際は方形で代用する).
+			// 制御点の組から, 重複するものを除いた点の集合を得る.
+			POINT_2D c0_lt = c[0];	// 凸包 c0 (を含む方形の左上点)
+			POINT_2D c0_rb = c[0];	// 凸包 c0 (を含む方形の右下点)
+			POINT_2D d[4];	// 重複しない点の集合.
+			uint32_t d_cnt = 0;	// 重複しない点の集合の要素数
+			d[d_cnt++] = c[0];
+			for (uint32_t i = 1; i < 4; i++) {
+				if (d[d_cnt - 1] != c[i]) {
+					d[d_cnt++] = c[i];
+					c[i].exp(c0_lt, c0_rb);
+				}
+			}
+			// 重複しない点の集合の要素数が 2 未満か判定する.
+			if (d_cnt < 2) {
+				// 制御点の組は 1 点に集まっているので, 中断する.
+				continue;
+			}
+
+			// 拡張・延長された線分を得る.
+			//   e[i][0]             e[i][1]
+			//        + - - - - - - - - - +
+			//        |           orth|
+			//   d[i] +---------------+---> dir
+			//        |           d[i+1]
+			//        + - - - - - - - - - +
+			//   e[i][3]             e[i][2]
+			POINT_2D e[3 * 4];	// 拡張・延長された線分の配列
+			for (uint32_t i = 0, j = 0; i < d_cnt - 1; i++, j += 4) {
+				auto e_dir = d[i + 1] - d[i];	// 次の頂点への位置ベクトル
+				e_dir = e_dir * (ew / std::sqrt(e_dir * e_dir));
+				const POINT_2D e_orth{ e_dir.y, -e_dir.x };	// 線分の直交ベクトル
+
+				// 法線ベクトルにそって正逆の方向に線分を拡張する.
+				e[j + 0] = d[i] + e_orth;
+				e[j + 1] = d[i + 1] + e_orth;
+				e[j + 2] = d[i + 1] - e_orth;
+				e[j + 3] = d[i] - e_orth;
+				if (i > 0) {
+					// 最初の制御点以外は, 線分ベクトルの方向に延長する.
+					e[j + 0] = e[j + 0] - e_dir;
+					e[j + 3] = e[j + 3] - e_dir;
+				}
+				if (i + 1 < d_cnt - 1) {
+					// 最後の制御点以外は, 線分ベクトルの逆方向に延長する.
+					e[j + 1] = e[j + 1] + e_dir;
+					e[j + 2] = e[j + 2] + e_dir;
+				}
+			}
+			// 拡張・延長された線分から, 凸包 c1 を得る.
+			uint32_t c1_cnt;
+			POINT_2D c1[3 * 4];
+			bezi_get_convex((d_cnt - 1) * 4, e, c1_cnt, c1);
+			// 点が凸包 c1 に含まれないか判定する.
+			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1)) {
+				// これ以上この制御点の組を分割する必要はない.
+				// スタックに残った他の制御点の組を試す.
+				continue;
+			}
+
+			// 凸包 c0 の大きさが 1 以下か判定する.
+			POINT_2D c0 = c0_rb - c0_lt;
+			if (c0.x <= 1.0 && c0.y <= 1.0) {
+				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
+				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
+				return LOC_TYPE::LOC_STROKE;
+			}
+
+			// スタックがオバーフローするか判定する.
+			if (s_cnt + 6 > 1 + D_MAX * 3) {
+				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
+				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
+				return LOC_TYPE::LOC_STROKE;
+			}
+
+			// 制御点の組を 2 分割する.
+			// c[0,1,2,3] の中点を c[4,5,6] に, c[4,5,6] の中点を c[7,8] に, c[7,8] の中点を c[9] に格納する.
+			// 分割した制御点の組はそれぞれ c[0,4,7,9] と c[9,8,6,3] になる.
+			c[4] = (c[0] + c[1]) * 0.5;
+			c[5] = (c[1] + c[2]) * 0.5;
+			c[6] = (c[2] + c[3]) * 0.5;
+			c[7] = (c[4] + c[5]) * 0.5;
+			c[8] = (c[5] + c[6]) * 0.5;
+			c[9] = (c[7] + c[8]) * 0.5;
+			if (f_opaque && !f_test) {
+				// 分割された凸包のあいだにできた三角形は, 塗りつぶしの領域.
+				// この領域に点が含まれるか, 分割するたびに判定する.
+				// ただし 1 度でも含まれるなら, それ以上の判定は必要ない.
+				const POINT_2D tri[3]{
+					c[0], c[9], c[3]
+				};
+				f_test = bezi_in_convex(tp.x, tp.y, 3, tri);
+			}
+			// 一方の組をプッシュする.
+			// 始点 (0) はスタックに残っているので, 
+			// 残りの 3 つの制御点をプッシュする.
+			s[s_cnt] = c[4];
+			s[s_cnt + 1] = c[7];
+			s[s_cnt + 2] = c[9];
+			// もう一方の組をプッシュする.
+			// 始点 (9) はプッシュ済みなので,
+			// 残りの 3 つの制御点をプッシュする.
+			s[s_cnt + 3] = c[8];
+			s[s_cnt + 4] = c[6];
+			s[s_cnt + 5] = c[3];
+			s_cnt += 6;
+		}
+		if (f_opaque && f_test) {
+			return LOC_TYPE::LOC_FILL;
+		}
+		return LOC_TYPE::LOC_PAGE;
+
+	}
+
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
 	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
@@ -447,7 +601,6 @@ namespace winrt::GraphPaper::implementation
 			return LOC_TYPE::LOC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
-		//if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 			if (pt_in_circle(tp.x, tp.y, ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
@@ -456,14 +609,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(
-				tp, cp, m_pos.data(), ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, cp, m_pos.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(
-				tp, cp, m_pos.data(), ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, cp, m_pos.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}

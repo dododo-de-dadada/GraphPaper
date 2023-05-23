@@ -90,6 +90,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto SNAP_INTERVAL_DEF_VAL = 2.0f * 6.0f;	// 点をくっつける間隔の既定値
 	constexpr uint32_t VERT_CNT_MAX = 12;	// 折れ線の頂点の最大数.
 	constexpr wchar_t LAYOUT_FILE[] = L"gp_layout.dat";	// レイアウトを格納するファイル名
+	constexpr auto CLICK_DIST = 6.0;	// クリック判定距離 (この値を以内ならクリック)
 
 	//-------------------------------
 	// 色の基数
@@ -266,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
-		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
+		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
 		bool m_eyedropper_filled = false;	// 抽出されたか判定
 		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 
@@ -425,14 +426,12 @@ namespace winrt::GraphPaper::implementation
 		void event_eyedropper_detect(const Shape* s, const uint32_t loc);
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
-		// 文字列図形の作成を終了する.
-		//IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 図形の変形を終了する.
-		void event_finish_deforming(void);
+		void event_finish_deforming(const VirtualKeyModifiers key_mod);
 		// 図形の移動を終了する.
 		void event_finish_moving(void);
 		// 範囲選択を終了する.
-		void event_finish_rect_selection(const VirtualKeyModifiers k_mod);
+		void event_finish_rect_selection(const VirtualKeyModifiers key_mod);
 		// ポインターが動いた.
 		void event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが押された.

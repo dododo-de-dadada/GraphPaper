@@ -830,9 +830,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_get_pos_arrow(
-					m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, //m_sweep_dir,
-					m_arrow_size, arrow);
+				arc_get_pos_arrow(m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir,
+					arrow);
 				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, arrow, arrow[2]);
 				dt_writer.WriteString(buf);
 			}

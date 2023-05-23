@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 長さを文字列に変換する.
 	// B	単位付加フラグ
-	// LEN_UNIT	長さの単位
+	// len_unit	長さの単位
 	// len	ピクセル単位の長さ
 	// dpi	DPI
 	// grid_len	方眼の大きさ

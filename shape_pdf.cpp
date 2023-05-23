@@ -1265,7 +1265,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_get_pos_arrow(m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, arrow);
+				arc_get_pos_arrow(m_pos[0], ctr, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, m_arrow_cap, m_arrow_join, m_arrow_join_limit, page_size, arrow, arrow[2], dt_writer);
 			}
 		}
