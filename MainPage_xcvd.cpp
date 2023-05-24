@@ -26,7 +26,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
 	using winrt::Windows::UI::Xaml::FocusState;
 
-
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
 	// 貼り付ける位置を求める.
