@@ -132,7 +132,8 @@ namespace winrt::GraphPaper::implementation
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
 		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
-		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, bool& fore_selected,
+		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt,
+		bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept
 	{
 		undeleted_cnt = 0;	// 消去フラグがない図形の数
@@ -144,6 +145,7 @@ namespace winrt::GraphPaper::implementation
 		selected_poly_open_cnt = 0;	// 選択された開いた多角形図形の数
 		selected_poly_close_cnt = 0;	// 選択された閉じた多角形図形の数
 		selected_arc_cnt = 0;	// 選択された円弧図形の数
+		selected_exist_cap_cnt = 0;	// 選択された端をもつ図形の数
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
 		back_selected = false;	// 最背面の図形の選択フラグ
@@ -183,12 +185,16 @@ namespace winrt::GraphPaper::implementation
 					// 最背面の図形の選択フラグを立てる.
 					back_selected = true;
 				}
+				// 端をもつ図形か判定する.
+				if (s->exist_cap()) {
+					selected_exist_cap_cnt++;
+				}
 				// 図形の型が画像か判定する.,
 				if (s_tid == typeid(ShapeImage)) {
 					selected_image_cnt++;
 				}
 				// 図形の型が画像か判定する.,
-				if (s_tid == typeid(ShapeArc)) {
+				else if (s_tid == typeid(ShapeArc)) {
 					selected_arc_cnt++;
 				}
 				// 図形の型がグループ図形か判定する.,

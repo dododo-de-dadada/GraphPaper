@@ -1258,8 +1258,8 @@
     <value>Arc Rotation</value>
     <comment>String</comment>
   </data>
-  <data name="mfsi_menu_meth_poly_end.Text" xml:space="preserve">
-    <value>Polygon End</value>
+  <data name="mfi_menu_meth_poly_end.Text" xml:space="preserve">
+    <value>Open/Close Polygon End</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_menu_meth_arc_rot.Text" xml:space="preserve">

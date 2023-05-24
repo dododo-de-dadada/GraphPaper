@@ -627,7 +627,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
 		IAsyncAction meth_arc_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「多角形の終端」のサブ項目が選択された.
+		// 編集メニューの「多角形の終端を開く/閉じる」が選択された.
 		void meth_poly_end_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		IAsyncAction meth_text_edit_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -1066,7 +1066,12 @@ namespace winrt::GraphPaper::implementation
 		// 指定した部位の点をスタックに保存する.
 		void undo_push_position(Shape* const s, const uint32_t loc)
 		{
-			m_ustack_undo.push_back(new UndoDeform(s, loc));
+			if (typeid(*s) == typeid(ShapeImage)) {
+				m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage* const>(s)));
+			}
+			else {
+				m_ustack_undo.push_back(new UndoDeform(s, loc));
+			}
 		}
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
 		void undo_push_image(Shape* const s)

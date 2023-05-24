@@ -217,6 +217,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t selected_arc_cnt = 0;	// 選択された円弧図形の数
 		uint32_t selected_poly_open_cnt = 0;	// 選択された開いた多角形図形の数
 		uint32_t selected_poly_close_cnt = 0;	// 選択された閉じた多角形図形の数
+		uint32_t selected_exist_cap_cnt = 0;	// 選択された端をもつ図形の数
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -232,6 +233,7 @@ namespace winrt::GraphPaper::implementation
 			selected_arc_cnt,
 			selected_poly_open_cnt,
 			selected_poly_close_cnt,
+			selected_exist_cap_cnt,
 			fore_selected,
 			back_selected,
 			prev_selected
@@ -257,6 +259,8 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_selected_2 = (selected_cnt > 1);
 		// 選択されたグループがひとつ以上ある場合.
 		const auto exists_selected_group = (selected_group_cnt > 0);
+		// 選択された端のある図形がひとつ以上ある場合.
+		const auto exists_selected_cap = (selected_exist_cap_cnt > 0);
 		// 前面に配置可能か判定する.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
@@ -287,12 +291,8 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_ungroup().IsEnabled(exists_selected_group);
 		// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 		// そうしないと, 子の項目の可否がただちに反映しない.
-		mfsi_menu_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-		mfsi_popup_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-		mfi_menu_meth_poly_open().IsEnabled(exists_selected_poly_close);
-		mfi_popup_popup_poly_open().IsEnabled(exists_selected_poly_close);
-		mfi_menu_meth_poly_close().IsEnabled(exists_selected_poly_open);
-		mfi_popup_meth_poly_close().IsEnabled(exists_selected_poly_open);
+		mfi_menu_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+		mfi_popup_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
 		mfi_menu_meth_arc_rot().IsEnabled(exists_selected_arc);
 		mfi_popup_meth_arc_rot().IsEnabled(exists_selected_arc);
 		mfi_menu_meth_text_edit().IsEnabled(exists_selected_text);
@@ -312,6 +312,8 @@ namespace winrt::GraphPaper::implementation
 		mfsi_menu_order().IsEnabled(enable_forward || enable_backward);
 		mfsi_popup_order().IsEnabled(enable_forward || enable_backward);
 		mfi_menu_meth_image_revert().IsEnabled(exists_selected_image);
+		mfi_popup_meth_image_revert().IsEnabled(exists_selected_image);
+		mfi_menu_reverse_path().IsEnabled(exists_selected_cap);
 		m_list_sel_cnt = selected_cnt;
 	}
 

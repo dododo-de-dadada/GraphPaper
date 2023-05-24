@@ -61,27 +61,30 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	void MainPage::meth_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::meth_poly_end_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (sender == mfi_menu_meth_poly_close() || sender == mfi_popup_meth_poly_close()) {
-			undo_push_null();
-			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED)) {
-			//if (undo_push_set<UNDO_T::POLY_END>(true)) {
-				mfi_menu_meth_poly_close().IsEnabled(false);
-				mfi_menu_meth_poly_open().IsEnabled(true);
-				undo_menu_is_enabled();
-				main_draw();
+		bool changed = false;
+		for (Shape* s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected()) {
+				continue;
+			}
+			D2D1_FIGURE_END end;
+			if (s->get_poly_end(end)) {
+				if (!changed) {
+					undo_push_null();
+					changed = true;
+				}
+				if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
+					undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
+				}
+				else {
+					undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				}
 			}
 		}
-		else if (sender == mfi_menu_meth_poly_open() || sender == mfi_popup_popup_poly_open()) {
-			undo_push_null();
-			if (undo_push_set<UNDO_T::POLY_END>(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)) {
-			//if (undo_push_set<UNDO_T::POLY_END>(false)) {
-				mfi_menu_meth_poly_close().IsEnabled(true);
-				mfi_menu_meth_poly_open().IsEnabled(false);
-				undo_menu_is_enabled();
-				main_draw();
-			}
+		if (changed) {
+			undo_menu_is_enabled();
+			main_draw();
 		}
 	}
 

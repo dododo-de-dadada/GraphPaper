@@ -1246,8 +1246,8 @@
     <value>円弧の傾き</value>
     <comment>String</comment>
   </data>
-  <data name="mfsi_menu_meth_poly_end.Text" xml:space="preserve">
-    <value>多角形の終端</value>
+  <data name="mfi_menu_meth_poly_end.Text" xml:space="preserve">
+    <value>多角形の端を開く/閉じる</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_menu_meth_arc_rot.Text" xml:space="preserve">

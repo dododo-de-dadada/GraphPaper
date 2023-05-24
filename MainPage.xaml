@@ -123,28 +123,18 @@
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_group_edit"/>
-				<!-- 多角形の終端 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_meth_poly_end" x:Uid="mfsi_menu_meth_poly_end" Text="Edit Polygon End">
-					<MenuFlyoutSubItem.Icon>
+                <!-- 画像を原画像に戻す -->
+                <MenuFlyoutItem x:Name="mfi_popup_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="{StaticResource glyph_update_restore}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 多角形の端を開く/閉じる -->
+                <MenuFlyoutItem x:Name="mfi_popup_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
+					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_end_open}" />
-					</MenuFlyoutSubItem.Icon>
-					<MenuFlyoutItem x:Name="mfi_popup_popup_poly_open" x:Uid="mfi_menu_meth_poly_open" Click="meth_poly_end_click" Text="Open Polygon End" >
-						<MenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_end_open}" />
-						</MenuFlyoutItem.Icon>
-						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="P" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
-					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_popup_meth_poly_close" x:Uid="mfi_menu_meth_poly_close" Click="meth_poly_end_click" Text="Close Polygon End" >
-						<MenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_end_closed}" />
-						</MenuFlyoutItem.Icon>
-						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="P" Modifiers="Control,Shift" />
-						</MenuFlyoutItem.KeyboardAccelerators>
-					</MenuFlyoutItem>
-				</MenuFlyoutSubItem>
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
 				<!-- 円弧の傾きの編集 -->
 				<MenuFlyoutItem x:Name="mfi_popup_meth_arc_rot" x:Uid="mfi_menu_meth_arc_rot" Click="meth_arc_click_async" Text="Edit Arc Rotation" >
 					<MenuFlyoutItem.Icon>
@@ -463,12 +453,6 @@
 						<PathIcon Data="{StaticResource data_chain}" />
 					</ToggleMenuFlyoutItem.Icon>
 				</ToggleMenuFlyoutItem>
-				<!-- 画像を原画像に戻す -->
-				<MenuFlyoutItem x:Name="mfi_popup_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_update_restore}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
 				<!-- 画像の不透明度 -->
 				<MenuFlyoutItem x:Name="mfi_popup_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
 					<MenuFlyoutItem.Icon>
@@ -769,6 +753,24 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_menu_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
+                <!-- 多角形の端を開く/閉じる -->
+                <MenuFlyoutItem x:Name="mfi_menu_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_end_open}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 画像を原画像に戻す -->
+                <MenuFlyoutItem x:Name="mfi_menu_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="{StaticResource glyph_update_restore}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 文字列の検索/置換 -->
+                <MenuFlyoutItem x:Name="mfi_menu_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="F" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
             </muxc:MenuBarItem>
 			<!-- 作図メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
@@ -872,28 +874,6 @@
             <!-- 操作メニュー -->
             <muxc:MenuBarItem x:Name="mbi_menu_method" x:Uid="mbi_menu_method" Title="Method">
                 <MenuFlyoutSeparator />
-                <!-- 多角形の終端 -->
-                <MenuFlyoutSubItem x:Name="mfsi_menu_meth_poly_end" x:Uid="mfsi_menu_meth_poly_end" Text="Edit Polygon End">
-                    <MenuFlyoutSubItem.Icon>
-                        <PathIcon Data="{StaticResource data_end_open}" />
-                    </MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_menu_meth_poly_open" x:Uid="mfi_menu_meth_poly_open" Click="meth_poly_end_click" Text="Open Polygon End" >
-                        <MenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_end_open}" />
-                        </MenuFlyoutItem.Icon>
-                        <MenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="P" Modifiers="Control" />
-                        </MenuFlyoutItem.KeyboardAccelerators>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_menu_meth_poly_close" x:Uid="mfi_menu_meth_poly_close" Click="meth_poly_end_click" Text="Close Polygon End" >
-                        <MenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_end_closed}" />
-                        </MenuFlyoutItem.Icon>
-                        <MenuFlyoutItem.KeyboardAccelerators>
-                            <KeyboardAccelerator Key="P" Modifiers="Control,Shift" />
-                        </MenuFlyoutItem.KeyboardAccelerators>
-                    </MenuFlyoutItem>
-                </MenuFlyoutSubItem>
                 <!-- 円弧の傾きの操作 -->
                 <MenuFlyoutItem x:Name="mfi_menu_meth_arc_rot" x:Uid="mfi_menu_meth_arc_rot" Click="meth_arc_click_async" Text="Edit Arc Rotation" >
                     <MenuFlyoutItem.Icon>
@@ -912,22 +892,10 @@
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
                 <!-- 文字列の枠の編集 -->
                 <MenuFlyoutItem x:Name="mfi_menu_meth_text_fit_frame" x:Uid="mfi_menu_meth_text_fit_frame" Click="meth_text_fit_frame_click" Text="Fit Frame Size to Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_fit_page}"/>
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像の縦横比を維持 -->

@@ -35,14 +35,19 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 点に最も近い, 線分上の点を求める.
+	//
 	// p	点
 	// a	線分の始点
 	// b	線分の終点
 	// q	最も近い点
-	static void image_get_pos_on_line(
-		const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b,
+	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b,
 		/*--->*/D2D1_POINT_2F& q) noexcept
 	{
+		//        p
+		//        *
+		// a      q       b
+		// *------*-------*
+		//
 		// 線分 ab が垂直か判定する.
 		if (a.x == b.x) {
 			q.x = a.x;
@@ -548,7 +553,6 @@ namespace winrt::GraphPaper::implementation
 		m_clip.left = m_clip.top = 0.0f;
 		m_clip.right = src_w;
 		m_clip.bottom = src_h;
-		m_ratio.width = m_ratio.height = 1.0f;
 		m_opac = 1.0f;
 	}
 
@@ -576,223 +580,278 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F new_p;
 		pt_round(val, PT_ROUND, new_p);
 
-		bool flag = false;
 		if (loc == LOC_TYPE::LOC_NW) {
-			// 画像の一部分でも表示されているか判定する.
-			// (画像がまったく表示されてない場合はスケールの変更は行わない.)
-			const float image_w = m_clip.right - m_clip.left;	// 表示されている画像の幅 (原寸)
-			const float image_h = m_clip.bottom - m_clip.top;	// 表示されている画像の高さ (原寸)
-			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s{ m_start };	// 始点 (図形の頂点)
-				D2D1_POINT_2F p;
+			const auto new_w = m_start.x + m_view.width - new_p.x;
+			const auto new_h = m_start.y + m_view.height - new_p.y;
+			if (new_w > 0.0f && new_h > 0.0f) {
 				if (keep_aspect) {
-					const D2D1_POINT_2F e{ s.x + image_w, s.y + image_h };	// 終点 (始点と対角にある画像上の点)
-					image_get_pos_on_line(new_p, s, e, p);
-				}
-				else {
-					p = new_p;
-				}
-				// 値と始点との差分 q を求め, 差分がゼロより大きいか判定する.
-				D2D1_POINT_2F q;
-				pt_sub(p, s, q);
-				if (pt_abs2(q) >= FLT_MIN) {
-					// スケール変更後の表示の寸法を求め, その縦横が 1 ピクセル以上あるか判定する.
-					const float page_w = m_view.width - q.x;
-					const float page_h = m_view.height - q.y;
-					if (page_w >= 1.0f && page_h >= 1.0f) {
-						m_view.width = page_w;
-						m_view.height = page_h;
-						m_start = p;
-						m_ratio.width = page_w / image_w;
-						m_ratio.height = page_h / image_h;
-						if (!flag) {
-							flag = true;
+					const auto old_w = m_view.width;
+					const auto old_h = m_view.height;
+					if (abs(new_w - old_w) < abs(new_h - old_h)) {
+						if (!equal(old_w, new_w)) {
+							const auto fit_h = old_h * new_w / old_w;	// 比率を合わせた高さ
+							m_start.x = new_p.x;	// new_p.x = m_start.x + m_view.width - new_w
+							m_start.y = m_start.y + old_h - fit_h;
+							m_view.width = new_w;
+							m_view.height = fit_h;
+							return true;
+						}
+					}
+					else {
+						if (!equal(old_h, new_h)) {
+							const auto fit_w = old_w * new_h / old_h;	// 比率を合わせた高さ
+							m_start.x = m_start.x + old_w - fit_w;
+							m_start.y = new_p.y;
+							m_view.width = fit_w;
+							m_view.height = new_h;
+							return true;
 						}
 					}
 				}
-			}
-		}
-		else if (loc == LOC_TYPE::LOC_NE) {
-			const float image_w = m_clip.right - m_clip.left;
-			const float image_h = m_clip.bottom - m_clip.top;
-			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s{ m_start.x + m_view.width, m_start.y };
-				D2D1_POINT_2F p;
-				if (keep_aspect) {
-					const D2D1_POINT_2F e{ s.x - image_w, s.y + image_h };
-					image_get_pos_on_line(new_p, s, e, p);
-				}
 				else {
-					p = new_p;
-				}
-				D2D1_POINT_2F q;
-				pt_sub(p, s, q);
-				if (pt_abs2(q) >= FLT_MIN) {
-					const float page_w = p.x - m_start.x;
-					const float page_h = m_start.y + m_view.height - p.y;
-					if (page_w >= 1.0f && page_h >= 1.0f) {
-						m_view.width = page_w;
-						m_view.height = page_h;
-						m_start.y = p.y;
-						m_ratio.width = page_w / image_w;
-						m_ratio.height = page_h / image_h;
-						if (!flag) {
-							flag = true;
-						}
+					if (!equal(m_start, new_p)) {
+						m_view.width = new_w;
+						m_view.height = new_h;
+						m_start = new_p;
+						return true;
 					}
 				}
 			}
+			//else {
+			//	if (!equal(m_start, new_p)) {
+			//		m_start = new_p;
+			//		return true;
+			//	}
+			//}
 		}
 		else if (loc == LOC_TYPE::LOC_SE) {
-			const float image_w = m_clip.right - m_clip.left;
-			const float image_h = m_clip.bottom - m_clip.top;
-			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s{ m_start.x + m_view.width, m_start.y + m_view.height };
-				D2D1_POINT_2F p;
+			const auto new_w = new_p.x - m_start.x;
+			const auto new_h = new_p.y - m_start.y;
+			if (new_w > 0.0f && new_h > 0.0f) {
 				if (keep_aspect) {
-					const D2D1_POINT_2F e{ s.x - image_w, s.y - image_h };
-					image_get_pos_on_line(new_p, s, e, p);
-				}
-				else {
-					p = new_p;
-				}
-				D2D1_POINT_2F q;
-				pt_sub(p, s, q);
-				if (pt_abs2(q) >= FLT_MIN) {
-					const float page_w = p.x - m_start.x;
-					const float page_h = p.y - m_start.y;
-					if (page_w >= 1.0f && page_h >= 1.0f) {
-						m_view.width = page_w;
-						m_view.height = page_h;
-						m_ratio.width = page_w / image_w;
-						m_ratio.height = page_h / image_h;
-						if (!flag) {
-							flag = true;
+					const auto old_w = m_view.width;
+					const auto old_h = m_view.height;
+					if (abs(new_w - old_w) < abs(new_h - old_h)) {
+						if (!equal(old_w, new_w)) {
+							const auto fit_h = old_h * new_w / old_w;
+							m_view.width = new_w;
+							m_view.height = fit_h;
+							return true;
+						}
+					}
+					else {
+						if (!equal(old_h, new_h)) {
+							const auto fit_w = old_w * new_h / old_h;
+							m_view.width = fit_w;
+							m_view.height = new_h;
+							return true;
 						}
 					}
 				}
+				else {
+					if (!equal(m_view.width, new_w) || !equal(m_view.height, new_h)) {
+						m_view.width = new_w;
+						m_view.height = new_h;
+						return true;
+					}
+				}
 			}
+			//else {
+			//	if (!equal(m_start, new_p)) {
+			//		m_start = new_p;
+			//		return true;
+			//	}
+			//}
 		}
 		else if (loc == LOC_TYPE::LOC_SW) {
-			const float image_w = m_clip.right - m_clip.left;
-			const float image_h = m_clip.bottom - m_clip.top;
-			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s{ m_start.x, m_start.y + m_view.height };
-				D2D1_POINT_2F p;
+			const auto new_w = m_start.x + m_view.width - new_p.x;
+			const auto new_h = new_p.y - m_start.y;
+			if (new_w > 0.0f && new_h > 0.0f) {
 				if (keep_aspect) {
-					const D2D1_POINT_2F e{ s.x + image_w, s.y - image_h };
-					image_get_pos_on_line(new_p, s, e, p);
-				}
-				else {
-					p = new_p;
-				}
-				D2D1_POINT_2F q;
-				pt_sub(p, s, q);
-				if (pt_abs2(q) >= FLT_MIN) {
-					const float page_w = m_start.x + m_view.width - p.x;
-					const float page_h = p.y - m_start.y;
-					if (page_w >= 1.0f && page_h >= 1.0f) {
-						m_view.width = page_w;
-						m_view.height = page_h;
-						m_start.x = p.x;
-						m_ratio.width = page_w / image_w;
-						m_ratio.height = page_h / image_h;
-						if (!flag) {
-							flag = true;
+					const auto old_w = m_view.width;
+					const auto old_h = m_view.height;
+					if (abs(new_w - old_w) < abs(new_h - old_h)) {
+						if (!equal(old_w, new_w)) {
+							const auto fit_h = old_h * new_w / old_w;
+							m_start.x = new_p.x;
+							m_view.width = new_w;
+							m_view.height = fit_h;
+							return true;
+						}
+					}
+					else {
+						if (!equal(old_h, new_h)) {
+							const auto fit_w = old_w * new_h / old_h;
+							m_start.x = m_start.x + old_w - fit_w;
+							m_view.width = fit_w;
+							m_view.height = new_h;
+							return true;
 						}
 					}
 				}
-			}
-		}
-		else if (loc == LOC_TYPE::LOC_NORTH) {
-			const float dy = (new_p.y - m_start.y);
-			if (fabs(dy) >= FLT_MIN) {
-				if (keep_aspect) {
-					const float t = min(m_clip.top + dy / m_ratio.height, m_clip.bottom - 1.0f);	// 上辺
-					m_clip.top = max(t, 0.0f);
-					m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-					m_start.y = new_p.y;
-					flag = true;
-				}
 				else {
-					if (m_view.height > dy) {
-						m_view.height -= dy;
-					}
-					else {
-						m_view.height = 0.0f;
-					}
-					m_start.y = new_p.y;
-					flag = true;
-				}
-			}
-		}
-		else if (loc == LOC_TYPE::LOC_EAST) {
-			const float dx = (new_p.x - (m_start.x + m_view.width));
-			if (fabs(dx) >= FLT_MIN) {
-				if (keep_aspect) {
-					const float r = max(m_clip.right + dx / m_ratio.width, m_clip.left + 1.0f);	// 右辺
-					m_clip.right = min(r, m_orig.width);
-					m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-					m_start.x = new_p.x - m_view.width;
-					flag = true;
-				}
-				else {
-					if (new_p.x > m_start.x) {
-						m_view.width = new_p.x - m_start.x;
-					}
-					else {
-						m_view.width = 0.0f;
+					if (!equal(m_start.x, new_p.x)) {
+						m_view.width = new_w;
+						m_view.height = new_h;
 						m_start.x = new_p.x;
+						return true;
 					}
-					flag = true;
 				}
 			}
+			//else {
+			//	if (!equal(m_start, new_p)) {
+			//		m_start = new_p;
+			//		return true;
+			//	}
+			//}
 		}
-		else if (loc == LOC_TYPE::LOC_SOUTH) {
-			const float dy = (new_p.y - (m_start.y + m_view.height));
-			if (fabs(dy) >= FLT_MIN) {
+		else if (loc == LOC_TYPE::LOC_NE) {
+			const auto new_w = new_p.x - m_start.x;
+			const auto new_h = m_start.y + m_view.height - new_p.y;
+			if (new_w > 0.0f && new_h > 0.0f) {
 				if (keep_aspect) {
-					const float b = max(m_clip.bottom + dy / m_ratio.height, m_clip.top + 1.0f);	// 下辺
-					m_clip.bottom = min(b, m_orig.height);
-					m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-					m_start.y = new_p.y - m_view.height;
-					flag = true;
-				}
-				else {
-					if (new_p.y > m_start.y) {
-						m_view.height = new_p.y - m_start.y;
+					const auto old_w = m_view.width;
+					const auto old_h = m_view.height;
+					if (abs(new_w - old_w) < abs(new_h - old_h)) {
+						if (!equal(old_w, new_w)) {
+							const auto fit_h = old_h * new_w / old_w;
+							m_start.y = m_start.y + old_h - fit_h;
+							m_view.width = new_w;
+							m_view.height = fit_h;
+							return true;
+						}
 					}
 					else {
-						m_view.height = 0.0f;
-						m_start.y = new_p.y;
+						if (!equal(old_h, new_h)) {
+							const auto fit_w = old_w * new_h / old_h;
+							m_start.y = new_p.y;
+							m_view.width = fit_w;
+							m_view.height = new_h;
+							return true;
+						}
 					}
-					flag = true;
+				}
+				else {
+					if (!equal(m_start.y, new_p.y)) {
+						m_start.y = new_p.y;
+						m_view.width = new_w;
+						m_view.height = new_h;
+						return true;
+					}
 				}
 			}
+			//else {
+			//	if (!equal(m_start, new_p)) {
+			//		m_start = new_p;
+			//		return true;
+			//	}
+			//}
 		}
 		else if (loc == LOC_TYPE::LOC_WEST) {
-			const float dx = (new_p.x - m_start.x);
-			if (fabs(dx) >= FLT_MIN) {
+			auto new_w = m_start.x + m_view.width - new_p.x;
+			if (new_w > 0.0) {
 				if (keep_aspect) {
-					const float l = min(m_clip.left + dx / m_ratio.width, m_clip.right - 1.0f);
-					m_clip.left = max(l , 0.0f);
-					m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-					m_start.x = new_p.x;
-					flag = true;
-				}
-				else {
-					if (m_view.width > dx) {
-						m_view.width -= dx;
+					const auto ratio_w = m_view.width / (m_clip.right - m_clip.left);	// 表示枠とクリッピングされた元画像の比率
+					m_clip.left = m_clip.left - (new_w - m_view.width) / ratio_w;
+					if (m_clip.left < 0.0) {
+						m_clip.right = m_clip.right - m_clip.left;
+						m_clip.left = 0.0;
 					}
-					else {
-						m_view.width = 0.0f;
+					if (m_clip.right > m_orig.width) {
+						new_w = new_w - (m_clip.right - m_orig.width) * ratio_w;
+						m_clip.right = m_orig.width;
 					}
-					m_start.x = new_p.x;
-					flag = true;
 				}
+				m_start.x = new_p.x;
+				m_view.width = new_w;
+				return true;
 			}
+			//else {
+			//	if (!equal(m_start.x, new_p.x)) {
+			//		m_start.x = new_p.x;
+			//		return true;
+			//	}
+			//}
 		}
-		return flag;
+		else if (loc == LOC_TYPE::LOC_NORTH) {
+			auto new_h = m_start.y + m_view.height - new_p.y;
+			if (new_h > 0.0) {
+				if (keep_aspect) {
+					const auto ratio_h = m_view.height / (m_clip.bottom - m_clip.top);	// 表示枠とクリッピングされた元画像の比率
+					m_clip.top = m_clip.top - (new_h - m_view.height) / ratio_h;
+					if (m_clip.top < 0.0) {
+						m_clip.bottom = m_clip.bottom - m_clip.top;
+						m_clip.top = 0.0;
+					}
+					if (m_clip.bottom > m_orig.height) {
+						new_h = new_h - (m_clip.bottom - m_orig.height) * ratio_h;
+						m_clip.bottom = m_orig.height;
+					}
+				}
+				m_start.y = new_p.y;
+				m_view.height = new_h;
+				return true;
+			}
+			//else {
+			//	if (!equal(m_start.y, new_p.y)) {
+			//		m_start.y = new_p.y;
+			//		return true;
+			//	}
+			//}
+		}
+		else if (loc == LOC_TYPE::LOC_SOUTH) {
+			auto new_h = new_p.y - m_start.y;
+			if (new_h > 0.0) {
+				if (keep_aspect) {
+					const auto ratio_h = m_view.height / (m_clip.bottom - m_clip.top);
+					m_clip.bottom = m_clip.bottom + (new_h - m_view.height) / ratio_h;
+					if (m_clip.bottom > m_orig.height) {
+						m_clip.top = m_clip.top - (m_clip.bottom - m_orig.height);
+						m_clip.bottom = m_orig.height;
+					}
+					if (m_clip.top < 0.0) {
+						new_h = new_h + m_clip.top * ratio_h;
+						m_clip.top = 0.0;
+					}
+				}
+				m_start.y = new_p.y - new_h;
+				m_view.height = new_h;
+				return true;
+			}
+			//else {
+			//	if (!equal(m_start.y, new_p.y)) {
+			//		m_start.y = new_p.y;
+			//		return true;
+			//	}
+			//}
+		}
+		else if (loc == LOC_TYPE::LOC_EAST) {
+			auto new_w = new_p.x - m_start.x;
+			if (new_w > 0.0) {
+				if (keep_aspect) {
+					const auto ratio_w = m_view.width / (m_clip.right - m_clip.left);
+					m_clip.right = m_clip.right + (new_w - m_view.width) / ratio_w;
+					if (m_clip.right > m_orig.width) {
+						m_clip.left = m_clip.left - (m_clip.right - m_orig.width);
+						m_clip.right = m_orig.width;
+					}
+					if (m_clip.left < 0.0) {
+						new_w = new_w + m_clip.left * ratio_w;
+						m_clip.left = 0.0;
+					}
+				}
+				m_start.x = new_p.x - new_w;
+				m_view.width = new_w;
+				return true;
+			}
+			//else {
+			//	if (!equal(m_start.y, new_p.y)) {
+			//		m_start.y = new_p.y;
+			//		return true;
+			//	}
+			//}
+		}
+		return false;
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
@@ -863,7 +922,6 @@ namespace winrt::GraphPaper::implementation
 		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), 
 			dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_orig(D2D1_SIZE_U{ dt_reader.ReadUInt32(), dt_reader.ReadUInt32() }),
-		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_opac(dt_reader.ReadSingle())
 	{
 		if (m_opac < 0.0f || m_opac > 1.0f) {
@@ -894,8 +952,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_clip.bottom);
 		dt_writer.WriteUInt32(m_orig.width);
 		dt_writer.WriteUInt32(m_orig.height);
-		dt_writer.WriteSingle(m_ratio.width);
-		dt_writer.WriteSingle(m_ratio.height);
 		dt_writer.WriteSingle(m_opac);
 
 		const size_t pitch = 4ull * m_orig.width;

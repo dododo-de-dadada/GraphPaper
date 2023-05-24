@@ -80,9 +80,6 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_T::IMAGE:
 			u = new UndoImage(dt_reader);
 			break;
-		//case UNDO_T::IMAGE_ASPECT:
-		//	u = new UndoValue<UNDO_T::IMAGE_ASPECT>(dt_reader);
-		//	break;
 		case UNDO_T::IMAGE_OPAC:
 			u = new UndoValue<UNDO_T::IMAGE_OPAC>(dt_reader);
 			break;

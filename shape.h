@@ -333,7 +333,7 @@ namespace winrt::GraphPaper::implementation
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, 
 		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
-		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, bool& fore_selected,
+		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt, bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept;
 	// 先頭から図形まで数える.
 	uint32_t slist_count(SHAPE_LIST const& slist, const Shape* s) noexcept;
@@ -655,7 +655,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_RECT_F m_clip;	// 表示されている矩形
 		D2D1_SIZE_U m_orig;	// ビットマップの原寸
 		uint8_t* m_bgra = nullptr;	// ビットマップのデータ
-		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
