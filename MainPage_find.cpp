@@ -382,9 +382,6 @@ namespace winrt::GraphPaper::implementation
 			//	m_edit_text_shape = nullptr;
 			//	xcvd_menu_is_enabled();
 			//}
-			if (m_edit_text_shape != nullptr) {
-				m_edit_context.NotifyFocusLeave();
-			}
 			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
