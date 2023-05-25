@@ -24,74 +24,96 @@ namespace winrt::GraphPaper::implementation
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
+			m_drawing_tool = DRAWING_TOOL::SELECT;
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
 			m_event_loc_pressed = LOC_TYPE::LOC_PAGE;
 		}
 		else if (sender == rmfi_menu_drawing_rect()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);
+			m_drawing_tool = DRAWING_TOOL::RECT;
 		}
 		else if (sender == rmfi_menu_drawing_rrect()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RRECT);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RRECT);
+			m_drawing_tool = DRAWING_TOOL::RRECT;
 		}
 		else if (sender == rmfi_menu_drawing_poly()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
+			m_drawing_tool = DRAWING_TOOL::POLY;
 		}
 		else if (sender == rmfi_menu_drawing_ellipse()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLIPSE);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLIPSE);
+			m_drawing_tool = DRAWING_TOOL::ELLIPSE;
 		}
 		else if (sender == rmfi_menu_drawing_line()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
+			m_drawing_tool = DRAWING_TOOL::LINE;
 		}
 		else if (sender == rmfi_menu_drawing_bezier()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZIER);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZIER);
+			m_drawing_tool = DRAWING_TOOL::BEZIER;
 		}
 		else if (sender == rmfi_menu_drawing_text()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::TEXT);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::TEXT);
+			m_drawing_tool = DRAWING_TOOL::TEXT;
 		}
 		else if (sender == rmfi_menu_drawing_ruler()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
+			m_drawing_tool = DRAWING_TOOL::RULER;
 		}
 		else if (sender == rmfi_menu_drawing_arc()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ARC);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ARC);
+			m_drawing_tool = DRAWING_TOOL::ARC;
 		}
 		else if (sender == rmfi_menu_eyedropper()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
+			m_drawing_tool = DRAWING_TOOL::EYEDROPPER;
 		}
 		else {
 			if (sender == rmfi_menu_drawing_poly_di()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 2);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 2);
+				m_drawing_poly_opt.m_vertex_cnt = 2;
 			}
 			else if (sender == rmfi_menu_drawing_poly_tri()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 3);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 3);
+				m_drawing_poly_opt.m_vertex_cnt = 3;
 			}
 			else if (sender == rmfi_menu_drawing_poly_quad()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 4);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 4);
+				m_drawing_poly_opt.m_vertex_cnt = 4;
 			}
 			else if (sender == rmfi_menu_drawing_poly_pent()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 5);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 5);
+				m_drawing_poly_opt.m_vertex_cnt = 5;
 			}
 			else if (sender == rmfi_menu_drawing_poly_hexa()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 6);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 6);
+				m_drawing_poly_opt.m_vertex_cnt = 6;
 			}
 			else if (sender == rmfi_menu_drawing_poly_hept()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 7);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 7);
+				m_drawing_poly_opt.m_vertex_cnt = 7;
 			}
 			else if (sender == rmfi_menu_drawing_poly_octa()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 8);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 8);
+				m_drawing_poly_opt.m_vertex_cnt = 8;
 			}
 			else if (sender == rmfi_menu_drawing_poly_nona()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 9);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 9);
+				m_drawing_poly_opt.m_vertex_cnt = 9;
 			}
 			else if (sender == rmfi_menu_drawing_poly_deca()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 10);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 10);
+				m_drawing_poly_opt.m_vertex_cnt = 10;
 			}
 			else if (sender == rmfi_menu_drawing_poly_hendeca()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 11);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 11);
+				m_drawing_poly_opt.m_vertex_cnt = 11;
 			}
 			else if (sender == rmfi_menu_drawing_poly_dodeca()) {
-				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 12);
+				//drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 12);
+				m_drawing_poly_opt.m_vertex_cnt = 12;
 			}
 			else if (sender == tmfi_tool_poly_end_close()) {
 				m_drawing_poly_opt.m_end_closed = !m_drawing_poly_opt.m_end_closed;
@@ -109,7 +131,9 @@ namespace winrt::GraphPaper::implementation
 				throw winrt::hresult_not_implemented();
 				return;
 			}
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
+			//drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
+			m_drawing_tool = DRAWING_TOOL::POLY;
+			rmfi_menu_drawing_poly().IsChecked(true);
 		}
 		status_bar_set_draw();
 		status_bar_set_pos();
@@ -117,6 +141,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 作図ツールのメニューに印をつける.
+	/*
 	void MainPage::drawing_tool_is_checked(const DRAWING_TOOL val)
 	{
 		rmfi_menu_selection_tool().IsChecked(val == DRAWING_TOOL::SELECT);
@@ -130,32 +155,32 @@ namespace winrt::GraphPaper::implementation
 		rmfi_menu_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
 		rmfi_menu_drawing_arc().IsChecked(val == DRAWING_TOOL::ARC);
 		rmfi_menu_eyedropper().IsChecked(val == DRAWING_TOOL::EYEDROPPER);
-	}
+	}*/
 
 	// 多角形の選択肢メニューにチェックをつける.
-	void MainPage::drawing_poly_opt_is_checked(const POLY_OPTION& val)
-	{
-		drawing_poly_vtx_is_checked(val.m_vertex_cnt);
-		tmfi_tool_poly_regular().IsChecked(val.m_regular);
-		tmfi_tool_poly_vertex_up().IsChecked(val.m_vertex_up);
-		tmfi_tool_poly_end_close().IsChecked(val.m_end_closed);
-		tmfi_tool_poly_clockwise().IsChecked(val.m_clockwise);
-	}
+	//void MainPage::drawing_poly_opt_is_checked(const POLY_OPTION& val)
+	//{
+	//	drawing_poly_vtx_is_checked(val.m_vertex_cnt);
+	//	tmfi_tool_poly_regular().IsChecked(val.m_regular);
+	//	tmfi_tool_poly_vertex_up().IsChecked(val.m_vertex_up);
+	//	tmfi_tool_poly_end_close().IsChecked(val.m_end_closed);
+	//	tmfi_tool_poly_clockwise().IsChecked(val.m_clockwise);
+	//}
 
 	// 多角形の頂点数メニューにチェックをつける.
-	void MainPage::drawing_poly_vtx_is_checked(const uint32_t val)
-	{
-		rmfi_menu_drawing_poly_di().IsChecked(val == 2);
-		rmfi_menu_drawing_poly_tri().IsChecked(val == 3);
-		rmfi_menu_drawing_poly_quad().IsChecked(val == 4);
-		rmfi_menu_drawing_poly_pent().IsChecked(val == 5);
-		rmfi_menu_drawing_poly_hexa().IsChecked(val == 6);
-		rmfi_menu_drawing_poly_hept().IsChecked(val == 7);
-		rmfi_menu_drawing_poly_octa().IsChecked(val == 8);
-		rmfi_menu_drawing_poly_nona().IsChecked(val == 9);
-		rmfi_menu_drawing_poly_deca().IsChecked(val == 10);
-		rmfi_menu_drawing_poly_hendeca().IsChecked(val == 11);
-		rmfi_menu_drawing_poly_dodeca().IsChecked(val == 12);
-	}
+	//void MainPage::drawing_poly_vtx_is_checked(const uint32_t val)
+	//{
+	//	rmfi_menu_drawing_poly_di().IsChecked(val == 2);
+	//	rmfi_menu_drawing_poly_tri().IsChecked(val == 3);
+	//	rmfi_menu_drawing_poly_quad().IsChecked(val == 4);
+	//	rmfi_menu_drawing_poly_pent().IsChecked(val == 5);
+	//	rmfi_menu_drawing_poly_hexa().IsChecked(val == 6);
+	//	rmfi_menu_drawing_poly_hept().IsChecked(val == 7);
+	//	rmfi_menu_drawing_poly_octa().IsChecked(val == 8);
+	//	rmfi_menu_drawing_poly_nona().IsChecked(val == 9);
+	//	rmfi_menu_drawing_poly_deca().IsChecked(val == 10);
+	//	rmfi_menu_drawing_poly_hendeca().IsChecked(val == 11);
+	//	rmfi_menu_drawing_poly_dodeca().IsChecked(val == 12);
+	//}
 
 }

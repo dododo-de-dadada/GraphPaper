@@ -846,7 +846,7 @@ namespace winrt::GraphPaper::implementation
 		//　上矢印キーが押された.
 		//void select_shape_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Escape が押された.
-		void select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_layout.cpp
@@ -1045,11 +1045,11 @@ namespace winrt::GraphPaper::implementation
 		// 作図メニューの項目が選択された.
 		void drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 作図メニューに印をつける.
-		void drawing_tool_is_checked(const DRAWING_TOOL val);
+		//void drawing_tool_is_checked(const DRAWING_TOOL val);
 		// 作図メニューの多角形の頂点数にチェックをつける.
-		void drawing_poly_vtx_is_checked(const uint32_t val);
+		//void drawing_poly_vtx_is_checked(const uint32_t val);
 		// 作図メニューの多角形の選択肢にチェックをつける.
-		void drawing_poly_opt_is_checked(const POLY_OPTION& val);
+		//void drawing_poly_opt_is_checked(const POLY_OPTION& val);
 
 		//-----------------------------
 		// MainPage_undo.cpp

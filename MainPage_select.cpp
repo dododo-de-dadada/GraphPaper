@@ -11,18 +11,6 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ListViewItem;
 
-	// Escape ‚ª‰Ÿ‚³‚ê‚½.
-	void MainPage::select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-			unselect_shape_all();
-			main_draw();
-		}
-		else {
-			drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
-		}
-	}
-
 	// Shift + ‰º–îˆóƒL[‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::select_shape_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
@@ -269,6 +257,12 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::unselect_shape_all(const bool t_range_only)
 	{
 		bool changed = false;
+		if (m_edit_text_shape == nullptr) {
+			undo_push_text_unselect(m_edit_text_shape);
+			m_edit_context.NotifyFocusLeave();
+			m_edit_text_shape = nullptr;
+			changed = true;
+		}
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;

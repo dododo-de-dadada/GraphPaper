@@ -1447,7 +1447,7 @@
 				されてしまう。つまり, メンバ変数にアクセスできない。
 				-->
 				<SwapChainPanel.KeyboardAccelerators>
-					<KeyboardAccelerator Invoked="select_tool_invoked" Key="Escape" />
+					<KeyboardAccelerator Invoked="kacc_escape_invoked" Key="Escape" />
                     <KeyboardAccelerator Invoked="kacc_back_invoked" Key="Back" />
                     <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete" />
                     <KeyboardAccelerator Invoked="kacc_delete_shift_invoked" Key="Delete" Modifiers="Shift" />

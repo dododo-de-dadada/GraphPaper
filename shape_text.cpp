@@ -842,16 +842,23 @@ namespace winrt::GraphPaper::implementation
 			const auto tw = m_dwrite_test_metrics[i].width;
 			tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
+			//const D2D1_POINT_2F v{	// 行の左上点
+			//	max(left, left + tl - f), top + tt + bl + descent - m_font_size
+			//};
+			//const D2D1_POINT_2F w{	// 行の右下点
+			//	min(right, left + tl + tw + f), top + tt + bl + descent
+			//};
 			const D2D1_POINT_2F v{	// 行の左上点
-				max(left, left + tl - f), top + tt + bl + descent - m_font_size
+				min(left, left + tl - f), top + tt + bl + descent - m_font_size
 			};
 			const D2D1_POINT_2F w{	// 行の右下点
-				min(right, left + tl + tw + f), top + tt + bl + descent
+				max(right, left + tl + tw + f), top + tt + bl + descent
 			};
 			if (pt_in_rect(pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
+		/*
 		float line_x;
 		if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
 			m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
@@ -879,6 +886,7 @@ namespace winrt::GraphPaper::implementation
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
+		*/
 		return ShapeRect::hit_test(pt);
 	}
 

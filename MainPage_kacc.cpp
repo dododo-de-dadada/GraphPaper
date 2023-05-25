@@ -196,6 +196,22 @@ namespace winrt::GraphPaper::implementation
 		m_edit_context.NotifyTextChanged(modified_ran, 1, new_ran);
 	}
 
+	// Escape ‚ª‰Ÿ‚³‚ê‚½.
+	void MainPage::kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
+			unselect_shape_all();
+			main_draw();
+		}
+		else {
+			m_drawing_tool = DRAWING_TOOL::SELECT;
+			rmfi_menu_selection_tool().IsChecked(true);
+		}
+		m_event_state = EVENT_STATE::BEGIN;
+		m_event_shape_pressed = nullptr;
+		m_event_loc_pressed = LOC_TYPE::LOC_PAGE;
+	}
+
 	void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_edit_text_shape == nullptr) {
