@@ -55,6 +55,7 @@ namespace winrt::GraphPaper::implementation
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}

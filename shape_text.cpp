@@ -447,13 +447,17 @@ namespace winrt::GraphPaper::implementation
 
 			// 行の計量を作成する.
 			if (hr == S_OK) {
-				m_dwrite_text_layout->GetLineMetrics(nullptr, 0, &m_dwrite_line_cnt);
+				// 行の計量の個数を得て, メモリを確保し, 改めて計量を得る.
+				DWRITE_LINE_METRICS dummy;	// nullptr だとハングアップをおこすことがあるので, ダミーを使う.
+				m_dwrite_text_layout->GetLineMetrics(&dummy, 1, &m_dwrite_line_cnt);
 				m_dwrite_line_metrics = new DWRITE_LINE_METRICS[m_dwrite_line_cnt];
 				hr = m_dwrite_text_layout->GetLineMetrics(m_dwrite_line_metrics, m_dwrite_line_cnt, &m_dwrite_line_cnt);
 			}
 
 			// ヒットテストの計量を作成する.
 			if (hr == S_OK) {
+				// ヒットテストの計量の個数は, 行の計量の個数を超えることはない (はず).
+				// 文末が空白 (改行) だけのとき, 逆はありうる.
 				m_dwrite_test_metrics = new DWRITE_HIT_TEST_METRICS[m_dwrite_line_cnt];
 				hr = m_dwrite_text_layout->HitTestTextRange(0, get_text_len(), 0.0f, 0.0f, m_dwrite_test_metrics, m_dwrite_line_cnt, &m_dwrite_test_cnt);
 			}

@@ -252,8 +252,17 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_selected_poly_open = (selected_poly_open_cnt > 0);
 		// 選択された閉じた多角形がひとつ以上ある場合.
 		const auto exists_selected_poly_close = (selected_poly_close_cnt > 0);
-		// 選択されてない図形がひとつ以上ある場合.
-		const auto exists_unselected = (selected_cnt < undeleted_cnt);
+		// 選択されてない図形がひとつ以上ある場合, または選択されてない文字がひとつ以上ある場合.
+		uint32_t text_unselected_char_cnt;
+		if (m_edit_text_shape != nullptr) {
+			const auto len = m_edit_text_shape->get_text_len();
+			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, m_edit_text_shape->get_text_len());
+			text_unselected_char_cnt = len - (end - m_main_page.m_select_start);
+		}
+		else {
+			text_unselected_char_cnt = 0;
+		}
+		const auto exists_unselected = (selected_cnt < undeleted_cnt || text_unselected_char_cnt > 0);
 		// 選択された図形がふたつ以上ある場合.
 		const auto exists_selected_2 = (selected_cnt > 1);
 		// 選択されたグループがひとつ以上ある場合.

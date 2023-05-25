@@ -254,8 +254,8 @@ namespace winrt::GraphPaper::implementation
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
 		ShapeText* m_edit_text_shape = nullptr;	// 編集中の文字列図形
 		bool m_edit_text_comp = false;	// 漢字変換中 (変換中なら true, そうでなければ false)
-		int m_edit_text_start = 0;	// 漢字変換開始時の開始位置
-		int m_edit_text_end = 0;	// 漢字変換開始時の終了位置
+		uint32_t m_edit_text_start = 0;	// 漢字変換開始時の開始位置
+		uint32_t m_edit_text_end = 0;	// 漢字変換開始時の終了位置
 		bool m_edit_text_trail = false;	// 漢字変換開始時のキャレット
 
 		// ポインターイベント
@@ -481,10 +481,12 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 
 		}
+
 		void text_sele_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
 		{
 			const ShapeText* t = m_edit_text_shape;
@@ -507,6 +509,7 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
 				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 			else if (ins_len > 0) {
@@ -523,6 +526,7 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
 				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -539,6 +543,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_text_select(m_edit_text_shape, end, end + 1, false);
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 			// 選択範囲があるなら
@@ -546,14 +551,15 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
 				undo_menu_is_enabled();
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 			winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
-				start, end
+				static_cast<const int32_t>(start), static_cast<const int32_t>(end)
 			};
 			winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-				m_main_page.m_select_start,
-				m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end
+				static_cast<int32_t>(m_main_page.m_select_start),
+					static_cast<int32_t>(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end)
 			};
 			m_edit_context.NotifyTextChanged(modified_ran, 0, new_ran);
 		}
@@ -641,6 +647,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 次を検索する.
 		bool find_next(void);
+		//bool find_next(ShapeText* edit_text_shape, uint32_t edit_text_end, ShapeText*& fint_text_shape, uint32_t& find_text_start, uint32_t& find_text_end, bool& find_text_trail);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -652,11 +659,11 @@ namespace winrt::GraphPaper::implementation
 		// 検索文字列が変更された.
 		void find_text_what_changed(IInspectable const&, TextChangedEventArgs const&);
 		// 置換して次を検索する.
-		bool replace_and_find(void);
+		bool replace_text(void);
 		// 文字列検索パネルの「すべて置換」ボタンが押された.
 		void replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
-		void replace_and_find_click(IInspectable const&, RoutedEventArgs const&);
+		void replace_text_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//　MainPage_font.cpp
@@ -691,9 +698,22 @@ namespace winrt::GraphPaper::implementation
 		void ungroup_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		//　MainPage_keyacc.cpp
+		//　MainPage_kacc.cpp
 		//　キーアクセラレーターのハンドラー
 		//-------------------------------
+
+		void kacc_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_delete_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_down_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_down_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_enter_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_right_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_up_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//　Cntrol + PgDn が押された.
 		//void kacc_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
@@ -1117,16 +1137,15 @@ namespace winrt::GraphPaper::implementation
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
 			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.
-			for (auto u = m_ustack_undo.rbegin();
-				u != m_ustack_undo.rend() && *u != nullptr &&
-				typeid(*u) == typeid(UndoTextSelect); u++) {
-				if ((*u)->m_shape == s) {
-					ShapeText* t = static_cast<ShapeText*>(s);
-					m_main_page.m_select_start = start;
-					m_main_page.m_select_end = end;
-					m_main_page.m_select_trail = trail;
-					return;
+			for (auto u = m_ustack_undo.rbegin(); u != m_ustack_undo.rend() && *u != nullptr && typeid(*u) == typeid(UndoTextSelect); u++) {
+				if ((*u)->m_shape != s) {
+					continue;
 				}
+				ShapeText* t = static_cast<ShapeText*>(s);
+				m_main_page.m_select_start = start;
+				m_main_page.m_select_end = end;
+				m_main_page.m_select_trail = trail;
+				return;
 			}
 			// そうでなければ, スタックに操作を積む.
 			m_ustack_undo.push_back(new UndoTextSelect(s, start, end, trail));

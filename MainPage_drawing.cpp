@@ -21,6 +21,7 @@ namespace winrt::GraphPaper::implementation
 				m_edit_context.NotifyFocusLeave();
 				undo_push_text_unselect(m_edit_text_shape);
 				m_edit_text_shape = nullptr;
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);

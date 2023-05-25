@@ -715,6 +715,7 @@ namespace winrt::GraphPaper::implementation
 			const auto end = m_edit_text_shape->get_text_pos(m_event_pos_curr, trail);
 			const auto start = m_main_page.m_select_start;
 			undo_push_text_select(m_edit_text_shape, start, end, trail);
+			xcvd_menu_is_enabled();
 			main_draw();
 		}
 		// ó‘Ô‚ª, ¶ƒ{ƒ^ƒ“‚ð‰Ÿ‚µ‚Ä‚¢‚éó‘Ô, ‚Ü‚½‚Í
@@ -775,6 +776,7 @@ namespace winrt::GraphPaper::implementation
 						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
 					}
 				}
+				xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -1389,6 +1391,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 		}
 		if (changed) {
+			undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_draw();
 		}

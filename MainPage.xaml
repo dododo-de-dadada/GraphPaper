@@ -1381,7 +1381,7 @@
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
 				<Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />
-				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_and_find_click" Content="Replace" />
+				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_text_click" Content="Replace" />
 				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_all_click" Content="Replace All" />
 				<Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close"  Margin="0,0" />
 			</StackPanel>
@@ -1448,7 +1448,21 @@
 				-->
 				<SwapChainPanel.KeyboardAccelerators>
 					<KeyboardAccelerator Invoked="select_tool_invoked" Key="Escape" />
-				</SwapChainPanel.KeyboardAccelerators>
+                    <KeyboardAccelerator Invoked="kacc_back_invoked" Key="Back" />
+                    <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete" />
+                    <KeyboardAccelerator Invoked="kacc_delete_shift_invoked" Key="Delete" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_down_invoked" Key="Down" />
+                    <KeyboardAccelerator Invoked="kacc_down_shift_invoked" Key="Down" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_enter_invoked" Key="Enter" />
+                    <KeyboardAccelerator Invoked="kacc_left_invoked" Key="Left" />
+                    <KeyboardAccelerator Invoked="kacc_left_shift_invoked" Key="Left" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_right_invoked" Key="Right" />
+                    <KeyboardAccelerator Invoked="kacc_right_shift_invoked" Key="Right" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_up_invoked" Key="Up" />
+                    <KeyboardAccelerator Invoked="kacc_up_shift_invoked" Key="Up" Modifiers="Shift" />
+                    <!--
+                    -->
+                </SwapChainPanel.KeyboardAccelerators>
 			</SwapChainPanel>
 			<ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 			<ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />

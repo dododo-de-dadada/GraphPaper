@@ -50,26 +50,33 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_shape_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		bool done = false;
-		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || s->is_selected()) {
-				continue;
+		if (m_edit_text_shape != nullptr) {
+			undo_push_text_select(m_edit_text_shape, 0, m_edit_text_shape->get_text_len(), false);
+			xcvd_menu_is_enabled();
+			main_draw();
+		}
+		else {
+			bool done = false;
+			for (auto s : m_main_page.m_shape_list) {
+				if (s->is_deleted() || s->is_selected()) {
+					continue;
+				}
+				if (!done) {
+					done = true;
+				}
+				undo_push_select(s);
 			}
 			if (!done) {
-				done = true;
+				return;
 			}
-			undo_push_select(s);
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_select_all();
+			}
+			xcvd_menu_is_enabled();
+			main_draw();
+			status_bar_set_pos();
 		}
-		if (!done) {
-			return;
-		}
-		// 一覧が表示されてるか判定する.
-		if (summary_is_visible()) {
-			summary_select_all();
-		}
-		xcvd_menu_is_enabled();
-		main_draw();
-		status_bar_set_pos();
 	}
 
 	// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
