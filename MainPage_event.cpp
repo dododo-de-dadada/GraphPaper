@@ -445,7 +445,7 @@ namespace winrt::GraphPaper::implementation
 		unselect_shape_all();
 		undo_push_append(s);
 		undo_push_select(s);
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_bbox_update(s);
 		main_panel_size();
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			unselect_shape_all();
 			undo_push_append(s);
 			undo_push_select(s);
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			m_event_shape_last = s;
 			main_bbox_update(s);
@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//undo_push_null();
 		//if (!undo_pop_invalid()) {
-		//	undo_menu_is_enabled();
+		//	//undo_menu_is_enabled();
 		//	main_bbox_update();
 		//	main_panel_size();
 		//}
@@ -782,289 +782,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ポップアップメニューの線枠と塗りつぶしの各項目を設定する.
-	void MainPage::event_arrange_popup_prop(const bool visible, const Shape* s)
-	{
-		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
-		mfsi_popup_stroke_dash().Visibility(v);
-		mfi_popup_stroke_dash_pat().Visibility(v);
-		mfsi_popup_stroke_width().Visibility(v);
-		if (visible && s->exist_cap()) {
-			mfsi_popup_stroke_cap().Visibility(Visibility::Visible);
-		}
-		else {
-			mfsi_popup_stroke_cap().Visibility(Visibility::Collapsed);
-		}
-		if (visible && s->exist_join()) {
-			mfsi_popup_stroke_join().Visibility(Visibility::Visible);
-		}
-		else {
-			mfsi_popup_stroke_join().Visibility(Visibility::Collapsed);
-		}
-		if (visible && s->exist_cap()) {
-			mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Visible);
-			mfsi_popup_stroke_arrow().Visibility(Visibility::Visible);
-			mfi_popup_stroke_arrow_size().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Collapsed);
-			mfsi_popup_stroke_arrow().Visibility(Visibility::Collapsed);
-			mfi_popup_stroke_arrow_size().Visibility(Visibility::Collapsed);
-		}
-		mfs_popup_sepa_arrow_color().Visibility(v);
-		mfi_popup_stroke_color().Visibility(v);
-		mfi_popup_fill_color().Visibility(v);
-	}
-
-	// ポップアップメニューの書体と文字列の各項目を設定する.
-	void MainPage::event_arrange_popup_font(const bool visible)
-	{
-		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
-		mfi_popup_font_family().Visibility(v);
-		mfi_popup_font_size().Visibility(v);
-		mfsi_popup_font_weight().Visibility(v);
-		mfsi_popup_font_weight().Visibility(v);
-		mfsi_popup_font_stretch().Visibility(v);
-		mfsi_popup_font_style().Visibility(v);
-		mfs_popup_sepa_font_text().Visibility(v);
-		mfsi_popup_text_align_horz().Visibility(v);
-		mfsi_popup_text_align_vert().Visibility(v);
-		mfi_popup_text_line_sp().Visibility(v);
-		mfi_popup_text_pad().Visibility(v);
-		mfi_popup_font_color().Visibility(v);
-	}
-
-	// ポップアップメニューの画像の各項目を設定する.
-	void MainPage::event_arrange_popup_image(const bool visible)
-	{
-		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
-		tmfi_menu_meth_image_keep_asp_2().Visibility(v);
-		mfi_popup_meth_image_revert().Visibility(v);
-		mfi_popup_image_opac().Visibility(v);
-	}
-
-	// ポップアップメニューの方眼とページ、背景パターンの各項目を設定する.
-	void MainPage::event_arrange_popup_layout(const bool visible)
-	{
-		const auto v = visible ? Visibility::Visible : Visibility::Collapsed;
-		mfsi_popup_grid_show().Visibility(v);
-		mfsi_popup_grid_len().Visibility(v);
-		mfsi_popup_grid_emph().Visibility(v);
-		mfi_popup_grid_color().Visibility(v);
-		mfs_popup_sepa_grid_page().Visibility(v);
-		mfi_popup_page_size().Visibility(v);
-		mfi_popup_page_color().Visibility(v);
-		mfsi_popup_page_zoom().Visibility(v);
-		mfsi_popup_background_pattern().Visibility(v);
-	}
-
-	//------------------------------
-	// ポップアップメニューを表示する.
-	//------------------------------
-	void MainPage::event_show_popup(void)
-	{
-		// ポップアップが表示されているならそれを解放する.
-		if (scp_main_panel().ContextFlyout() != nullptr) {
-			scp_main_panel().ContextFlyout().Hide();
-			scp_main_panel().ContextFlyout(nullptr);
-		}
-		Shape* pressed = m_event_shape_pressed;
-		uint32_t loc_pressed = m_event_loc_pressed;
-		undo_menu_is_enabled();
-		int undo_visible = 0;
-		if (mfi_popup_undo().IsEnabled()) {
-			mfi_popup_undo().Visibility(Visibility::Visible);
-			undo_visible++;
-		}
-		else {
-			mfi_popup_undo().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_redo().IsEnabled()) {
-			mfi_popup_redo().Visibility(Visibility::Visible);
-			undo_visible++;
-		}
-		else {
-			mfi_popup_redo().Visibility(Visibility::Collapsed);
-		}
-		xcvd_menu_is_enabled();
-		int xcvd_visible = 0;
-		if (mfi_popup_xcvd_cut().IsEnabled()) {
-			mfi_popup_xcvd_cut().Visibility(Visibility::Visible);
-			xcvd_visible++;
-		}
-		else {
-			mfi_popup_xcvd_cut().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_xcvd_copy().IsEnabled()) {
-			mfi_popup_xcvd_copy().Visibility(Visibility::Visible);
-			xcvd_visible++;
-		}
-		else {
-			mfi_popup_xcvd_copy().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_xcvd_paste().IsEnabled()) {
-			mfi_popup_xcvd_paste().Visibility(Visibility::Visible);
-			xcvd_visible++;
-		}
-		else {
-			mfi_popup_xcvd_paste().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_xcvd_delete().IsEnabled()) {
-			mfi_popup_xcvd_delete().Visibility(Visibility::Visible);
-			xcvd_visible++;
-		}
-		else {
-			mfi_popup_xcvd_delete().Visibility(Visibility::Collapsed);
-		}
-		if ((undo_visible > 0 && xcvd_visible > 1) ||
-			(undo_visible > 1 && xcvd_visible > 0)) {
-			mfs_popup_sepa_undo_xcvd().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_undo_xcvd().Visibility(Visibility::Collapsed);
-		}
-		int select_visible = 0;
-		if (mfi_popup_select_all().IsEnabled()) {
-			mfi_popup_select_all().Visibility(Visibility::Visible);
-			select_visible++;
-		}
-		else {
-			mfi_popup_select_all().Visibility(Visibility::Collapsed);
-		}
-		if (mfsi_popup_order().IsEnabled()) {
-			mfsi_popup_order().Visibility(Visibility::Visible);
-			select_visible++;
-		}
-		else {
-			mfsi_popup_order().Visibility(Visibility::Collapsed);
-		}
-		if ((undo_visible + xcvd_visible > 0 && select_visible > 1) ||
-			(undo_visible + xcvd_visible > 1 && select_visible > 0)) {
-			mfs_popup_sepa_xcvd_select().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_xcvd_select().Visibility(Visibility::Collapsed);
-		}
-		int group_visible = 0;
-		if (mfi_popup_group().IsEnabled()) {
-			mfi_popup_group().Visibility(Visibility::Visible);
-			group_visible++;
-		}
-		else {
-			mfi_popup_group().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_ungroup().IsEnabled()) {
-			mfi_popup_ungroup().Visibility(Visibility::Visible);
-			group_visible++;
-		}
-		else {
-			mfi_popup_ungroup().Visibility(Visibility::Collapsed);
-		}
-		if ((undo_visible + xcvd_visible + select_visible > 0 && group_visible > 1) ||
-			(undo_visible + xcvd_visible + select_visible > 1 && group_visible > 0)) {
-			mfs_popup_sepa_select_group().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_select_group().Visibility(Visibility::Collapsed);
-		}
-		int edit_visible = 0;
-		if (mfi_popup_meth_poly_end().IsEnabled()) {
-			mfi_popup_meth_poly_end().Visibility(Visibility::Visible);
-			edit_visible++;
-		}
-		else {
-			mfi_popup_meth_poly_end().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_meth_arc_rot().IsEnabled()) {
-			mfi_popup_meth_arc_rot().Visibility(Visibility::Visible);
-			edit_visible++;
-		}
-		else {
-			mfi_popup_meth_arc_rot().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_meth_text_edit().IsEnabled()) {
-			mfi_popup_meth_text_edit().Visibility(Visibility::Visible);
-			edit_visible++;
-		}
-		else {
-			mfi_popup_meth_text_edit().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_meth_text_find().IsEnabled()) {
-			mfi_popup_meth_text_find().Visibility(Visibility::Visible);
-			edit_visible++;
-		}
-		else {
-			mfi_popup_meth_text_find().Visibility(Visibility::Collapsed);
-		}
-		if (mfi_popup_meth_text_fit_frame().IsEnabled()) {
-			mfi_popup_meth_text_fit_frame().Visibility(Visibility::Visible);
-			edit_visible++;
-		}
-		else {
-			mfi_popup_meth_text_fit_frame().Visibility(Visibility::Collapsed);
-		}
-		if ((undo_visible + xcvd_visible + select_visible + group_visible > 0 && edit_visible > 1) ||
-			(undo_visible + xcvd_visible + select_visible + group_visible > 1 && edit_visible > 0)) {
-			mfs_popup_sepa_group_edit().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_group_edit().Visibility(Visibility::Collapsed);
-		}
-		if (undo_visible + xcvd_visible + select_visible + group_visible + edit_visible > 0) {
-			mfs_popup_sepa_edit_stroke().Visibility(Visibility::Visible);
-		}
-		else {
-			mfs_popup_sepa_edit_stroke().Visibility(Visibility::Collapsed);
-		}
-
-		// 押された図形がヌル, または押された図形の部位が外側か判定する.
-		if (pressed == nullptr || loc_pressed == LOC_TYPE::LOC_PAGE) {
-			event_arrange_popup_prop(false, pressed);
-			event_arrange_popup_font(false);
-			event_arrange_popup_image(false);
-			event_arrange_popup_layout(true);
-		}
-		else {
-			// 押された図形の属性値を表示に格納する.
-			m_main_page.set_attr_to(pressed);
-			// メニューバーを更新する
-			stroke_dash_is_checked(m_main_page.m_stroke_dash);
-			stroke_width_is_checked(m_main_page.m_stroke_width);
-			stroke_cap_is_checked(m_main_page.m_stroke_cap);
-			stroke_join_is_checked(m_main_page.m_stroke_join);
-			stroke_arrow_is_checked(m_main_page.m_arrow_style);
-			font_weight_is_checked(m_main_page.m_font_weight);
-			font_stretch_is_checked(m_main_page.m_font_stretch);
-			font_style_is_checked(m_main_page.m_font_style);
-			text_align_horz_is_checked(m_main_page.m_text_align_horz);
-			text_align_vert_is_checked(m_main_page.m_text_align_vert);
-			text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
-			grid_emph_is_checked(m_main_page.m_grid_emph);
-			grid_show_is_checked(m_main_page.m_grid_show);
-
-			// 押された部位が文字列なら, フォントのメニュー項目を表示する.
-			if (loc_pressed == LOC_TYPE::LOC_TEXT) {
-				event_arrange_popup_prop(false, pressed);
-				event_arrange_popup_font(true);
-				event_arrange_popup_image(false);
-			}
-			// 押された部位が画像なら, 画像のメニュー項目を表示する.
-			else if (typeid(*pressed) == typeid(ShapeImage)) {
-				event_arrange_popup_prop(false, pressed);
-				event_arrange_popup_font(false);
-				event_arrange_popup_image(true);
-			}
-			// 上記以外なら, 属性のメニュー項目を表示する.
-			else {
-				event_arrange_popup_prop(true, pressed);
-				event_arrange_popup_font(false);
-				event_arrange_popup_image(false);
-			}
-			event_arrange_popup_layout(false);
-		}
-		scp_main_panel().ContextFlyout(mf_popup_menu());
-	}
-
 	//------------------------------
 	// ポインターのボタンが押された.
 	// キャプチャの有無にかかわらず, 片方のマウスボタンを押した状態で, もう一方のボタンを押しても, それは通知されない.
@@ -1166,6 +883,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control) {
+					// 制御キー押下でのマウスボタン押下は, 押された図形が選択されていたなら外し, 選択されていなかったなら付ける.
+					// ただし, 押された図形の部位が, 枠線や塗りつぶし以外の部位だったならば, 制御キー押下での変形を行なう.
 					m_event_shape_pressed = nullptr;
 					m_event_loc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
 					if (m_event_loc_pressed == LOC_TYPE::LOC_PAGE) {
@@ -1178,8 +897,7 @@ namespace winrt::GraphPaper::implementation
 							changed = true;
 						}
 					}
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE ||
-						m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
+					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 						if (!m_event_shape_pressed->is_selected()) {
 							undo_push_select(m_event_shape_pressed);
 							m_event_shape_last = m_event_shape_pressed;
@@ -1391,7 +1109,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 		}
 		if (changed) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -1736,7 +1454,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			//undo_push_null();
 			if (!undo_pop_invalid()) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 			}
@@ -1748,7 +1466,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			undo_push_null();
 			if (!undo_pop_invalid()) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 			}
@@ -1806,28 +1524,35 @@ namespace winrt::GraphPaper::implementation
 				if (loc == LOC_TYPE::LOC_PAGE) {
 					undo_push_null();
 					undo_push_set<UNDO_T::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 				}
 				else if (s != nullptr) {
 					if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 						undo_push_null();
 						undo_push_set<UNDO_T::FILL_COLOR>(s, m_eyedropper_color);
-						undo_menu_is_enabled();
+						//undo_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 						undo_push_null();
 						undo_push_set<UNDO_T::FONT_COLOR>(s, m_eyedropper_color);
-						undo_menu_is_enabled();
+						//undo_menu_is_enabled();
 					}
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
 						undo_push_null();
 						undo_push_set<UNDO_T::STROKE_COLOR>(s, m_eyedropper_color);
-						undo_menu_is_enabled();
+						//undo_menu_is_enabled();
 					}
 				}
 			}
 			else {
-				event_show_popup();
+				m_event_loc_r_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, false, m_event_shape_r_pressed);
+				// ポップアップ (フライアウト) が表示されているならそれを解放する.
+				if (scp_main_panel().ContextFlyout() != nullptr) {
+					scp_main_panel().ContextFlyout().Hide();
+					scp_main_panel().ContextFlyout(nullptr);
+				}
+				// ポップアップメニューを表示する.
+				scp_main_panel().ContextFlyout(mf_popup_menu());
 			}
 		}
 		// 状態が, 初期状態か判定する.

@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 			stroke_arrow_is_checked(a_style);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_cap = undo_push_set<UNDO_T::ARROW_CAP>(new_cap);
 				const bool flag_join = undo_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -394,7 +394,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_cap_is_checked(new_val);
 		undo_push_null();
 		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -523,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 				const bool limit_changed = undo_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
 				const bool width_changed = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -852,7 +852,7 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_dash = undo_push_set<UNDO_T::DASH_STYLE>(new_dash);
 				const bool flag_cap = undo_push_set<UNDO_T::STROKE_CAP>(new_cap);
 				if (flag_patt || flag_width || flag_dash || flag_cap) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -894,7 +894,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_menu_stroke_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -960,7 +960,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_join_is_checked(new_val);
 		undo_push_null();
 		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -1017,7 +1017,7 @@ namespace winrt::GraphPaper::implementation
 			stroke_width_is_checked(s_width);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -1130,7 +1130,7 @@ namespace winrt::GraphPaper::implementation
 				stroke_width_is_checked(new_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}

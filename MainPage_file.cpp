@@ -347,7 +347,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 
 		stroke_arrow_is_checked(m_main_page.m_arrow_style);
@@ -1156,7 +1156,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				unselect_shape_all();
 				undo_push_append(s);
 				undo_push_select(s);
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				m_mutex_draw.unlock();
 			}
 

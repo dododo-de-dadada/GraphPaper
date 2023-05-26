@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			undo_push_text_select(m_edit_text_shape, end - 1, end, false);
 			m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 		else if (end != start) {
 			undo_push_null();
 			m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -179,9 +179,10 @@ namespace winrt::GraphPaper::implementation
 		const auto start = min(m_main_page.m_select_start, len);
 		const auto s = min(start, end);
 		undo_push_null();
+		// ‰üs‚ğ‘}“ü‚·‚é.
 		m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, L"\r"));
 		undo_push_text_select(m_edit_text_shape, s + 1, s + 1, false);
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 

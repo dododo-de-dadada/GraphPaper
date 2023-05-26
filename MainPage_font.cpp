@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -202,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_font_family(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -337,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_font_size(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -381,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -406,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 			text_align_vert_is_checked(val);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -463,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 			text_align_horz_is_checked(val);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				//xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -557,7 +557,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_text_line_sp(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -582,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER);
 		}
 		if (changed) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
 			main_draw();
 		}
@@ -678,7 +678,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_text_pad(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					//xcvd_menu_is_enabled();
 					main_draw();
 				}
@@ -696,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			undo_push_null();
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -708,7 +708,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			undo_push_null();
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -720,7 +720,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			undo_push_null();
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}

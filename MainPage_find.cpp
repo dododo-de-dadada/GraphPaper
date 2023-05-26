@@ -280,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			status_bar_set_pos();
 		}
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 	}
@@ -351,7 +351,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_main_page.m_select_start != end) {
 				undo_push_null();
 				replace_text();
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 			}
 		}
 		// Ÿ‚Ì•¶š—ñ‚ğŒŸõ‚·‚é.

@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		if (flag) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		if (flag) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
@@ -361,6 +361,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す/やり直しメニューの可否を設定する.
+	/*
 	void MainPage::undo_menu_is_enabled(void)
 	{
 		mbi_menu_undo().IsEnabled(m_ustack_undo.size() > 0);
@@ -368,6 +369,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_menu_redo().IsEnabled(m_ustack_redo.size() > 0);
 		mfi_popup_redo().IsEnabled(m_ustack_redo.size() > 0);
 	}
+	*/
 
 	// 無効な操作をポップする.
 	// 戻り値	操作がひとつ以上ポップされたなら true
@@ -493,14 +495,31 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::undo_push_select(Shape* s)
 	{
 		const auto it_end = m_ustack_undo.rend();
+		const auto selected = s->is_selected();
+		if (selected) {
+			m_list_sel_cnt--;
+		}
+		else {
+			m_list_sel_cnt++;
+		}
+#ifdef _DEBUG
+		for (auto s : m_main_page.m_shape_list) {
+			
+		}
+#endif
 		Undo* u;
 		for (auto it = m_ustack_undo.rbegin();
 			it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
 			if (u->shape() == s) {
 				// 操作の図形が指定された図形と一致した場合,
 				// 操作スタックを介せずに図形の選択を反転させ, 
-				// 操作をスタックから取り除き, 終了する.
-				s->set_select(!s->is_selected());
+				// 以前の操作をスタックから取り除き, 終了する.
+				if (selected) {
+					s->set_select(false);
+				}
+				else {
+					s->set_select(true);
+				}
 				m_ustack_undo.remove(u);
 				return;
 			}

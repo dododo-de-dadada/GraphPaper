@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 					undo_push_position(s, LOC_TYPE::LOC_SE);
 					s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
 				}
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (changed) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 	}
@@ -331,7 +331,7 @@ namespace winrt::GraphPaper::implementation
 					undo_push_set<UNDO_T::ARC_END>(new_val);
 					s->get_arc_rot(new_val);
 					undo_push_set<UNDO_T::ARC_ROT>(new_val);
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -398,7 +398,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_panel_size();
 			main_draw();
 		}

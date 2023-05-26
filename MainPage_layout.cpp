@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -280,9 +280,9 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.get_grid_base(page_val);
 				m_prop_page.get_grid_base(setting_val);
 				if (!equal(page_val, setting_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 		if (val >= 1.0f) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -319,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_main_page.m_grid_show != new_val) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
-			undo_menu_is_enabled();
+			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -695,7 +695,7 @@ namespace winrt::GraphPaper::implementation
 				if (flag_mar) {
 					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -818,7 +818,7 @@ namespace winrt::GraphPaper::implementation
 				if (mar_chanfed) {
 					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
 				}
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();

@@ -77,7 +77,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
-	using winrt::Windows::UI::Xaml::Visibility;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 	using winrt::Windows::UI::ViewManagement::InputPane;
 
@@ -264,7 +263,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
 		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
+		uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_PAGE;	// 右ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
+		Shape* m_event_shape_r_pressed = nullptr;	// 右ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
@@ -442,18 +443,8 @@ namespace winrt::GraphPaper::implementation
 		void event_set_cursor(void);
 		// ポインターの現在位置に, イベント引数の値を格納する.
 		void event_set_position(PointerRoutedEventArgs const& args);
-		// コンテキストメニューを表示する.
-		void event_show_popup(void);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// ポップアップメニューの線枠と塗りつぶしの各項目を設定する.
-		void event_arrange_popup_prop(const bool visible, const Shape* s);
-		// ポップアップメニューの書体と文字列の各項目を設定する.
-		void event_arrange_popup_font(const bool visible);
-		// ポップアップメニューの画像の各項目を設定する.
-		void event_arrange_popup_image(const bool visible);
-		// ポップアップメニューの方眼とページ、背景パターンの各項目を設定する.
-		void event_arrange_popup_layout(const bool visible);
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -480,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 			if (end != start) {
 				undo_push_null();
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -508,7 +499,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
 				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -525,7 +516,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
 				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -542,7 +533,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				undo_push_text_select(m_edit_text_shape, end, end + 1, false);
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -550,7 +541,7 @@ namespace winrt::GraphPaper::implementation
 			else if (end != start) {
 				undo_push_null();
 				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				xcvd_menu_is_enabled();
 				main_draw();
 			}
@@ -1057,7 +1048,7 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		// 元に戻す/やり直しメニューの可否を設定する.
-		void undo_menu_is_enabled(void);
+		//void undo_menu_is_enabled(void);
 		// 編集メニューの「やり直し」が選択された.
 		void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
@@ -1193,7 +1184,7 @@ namespace winrt::GraphPaper::implementation
 				m_ustack_undo.push_back(new UndoReverse(s));
 			}
 			if (changed) {
-				undo_menu_is_enabled();
+				//undo_menu_is_enabled();
 				main_draw();
 				status_bar_set_pos();
 			}

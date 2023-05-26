@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist.clear();
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 				if (it_src == it_end) {
 					// ŒğŠ·Ï‚İ‚©”»’è‚·‚é
 					if (done) {
-						undo_menu_is_enabled();
+						//undo_menu_is_enabled();
 						xcvd_menu_is_enabled();
 						main_draw();
 					}
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist.clear();
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();

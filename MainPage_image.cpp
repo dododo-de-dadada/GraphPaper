@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_image(s);
 			static_cast<ShapeImage*>(s)->revert();
 		}
-		undo_menu_is_enabled();
+		//undo_menu_is_enabled();
 		//xcvd_menu_is_enabled();
 		main_panel_size();
 		main_draw();

@@ -901,6 +901,9 @@ namespace winrt::GraphPaper::implementation
 	void UndoList::exec(void) noexcept
 	{
 		if (m_insert) {
+			// 図形リストから指定された図形を検索し, あれば図形を取りのぞく.
+			// 図形リストから挿入する位置にある図形を探し, その位置に指定された図形を挿入する.
+			// 指定された図形の削除フラグを解除する.
 			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
 			if (it_del != undo_slist->end()) {
 				undo_slist->erase(it_del);
@@ -908,15 +911,18 @@ namespace winrt::GraphPaper::implementation
 			auto it_ins{ std::find(undo_slist->begin(), undo_slist->end(), m_shape_at) };
 			undo_slist->insert(it_ins, m_shape);
 			m_shape->set_delete(false);
+			m_insert = false;
 		}
 		else {
-			m_shape->set_delete(true);
+			// 図形リストから指定された図形を検索し, 図形を取りのぞき, リストの先頭に挿入する.
+			// 指定された図形の削除フラグを立てる.
 			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
 			auto it_pos{ undo_slist->erase(it_del) };
 			m_shape_at = (it_pos == undo_slist->end() ? nullptr : *it_pos);
 			undo_slist->push_front(m_shape);
+			m_shape->set_delete(true);
+			m_insert = true;
 		}
-		m_insert = !m_insert;
 	}
 
 	// データリーダーから操作を読み込む.

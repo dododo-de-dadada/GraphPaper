@@ -350,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				color_code_is_checked(m_color_code);
 				if (color_ustack_set<U>(*this, new_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -512,7 +512,7 @@ namespace winrt::GraphPaper::implementation
 				color_code_is_checked(m_color_code);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
-					undo_menu_is_enabled();
+					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}

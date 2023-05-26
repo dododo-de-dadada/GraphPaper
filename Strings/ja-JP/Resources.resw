@@ -1250,10 +1250,6 @@
     <value>多角形の端を開く/閉じる</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_menu_meth_arc_rot.Text" xml:space="preserve">
-    <value>円弧の傾き</value>
-    <comment>MenuFlyoutSubItem</comment>
-  </data>
   <data name="mfsi_menu_background_pattern.Text" xml:space="preserve">
     <value>背景パターン</value>
     <comment>MenuFlyoutSubItem</comment>

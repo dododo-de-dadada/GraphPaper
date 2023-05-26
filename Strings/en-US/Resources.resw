@@ -1262,10 +1262,6 @@
     <value>Open/Close Polygon End</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_menu_meth_arc_rot.Text" xml:space="preserve">
-    <value>Arc Rotation</value>
-    <comment>MenuFlyoutSubItem</comment>
-  </data>
   <data name="mfsi_menu_background_pattern.Text" xml:space="preserve">
     <value>Background Pattern</value>
     <comment>MenuFlyoutSubItem</comment>

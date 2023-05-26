@@ -41,9 +41,7 @@
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_undo_xcvd"/>
 				<!-- 切り取り -->
 				<MenuFlyoutItem x:Name="mfi_popup_xcvd_cut" x:Uid="mfi_menu_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="X" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem.KeyboardAcceleratorTextOverride>Ctrl+X</MenuFlyoutItem.KeyboardAcceleratorTextOverride>
 				</MenuFlyoutItem>
 				<!-- コピー -->
 				<MenuFlyoutItem x:Name="mfi_popup_xcvd_copy" x:Uid="mfi_menu_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy">
@@ -123,49 +121,36 @@
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_group_edit"/>
+                <!-- 始点と終点を入れ替える-->
+                <MenuFlyoutItem x:Name="mfi_popup_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
+                <!-- 多角形の端を開く/閉じる -->
+                <MenuFlyoutItem x:Name="mfi_popup_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_end_open}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
                 <MenuFlyoutItem x:Name="mfi_popup_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
-                <!-- 多角形の端を開く/閉じる -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_end_open}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 円弧の傾きの編集 -->
-				<MenuFlyoutItem x:Name="mfi_popup_meth_arc_rot" x:Uid="mfi_menu_meth_arc_rot" Click="meth_arc_click_async" Text="Edit Arc Rotation" >
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_arc}" />
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="R" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				<!-- 文字列の編集 -->
-				<MenuFlyoutItem x:Name="mfi_popup_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_ibeam}"/>
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="E" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				<!-- 文字列の検索/置換 -->
-				<MenuFlyoutItem x:Name="mfi_popup_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="F" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				<!-- 枠を文字列に合わせる -->
-				<MenuFlyoutItem x:Name="mfi_popup_meth_text_fit_frame" x:Uid="mfi_menu_meth_text_fit_frame" Click="meth_text_fit_frame_click" Text="Fit Frame Size to Text" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_fit_page}"/>
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- ================ -->
+                <!-- 文字列の編集 -->
+                <MenuFlyoutItem x:Name="mfi_popup_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="E" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <!-- 文字列の検索/置換 -->
+                <MenuFlyoutItem x:Name="mfi_popup_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="F" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_edit_stroke"/>
 				<!-- 破線の形式 -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_dash" x:Uid="mfsi_menu_stroke_dash" Text="Style">
@@ -440,7 +425,7 @@
 				<!-- 余白 -->
 				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
                 <!-- 文字列の折り返し -->
-                <MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
+                <MenuFlyoutSubItem x:Name="mfsi_popup_text_wrap" x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Word Wrap" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="No Wrap" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_popup_text_wrap" Text="Wrap Between Any" />
@@ -560,11 +545,11 @@
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 		<!-- メニューバー -->
-		<muxc:MenuBar x:Name="mb_menu" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
+        <muxc:MenuBar x:Name="mb_menu" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
 			<!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
 				<!-- 新規 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_new" Click="file_new_click_async" Icon="Page2" Text="New" >
+				<MenuFlyoutItem x:Uid="mfi_menu_new" Click="file_new_click_async" Icon="Page2" Text="New"  >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="N" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -582,15 +567,15 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 名前をつけて保存 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_save_as" Click="file_save_as_click_async" Text="Save As..." >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_save_as}" />
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				<!-- 画像をインポート -->
+                <MenuFlyoutItem x:Uid="mfi_menu_save_as" Click="file_save_as_click_async" Text="Save As..." >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="{StaticResource glyph_save_as}" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <!-- 画像をインポート -->
 				<MenuFlyoutItem x:Uid="mfi_menu_import_image" Click="file_import_image_click_async" Icon="Import" Text="Import Image..." >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
@@ -651,8 +636,8 @@
 				<MenuFlyoutItem x:Uid="mfi_menu_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
-			<muxc:MenuBarItem x:Name="mbi_menu_edit" x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit">
-				<!-- 元に戻す -->
+            <muxc:MenuBarItem x:Name="mbi_menu_edit" x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit" >
+                <!-- 元に戻す -->
 				<MenuFlyoutItem x:Name="mbi_menu_undo" x:Uid="mbi_menu_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" />
@@ -752,6 +737,7 @@
 						<KeyboardAccelerator Key="U" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
+                <!-- 始点と終点を入れ替える-->
                 <MenuFlyoutItem x:Name="mfi_menu_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
                 <!-- 多角形の端を開く/閉じる -->
                 <MenuFlyoutItem x:Name="mfi_menu_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
@@ -764,6 +750,15 @@
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 文字列の編集 -->
+                <MenuFlyoutItem x:Name="mfi_menu_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="E" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <!-- 文字列の検索/置換 -->
                 <MenuFlyoutItem x:Name="mfi_menu_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
@@ -875,6 +870,7 @@
             <muxc:MenuBarItem x:Name="mbi_menu_method" x:Uid="mbi_menu_method" Title="Method">
                 <MenuFlyoutSeparator />
                 <!-- 円弧の傾きの操作 -->
+                <!--
                 <MenuFlyoutItem x:Name="mfi_menu_meth_arc_rot" x:Uid="mfi_menu_meth_arc_rot" Click="meth_arc_click_async" Text="Edit Arc Rotation" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_arc}" />
@@ -883,15 +879,7 @@
                         <KeyboardAccelerator Key="R" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <!-- 文字列の編集 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
-                    </MenuFlyoutItem.Icon>
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="E" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
+                -->
                 <!-- 文字列の枠の編集 -->
                 <MenuFlyoutItem x:Name="mfi_menu_meth_text_fit_frame" x:Uid="mfi_menu_meth_text_fit_frame" Click="meth_text_fit_frame_click" Text="Fit Frame Size to Text" >
                     <MenuFlyoutItem.Icon>
