@@ -26,13 +26,13 @@
 			<!-- 右クリックのポップアップメニュー -->
 			<MenuFlyout x:Name="mf_popup_menu">
 				<!-- 元に戻す -->
-				<MenuFlyoutItem x:Name="mfi_popup_undo" x:Uid="mbi_menu_undo" Click="undo_click" Icon="Undo" Text="Undo" IsEnabled="False" >
+				<MenuFlyoutItem x:Name="mfi_popup_undo" x:Uid="mbi_menu_undo" Click="undo_click" Icon="Undo" Text="Undo"  >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- やり直し -->
-				<MenuFlyoutItem x:Name="mfi_popup_redo" x:Uid="mfi_menu_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
+				<MenuFlyoutItem x:Name="mfi_popup_redo" x:Uid="mfi_menu_redo" Click="redo_click" Icon="Redo" Text="Redo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Y" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -40,23 +40,25 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_undo_xcvd"/>
 				<!-- 切り取り -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_cut" x:Uid="mfi_menu_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
-                    <MenuFlyoutItem.KeyboardAcceleratorTextOverride>Ctrl+X</MenuFlyoutItem.KeyboardAcceleratorTextOverride>
-				</MenuFlyoutItem>
+				<MenuFlyoutItem x:Name="mfi_popup_xcvd_cut" x:Uid="mfi_menu_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" Text="Cut" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="X" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
 				<!-- コピー -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_copy" x:Uid="mfi_menu_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy">
+				<MenuFlyoutItem x:Name="mfi_popup_xcvd_copy" x:Uid="mfi_menu_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" Text="Copy">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="C" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 貼り付け -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_paste" x:Uid="mfi_menu_xcvd_paste" Click="xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
+				<MenuFlyoutItem x:Name="mfi_popup_xcvd_paste" x:Uid="mfi_menu_xcvd_paste" Click="xcvd_paste_click" Icon="Paste" Text="Paste" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="V" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-                <MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete">
+                <MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" Text="Delete">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Delete" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -64,7 +66,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_xcvd_select"/>
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="mfi_popup_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
+				<MenuFlyoutItem x:Name="mfi_popup_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -75,25 +77,25 @@
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+					<MenuFlyoutItem x:Name="mfi_popup_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click" Text="Bring to Front" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="End" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+					<MenuFlyoutItem x:Name="mfi_popup_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click" Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" IsEnabled="false" Text="Send Backward" >
+					<MenuFlyoutItem x:Name="mfi_popup_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" IsEnabled="false" Text="Send to Back" >
+					<MenuFlyoutItem x:Name="mfi_popup_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" Text="Send to Back" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Home" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
@@ -102,7 +104,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_select_group"/>
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="mfi_popup_group" x:Uid="mfi_menu_group" Click="group_click" IsEnabled="false" Text="Group" >
+				<MenuFlyoutItem x:Name="mfi_popup_group" x:Uid="mfi_menu_group" Click="group_click" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
@@ -111,7 +113,7 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="mfi_popup_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click" IsEnabled="false" Text="Ungroup" >
+				<MenuFlyoutItem x:Name="mfi_popup_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click"  Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
@@ -693,25 +695,25 @@
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click" IsEnabled="false" Text="Bring to Front">
+					<MenuFlyoutItem x:Name="mfi_menu_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click"  Text="Bring to Front">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="End" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+					<MenuFlyoutItem x:Name="mfi_menu_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click"  Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" IsEnabled="false" Text="Send Backward" >
+					<MenuFlyoutItem x:Name="mfi_menu_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" IsEnabled="false" Text="Send to Back" >
+					<MenuFlyoutItem x:Name="mfi_menu_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" Text="Send to Back" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Home" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
@@ -720,7 +722,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="mfi_menu_group" x:Uid="mfi_menu_group" Click="group_click" IsEnabled="false" Text="Group" >
+				<MenuFlyoutItem x:Name="mfi_menu_group" x:Uid="mfi_menu_group" Click="group_click" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
@@ -729,7 +731,7 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="mfi_menu_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click" IsEnabled="false" Text="Ungroup" >
+				<MenuFlyoutItem x:Name="mfi_menu_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click" Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
