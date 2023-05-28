@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			//undo_menu_is_enabled();
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -260,7 +260,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			//undo_menu_is_enabled();
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -283,25 +283,21 @@ namespace winrt::GraphPaper::implementation
 			// 属性メニューの「矢じるしの形式」に印をつける.
 			ARROW_STYLE val;
 			m_main_page.get_arrow_style(val);
-			stroke_arrow_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE val;
 			m_main_page.get_font_style(val);
-			font_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::FONT_WEIGHT>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_WEIGHT val;
 			m_main_page.get_font_weight(val);
-			font_weight_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::FONT_STRETCH>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STRETCH val;
 			m_main_page.get_font_stretch(val);
-			font_stretch_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -311,52 +307,42 @@ namespace winrt::GraphPaper::implementation
 			// レイアウトメニューの「方眼の強調」に印をつける.
 			GRID_EMPH val;
 			m_main_page.get_grid_emph(val);
-			grid_emph_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_SHOW>)) {
 			GRID_SHOW val;
 			m_main_page.get_grid_show(val);
-			grid_show_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
 			status_bar_set_page();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {
-			//CAP_STYLE val;
 			D2D1_CAP_STYLE val;
 			m_main_page.get_stroke_cap(val);
-			stroke_cap_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
 			m_main_page.get_stroke_dash(val);
-			stroke_dash_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
 			m_main_page.get_stroke_join(val);
-			stroke_join_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_WIDTH>)) {
 			float val;
 			m_main_page.get_stroke_width(val);
-			stroke_width_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
 			m_main_page.get_text_align_horz(val);
-			text_align_horz_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
 			m_main_page.get_text_align_vert(val);
-			text_align_vert_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::TEXT_WRAP>)) {
 			DWRITE_WORD_WRAPPING val;
 			m_main_page.get_text_wrap(val);
-			text_word_wrap_is_checked(val);
 		}
 	}
 

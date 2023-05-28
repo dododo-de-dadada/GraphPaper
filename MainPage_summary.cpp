@@ -224,21 +224,6 @@ namespace winrt::GraphPaper::implementation
 			m_edit_context.NotifyFocusEnter();
 		}
 		m_main_page.set_attr_to(m_event_shape_pressed);
-
-		// メニューバーを更新する
-		stroke_dash_is_checked(m_main_page.m_stroke_dash);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		stroke_cap_is_checked(m_main_page.m_stroke_cap);
-		stroke_join_is_checked(m_main_page.m_stroke_join);
-		stroke_arrow_is_checked(m_main_page.m_arrow_style);
-		font_weight_is_checked(m_main_page.m_font_weight);
-		font_stretch_is_checked(m_main_page.m_font_stretch);
-		font_style_is_checked(m_main_page.m_font_style);
-		text_align_horz_is_checked(m_main_page.m_text_align_horz);
-		text_align_vert_is_checked(m_main_page.m_text_align_vert);
-		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
-		grid_emph_is_checked(m_main_page.m_grid_emph);
-		grid_show_is_checked(m_main_page.m_grid_show);
 	}
 
 	// 編集メニューの「一覧を表示」が選択された.
@@ -447,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 編集メニュー項目の使用の可否を設定する.
-		xcvd_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_draw();
 	}
 

@@ -59,8 +59,9 @@
 				</MenuFlyoutItem>
 				<!-- 削除 -->
                 <MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" Text="Delete">
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="Delete" />
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete" />
+                        <KeyboardAccelerator Key="D" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
 				<!-- ================ -->
@@ -138,7 +139,7 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_popup_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
                     </MenuFlyoutItem.Icon>
@@ -434,12 +435,6 @@
                 </MenuFlyoutSubItem>
                 <!-- 書体の色 -->
 				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
-				<!-- 画像の縦横比を維持 -->
-				<ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp_2" x:Uid="tmfi_menu_meth_image_keep_asp" Click="image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
-					<ToggleMenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_chain}" />
-					</ToggleMenuFlyoutItem.Icon>
-				</ToggleMenuFlyoutItem>
 				<!-- 画像の不透明度 -->
 				<MenuFlyoutItem x:Name="mfi_popup_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
 					<MenuFlyoutItem.Icon>
@@ -672,15 +667,12 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-				<MenuFlyoutItem x:Name="mfi_menu_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
-                    <MenuFlyoutItem.KeyboardAcceleratorTextOverride>Del</MenuFlyoutItem.KeyboardAcceleratorTextOverride>
-                    <!--
+				<MenuFlyoutItem x:Name="mfi_menu_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="D" Modifiers="Control" />
-						<KeyboardAccelerator Key="Delete" />
+                        <KeyboardAccelerator Key="Delete" />
+                        <KeyboardAccelerator Key="D" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
-                    -->
-				</MenuFlyoutItem>
+                </MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
@@ -754,7 +746,7 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click_async" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_menu_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
                     </MenuFlyoutItem.Icon>
@@ -770,7 +762,7 @@
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
 			<!-- 作図メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
+            <muxc:MenuBarItem x:Name="mbi_menu_drawing" x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
 				<!-- 選択ツール -->
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_selection_tool" x:Uid="rmfi_menu_selection_tool" GroupName="gn_drawing_tool" Click="drawing_tool_click" IsChecked="True" Text="Selection Tool">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -868,33 +860,6 @@
                     <ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="drawing_tool_click" IsChecked="true" Text="Clockwise" />
                 </MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
-            <!-- 操作メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_menu_method" x:Uid="mbi_menu_method" Title="Method">
-                <MenuFlyoutSeparator />
-                <!-- 円弧の傾きの操作 -->
-                <!--
-                <MenuFlyoutItem x:Name="mfi_menu_meth_arc_rot" x:Uid="mfi_menu_meth_arc_rot" Click="meth_arc_click_async" Text="Edit Arc Rotation" >
-                    <MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_arc}" />
-                    </MenuFlyoutItem.Icon>
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="R" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                -->
-                <!-- 文字列の枠の編集 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_fit_frame" x:Uid="mfi_menu_meth_text_fit_frame" Click="meth_text_fit_frame_click" Text="Fit Frame Size to Text" >
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="{StaticResource glyph_fit_page}"/>
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <!-- 画像の縦横比を維持 -->
-                <ToggleMenuFlyoutItem x:Name="tmfi_menu_meth_image_keep_asp" x:Uid="tmfi_menu_meth_image_keep_asp" Click="image_keep_asp_click" IsChecked="True" Text="Keep Image Aspect Ratio" >
-                    <ToggleMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_chain}" />
-                    </ToggleMenuFlyoutItem.Icon>
-                </ToggleMenuFlyoutItem>
-            </muxc:MenuBarItem>
 			<!-- 属性メニュー -->
             <muxc:MenuBarItem x:Name="mbi_menu_property" x:Uid="mbi_menu_property" AccessKey="P" Title="Property">
 				<!-- 破線の形式 -->
@@ -1223,42 +1188,34 @@
 				<MenuFlyoutItem x:Uid="mfi_menu_page_color" Click="color_page_click" Text="Page Color..." />
 				<!-- ページのズーム -->
 				<MenuFlyoutSubItem x:Uid="mfsi_menu_page_zoom" Icon="Zoom" Text="Page Zoom">
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
-					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_menu_page_zoom_100" Click="page_zoom_click" Icon="Zoom" Text="100%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_100" Click="page_zoom_click" Icon="Zoom" Text="100%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem
-						x:Name="rmfi_menu_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
@@ -1293,7 +1250,7 @@
 				<MenuFlyoutItem x:Name="mfi_menu_layout_reset" x:Uid="mfi_menu_layout_reset" Click="layout_reset_click_async" Text="Reset Layout" />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_menu_help" AccessKey="H" Title="Help">
+            <muxc:MenuBarItem x:Name="mbi_menu_help" x:Uid="mbi_menu_help" AccessKey="H" Title="Help">
 				<!-- 一覧 -->
 				<MenuFlyoutItem x:Name="mfi_menu_summary_list" x:Uid="mfi_menu_summary_list" Click="summary_list_click" Text="List Summary" >
 					<MenuFlyoutItem.Icon>
@@ -1309,7 +1266,7 @@
 						<FontIcon Glyph="{StaticResource glyph_unit}" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_pixel" x:Uid="rmfi_menu_len_unit_pixel" GroupName="gn_len_unit" Click="len_unit_click" IsChecked="True" Text="Pixel" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_inch" x:Uid="rmfi_menu_len_unit_inch" GroupName="gn_len_unit" Click="len_unit_click" Text="Inch" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_inch" x:Uid="rmfi_menu_len_unit_inch" GroupName="gn_len_unit" Click="len_unit_click" Text="Inch" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_milli" x:Uid="rmfi_menu_len_unit_milli" GroupName="gn_len_unit" Click="len_unit_click" Text="Millimeter" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_point" x:Uid="rmfi_menu_len_unit_point" GroupName="gn_len_unit" Click="len_unit_click" Text="Point" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_len_unit_grid" x:Uid="rmfi_menu_len_unit_grid" GroupName="gn_len_unit" Click="len_unit_click" Text="Grid" />
@@ -1319,13 +1276,9 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_color}" />
 					</MenuFlyoutSubItem.Icon>
-					<!-- 10 進数 -->
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_color_code_dec" x:Uid="rmfi_menu_color_code_dec" GroupName="gn_color_code" Click="color_code_click" IsChecked="True" Text="Decimal" />
-					<!-- 16 進数 -->
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_color_code_hex" x:Uid="rmfi_menu_color_code_hex" GroupName="gn_color_code" Click="color_code_click" Text="Hexadecimal" />
-					<!-- 実数 -->
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_color_code_real" x:Uid="rmfi_menu_color_code_real" GroupName="gn_color_code" Click="color_code_click" Text="Real" />
-					<!-- パーセント -->
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_color_code_pct" x:Uid="rmfi_menu_color_code_pct" GroupName="gn_color_code" Click="color_code_click" Text="Percent" />
 				</MenuFlyoutSubItem>
 				<!-- ステータスバー -->
@@ -1341,8 +1294,10 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Page Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
+                <!-- 点を方眼にくっつける -->
 				<ToggleMenuFlyoutItem x:Name="tmfi_menu_snap_grid" x:Uid="tmfi_menu_snap_grid" Click="snap_grid_click" Text="Snap Point to Grid" />
-				<MenuFlyoutItem x:Name="mfi_menu_snap_point" x:Uid="mfi_menu_snap_point" Click="snap_point_click_async" Text="Snap Point to Point Interval..." />
+                <!-- 点を点にくっつけるしきい値 -->
+                <MenuFlyoutItem x:Name="mfi_menu_snap_point" x:Uid="mfi_menu_snap_point" Click="snap_point_click_async" Text="Snap Point to Point Interval..." />
 				<MenuFlyoutSeparator />
 				<!-- 方眼紙について -->
 				<MenuFlyoutItem x:Uid="mfi_menu_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
@@ -1450,8 +1405,6 @@
                     <KeyboardAccelerator Invoked="kacc_right_shift_invoked" Key="Right" Modifiers="Shift" />
                     <KeyboardAccelerator Invoked="kacc_up_invoked" Key="Up" />
                     <KeyboardAccelerator Invoked="kacc_up_shift_invoked" Key="Up" Modifiers="Shift" />
-                    <!--
-                    -->
                 </SwapChainPanel.KeyboardAccelerators>
 			</SwapChainPanel>
 			<ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
@@ -1459,13 +1412,11 @@
 		</RelativePanel>
         <Canvas x:Name="c_canvas" Grid.Row="1" Grid.Column="0" Background="Transparent" IsHitTestVisible="False"/>
         <!-- ステータスバー -->
-		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" 
-					PointerReleased="event_released"
-					>
+		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" PointerReleased="event_released" >
 			<!-- ステータスバーコンテキストメニュー -->
 			<!-- UIElement は共有可能ではないので, メニューバーとコンテキストメニューの 2 つを用意しなきゃいけない -->
 			<StackPanel.ContextFlyout>
-				<MenuFlyout>
+				<MenuFlyout x:Name="mf_popup_status">
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Len Unit Name" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />

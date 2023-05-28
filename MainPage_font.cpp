@@ -45,46 +45,6 @@ namespace winrt::GraphPaper::implementation
 		return t;
 	}
 
-	void MainPage::font_stretch_is_checked(const DWRITE_FONT_STRETCH val)
-	{
-		if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
-			rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
-			rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
-			rmfi_menu_font_stretch_extra_condensed().IsChecked(true);
-			rmfi_popup_font_stretch_extra_condensed().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
-			rmfi_menu_font_stretch_condensed().IsChecked(true);
-			rmfi_popup_font_stretch_condensed().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
-			rmfi_menu_font_stretch_semi_condensed().IsChecked(true);
-			rmfi_popup_font_stretch_semi_condensed().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
-			rmfi_menu_font_stretch_normal().IsChecked(true);
-			rmfi_popup_font_stretch_normal().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
-			rmfi_menu_font_stretch_semi_expanded().IsChecked(true);
-			rmfi_popup_font_stretch_semi_expanded().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
-			rmfi_menu_font_stretch_expanded().IsChecked(true);
-			rmfi_popup_font_stretch_expanded().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
-			rmfi_menu_font_stretch_extra_expanded().IsChecked(true);
-			rmfi_popup_font_stretch_extra_expanded().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
-			rmfi_menu_font_stretch_ultra_expanded().IsChecked(true);
-			rmfi_popup_font_stretch_ultra_expanded().IsChecked(true);
-		}
-	}
-
 	void MainPage::font_stretch_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_FONT_STRETCH f_stretch = static_cast<DWRITE_FONT_STRETCH>(-1);
@@ -123,50 +83,6 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 	}
 
-	void MainPage::font_weight_is_checked(DWRITE_FONT_WEIGHT val)
-	{
-		if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
-			rmfi_menu_font_weight_thin().IsChecked(true);
-			rmfi_popup_font_weight_thin().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
-			rmfi_menu_font_weight_extra_light().IsChecked(true);
-			rmfi_popup_font_weight_extra_light().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
-			rmfi_menu_font_weight_light().IsChecked(true);
-			rmfi_popup_font_weight_light().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
-			rmfi_menu_font_weight_normal().IsChecked(true);
-			rmfi_popup_font_weight_normal().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
-			rmfi_menu_font_weight_medium().IsChecked(true);
-			rmfi_popup_font_weight_medium().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
-			rmfi_menu_font_weight_semi_bold().IsChecked(true);
-			rmfi_popup_font_weight_semi_bold().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
-			rmfi_menu_font_weight_bold().IsChecked(true);
-			rmfi_popup_font_weight_bold().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
-			rmfi_menu_font_weight_extra_bold().IsChecked(true);
-			rmfi_popup_font_weight_extra_bold().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
-			rmfi_menu_font_weight_black().IsChecked(true);
-			rmfi_popup_font_weight_black().IsChecked(true);
-		}
-		else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
-			rmfi_menu_font_weight_extra_black().IsChecked(true);
-			rmfi_popup_font_weight_extra_black().IsChecked(true);
-		}
-	}
-
 	void MainPage::font_weight_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_FONT_WEIGHT f_weight = static_cast<DWRITE_FONT_WEIGHT>(-1);
@@ -203,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
 			//undo_menu_is_enabled();
-			//xcvd_menu_is_enabled();
+			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -265,7 +181,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
 					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
+					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -338,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
 					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
+					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -347,24 +263,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().Visibility(Visibility::Collapsed);
 		main_draw();
 		m_mutex_event.unlock();
-	}
-
-	// 書体メニューの「字体」に印をつける.
-	// f_style	書体の字体
-	void MainPage::font_style_is_checked(const DWRITE_FONT_STYLE f_style)
-	{
-		if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
-			rmfi_menu_font_style_italic().IsChecked(true);
-			rmfi_popup_font_style_italic().IsChecked(true);
-		}
-		else if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL) {
-			rmfi_menu_font_style_normal().IsChecked(true);
-			rmfi_popup_font_style_normal().IsChecked(true);
-		}
-		else if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
-			rmfi_menu_font_style_oblique().IsChecked(true);
-			rmfi_popup_font_style_oblique().IsChecked(true);
-		}
 	}
 
 	void MainPage::font_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -403,44 +301,12 @@ namespace winrt::GraphPaper::implementation
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
-			text_align_vert_is_checked(val);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-				//undo_menu_is_enabled();
-				//xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// 書体メニューの「段落のそろえ」に印をつける.
-	// val	段落のそろえ
-	void MainPage::text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
-	{
-		rmfi_menu_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_popup_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_menu_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_popup_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_menu_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		rmfi_popup_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列の折り返し」のサブ項目に印をつける
-	void MainPage::text_word_wrap_is_checked(const DWRITE_WORD_WRAPPING val)
-	{
-		if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP) {
-			rmfi_menu_text_wrap().IsChecked(true);
-			rmfi_popup_text_wrap().IsChecked(true);
-		}
-		else if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_NO_WRAP) {
-			rmfi_menu_text_no_wrap().IsChecked(true);
-			rmfi_popup_text_no_wrap().IsChecked(true);
-		}
-		else if (val == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER) {
-			rmfi_menu_text_wrap_char().IsChecked(true);
-			rmfi_popup_text_wrap_char().IsChecked(true);
-		}
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
@@ -460,29 +326,12 @@ namespace winrt::GraphPaper::implementation
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
 		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
-			text_align_horz_is_checked(val);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-				//undo_menu_is_enabled();
-				//xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// 書体メニューの「文字列のそろえ」に印をつける.
-	// t_align	文字列のそろえ
-	void MainPage::text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val)
-	{
-		rmfi_menu_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_popup_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_menu_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_popup_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_menu_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_popup_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_menu_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-		rmfi_popup_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.
@@ -558,7 +407,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
+					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -582,8 +431,6 @@ namespace winrt::GraphPaper::implementation
 			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER);
 		}
 		if (changed) {
-			//undo_menu_is_enabled();
-			text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -679,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
+					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -697,7 +544,7 @@ namespace winrt::GraphPaper::implementation
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			undo_push_null();
 			//undo_menu_is_enabled();
-			//xcvd_menu_is_enabled();
+			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -709,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			undo_push_null();
 			//undo_menu_is_enabled();
-			//xcvd_menu_is_enabled();
+			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -721,7 +568,7 @@ namespace winrt::GraphPaper::implementation
 		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			undo_push_null();
 			//undo_menu_is_enabled();
-			//xcvd_menu_is_enabled();
+			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -772,7 +619,7 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.back()->get_font_weight(new_val);
 				if (undo_push_set<UNDO_T::FONT_WEIGHT>(new_val)) {
 					undo_push_null();
-					xcvd_menu_is_enabled();
+					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}

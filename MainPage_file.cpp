@@ -347,31 +347,6 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
-		//undo_menu_is_enabled();
-		xcvd_menu_is_enabled();
-
-		stroke_arrow_is_checked(m_main_page.m_arrow_style);
-		font_style_is_checked(m_main_page.m_font_style);
-		font_stretch_is_checked(m_main_page.m_font_stretch);
-		font_weight_is_checked(m_main_page.m_font_weight);
-		grid_emph_is_checked(m_main_page.m_grid_emph);
-		grid_show_is_checked(m_main_page.m_grid_show);
-		stroke_cap_is_checked(m_main_page.m_stroke_cap);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		stroke_dash_is_checked(m_main_page.m_stroke_dash);
-		stroke_join_is_checked(m_main_page.m_stroke_join);
-		text_align_horz_is_checked(m_main_page.m_text_align_horz);
-		text_align_vert_is_checked(m_main_page.m_text_align_vert);
-		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
-
-		image_keep_aspect_is_checked(m_image_keep_aspect);
-		len_unit_is_checked(m_len_unit);
-		color_code_is_checked(m_color_code);
-		page_zoom_is_checked(m_main_scale);
-		status_bar_is_checked(m_status_bar);
-		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
-		background_color_is_checked(m_background_show, m_background_color);
-
 		wchar_t* unavailable_font;	// 無効な書体名
 		if (!slist_check_avaiable_font(m_main_page.m_shape_list, unavailable_font)) {
 
@@ -540,7 +515,7 @@ m_main_scale = dt_reader.ReadSingle();
 m_snap_grid = dt_reader.ReadBoolean();
 			m_snap_point = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
-			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
+			//m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
 
 			const bool s_atom = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
@@ -910,7 +885,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			dt_writer.WriteBoolean(m_snap_grid);
 			dt_writer.WriteSingle(m_snap_point);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
-			dt_writer.WriteBoolean(m_image_keep_aspect);
+			//dt_writer.WriteBoolean(m_image_keep_aspect);
 
 			dt_writer.WriteBoolean(summary_is_visible());
 
@@ -1165,7 +1140,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				summary_append(s);
 				summary_select(s);
 			}
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_bbox_update(s);
 			main_panel_size();
 			main_draw();

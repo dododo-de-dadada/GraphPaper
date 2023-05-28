@@ -50,27 +50,6 @@ namespace winrt::GraphPaper::implementation
 		wic_frame = nullptr;
 	}
 
-	// 背景色の項目に印をつける
-	void MainPage::background_color_is_checked(const bool checker_board, const D2D1_COLOR_F& color)
-	{
-		if (checker_board) {
-			tmfi_menu_background_show().IsChecked(true);
-			tmfi_popup_background_show().IsChecked(true);
-		}
-		else {
-			tmfi_menu_background_show().IsChecked(false);
-			tmfi_popup_background_show().IsChecked(false);
-		}
-		if (equal(color, COLOR_BLACK)) {
-			rmfi_menu_background_black().IsChecked(true);
-			rmfi_popup_background_black().IsChecked(true);
-		}
-		else {
-			rmfi_menu_background_white().IsChecked(true);
-			rmfi_popup_background_white().IsChecked(true);
-		}
-	}
-
 	// 背景パターンがクリックされた.
 	void MainPage::background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -112,7 +91,6 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
 		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
@@ -122,24 +100,6 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 		}
 		status_bar_set_pos();
-	}
-
-	// レイアウトメニューの「方眼の強調」に印をつける.
-	// g_emph	方眼の強調
-	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
-	{
-		if (g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0) {
-			rmfi_menu_grid_emph_1().IsChecked(true);
-			rmfi_popup_grid_emph_1().IsChecked(true);
-		}
-		else if (g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0) {
-			rmfi_menu_grid_emph_2().IsChecked(true);
-			rmfi_popup_grid_emph_2().IsChecked(true);
-		}
-		else if (g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0) {
-			rmfi_menu_grid_emph_3().IsChecked(true);
-			rmfi_popup_grid_emph_3().IsChecked(true);
-		}
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -342,33 +302,14 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		grid_show_is_checked(new_val);
 		if (m_main_page.m_grid_show != new_val) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
 	}
 
-	// レイアウトメニューの「方眼の表示」に印をつける.
-	// g_show	方眼の表示
-	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
-	{
-		if (g_show == GRID_SHOW::BACK) {
-			rmfi_menu_grid_show_back().IsChecked(true);
-			rmfi_popup_grid_show_back().IsChecked(true);
-		}
-		else if (g_show == GRID_SHOW::FRONT) {
-			rmfi_menu_grid_show_front().IsChecked(true);
-			rmfi_popup_grid_show_front().IsChecked(true);
-		}
-		else if (g_show == GRID_SHOW::HIDE) {
-			rmfi_menu_grid_show_hide().IsChecked(true);
-			rmfi_popup_grid_show_hide().IsChecked(true);
-		}
-	}
 	// レイアウトメニューの「レイアウトを既定値に戻す」が選択された.
 	// データを保存したファイルがある場合, それを削除する.
 	IAsyncAction MainPage::layout_reset_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -534,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_text_line_sp(0.0);
 			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
 		}
-		m_image_keep_aspect = true;
+		//m_image_keep_aspect = true;
 		m_len_unit = LEN_UNIT::PIXEL;
 		m_color_code = COLOR_CODE::DEC;
 		m_main_scale = 1.0f;
@@ -544,29 +485,6 @@ namespace winrt::GraphPaper::implementation
 		m_background_show = false;
 		m_background_color = COLOR_WHITE;
 
-		//event_menu_is_checked();
-
-		font_style_is_checked(m_main_page.m_font_style);
-		font_stretch_is_checked(m_main_page.m_font_stretch);
-		font_weight_is_checked(m_main_page.m_font_weight);
-		grid_emph_is_checked(m_main_page.m_grid_emph);
-		grid_show_is_checked(m_main_page.m_grid_show);
-		stroke_arrow_is_checked(m_main_page.m_arrow_style);
-		stroke_cap_is_checked(m_main_page.m_stroke_cap);
-		stroke_dash_is_checked(m_main_page.m_stroke_dash);
-		stroke_join_is_checked(m_main_page.m_stroke_join);
-		stroke_width_is_checked(m_main_page.m_stroke_width);
-		text_align_horz_is_checked(m_main_page.m_text_align_horz);
-		text_align_vert_is_checked(m_main_page.m_text_align_vert);
-		text_word_wrap_is_checked(m_main_page.m_text_word_wrap);
-		background_color_is_checked(m_background_show, m_background_color);
-		page_zoom_is_checked(m_main_scale);
-
-		image_keep_aspect_is_checked(m_image_keep_aspect);
-		len_unit_is_checked(m_len_unit);
-		color_code_is_checked(m_color_code);
-		status_bar_is_checked(m_status_bar);
-		tmfi_menu_snap_grid().IsChecked(m_snap_grid);
 	}
 
 	//------------------------------
@@ -634,7 +552,6 @@ namespace winrt::GraphPaper::implementation
 			else {
 				m_len_unit = LEN_UNIT::PIXEL;
 			}
-			len_unit_is_checked(m_len_unit);
 
 			float new_left;
 			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
@@ -726,7 +643,6 @@ namespace winrt::GraphPaper::implementation
 			else {
 				m_len_unit = LEN_UNIT::PIXEL;
 			}
-			len_unit_is_checked(m_len_unit);
 
 			float new_left;
 			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
@@ -962,27 +878,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// レイアウトメニューの「ページのズーム」のサブ項目に印をつける.
-	void MainPage::page_zoom_is_checked(float scale)
-	{
-		rmfi_menu_page_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_popup_page_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_menu_page_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_popup_page_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_menu_page_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_popup_page_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_menu_page_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_popup_page_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_menu_page_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_popup_page_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_menu_page_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_popup_page_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_menu_page_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_popup_page_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_menu_page_zoom_025().IsChecked(equal(scale, 0.25f));
-		rmfi_popup_page_zoom_025().IsChecked(equal(scale, 0.25f));
-	}
-
 	// レイアウトメニューの「ページのズーム」が選択された.
 	void MainPage::page_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -1014,9 +909,6 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		page_zoom_is_checked(scale);
-		//if (scale != m_main_page.m_page_scale) {
-		//	m_main_page.m_page_scale = scale;
 		if (scale != m_main_scale) {
 			m_main_scale = scale;
 			main_panel_size();

@@ -11,11 +11,9 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::UI::Core::CoreWindow;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// AND 演算する.
-	static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+	//static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// ビットマスクする.
 	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// NOT 演算する.
@@ -24,10 +22,10 @@ namespace winrt::GraphPaper::implementation
 	static inline STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 
 	// 列挙型を AND 演算する.
-	static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept
-	{
-		return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
-	}
+	//static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept
+	//{
+	//	return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+	//}
 
 	// 列挙型をビットマスクする.
 	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept
@@ -135,25 +133,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// ステータスバーのメニュー項目に印をつける.
-	// s_bar	ステータスバーの状態
-	void MainPage::status_bar_is_checked(const STATUS_BAR s_bar)
-	{
-		tmfi_menu_status_bar_pos().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
-		tmfi_menu_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_menu_status_bar_page().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
-		tmfi_menu_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_menu_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_menu_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
-
-		tmfi_popup_status_bar_pos().IsChecked(status_mask(s_bar, STATUS_BAR::POS));
-		tmfi_popup_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_popup_status_bar_page().IsChecked(status_mask(s_bar, STATUS_BAR::PAGE));
-		tmfi_popup_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_popup_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_popup_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
 	}
 
 	// ポインターの位置をステータスバーに格納する.

@@ -30,35 +30,12 @@ namespace winrt::GraphPaper::implementation
 			a_style = ARROW_STYLE::ARROW_FILLED;
 		}
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
-			stroke_arrow_is_checked(a_style);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-				//undo_menu_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// 属性メニューの「矢じるしの形式」のサブ項目に印をつける.
-	void MainPage::stroke_arrow_is_checked(const ARROW_STYLE val)
-	{
-		if (val == ARROW_STYLE::ARROW_NONE) {
-			rmfi_menu_stroke_arrow_none().IsChecked(true);
-			rmfi_popup_stroke_arrow_none().IsChecked(true);
-		}
-		else if (val == ARROW_STYLE::ARROW_OPENED) {
-			rmfi_menu_stroke_arrow_opened().IsChecked(true);
-			rmfi_popup_stroke_arrow_opened().IsChecked(true);
-			mfi_menu_stroke_arrow_size().IsEnabled(true);
-			mfi_popup_stroke_arrow_size().IsEnabled(true);
-		}
-		else if (val == ARROW_STYLE::ARROW_FILLED) {
-			rmfi_menu_stroke_arrow_filled().IsChecked(true);
-			rmfi_popup_stroke_arrow_filled().IsChecked(true);
-			mfi_menu_stroke_arrow_size().IsEnabled(true);
-			mfi_popup_stroke_arrow_size().IsEnabled(true);
-		}
 	}
 
 	// 属性メニューの「矢じるしの寸法...」が選択された.
@@ -332,7 +309,6 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_arrow_style(new_style);
 				m_prop_page.slist_back()->get_arrow_cap(new_cap);
 				m_prop_page.slist_back()->get_arrow_join(new_join);
-				stroke_arrow_is_checked(new_style);
 				undo_push_null();
 				const bool flag_size = undo_push_set<UNDO_T::ARROW_SIZE>(new_size);
 				const bool flag_style = undo_push_set<UNDO_T::ARROW_STYLE>(new_style);
@@ -391,26 +367,11 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		stroke_cap_is_checked(new_val);
 		undo_push_null();
 		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
-	}
-
-	// 属性メニューの「端の形式」のサブ項目に印をつける.
-	void MainPage::stroke_cap_is_checked(const D2D1_CAP_STYLE& val)
-	{
-		rmfi_menu_stroke_cap_flat().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT));
-		rmfi_popup_stroke_cap_flat().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT));
-		rmfi_menu_stroke_cap_square().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE));
-		rmfi_popup_stroke_cap_square().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE));
-		rmfi_menu_stroke_cap_round().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND));
-		rmfi_popup_stroke_cap_round().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND));
-		rmfi_menu_stroke_cap_triangle().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE));
-		rmfi_popup_stroke_cap_triangle().IsChecked(equal(val, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE));
 	}
 
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
@@ -844,8 +805,6 @@ namespace winrt::GraphPaper::implementation
 				m_prop_page.slist_back()->get_stroke_width(new_width);
 				m_prop_page.slist_back()->get_stroke_dash(new_dash);
 				m_prop_page.slist_back()->get_stroke_cap(new_cap);
-				stroke_dash_is_checked(new_dash);
-				stroke_cap_is_checked(new_cap);
 				undo_push_null();
 				const bool flag_patt = undo_push_set<UNDO_T::DASH_PAT>(new_patt);
 				const bool flag_width = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
@@ -895,46 +854,11 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
 				//undo_menu_is_enabled();
-				//xcvd_menu_is_enabled();
+				////xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// 属性メニューの「破線の形式」のサブ項目に印をつける.
-	void MainPage::stroke_dash_is_checked(
-		const D2D1_DASH_STYLE d_style	// 破線の形式
-	)
-	{
-		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-			rmfi_menu_stroke_dash_solid().IsChecked(true);
-			rmfi_popup_stroke_dash_solid().IsChecked(true);
-		}
-		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
-			rmfi_menu_stroke_dash_dash().IsChecked(true);
-			rmfi_popup_stroke_dash_dash().IsChecked(true);
-		}
-		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-			rmfi_menu_stroke_dash_dash_dot().IsChecked(true);
-			rmfi_popup_stroke_dash_dash_dot().IsChecked(true);
-		}
-		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			rmfi_menu_stroke_dash_dash_dot_dot().IsChecked(true);
-			rmfi_popup_stroke_dash_dash_dot_dot().IsChecked(true);
-		}
-		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-			rmfi_menu_stroke_dash_dot().IsChecked(true);
-			rmfi_popup_stroke_dash_dot().IsChecked(true);
-		}
-		if (d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-			mfi_menu_stroke_dash_pat().IsEnabled(true);
-			mfi_popup_stroke_dash_pat().IsEnabled(true);
-		}
-		else {
-			mfi_menu_stroke_dash_pat().IsEnabled(false);
-			mfi_popup_stroke_dash_pat().IsEnabled(false);
-		}
 	}
 
 	// 属性メニューの「結合の形式」のサブ項目が選択された.
@@ -957,29 +881,11 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		stroke_join_is_checked(new_val);
 		undo_push_null();
 		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
-	}
-
-	// 属性メニューの「線の結合」のサブ項目に印をつける.
-	// s_join	線の結合
-	void MainPage::stroke_join_is_checked(const D2D1_LINE_JOIN val)
-	{
-		rmfi_menu_stroke_join_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_popup_stroke_join_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_menu_stroke_join_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_popup_stroke_join_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_menu_stroke_join_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_popup_stroke_join_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_menu_stroke_join_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		rmfi_popup_stroke_join_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		mfi_menu_stroke_join_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		mfi_popup_stroke_join_limit().IsEnabled(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 	}
 
 	// 属性メニューの「太さ」のサブ項目が選択された.
@@ -1014,57 +920,12 @@ namespace winrt::GraphPaper::implementation
 			s_width = 16.0f;
 		}
 		if (s_width >= 0.0f) {
-			stroke_width_is_checked(s_width);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-				//undo_menu_is_enabled();
 				main_draw();
 			}
 		}
 		status_bar_set_pos();
-	}
-
-	// 属性メニューの「線枠の太さ」のサブ項目に印をつける.
-	void MainPage::stroke_width_is_checked(
-		const float s_width	// 線枠の太さ
-	) noexcept
-	{
-		if (s_width == 0.0f) {
-			rmfi_menu_stroke_width_0px().IsChecked(true);
-			rmfi_popup_stroke_width_0px().IsChecked(true);
-		}
-		else if (s_width == 1.0f) {
-			rmfi_menu_stroke_width_1px().IsChecked(true);
-			rmfi_popup_stroke_width_1px().IsChecked(true);
-		}
-		else if (s_width == 2.0f) {
-			rmfi_menu_stroke_width_2px().IsChecked(true);
-			rmfi_popup_stroke_width_2px().IsChecked(true);
-		}
-		else if (s_width == 3.0f) {
-			rmfi_menu_stroke_width_3px().IsChecked(true);
-			rmfi_popup_stroke_width_3px().IsChecked(true);
-		}
-		else if (s_width == 4.0f) {
-			rmfi_menu_stroke_width_4px().IsChecked(true);
-			rmfi_popup_stroke_width_4px().IsChecked(true);
-		}
-		else if (s_width == 8.0f) {
-			rmfi_menu_stroke_width_8px().IsChecked(true);
-			rmfi_popup_stroke_width_8px().IsChecked(true);
-		}
-		else if (s_width == 12.0f) {
-			rmfi_menu_stroke_width_12px().IsChecked(true);
-			rmfi_popup_stroke_width_12px().IsChecked(true);
-		}
-		else if (s_width == 16.0f) {
-			rmfi_menu_stroke_width_16px().IsChecked(true);
-			rmfi_popup_stroke_width_16px().IsChecked(true);
-		}
-		else {
-			rmfi_menu_stroke_width_other().IsChecked(true);
-			rmfi_popup_stroke_width_other().IsChecked(true);
-		}
 	}
 
 	// 属性メニューの「線枠の太さ」>「その他」が選択された.
@@ -1127,11 +988,8 @@ namespace winrt::GraphPaper::implementation
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float new_val;
 				m_prop_page.slist_back()->get_stroke_width(new_val);
-				stroke_width_is_checked(new_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
-					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}

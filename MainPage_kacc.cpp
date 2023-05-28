@@ -21,16 +21,12 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			undo_push_text_select(m_edit_text_shape, end - 1, end, false);
 			m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-			//undo_menu_is_enabled();
-			xcvd_menu_is_enabled();
 			main_draw();
 		}
 		// ‘I‘ð”ÍˆÍ‚ª‚ ‚é‚È‚ç
 		else if (end != start) {
 			undo_push_null();
 			m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
-			//undo_menu_is_enabled();
-			xcvd_menu_is_enabled();
 			main_draw();
 		}
 		CoreTextRange modified_ran{
@@ -47,23 +43,21 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_edit_text_shape == nullptr) {
-			return;
+			xcvd_delete_click(nullptr, nullptr);
 		}
-		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-		//text_char_delete(shift_key);
-		text_char_delete(false);
+		else {
+			text_char_delete(false);
+		}
 	}
 
 	void MainPage::kacc_delete_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_edit_text_shape == nullptr) {
-			return;
+			xcvd_delete_click(nullptr, nullptr);
 		}
-		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-		//text_char_delete(shift_key);
-		text_char_delete(true);
+		else {
+			text_char_delete(true);
+		}
 	}
 
 	void MainPage::kacc_down_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
@@ -86,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 			//}
 			//else {
 				undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
-				xcvd_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 		}
@@ -106,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 			//else {
 				const auto new_start = new_trail ? new_end + 1 : new_end;
 				undo_push_text_select(m_edit_text_shape, new_start, new_end, new_trail);
-				xcvd_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 		}
@@ -133,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
 				undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
-				xcvd_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 			//else {
@@ -152,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_edit_text_shape->get_text_pos(new_car, new_trail);
 			//if (shift_key) {
 				undo_push_text_select(m_edit_text_shape, start, new_end, new_trail);
-				xcvd_menu_is_enabled();
+				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 			//else {
@@ -183,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, L"\r"));
 		undo_push_text_select(m_edit_text_shape, s + 1, s + 1, false);
 		//undo_menu_is_enabled();
-		xcvd_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_draw();
 
 		CoreTextRange modified_ran{
@@ -232,13 +226,13 @@ namespace winrt::GraphPaper::implementation
 		//else {
 		if (end == start && end > 0) {
 			undo_push_text_select(m_edit_text_shape, end - 1, end - 1, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		else if (end != start) {
 			const auto new_end = min(start, end);
 			undo_push_text_select(m_edit_text_shape, new_end, new_end, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -263,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		//if (shift_key) {
 		if (end > 0) {
 			undo_push_text_select(m_edit_text_shape, start, end - 1, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -305,13 +299,13 @@ namespace winrt::GraphPaper::implementation
 		//else {
 		if (end == start && end < len) {
 			undo_push_text_select(m_edit_text_shape, end + 1, end + 1, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		else if (end != start) {
 			const auto new_end = max(start, end);
 			undo_push_text_select(m_edit_text_shape, new_end, new_end, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -336,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 		//if (shift_key) {
 		if (end < len) {
 			undo_push_text_select(m_edit_text_shape, start, end + 1, false);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -377,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 			//}
 			//else {
 			undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 		}
@@ -397,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			const auto new_start = new_trail ? new_end + 1 : new_end;
 			undo_push_text_select(m_edit_text_shape, new_start, new_end, new_trail);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 		}
@@ -423,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
 			undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 			//else {
@@ -442,7 +436,7 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_edit_text_shape->get_text_pos(new_car, new_trail);
 			//if (shift_key) {
 			undo_push_text_select(m_edit_text_shape, start, new_end, new_trail);
-			xcvd_menu_is_enabled();
+			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 			//else {

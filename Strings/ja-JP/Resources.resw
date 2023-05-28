@@ -321,11 +321,7 @@
     <value>ヘルプ(H)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_method.Title" xml:space="preserve">
-    <value>操作(M)</value>
-    <comment>MenuBarItem</comment>
-  </data>
-	<data name="mbi_menu_property.Title" xml:space="preserve">
+  <data name="mbi_menu_property.Title" xml:space="preserve">
     <value>属性(P)</value>
     <comment>MenuBarItem</comment>
   </data>

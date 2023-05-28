@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
-		static SHAPE_LIST* undo_slist;	// 参照する図形リスト
+		//static SHAPE_LIST* undo_slist;	// 参照する図形リスト
 		static ShapePage* undo_page;	// 参照するページ
 
 		Shape* m_shape;	// 操作する図形
@@ -136,9 +136,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 操作が参照するための図形リストと表示図形を格納する.
-		static void begin(SHAPE_LIST* slist, ShapePage* page) noexcept
+		static void begin(/*SHAPE_LIST* slist,*/ ShapePage* page) noexcept
 		{
-			undo_slist = slist;
+			//undo_slist = slist;
 			undo_page = page;
 		}
 		// 操作する図形を得る.
@@ -159,7 +159,8 @@ namespace winrt::GraphPaper::implementation
 				s = nullptr;
 			}
 			else {
-				slist_match<const uint32_t, Shape*>(*Undo::undo_slist, i, s);
+				auto& slist = Undo::undo_page->m_shape_list;
+				slist_match<const uint32_t, Shape*>(slist, i, s);
 			}
 			return s;
 		}
@@ -181,7 +182,8 @@ namespace winrt::GraphPaper::implementation
 			// リスト中に図形がなければ UNDO_SHAPE_NIL が書き込まれる.
 			else {
 				uint32_t i = UNDO_SHAPE_NIL;
-				slist_match<Shape* const, uint32_t>(*Undo::undo_slist, s, i);
+				auto& slist = Undo::undo_page->m_shape_list;
+				slist_match<Shape* const, uint32_t>(slist, s, i);
 				dt_writer.WriteUInt32(i);
 			}
 		}
@@ -423,7 +425,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		virtual void exec(void) noexcept final override
 		{
-			//ShapeText* const t = static_cast<ShapeText* const>(m_shape);
 			const auto start = undo_page->m_select_start;
 			const auto end = undo_page->m_select_end;
 			const auto is_trail = undo_page->m_select_trail;

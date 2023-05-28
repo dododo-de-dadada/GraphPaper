@@ -568,8 +568,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_page_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// ページの余白に格納する.
 		virtual bool set_page_margin(const D2D1_RECT_F&/*val*/) noexcept { return false; }
-		// 値をページ倍率に格納する.
-		//virtual bool set_page_scale(const float/*val*/) noexcept { return false; }
 		// 値をページの大きさに格納する.
 		virtual bool set_page_size(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を選択されてるか判定に格納する.
@@ -735,7 +733,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 表示
+	// ページ図形
 	//------------------------------
 	struct ShapePage : Shape {
 		SHAPE_LIST m_shape_list{};	// 図形リスト

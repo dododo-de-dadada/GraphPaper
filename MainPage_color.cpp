@@ -348,9 +348,7 @@ namespace winrt::GraphPaper::implementation
 				else if (dialog_combo_box_0().SelectedIndex() == 3) {
 					m_color_code = COLOR_CODE::PCT;
 				}
-				color_code_is_checked(m_color_code);
 				if (color_ustack_set<U>(*this, new_val)) {
-					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -373,15 +371,6 @@ namespace winrt::GraphPaper::implementation
 	template IAsyncAction MainPage::color_click_async<UNDO_T::PAGE_COLOR>();
 	template IAsyncAction MainPage::color_click_async<UNDO_T::STROKE_COLOR>();
 
-	// その他メニューの「色の基数」に印をつける.
-	void MainPage::color_code_is_checked(const COLOR_CODE val)
-	{
-		rmfi_menu_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
-		rmfi_menu_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
-		rmfi_menu_color_code_real().IsChecked(val == COLOR_CODE::REAL);
-		rmfi_menu_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
-	}
-
 	// その他メニューの「色の基数」のサブ項目が選択された.
 	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -401,7 +390,6 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		color_code_is_checked(m_color_code);
 		status_bar_set_pos();
 	}
 
@@ -509,10 +497,8 @@ namespace winrt::GraphPaper::implementation
 				else if (dialog_combo_box_0().SelectedIndex() == 3) {
 					m_color_code = COLOR_CODE::PCT;
 				}
-				color_code_is_checked(m_color_code);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
-					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}

@@ -72,14 +72,13 @@ namespace winrt::GraphPaper::implementation
 	// ビットマップをストリームに格納する.
 	// C	true ならクリッピングする. false ならしない.
 	// enc_id	符号化方式
-	// stream	画像を格納するストリーム
+	// stream	画像を格納するランダムアクセスストリーム
 	// 戻り値	格納できたら true
 	template <bool C>
 	IAsyncOperation<bool> ShapeImage::copy(const winrt::guid enc_id, IRandomAccessStream& stream) const
 	{
-		// クリップボードに格納するなら, 元データのまま.
-		// 描画するときに DrawBitmap でクリッピングされる.
-		// エクスポートするなら, クリッピングしたデータ.
+		// 格納先がクリップボードなら, 元データのままコピーする.
+		// エクスポートなら, クリッピングしたデータをコピーする.
 		// SVG には, 画像をクリッピングして表示する機能がないか, あっても煩雑.
 		// ひょっとしたら, クリッピング矩形の小数点のせいで微妙に異なる画像になるかもしれない.
 		// PDF には, 3 バイト RGB を提供できないので, 使えない.
@@ -124,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 
 			// SoftwareBitmap を作成する.
 			// Windows では, SoftwareBitmap にしろ WIC にしろ
-			// 3 バイトの RGB はサポートされてない.
+			// 3 バイト RGB はサポートされてない.
 			const int32_t c_width = c_right - c_left;
 			const int32_t c_height = c_bottom - c_top;
 			SoftwareBitmap soft_bmp{
@@ -153,10 +152,12 @@ namespace winrt::GraphPaper::implementation
 				// SoftwareBitmap のバッファにコピーする.
 				if constexpr (C) {
 					// クリッピングあり
-					for (size_t y = c_top; y < c_bottom; y++) {
-						memcpy(soft_bmp_ptr + 4ull * c_width * y, 
-							m_bgra + 4ull * m_orig.width * y + c_left,
-							4ull * c_width);
+					auto dst_ptr = soft_bmp_ptr;
+					auto src_ptr = m_bgra + 4ull * (m_orig.width * c_top + c_left);
+					for (size_t y = 0; y < c_height; y++) {
+						memcpy(dst_ptr, src_ptr, 4ull * c_width);
+						dst_ptr += 4ull * c_width;
+						src_ptr += 4ull * m_orig.width;
 					}
 				}
 				else {
@@ -333,10 +334,8 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeImage::get_pixcel(const D2D1_POINT_2F p, D2D1_COLOR_F& val) const noexcept
 	{
 		// ページ座標での位置を, 元画像での位置に変換する.
-		const double fx = round(
-			m_clip.left + (p.x - m_start.x) * (m_clip.right - m_clip.left) / m_view.width);
-		const double fy = round(
-			m_clip.top + (p.y - m_start.y) * (m_clip.bottom - m_clip.top) / m_view.height);
+		const double fx = round(m_clip.left + (p.x - m_start.x) * (m_clip.right - m_clip.left) / m_view.width);
+		const double fy = round(m_clip.top + (p.y - m_start.y) * (m_clip.bottom - m_clip.top) / m_view.height);
 		// 変換された位置が, 画像に収まるなら,
 		if (fx >= 0.0 && fx <= m_orig.width && fy >= 0.0 && fy <= m_orig.height) {
 			// 生データでの画素あたりの添え字に変換.
@@ -546,13 +545,12 @@ namespace winrt::GraphPaper::implementation
 	// 原画像に戻す.
 	void ShapeImage::revert(void) noexcept
 	{
-		const float src_w = static_cast<float>(m_orig.width);
-		const float src_h = static_cast<float>(m_orig.height);
-		m_view.width = src_w;
-		m_view.height = src_h;
-		m_clip.left = m_clip.top = 0.0f;
-		m_clip.right = src_w;
-		m_clip.bottom = src_h;
+		m_view.width = static_cast<float>(m_orig.width);
+		m_view.height = static_cast<float>(m_orig.height);
+		m_clip.left = 0.0f;
+		m_clip.top = 0.0f;
+		m_clip.right = static_cast<float>(m_orig.width);
+		m_clip.bottom = static_cast<float>(m_orig.height);
 		m_opac = 1.0f;
 	}
 
@@ -570,12 +568,7 @@ namespace winrt::GraphPaper::implementation
 	// val	値
 	// loc	部位
 	// keep_aspect	画像の縦横比の維持/可変
-	bool ShapeImage::set_pos_loc(
-		const D2D1_POINT_2F val,	// 値
-		const uint32_t loc,	// 部位
-		const float,
-		const bool keep_aspect	// 画像の縦横比の維持/可変
-	) noexcept
+	bool ShapeImage::set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float, const bool keep_aspect) noexcept
 	{
 		D2D1_POINT_2F new_p;
 		pt_round(val, PT_ROUND, new_p);
@@ -857,10 +850,10 @@ namespace winrt::GraphPaper::implementation
 	// 値を始点に格納する. 他の部位の位置も動く.
 	bool ShapeImage::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		D2D1_POINT_2F new_p;
-		pt_round(val, PT_ROUND, new_p);
-		if (!equal(m_start, new_p)) {
-			m_start = new_p;
+		D2D1_POINT_2F pt;
+		pt_round(val, PT_ROUND, pt);
+		if (!equal(m_start, pt)) {
+			m_start = pt;
 			return true;
 		}
 		return false;

@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 			status_bar_set_pos();
 		}
 		//undo_menu_is_enabled();
-		xcvd_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_draw();
 	}
 
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		if (found) {
 			scroll_to(m_edit_text_shape);
 		}
-		xcvd_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_draw();
 		if (!found) {
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			//	m_edit_context.NotifyFocusLeave();
 			//	undo_push_text_unselect(m_edit_text_shape);
 			//	m_edit_text_shape = nullptr;
-			//	xcvd_menu_is_enabled();
+			//	//xcvd_menu_is_enabled();
 			//}
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -500,7 +500,7 @@ namespace winrt::GraphPaper::implementation
 		if (found) {
 			scroll_to(m_edit_text_shape);
 		}
-		xcvd_menu_is_enabled();
+		//xcvd_menu_is_enabled();
 		main_draw();
 		if (!found) {
 			// 「文字列は見つかりません」メッセージダイアログを表示する.

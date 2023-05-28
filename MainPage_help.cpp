@@ -93,26 +93,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ヘルプメニューの「長さの単位」に印をつける.
-	void MainPage::len_unit_is_checked(const LEN_UNIT val)
-	{
-		rmfi_menu_len_unit_grid().IsChecked(val == LEN_UNIT::GRID);
-		rmfi_menu_len_unit_inch().IsChecked(val == LEN_UNIT::INCH);
-		rmfi_menu_len_unit_milli().IsChecked(val == LEN_UNIT::MILLI);
-		rmfi_menu_len_unit_pixel().IsChecked(val == LEN_UNIT::PIXEL);
-		rmfi_menu_len_unit_point().IsChecked(val == LEN_UNIT::POINT);
-		cbi_len_unit_grid().IsSelected(val == LEN_UNIT::GRID);
-		cbi_len_unit_inch().IsSelected(val == LEN_UNIT::INCH);
-		cbi_len_unit_milli().IsSelected(val == LEN_UNIT::MILLI);
-		cbi_len_unit_pixel().IsSelected(val == LEN_UNIT::PIXEL);
-		cbi_len_unit_point().IsSelected(val == LEN_UNIT::POINT);
-	}
-
 	// ヘルプメニューの「点を方眼にくっつける」が選択された.
 	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_snap_grid = tmfi_menu_snap_grid().IsChecked();
-		//m_main_page.m_snap_grid = tmfi_menu_snap_grid().IsChecked();
 		status_bar_set_pos();
 	}
 
