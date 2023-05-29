@@ -761,13 +761,12 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行すると値が変わるか判定する.
 	bool UndoImage::changed(void) const noexcept
 	{
-		//using winrt::GraphPaper::implementation::equal;
 		const ShapeImage* s = static_cast<const ShapeImage*>(m_shape);
 		const auto pos = s->m_start;
 		const auto view = s->m_view;
 		const auto clip = s->m_clip;
-		//const auto opac = s->m_opac;
-		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip);// || !equal(opac, m_opac);
+		const auto opac = s->m_opac;
+		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip) || !equal(opac, m_opac);
 	}
 
 	// 元に戻す操作を実行する.
@@ -777,15 +776,15 @@ namespace winrt::GraphPaper::implementation
 		const auto pos = s->m_start;
 		const auto view = s->m_view;
 		const auto clip = s->m_clip;
-		//const auto opac = s->m_opac;
+		const auto opac = s->m_opac;
 		s->m_start = m_start;
 		s->m_view = m_view;
 		s->m_clip = m_clip;
-		//s->m_opac = m_opac;
+		s->m_opac = m_opac;
 		m_start = pos;
 		m_view = view;
 		m_clip = clip;
-		//m_opac = opac;
+		m_opac = opac;
 	}
 
 	// データリーダーから操作を読み込む.
@@ -795,16 +794,16 @@ namespace winrt::GraphPaper::implementation
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_clip(D2D1_RECT_F{
 			dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle()
-		})//,
-		//m_opac(dt_reader.ReadSingle())
+		}),
+		m_opac(dt_reader.ReadSingle())
 	{}
 
 	UndoImage::UndoImage(ShapeImage* const s) :
 		Undo(s),
 		m_start(s->m_start),
 		m_view(s->m_view),
-		m_clip(s->m_clip)//,
-		//m_opac(s->m_opac)
+		m_clip(s->m_clip),
+		m_opac(s->m_opac)
 	{}
 
 	// 画像の操作をデータライターに書き込む.
@@ -820,7 +819,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_clip.top);
 		dt_writer.WriteSingle(m_clip.right);
 		dt_writer.WriteSingle(m_clip.bottom);
-		//dt_writer.WriteSingle(m_opac);
+		dt_writer.WriteSingle(m_opac);
 	}
 
 	// 操作を実行する.

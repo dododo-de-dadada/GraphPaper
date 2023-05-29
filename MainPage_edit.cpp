@@ -89,7 +89,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (changed) {
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 	}
@@ -170,6 +169,7 @@ namespace winrt::GraphPaper::implementation
 		//const auto val3 = dialog_check_box().IsChecked();
 		//const auto vis3 = dialog_check_box().Visibility();
 		//const auto vis3 = dialog_radio_buttons().Visibility();
+
 		wchar_t buf[32];
 
 		dialog_slider_0().Minimum(0.0);
@@ -316,6 +316,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_page.m_shape_list);
+
 		dialog_slider_0().Minimum(min0);
 		dialog_slider_0().Maximum(max0);
 		dialog_slider_0().TickFrequency(freq0);

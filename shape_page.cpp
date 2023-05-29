@@ -295,13 +295,13 @@ namespace winrt::GraphPaper::implementation
 	void ShapePage::draw(void) noexcept
 	{
 		// ページの色でページを塗りつぶす.
-		m_d2d_color_brush->SetColor(m_page_color);
 		D2D1_RECT_F p_rect{	// ページの矩形
 			-m_page_margin.left,
 			-m_page_margin.top,
 			-m_page_margin.left + m_page_size.width,
 			-m_page_margin.top + m_page_size.height
 		};
+		m_d2d_color_brush->SetColor(m_page_color);
 		m_d2d_target->FillRectangle(p_rect, m_d2d_color_brush.get());
 
 		// 方眼の表示が最背面なら, 最初に方眼を表示する.
@@ -330,15 +330,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼を表示する.
-	static void page_draw_grid(
-		ID2D1RenderTarget* const target,	// D2D 描画対象
-		ID2D1SolidColorBrush* const brush,	// 色ブラシ
-		const float g_len,	// 方眼の大きさ
-		const D2D1_COLOR_F g_color,	// 方眼の色
-		const GRID_EMPH g_emph,	// 方眼の強調の形式
-		const D2D1_POINT_2F g_offset,	// 方眼のずらし値
-		const D2D1_SIZE_F g_size	// 方眼を表示する矩形の大きさ
-	) noexcept
+	// target	D2D 描画対象
+	// brush	色ブラシ
+	// g_len	方眼の大きさ
+	// g_color	方眼の色
+	// g_emph	方眼の強調の形式
+	// g_offset	方眼のずらし値
+	// g_size	方眼を表示する矩形の大きさ
+	static void page_draw_grid(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len, const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset, const D2D1_SIZE_F g_size) noexcept
 	{
 		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
@@ -500,7 +499,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 端の形式を得る.
-	//bool ShapePage::get_stroke_cap(CAP_STYLE& val) const noexcept
 	bool ShapePage::get_stroke_cap(D2D1_CAP_STYLE& val) const noexcept
 	{
 		val = m_stroke_cap;
@@ -513,13 +511,6 @@ namespace winrt::GraphPaper::implementation
 		val = m_stroke_color;
 		return true;
 	}
-
-	// 破線の端の形式を得る.
-	//bool ShapePage::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
-	//{
-	//	val = m_dash_cap;
-	//	return true;
-	//}
 
 	// 破線の配置を得る.
 	bool ShapePage::get_stroke_dash_pat(DASH_PAT& val) const noexcept

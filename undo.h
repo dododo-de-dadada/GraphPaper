@@ -327,7 +327,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_start;	// 左上点
 		D2D1_SIZE_F m_view;	// 表示されている画面上の寸法
 		D2D1_RECT_F m_clip;	// 表示されている画像上の矩形
-		//float m_opac;	// 不透明度
+		float m_opac;	// 不透明度
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept final override;

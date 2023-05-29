@@ -213,14 +213,14 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_pressed = summary->get_shape();
 		m_event_shape_last = m_event_shape_pressed;
 		if (typeid(*m_event_shape_pressed) == typeid(ShapeText) &&
-			m_edit_text_shape != static_cast<ShapeText*>(m_event_shape_pressed)) {
+			m_edit_context_shape != static_cast<ShapeText*>(m_event_shape_pressed)) {
 			// 編集対象の図形があるならフォーカスをはずす.
-			if (m_edit_text_shape != nullptr) {
+			if (m_edit_context_shape != nullptr) {
 				m_edit_context.NotifyFocusLeave();
-				undo_push_text_unselect(m_edit_text_shape);
+				undo_push_text_unselect(m_edit_context_shape);
 			}
 			// 一覧で押された図形をあらたな編集対象の図形とする.
-			m_edit_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+			m_edit_context_shape = static_cast<ShapeText*>(m_event_shape_pressed);
 			m_edit_context.NotifyFocusEnter();
 		}
 		m_main_page.set_attr_to(m_event_shape_pressed);

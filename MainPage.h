@@ -79,6 +79,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 	using winrt::Windows::UI::ViewManagement::InputPane;
+	using winrt::Windows::UI::Text::Core::CoreTextEditContext;
+	using winrt::Windows::UI::Text::Core::CoreTextServicesManager;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -220,13 +222,9 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		// テキスト編集
-		winrt::Windows::UI::Text::Core::CoreTextEditContext m_edit_context{	// 編集コンテキスト (状態)
-			winrt::Windows::UI::Text::Core::CoreTextServicesManager::GetForCurrentView().CreateEditContext()
-		};
-		winrt::Windows::UI::ViewManagement::InputPane m_edit_input{	// 編集ペイン (枠)
-			winrt::Windows::UI::ViewManagement::InputPane::GetForCurrentView()
-		};
+		//winrt::Windows::UI::ViewManagement::InputPane m_edit_input{	// 編集ペイン (枠)
+		//	winrt::Windows::UI::ViewManagement::InputPane::GetForCurrentView()
+		//};
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
 		// 排他制御
@@ -249,6 +247,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_text_case = false;	// 英文字の区別
 		bool m_find_text_wrap = false;	// 回り込み検索
 
+		// テキスト編集
 		// trail = false    trail = true
 		//   start  end        start end
 		//     |     |           |   |
@@ -257,11 +256,12 @@ namespace winrt::GraphPaper::implementation
 		// a b|c d e|f g     a b|c d e|f g
 		//    +-----+           +-----+
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		ShapeText* m_edit_text_shape = nullptr;	// 編集中の文字列図形
-		bool m_edit_text_comp = false;	// 漢字変換中 (変換中なら true, そうでなければ false)
-		uint32_t m_edit_text_start = 0;	// 漢字変換開始時の開始位置
-		uint32_t m_edit_text_end = 0;	// 漢字変換開始時の終了位置
-		bool m_edit_text_trail = false;	// 漢字変換開始時のキャレット
+		CoreTextEditContext m_edit_context{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
+		ShapeText* m_edit_context_shape = nullptr;	// 編集中の文字列図形
+		bool m_edit_context_comp = false;	// 入力変換が開始されたら true, 終了したら false
+		uint32_t m_edit_context_start = 0;	// 入力変換開始時の開始位置
+		uint32_t m_edit_context_end = 0;	// 入力変換開始時の終了位置
+		bool m_edit_context_trail = false;	// 入力変換開始時のキャレット前後判定
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
@@ -269,10 +269,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
 		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
-		uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_PAGE;	// 右ポインターが押された部位
+		//uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_PAGE;	// 右ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
-		Shape* m_event_shape_r_pressed = nullptr;	// 右ポインターが押された図形
-		Shape* m_event_shape_d_clicked = nullptr;	// ダブルクリックされた図形
+		//Shape* m_event_shape_r_pressed = nullptr;	// 右ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
@@ -460,24 +459,24 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::hstring text_sele_get(void) const noexcept
 		{
-			//ShapeText* t = m_edit_text_shape;
-			const auto len = m_edit_text_shape->get_text_len();
+			//ShapeText* t = m_edit_context_shape;
+			const auto len = m_edit_context_shape->get_text_len();
 			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 			const auto s = min(m_main_page.m_select_start, end);
 			const auto e = max(m_main_page.m_select_start, end);
-			return winrt::hstring{ m_edit_text_shape->m_text + s, e - s };
+			return winrt::hstring{ m_edit_context_shape->m_text + s, e - s };
 		}
 
 		void text_sele_delete(void) noexcept
 		{
-			const ShapeText* t = m_edit_text_shape;
+			const ShapeText* t = m_edit_context_shape;
 			const auto len = t->get_text_len();
 			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 			const auto start = min(m_main_page.m_select_start, len);
 			// 選択範囲があるなら
 			if (end != start) {
 				undo_push_null();
-				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
 				//undo_menu_is_enabled();
 				////xcvd_menu_is_enabled();
 				main_draw();
@@ -487,14 +486,14 @@ namespace winrt::GraphPaper::implementation
 
 		void text_sele_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
 		{
-			const ShapeText* t = m_edit_text_shape;
+			const ShapeText* t = m_edit_context_shape;
 			const auto old_len = t->get_text_len();
 			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, old_len);
-			const auto start = min(m_edit_text_comp ? m_edit_text_start : m_main_page.m_select_start, old_len);
+			const auto start = min(m_edit_context_comp ? m_edit_context_start : m_main_page.m_select_start, old_len);
 			const auto s = min(start, end);
 			const auto e = max(start, end);
 			if (s < e) {
-				if (!m_edit_text_comp) {
+				if (!m_edit_context_comp) {
 					undo_push_null();
 				}
 				else {
@@ -504,14 +503,14 @@ namespace winrt::GraphPaper::implementation
 						delete u;
 					}
 				}
-				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
-				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
+				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, ins_text));
+				undo_push_text_select(m_edit_context_shape, s + ins_len, s + ins_len, false);
 				//undo_menu_is_enabled();
 				////xcvd_menu_is_enabled();
 				main_draw();
 			}
 			else if (ins_len > 0) {
-				if (!m_edit_text_comp) {
+				if (!m_edit_context_comp) {
 					undo_push_null();
 				}
 				else {
@@ -521,8 +520,8 @@ namespace winrt::GraphPaper::implementation
 						delete u;
 					}
 				}
-				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, ins_text));
-				undo_push_text_select(m_edit_text_shape, s + ins_len, s + ins_len, false);
+				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, ins_text));
+				undo_push_text_select(m_edit_context_shape, s + ins_len, s + ins_len, false);
 				main_draw();
 			}
 		}
@@ -530,20 +529,20 @@ namespace winrt::GraphPaper::implementation
 		void text_char_delete(const bool shift_key) noexcept
 		{
 			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
-			const ShapeText* t = m_edit_text_shape;
+			const ShapeText* t = m_edit_context_shape;
 			const auto len = t->get_text_len();
 			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 			const auto start = min(m_main_page.m_select_start, len);
 			if (!shift_key && end == start && end < len) {
 				undo_push_null();
-				undo_push_text_select(m_edit_text_shape, end, end + 1, false);
-				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				undo_push_text_select(m_edit_context_shape, end, end + 1, false);
+				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
 				main_draw();
 			}
 			// 選択範囲があるなら
 			else if (end != start) {
 				undo_push_null();
-				m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
 				main_draw();
 			}
 			winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{

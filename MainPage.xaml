@@ -522,11 +522,10 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_background_black" x:Uid="rmfi_menu_background_black" Click="background_pattern_click" IsChecked="False" Text="Background Black" GroupName="gn_popup_background_color">
-						<muxc:RadioMenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_black}" />
-						</muxc:RadioMenuFlyoutItem.Icon>
-
-					</muxc:RadioMenuFlyoutItem>
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_black}" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 			</MenuFlyout>
 		</ResourceDictionary>

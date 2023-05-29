@@ -234,9 +234,9 @@ namespace winrt::GraphPaper::implementation
 			const auto exists_selected_poly_close = (selected_poly_close_cnt > 0);
 			// 選択されてない図形がひとつ以上ある場合, または選択されてない文字がひとつ以上ある場合.
 			uint32_t text_unselected_char_cnt;
-			if (m_edit_text_shape != nullptr) {
-				const auto len = m_edit_text_shape->get_text_len();
-				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, m_edit_text_shape->get_text_len());
+			if (m_edit_context_shape != nullptr) {
+				const auto len = m_edit_context_shape->get_text_len();
+				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, m_edit_context_shape->get_text_len());
 				text_unselected_char_cnt = len - (end - m_main_page.m_select_start);
 			}
 			else {
@@ -306,37 +306,50 @@ namespace winrt::GraphPaper::implementation
 
 			winrt::Windows::UI::Xaml::Visibility prop;
 			winrt::Windows::UI::Xaml::Visibility font;
+			winrt::Windows::UI::Xaml::Visibility text;
 			winrt::Windows::UI::Xaml::Visibility image;
 			winrt::Windows::UI::Xaml::Visibility layout;
-			// 押された図形がヌル, または押された図形の部位が外側か判定する.
-			if (m_event_shape_r_pressed == nullptr || m_event_loc_r_pressed == LOC_TYPE::LOC_PAGE) {
+			// 押された図形が空なら
+			if (m_event_shape_pressed == nullptr) {//} || m_event_loc_last == LOC_TYPE::LOC_PAGE) {
 				prop = Visibility::Collapsed;
 				font = Visibility::Collapsed;
+				text = Visibility::Collapsed;
 				image = Visibility::Collapsed;
 				layout = Visibility::Visible;
 			}
 			else {
 				// 押された図形の属性値を表示に格納する.
-				m_main_page.set_attr_to(m_event_shape_r_pressed);
+				m_main_page.set_attr_to(m_event_shape_pressed);
 
 				// 押された部位が文字列なら, フォントのメニュー項目を表示する.
-				if (m_event_loc_r_pressed == LOC_TYPE::LOC_TEXT) {
+				if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 					prop = Visibility::Collapsed;
 					font = Visibility::Visible;
+					text = Visibility::Visible;
 					image = Visibility::Collapsed;
 					layout = Visibility::Collapsed;
 				}
 				// 押された部位が画像なら, 画像のメニュー項目を表示する.
-				else if (typeid(*m_event_shape_r_pressed) == typeid(ShapeImage)) {
+				else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
 					prop = Visibility::Collapsed;
 					font = Visibility::Collapsed;
+					text = Visibility::Collapsed;
 					image = Visibility::Visible;
+					layout = Visibility::Collapsed;
+				}
+				// 押された部位が定規なら, 書体メニュー項目を表示する.
+				else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
+					prop = Visibility::Visible;
+					font = Visibility::Visible;
+					text = Visibility::Collapsed;
+					image = Visibility::Collapsed;
 					layout = Visibility::Collapsed;
 				}
 				// 上記以外なら, 属性のメニュー項目を表示する.
 				else {
 					prop = Visibility::Visible;
 					font = Visibility::Collapsed;
+					text = Visibility::Collapsed;
 					image = Visibility::Collapsed;
 					layout = Visibility::Collapsed;
 				}
@@ -430,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 			mfsi_popup_stroke_dash().Visibility(prop);
 			mfi_popup_stroke_dash_pat().Visibility(prop);
 			mfsi_popup_stroke_width().Visibility(prop);
-			if (prop == Visibility::Visible && m_event_shape_r_pressed->exist_cap()) {
+			if (prop == Visibility::Visible && m_event_shape_pressed->exist_cap()) {
 				mfsi_popup_stroke_cap().Visibility(Visibility::Visible);
 				mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Visible);
 				mfsi_popup_stroke_arrow().Visibility(Visibility::Visible);
@@ -442,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 				mfsi_popup_stroke_arrow().Visibility(Visibility::Collapsed);
 				mfi_popup_stroke_arrow_size().Visibility(Visibility::Collapsed);
 			}
-			if (prop == Visibility::Visible && m_event_shape_r_pressed->exist_join()) {
+			if (prop == Visibility::Visible && m_event_shape_pressed->exist_join()) {
 				mfsi_popup_stroke_join().Visibility(Visibility::Visible);
 			}
 			else {
@@ -557,13 +570,18 @@ namespace winrt::GraphPaper::implementation
 			mfsi_popup_font_weight().Visibility(font);
 			mfsi_popup_font_stretch().Visibility(font);
 			mfsi_popup_font_style().Visibility(font);
-			mfs_popup_sepa_font_text().Visibility(font);
-			mfsi_popup_text_align_horz().Visibility(font);
-			mfsi_popup_text_align_vert().Visibility(font);
-			mfi_popup_text_line_sp().Visibility(font);
-			mfi_popup_text_pad().Visibility(font);
-			mfsi_popup_text_wrap().Visibility(font);
-			mfi_popup_font_color().Visibility(font);
+			if (font == Visibility::Visible && text == Visibility::Visible) {
+				mfs_popup_sepa_font_text().Visibility(Visibility::Visible);
+			}
+			else {
+				mfs_popup_sepa_font_text().Visibility(Visibility::Collapsed);
+			}
+			mfsi_popup_text_align_horz().Visibility(text);
+			mfsi_popup_text_align_vert().Visibility(text);
+			mfi_popup_text_line_sp().Visibility(text);
+			mfi_popup_text_pad().Visibility(text);
+			mfsi_popup_text_wrap().Visibility(text);
+			mfi_popup_font_color().Visibility(text);
 
 			mfi_popup_meth_image_revert().Visibility(image);
 			mfi_popup_image_opac().Visibility(image);
@@ -1140,9 +1158,9 @@ namespace winrt::GraphPaper::implementation
 			const auto exists_selected_poly_close = (selected_poly_close_cnt > 0);
 			// 選択されてない図形がひとつ以上ある場合, または選択されてない文字がひとつ以上ある場合.
 			uint32_t text_unselected_char_cnt;
-			if (m_edit_text_shape != nullptr) {
-				const auto len = m_edit_text_shape->get_text_len();
-				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, m_edit_text_shape->get_text_len());
+			if (m_edit_context_shape != nullptr) {
+				const auto len = m_edit_context_shape->get_text_len();
+				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, m_edit_context_shape->get_text_len());
 				text_unselected_char_cnt = len - (end - m_main_page.m_select_start);
 			}
 			else {
@@ -1194,7 +1212,6 @@ namespace winrt::GraphPaper::implementation
 			mfi_menu_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
 			mfi_menu_meth_text_edit().IsEnabled(exists_selected_text);
 			mfi_menu_meth_text_find().IsEnabled(exists_text);
-			//mfi_menu_meth_text_fit_frame().IsEnabled(exists_selected_text);
 			mfi_menu_meth_image_revert().IsEnabled(exists_selected_image);
 			m_list_sel_cnt = selected_cnt;
 		});
@@ -1224,12 +1241,12 @@ namespace winrt::GraphPaper::implementation
 		{
 			/*
 			tx_find_text_what().GettingFocus([this](auto, auto) {
-				if (m_edit_text_shape != nullptr) {
+				if (m_edit_context_shape != nullptr) {
 					m_edit_context.NotifyFocusLeave();
 				}
 				});
 			tx_find_replace_with().GettingFocus([this](auto, auto) {
-				if (m_edit_text_shape != nullptr) {
+				if (m_edit_context_shape != nullptr) {
 					m_edit_context.NotifyFocusLeave();
 				}
 				});
@@ -1244,19 +1261,19 @@ namespace winrt::GraphPaper::implementation
 					lv_summary_list().FocusState() != FocusState::Unfocused) {
 					return;
 				}
-				if (m_edit_text_shape == nullptr ||
-					m_edit_text_shape->is_deleted() || !m_edit_text_shape->is_selected()) {
+				if (m_edit_context_shape == nullptr ||
+					m_edit_context_shape->is_deleted() || !m_edit_context_shape->is_selected()) {
 					return;
 				}
-				const ShapeText* t = m_edit_text_shape;
+				const ShapeText* t = m_edit_context_shape;
 				if (args.VirtualKey() == VirtualKey::Enter) {
 					const auto len = t->get_text_len();
 					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 					const auto start = min(m_main_page.m_select_start, len);
 					const auto s = min(start, end);
 					undo_push_null();
-					m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, L"\r"));
-					undo_push_text_select(m_edit_text_shape, s + 1, s + 1, false);
+					m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, L"\r"));
+					undo_push_text_select(m_edit_context_shape, s + 1, s + 1, false);
 					//undo_menu_is_enabled();
 					main_draw();
 
@@ -1277,15 +1294,15 @@ namespace winrt::GraphPaper::implementation
 					const auto start = min(m_main_page.m_select_start, len);
 					if (end == start && end > 0) {
 						undo_push_null();
-						undo_push_text_select(m_edit_text_shape, end - 1, end, false);
-						m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+						undo_push_text_select(m_edit_context_shape, end - 1, end, false);
+						m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
 						//undo_menu_is_enabled();
 						main_draw();
 					}
 					// 選択範囲があるなら
 					else if (end != start) {
 						undo_push_null();
-						m_ustack_undo.push_back(new UndoText2(m_edit_text_shape, nullptr));
+						m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
 						//undo_menu_is_enabled();
 						main_draw();
 					}
@@ -1314,18 +1331,18 @@ namespace winrt::GraphPaper::implementation
 					const auto start = min(m_main_page.m_select_start, len);
 					if (shift_key) {
 						if (end > 0) {
-							undo_push_text_select(m_edit_text_shape, start, end - 1, false);
+							undo_push_text_select(m_edit_context_shape, start, end - 1, false);
 							main_draw();
 						}
 					}
 					else {
 						if (end == start && end > 0) {
-							undo_push_text_select(m_edit_text_shape, end - 1, end - 1, false);
+							undo_push_text_select(m_edit_context_shape, end - 1, end - 1, false);
 							main_draw();
 						}
 						else if (end != start) {
 							const auto new_end = min(start, end);
-							undo_push_text_select(m_edit_text_shape, new_end, new_end, false);
+							undo_push_text_select(m_edit_context_shape, new_end, new_end, false);
 							main_draw();
 						}
 					}
@@ -1345,18 +1362,18 @@ namespace winrt::GraphPaper::implementation
 					const auto start = min(m_main_page.m_select_start, len);
 					if (shift_key) {
 						if (end < len) {
-							undo_push_text_select(m_edit_text_shape, start, end + 1, false);
+							undo_push_text_select(m_edit_context_shape, start, end + 1, false);
 							main_draw();
 						}
 					}
 					else {
 						if (end == start && end < len) {
-							undo_push_text_select(m_edit_text_shape, end + 1, end + 1, false);
+							undo_push_text_select(m_edit_context_shape, end + 1, end + 1, false);
 							main_draw();
 						}
 						else if (end != start) {
 							const auto new_end = max(start, end);
-							undo_push_text_select(m_edit_text_shape, new_end, new_end, false);
+							undo_push_text_select(m_edit_context_shape, new_end, new_end, false);
 							main_draw();
 						}
 					}
@@ -1377,11 +1394,11 @@ namespace winrt::GraphPaper::implementation
 						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						if (shift_key) {
-							undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+							undo_push_text_select(m_edit_context_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 						else {
-							undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+							undo_push_text_select(m_edit_context_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 					}
@@ -1396,12 +1413,12 @@ namespace winrt::GraphPaper::implementation
 						bool new_trail;
 						const auto new_end = t->get_text_pos(new_car, new_trail);
 						if (shift_key) {
-							undo_push_text_select(m_edit_text_shape, start, new_end, new_trail);
+							undo_push_text_select(m_edit_context_shape, start, new_end, new_trail);
 							main_draw();
 						}
 						else {
 							const auto new_start = new_trail ? new_end + 1 : new_end;
-							undo_push_text_select(m_edit_text_shape, new_start, new_end, new_trail);
+							undo_push_text_select(m_edit_context_shape, new_start, new_end, new_trail);
 							main_draw();
 						}
 					}
@@ -1423,11 +1440,11 @@ namespace winrt::GraphPaper::implementation
 						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 						if (shift_key) {
-							undo_push_text_select(m_edit_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+							undo_push_text_select(m_edit_context_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 						else {
-							undo_push_text_select(m_edit_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+							undo_push_text_select(m_edit_context_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
 							main_draw();
 						}
 					}
@@ -1442,12 +1459,12 @@ namespace winrt::GraphPaper::implementation
 						bool new_trail;
 						const auto new_end = t->get_text_pos(new_car, new_trail);
 						if (shift_key) {
-							undo_push_text_select(m_edit_text_shape, start, new_end, new_trail);
+							undo_push_text_select(m_edit_context_shape, start, new_end, new_trail);
 							main_draw();
 						}
 						else {
 							const auto new_start = new_trail ? new_end + 1 : new_end;
-							undo_push_text_select(m_edit_text_shape, new_start, new_end, new_trail);
+							undo_push_text_select(m_edit_context_shape, new_start, new_end, new_trail);
 							main_draw();
 						}
 					}
@@ -1463,25 +1480,30 @@ namespace winrt::GraphPaper::implementation
 			m_edit_context.InputPaneDisplayPolicy(winrt::Windows::UI::Text::Core::CoreTextInputPaneDisplayPolicy::Manual);
 			m_edit_context.InputScope(winrt::Windows::UI::Text::Core::CoreTextInputScope::Text);
 			m_edit_context.TextRequested([this](auto, auto args) {
+				if (m_edit_context_shape == nullptr) {
+					return;
+				}
 				//__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextTextRequest;
 				CoreTextTextRequest req{ args.Request() };
 				const auto end = static_cast<uint32_t>(req.Range().EndCaretPosition);
-				const auto text = (m_edit_text_shape->m_text == nullptr ? L"" : m_edit_text_shape->m_text);
-				const auto sub_len = min(end, m_edit_text_shape->get_text_len()) - req.Range().StartCaretPosition;	// 部分文字列の長さ
+				const auto text = (m_edit_context_shape->m_text == nullptr ? L"" : m_edit_context_shape->m_text);
+				const auto sub_len = min(end, m_edit_context_shape->get_text_len()) - req.Range().StartCaretPosition;	// 部分文字列の長さ
 				winrt::hstring sub_text{	// 部分文字列
-					text + req.Range().StartCaretPosition,
-						static_cast<winrt::hstring::size_type>(sub_len)
+					text + req.Range().StartCaretPosition, static_cast<winrt::hstring::size_type>(sub_len)
 				};
 				req.Text(sub_text);
 			});
 			m_edit_context.SelectionRequested([this](auto, auto args) {
+				if (m_edit_context_shape == nullptr) {
+					return;
+				}
 				//__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextSelectionRequest;
 				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextSelectionRequest req{ args.Request() };
 				CoreTextRange ran{};
-				const ShapeText* t = m_edit_text_shape;
+				const ShapeText* t = m_edit_context_shape;
 				const auto len = t->get_text_len();
 				const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 				const auto start = min(m_main_page.m_select_start, len);
@@ -1491,10 +1513,10 @@ namespace winrt::GraphPaper::implementation
 				});
 			m_edit_context.FocusRemoved([this](auto, auto) {
 				__debugbreak();
-				if (m_edit_text_shape != nullptr) {
+				if (m_edit_context_shape != nullptr) {
 					m_edit_context.NotifyFocusLeave();
-					undo_push_text_unselect(m_edit_text_shape);
-					m_edit_text_shape = nullptr;
+					undo_push_text_unselect(m_edit_context_shape);
+					m_edit_context_shape = nullptr;
 					main_draw();
 				}
 				});
@@ -1511,7 +1533,7 @@ namespace winrt::GraphPaper::implementation
 				//__debugbreak();
 				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextRange ran{ args.Selection() };
-				undo_push_text_select(m_edit_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
+				undo_push_text_select(m_edit_context_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
 				////xcvd_menu_is_enabled();
 				main_draw();
 				});
@@ -1520,6 +1542,9 @@ namespace winrt::GraphPaper::implementation
 				});
 			m_edit_context.LayoutRequested([this](auto, auto args) {
 				// __debugbreak();
+				if (m_edit_context_shape == nullptr) {
+					return;
+				}
 				using winrt::Windows::UI::Text::Core::CoreTextLayoutRequest;
 				using winrt::Windows::Graphics::Display::DisplayInformation;
 				using winrt::Windows::UI::Xaml::Media::GeneralTransform;
@@ -1530,9 +1555,9 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F sel_start, sel_end;	// 選択範囲の端
 				// キャレットがある行を得る.
 				// キャレットは選択範囲の end の位置にある.
-				const ShapeText* t = m_edit_text_shape;
+				const ShapeText* t = m_edit_context_shape;
 				if (t->m_dwrite_text_layout == nullptr) {
-					m_edit_text_shape->create_text_layout();
+					m_edit_context_shape->create_text_layout();
 				}
 
 				float height = t->m_font_size;
@@ -1582,66 +1607,22 @@ namespace winrt::GraphPaper::implementation
 				sel_rect.Height = static_cast<FLOAT>(sel_rect.Height * disp_scale);
 				req.LayoutBounds().ControlBounds(con_rect);
 				req.LayoutBounds().TextBounds(sel_rect);
-
-
-
-				/*
-				const auto end = (m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end);
-				const auto row = t->get_text_row(end);	// キャレットがある行
-				// キャレット行の両端の座標を得る.
-				const auto row_start = t->m_dwrite_test_metrics[row].textPosition;
-				const auto row_end = row_start + t->m_dwrite_test_metrics[row].length;
-				t->get_text_caret(row_start, row, false, con_start);
-				t->get_text_caret(row_end, row, false, con_end);
-				// キャレット行と選択範囲の共通部分の両端の座標を得る.
-				const auto start = m_main_page.m_select_start;
-				t->get_text_caret(max(start, row_start), row, false, sel_start);
-				t->get_text_caret(min(end, row_end), row, false, sel_end);
-				Rect win_rect{	// ウィンドウのクライアント矩形
-					Window::Current().CoreWindow().Bounds()
-				};
-				GeneralTransform tran{	// 変換子
-					scp_main_panel().TransformToVisual(nullptr)
-				};
-				const Point pane{	// スワップチェーンパネルの左上点
-					tran.TransformPoint(Point{ 0.0f, 0.0f })
-				};
-				con_rect.X = win_rect.X + pane.X + con_start.x / m_main_scale;
-				con_rect.Y = win_rect.Y + pane.Y + con_start.y / m_main_scale;
-				con_rect.Width = (con_end.x - con_start.x) / m_main_scale;
-				con_rect.Height = t->m_font_size / m_main_scale;
-				sel_rect.X = win_rect.X + pane.X + sel_start.x / m_main_scale;
-				sel_rect.Y = win_rect.Y + pane.Y + sel_start.y / m_main_scale;
-				sel_rect.Width = (sel_end.x - sel_start.x) / m_main_scale;
-				sel_rect.Height = t->m_font_size / m_main_scale;
-				const auto disp_scale = DisplayInformation::GetForCurrentView().RawPixelsPerViewPixel();
-				con_rect.X = static_cast<FLOAT>(con_rect.X * disp_scale);
-				con_rect.Y = static_cast<FLOAT>(con_rect.Y * disp_scale);
-				con_rect.Width = static_cast<FLOAT>(con_rect.Width * disp_scale);
-				con_rect.Height = static_cast<FLOAT>(con_rect.Height * disp_scale);
-				sel_rect.X = static_cast<FLOAT>(sel_rect.X * disp_scale);
-				sel_rect.Y = static_cast<FLOAT>(sel_rect.Y * disp_scale);
-				sel_rect.Width = static_cast<FLOAT>(sel_rect.Width * disp_scale);
-				sel_rect.Height = static_cast<FLOAT>(sel_rect.Height * disp_scale);
-				req.LayoutBounds().TextBounds(sel_rect);
-				req.LayoutBounds().ControlBounds(con_rect);
-				*/
-				});
+			});
 			// 入力変換が開始された
 			m_edit_context.CompositionStarted([this](auto, auto) {
 				//__debugbreak();
 				// 変換開始時の文字列の選択範囲を保存しておく.
-				m_edit_text_comp = true;
-				m_edit_text_start = m_main_page.m_select_start;
-				m_edit_text_end = m_main_page.m_select_end;
-				m_edit_text_trail = m_main_page.m_select_trail;
+				m_edit_context_comp = true;
+				m_edit_context_start = m_main_page.m_select_start;
+				m_edit_context_end = m_main_page.m_select_end;
+				m_edit_context_trail = m_main_page.m_select_trail;
 				undo_push_null();
 
 				m_edit_context.NotifyLayoutChanged();
 				});
 			m_edit_context.CompositionCompleted([this](auto, auto) {
 				//__debugbreak();				
-				m_edit_text_comp = false;
+				m_edit_context_comp = false;
 				});
 		}
 
@@ -1908,25 +1889,25 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		if (m_edit_text_shape != nullptr && !m_edit_text_shape->is_deleted() && m_edit_text_shape->is_selected()) {
-			m_edit_text_shape->draw_selection(m_main_page.m_select_start, m_main_page.m_select_end, m_main_page.m_select_trail);
+		if (m_edit_context_shape != nullptr && !m_edit_context_shape->is_deleted() && m_edit_context_shape->is_selected()) {
+			m_edit_context_shape->draw_selection(m_main_page.m_select_start, m_main_page.m_select_end, m_main_page.m_select_trail);
 
-			const int row = m_edit_text_shape->get_text_row(m_main_page.m_select_end);
-			//const int row = m_edit_text_shape->get_text_row(m_edit_text_end);
+			const int row = m_edit_context_shape->get_text_row(m_main_page.m_select_end);
+			//const int row = m_edit_context_shape->get_text_row(m_edit_context_end);
 			D2D1_POINT_2F car;	// キャレットの点
-			m_edit_text_shape->get_text_caret(m_main_page.m_select_end, row, m_main_page.m_select_trail, car);
-			//m_edit_text_shape->get_text_caret(m_edit_text_end, row, m_edit_text_trail, car);
+			m_edit_context_shape->get_text_caret(m_main_page.m_select_end, row, m_main_page.m_select_trail, car);
+			//m_edit_context_shape->get_text_caret(m_edit_context_end, row, m_edit_context_trail, car);
 			D2D1_POINT_2F p{
 				car.x - 0.5f, car.y
 			};
 			D2D1_POINT_2F q{
-				car.x - 0.5f, car.y + m_edit_text_shape->m_font_size
+				car.x - 0.5f, car.y + m_edit_context_shape->m_font_size
 			};
 			D2D1_POINT_2F r{
 				car.x, car.y
 			};
 			D2D1_POINT_2F s{
-				car.x, car.y + m_edit_text_shape->m_font_size
+				car.x, car.y + m_edit_context_shape->m_font_size
 			};
 			m_main_page.m_d2d_color_brush->SetColor(COLOR_WHITE);
 			m_main_d2d.m_d2d_context->DrawLine(p, q, m_main_page.m_d2d_color_brush.get(), 2.0f);

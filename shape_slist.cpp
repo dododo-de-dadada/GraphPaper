@@ -155,19 +155,18 @@ namespace winrt::GraphPaper::implementation
 		for (auto s : slist) {
 			// 図形の消去フラグを判定する.
 			if (s->is_deleted()) {
-				// 以下を無視する.
 				continue;
 			}
 			// 消去フラグがない図形の数をインクリメントする.
 			undeleted_cnt++;
 			// 図形の動的な型を得る.
-			auto const& s_tid = typeid(*s);
-			if (s_tid == typeid(ShapeText)) {
+			auto const& tid = typeid(*s);
+			if (tid == typeid(ShapeText)) {
 				// 型が文字列図形の場合,
 				// 文字列図形の数をインクリメントする.
 				text_cnt++;
 			}
-			else if (s_tid == typeid(ShapeGroup)) {
+			else if (tid == typeid(ShapeGroup)) {
 				if (static_cast<ShapeGroup*>(s)->has_text()) {
 					// 型が文字列図形の場合,
 					// 文字列図形の数をインクリメントする.
@@ -190,20 +189,20 @@ namespace winrt::GraphPaper::implementation
 					selected_exist_cap_cnt++;
 				}
 				// 図形の型が画像か判定する.,
-				if (s_tid == typeid(ShapeImage)) {
+				if (tid == typeid(ShapeImage)) {
 					selected_image_cnt++;
 				}
 				// 図形の型が画像か判定する.,
-				else if (s_tid == typeid(ShapeArc)) {
+				else if (tid == typeid(ShapeArc)) {
 					selected_arc_cnt++;
 				}
 				// 図形の型がグループ図形か判定する.,
-				else if (s_tid == typeid(ShapeGroup)) {
+				else if (tid == typeid(ShapeGroup)) {
 					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
 				}
-				else if (s_tid == typeid(ShapePoly)) {
+				else if (tid == typeid(ShapePoly)) {
 					// 図形の型が多角形図形の場合,
 					//bool closed;
 					//if (s->get_poly_closed(closed)) {
@@ -218,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 						selected_poly_open_cnt++;
 					}
 				}
-				else if (s_tid == typeid(ShapeText)) {
+				else if (tid == typeid(ShapeText)) {
 					// 図形の型が文字列図形の場合,
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
