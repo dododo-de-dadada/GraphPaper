@@ -1517,6 +1517,7 @@ namespace winrt::GraphPaper::implementation
 					m_edit_context.NotifyFocusLeave();
 					undo_push_text_unselect(m_edit_context_shape);
 					m_edit_context_shape = nullptr;
+					m_edit_context_comp = false;
 					main_draw();
 				}
 				});

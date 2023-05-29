@@ -996,34 +996,36 @@ namespace winrt::GraphPaper::implementation
 					}
 					// 押された図形は文字列.
 					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						// 押された図形が選択されてないなら選択する.
-						bool take_over = !m_event_shape_pressed->is_selected();
-						if (take_over) {
-							m_main_page.set_attr_to(m_event_shape_pressed);
-							m_event_shape_last = m_event_shape_pressed;
-							unselect_shape_all();
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_select(m_event_shape_pressed);
+						if (!m_edit_context_comp) {
+							// 押された図形が選択されてないなら選択する.
+							bool take_over = !m_event_shape_pressed->is_selected();
+							if (take_over) {
+								m_main_page.set_attr_to(m_event_shape_pressed);
+								m_event_shape_last = m_event_shape_pressed;
+								unselect_shape_all();
+								undo_push_select(m_event_shape_pressed);
+								if (summary_is_visible()) {
+									summary_select(m_event_shape_pressed);
+								}
 							}
-						}
-						// 押された図形が編集中の文字列でない場合
-						// 編集中の文字列があったなら, 編集を中断する.
-						// 押された図形を編集中の文字列図形に設定する.
-						///////
-						if (m_edit_context_shape != m_event_shape_pressed) {
-							if (m_edit_context_shape != nullptr) {
-								m_edit_context.NotifyFocusLeave();
-								undo_push_text_unselect(m_edit_context_shape);
+							// 押された図形が編集中の文字列でない場合
+							// 編集中の文字列があったなら, 編集を中断する.
+							// 押された図形を編集中の文字列図形に設定する.
+							///////
+							if (m_edit_context_shape != m_event_shape_pressed) {
+								if (m_edit_context_shape != nullptr) {
+									m_edit_context.NotifyFocusLeave();
+									undo_push_text_unselect(m_edit_context_shape);
+								}
+								m_edit_context_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+								m_edit_context.NotifyFocusEnter();
 							}
-							m_edit_context_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+							bool trail;
+							const auto end = m_edit_context_shape->get_text_pos(m_event_pos_curr, trail);
+							const auto start = trail ? end + 1 : end;
+							undo_push_text_select(m_edit_context_shape, start, end, trail);
+							changed = true;
 						}
-						bool trail;
-						const auto end = m_edit_context_shape->get_text_pos(m_event_pos_curr, trail);
-						const auto start = trail ? end + 1 : end;
-						undo_push_text_select(m_edit_context_shape, start, end, trail);
-						m_edit_context.NotifyFocusEnter();
-						changed = true;
 					}
 					// 押された図形は文字列以外.
 					else {

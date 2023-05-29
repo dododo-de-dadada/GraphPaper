@@ -114,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::kacc_down_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (m_edit_context_shape == nullptr) {
+		if (m_edit_context_shape == nullptr || m_edit_context_comp) {
 			return;
 		}
 		const auto len = m_edit_context_shape->get_text_len();
@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (m_edit_context_shape == nullptr) {
+		if (m_edit_context_shape == nullptr || m_edit_context_comp) {
 			return;
 		}
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
@@ -319,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (m_edit_context_shape == nullptr) {
+		if (m_edit_context_shape == nullptr || m_edit_context_comp) {
 			return;
 		}
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
@@ -405,7 +405,8 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (m_edit_context_shape == nullptr) {
+		// Š¿Žš•ÏŠ·’†‚Í•¶Žš—ñ‘I‘ð‚µ‚È‚¢.
+		if (m_edit_context_shape == nullptr || m_edit_context_comp) {
 			return;
 		}
 		const auto len = m_edit_context_shape->get_text_len();
