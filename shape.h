@@ -2081,14 +2081,13 @@ namespace winrt::GraphPaper::implementation
 						DWRITE_HIT_TEST_METRICS tm{};
 						FLOAT x, y;
 						m_dwrite_text_layout->HitTestTextPosition(j, false, &x, &y, &tm);
-						if (px < x + tm.width * 0.5f) {
+						if (px <= x + tm.width * 0.5f) {
 							is_trailing = false;
 							//row = i;
 							return j;
 						}
 					}
-					is_trailing = true;
-					//row = i;
+					is_trailing = (m_text[e - 1] != '\r');
 					return e - 1;
 				}
 			}

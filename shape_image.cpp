@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 			val.b = static_cast<float>(b) / 255.0f;
 			val.g = static_cast<float>(g) / 255.0f;
 			val.r = static_cast<float>(r) / 255.0f;
-			val.a = static_cast<float>(a) / 255.0f;
+			val.a = (static_cast<float>(a) / 255.0f) * m_opac;
 			return true;
 		}
 		return false;

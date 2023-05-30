@@ -357,7 +357,7 @@
     <value>消去</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_text_edit.Text" xml:space="preserve">
+  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
     <value>文字列の編集...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -381,7 +381,7 @@
     <value>塗りつぶし色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_text_find.Text" xml:space="preserve">
+  <data name="mfi_menu_find_text.Text" xml:space="preserve">
     <value>文字列の検索と置換...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1186,7 +1186,7 @@
     <value>画像の不透明度...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_image_revert.Text" xml:space="preserve">
+  <data name="mfi_menu_revert_image.Text" xml:space="preserve">
     <value>画像を原画像に戻す</value>
     <comment>MenuFlyoutItem</comment>
   </data>

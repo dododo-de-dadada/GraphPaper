@@ -255,9 +255,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 得られた図形のキャレットを先頭に戻して検索する.
 		undo_push_null();
-		if (m_edit_context_shape != nullptr) {
-			undo_push_text_select(m_edit_context_shape, 0, 0, false);
-			m_edit_context_shape = nullptr;
+		if (m_core_text_shape != nullptr) {
+			undo_push_text_select(m_core_text_shape, 0, 0, false);
+			m_core_text_shape = nullptr;
 		}
 		if (find_next()) {
 			do {
@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::replace_text(void)
 	{
 		// 編集する図形がある.
-		if (m_edit_context_shape != nullptr) {
+		if (m_core_text_shape != nullptr) {
 			//選択された文字範囲がある.
 			const ShapePage* t = &m_main_page;
 			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
@@ -300,11 +300,11 @@ namespace winrt::GraphPaper::implementation
 			const auto e = max(t->m_select_start, end);
 			if (s < e) {
 				// 置換して, 置換後の文字範囲を選択
-				undo_push_select(m_edit_context_shape);
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, m_find_repl));
+				undo_push_select(m_core_text_shape);
+				m_ustack_undo.push_back(new UndoText2(m_core_text_shape, m_find_repl));
 				const auto repl_len = wchar_len(m_find_repl);
-				undo_push_text_select(m_edit_context_shape, s + repl_len, s + repl_len, false);
-				m_edit_context_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
+				undo_push_text_select(m_core_text_shape, s + repl_len, s + repl_len, false);
+				m_core_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
 			}
 		}
 		// 次の文字列を検索する.
@@ -316,20 +316,20 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::replace_text(void)
 	{
 		// 編集する図形がある.
-		if (m_edit_context_shape != nullptr) {
+		if (m_core_text_shape != nullptr) {
 			//選択された文字範囲がある.
-			const auto len = m_edit_context_shape->get_text_len();
+			const auto len = m_core_text_shape->get_text_len();
 			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 			const auto s = min(m_main_page.m_select_start, end);
 			const auto e = max(m_main_page.m_select_start, end);
 			if (s < e) {
-				if (!m_edit_context_shape->is_selected()) {
-					undo_push_select(m_edit_context_shape);
+				if (!m_core_text_shape->is_selected()) {
+					undo_push_select(m_core_text_shape);
 				}
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, m_find_repl));
+				m_ustack_undo.push_back(new UndoText2(m_core_text_shape, m_find_repl));
 				const auto repl_len = wchar_len(m_find_repl);
-				undo_push_text_select(m_edit_context_shape, s + repl_len, s + repl_len, false);
-				m_edit_context_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
+				undo_push_text_select(m_core_text_shape, s + repl_len, s + repl_len, false);
+				m_core_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
 				return true;
 			}
 		}
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 選択範囲があれば置換する.
-		if (m_edit_context_shape != nullptr) {
+		if (m_core_text_shape != nullptr) {
 			const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
 			if (m_main_page.m_select_start != end) {
 				undo_push_null();
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 		// 次の文字列を検索する.
 		const bool found = find_next();
 		if (found) {
-			scroll_to(m_edit_context_shape);
+			scroll_to(m_core_text_shape);
 		}
 		//xcvd_menu_is_enabled();
 		main_draw();
@@ -376,10 +376,10 @@ namespace winrt::GraphPaper::implementation
 			find_text_preserve();
 		}
 		else {
-			//if (m_edit_context_shape != nullptr) {
-			//	m_edit_context.NotifyFocusLeave();
-			//	undo_push_text_unselect(m_edit_context_shape);
-			//	m_edit_context_shape = nullptr;
+			//if (m_core_text_shape != nullptr) {
+			//	m_core_text.NotifyFocusLeave();
+			//	undo_push_text_unselect(m_core_text_shape);
+			//	m_core_text_shape = nullptr;
 			//	//xcvd_menu_is_enabled();
 			//}
 			// 一覧が表示されてるか判定する.
@@ -413,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 			if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {
 				continue;
 			}
-			if (m_edit_context_shape != nullptr && m_edit_context_shape != *it) {
+			if (m_core_text_shape != nullptr && m_core_text_shape != *it) {
 				continue;
 			}
 			Shape* s = *it;
@@ -435,9 +435,9 @@ namespace winrt::GraphPaper::implementation
 						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						unselect_shape_all();
-						m_edit_context_shape = static_cast<ShapeText*>(*it);
-						undo_push_select(m_edit_context_shape);
-						undo_push_text_select(m_edit_context_shape, i, i + find_len, false);
+						m_core_text_shape = static_cast<ShapeText*>(*it);
+						undo_push_select(m_core_text_shape);
+						undo_push_text_select(m_core_text_shape, i, i + find_len, false);
 						return true;
 					}
 				}
@@ -460,9 +460,9 @@ namespace winrt::GraphPaper::implementation
 						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						unselect_shape_all();
-						m_edit_context_shape = static_cast<ShapeText*>(*it);
-						undo_push_select(m_edit_context_shape);
-						undo_push_text_select(m_edit_context_shape, i, i + find_len, false);
+						m_core_text_shape = static_cast<ShapeText*>(*it);
+						undo_push_select(m_core_text_shape);
+						undo_push_text_select(m_core_text_shape, i, i + find_len, false);
 						return true;
 					}
 				}
@@ -477,9 +477,9 @@ namespace winrt::GraphPaper::implementation
 					_wcsnicmp(t->m_text + i, m_find_text, find_len);
 				if (cmp == 0) {
 					unselect_shape_all();
-					m_edit_context_shape = static_cast<ShapeText*>(*it);
-					undo_push_select(m_edit_context_shape);
-					undo_push_text_select(m_edit_context_shape, i, i + find_len, false);
+					m_core_text_shape = static_cast<ShapeText*>(*it);
+					undo_push_select(m_core_text_shape);
+					undo_push_text_select(m_core_text_shape, i, i + find_len, false);
 					return true;
 				}
 			}
@@ -498,7 +498,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		const bool found = find_next();
 		if (found) {
-			scroll_to(m_edit_context_shape);
+			scroll_to(m_core_text_shape);
 		}
 		//xcvd_menu_is_enabled();
 		main_draw();

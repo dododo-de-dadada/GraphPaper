@@ -357,7 +357,7 @@
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_text_edit.Text" xml:space="preserve">
+  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
     <value>Edit Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -381,7 +381,7 @@
     <value>Open...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_text_find.Text" xml:space="preserve">
+  <data name="mfi_menu_find_text.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1194,7 +1194,7 @@
     <value>Image Opacity...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_meth_image_revert.Text" xml:space="preserve">
+  <data name="mfi_menu_revert_image.Text" xml:space="preserve">
     <value>Revert Image to Original</value>
     <comment>MenuFlyoutItem</comment>
   </data>

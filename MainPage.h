@@ -256,12 +256,12 @@ namespace winrt::GraphPaper::implementation
 		// a b|c d e|f g     a b|c d e|f g
 		//    +-----+           +-----+
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		CoreTextEditContext m_edit_context{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
-		ShapeText* m_edit_context_shape = nullptr;	// 編集中の文字列図形
-		bool m_edit_context_comp = false;	// 入力変換が開始されたら true, 終了したら false
-		uint32_t m_edit_context_start = 0;	// 入力変換開始時の開始位置
-		uint32_t m_edit_context_end = 0;	// 入力変換開始時の終了位置
-		bool m_edit_context_trail = false;	// 入力変換開始時のキャレット前後判定
+		CoreTextEditContext m_core_text{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
+		ShapeText* m_core_text_shape = nullptr;	// 編集中の文字列図形
+		bool m_core_text_comp = false;	// 入力変換フラグ. 変換中なら true, それ以外なら false.
+		uint32_t m_core_text_start = 0;	// 入力変換開始時の開始位置
+		uint32_t m_core_text_end = 0;	// 入力変換開始時の終了位置
+		bool m_core_text_trail = false;	// 入力変換開始時のキャレット前後判定
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
@@ -346,6 +346,14 @@ namespace winrt::GraphPaper::implementation
 		// メインのページ図形の処理
 		//-------------------------------
 
+		// 入力文字列の選択範囲の文字列を得る.
+		winrt::hstring core_text_substr(void) const noexcept;
+		// 入力文字列の選択範囲の文字を削除する.
+		void core_text_delete(void) noexcept;
+		// 入力文字列の選択範囲に文字列を挿入する.
+		void core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept;
+		// 入力文字列から文字を削除する.
+		void core_text_del_c(const bool shift_key) noexcept;
 		// 更新された図形をもとにメインのページの境界矩形を更新する.
 		void MainPage::main_bbox_update(const Shape* s) noexcept
 		{
@@ -456,104 +464,6 @@ namespace winrt::GraphPaper::implementation
 		// MainPage_edit.cpp
 		// 文字列の編集
 		//-------------------------------
-
-		winrt::hstring text_sele_get(void) const noexcept
-		{
-			//ShapeText* t = m_edit_context_shape;
-			const auto len = m_edit_context_shape->get_text_len();
-			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-			const auto s = min(m_main_page.m_select_start, end);
-			const auto e = max(m_main_page.m_select_start, end);
-			return winrt::hstring{ m_edit_context_shape->m_text + s, e - s };
-		}
-
-		void text_sele_delete(void) noexcept
-		{
-			const ShapeText* t = m_edit_context_shape;
-			const auto len = t->get_text_len();
-			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-			const auto start = min(m_main_page.m_select_start, len);
-			// 選択範囲があるなら
-			if (end != start) {
-				undo_push_null();
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
-				//undo_menu_is_enabled();
-				////xcvd_menu_is_enabled();
-				main_draw();
-			}
-
-		}
-
-		void text_sele_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
-		{
-			const ShapeText* t = m_edit_context_shape;
-			const auto old_len = t->get_text_len();
-			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, old_len);
-			const auto start = min(m_edit_context_comp ? m_edit_context_start : m_main_page.m_select_start, old_len);
-			const auto s = min(start, end);
-			const auto e = max(start, end);
-			if (s < e) {
-				if (!m_edit_context_comp) {
-					undo_push_null();
-				}
-				else {
-					for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-						m_ustack_undo.pop_back();
-						u->exec();
-						delete u;
-					}
-				}
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, ins_text));
-				undo_push_text_select(m_edit_context_shape, s + ins_len, s + ins_len, false);
-				//undo_menu_is_enabled();
-				////xcvd_menu_is_enabled();
-				main_draw();
-			}
-			else if (ins_len > 0) {
-				if (!m_edit_context_comp) {
-					undo_push_null();
-				}
-				else {
-					for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-						m_ustack_undo.pop_back();
-						u->exec();
-						delete u;
-					}
-				}
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, ins_text));
-				undo_push_text_select(m_edit_context_shape, s + ins_len, s + ins_len, false);
-				main_draw();
-			}
-		}
-
-		void text_char_delete(const bool shift_key) noexcept
-		{
-			// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
-			const ShapeText* t = m_edit_context_shape;
-			const auto len = t->get_text_len();
-			const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-			const auto start = min(m_main_page.m_select_start, len);
-			if (!shift_key && end == start && end < len) {
-				undo_push_null();
-				undo_push_text_select(m_edit_context_shape, end, end + 1, false);
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
-				main_draw();
-			}
-			// 選択範囲があるなら
-			else if (end != start) {
-				undo_push_null();
-				m_ustack_undo.push_back(new UndoText2(m_edit_context_shape, nullptr));
-				main_draw();
-			}
-			winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
-				static_cast<const int32_t>(start), static_cast<const int32_t>(end)
-			};
-			winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-				static_cast<int32_t>(m_main_page.m_select_start),
-					static_cast<int32_t>(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end)
-			};
-			m_edit_context.NotifyTextChanged(modified_ran, 0, new_ran);
-		}
 
 		//-------------------------------
 		// MainPage_file.cpp

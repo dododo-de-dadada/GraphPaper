@@ -207,8 +207,10 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	点を含む部位
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
-		D2D1_POINT_2F end;	// 終点
-		pt_add(m_start, m_pos, end);
+		const D2D1_POINT_2F end{	// 終点
+			m_start.x + m_pos.x,
+			m_start.y + m_pos.y
+		};
 		if (loc_hit_test(pt, end, m_loc_width)) {
 			return LOC_TYPE::LOC_END;
 		}

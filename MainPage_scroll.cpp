@@ -117,8 +117,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F test_lt{};	// 判定される矩形の左上位置
 		D2D1_POINT_2F test_rb{};	// 判定される矩形の右下位置
 		// 表示される図形が編集対象の図形なら, 文字列の選択範囲を判定される矩形に格納する.
-		if (static_cast<const ShapeText*>(s) == m_edit_context_shape) {
-			const ShapeText* t = m_edit_context_shape;
+		if (static_cast<const ShapeText*>(s) == m_core_text_shape) {
+			const ShapeText* t = m_core_text_shape;
 			const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
 			if (m_main_page.m_select_start != end) {
 				// 文字列の選択範囲のキャレット点を得て, これを判定する矩形に格納する.

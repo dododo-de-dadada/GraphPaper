@@ -133,13 +133,13 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
+                <MenuFlyoutItem x:Name="mfi_popup_revert_image" x:Uid="mfi_menu_revert_image" Click="image_revert_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_popup_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
                     </MenuFlyoutItem.Icon>
@@ -148,7 +148,7 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
+                <MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -424,8 +424,12 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_text_align_mid" x:Uid="rmfi_menu_text_align_mid" GroupName="gn_popup_text_align_vert" Click="text_align_vert_click" Text="Middle" />
 				</MenuFlyoutSubItem>
 				<!-- 行間 -->
-				<MenuFlyoutItem x:Name="mfi_popup_text_line_sp" x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
-				<!-- 余白 -->
+                <MenuFlyoutItem x:Name="mfi_popup_text_line_sp" x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_line_space}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 余白 -->
 				<MenuFlyoutItem x:Name="mfi_popup_text_pad" x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
                 <!-- 文字列の折り返し -->
                 <MenuFlyoutSubItem x:Name="mfsi_popup_text_wrap" x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
@@ -739,13 +743,13 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_image_revert" x:Uid="mfi_menu_meth_image_revert" Click="image_revert_click" Text="Revert Image to Original" >
+                <MenuFlyoutItem x:Name="mfi_menu_revert_image" x:Uid="mfi_menu_revert_image" Click="image_revert_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_edit" x:Uid="mfi_menu_meth_text_edit" Click="meth_text_edit_click" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_menu_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
                     </MenuFlyoutItem.Icon>
@@ -754,7 +758,7 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_text_find" x:Uid="mfi_menu_meth_text_find" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
+                <MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -1145,7 +1149,11 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_align_mid" x:Uid="rmfi_menu_text_align_mid" Click="text_align_vert_click" GroupName="gn_menu_text_align_vert" Text="Middle" />
 				</MenuFlyoutSubItem>
                 <!-- 行間 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
+                <MenuFlyoutItem x:Uid="mfi_menu_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_line_space}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
                 <!-- 文字列の余白 -->
                 <MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
                 <!-- 文字列の折り返し -->
