@@ -445,10 +445,9 @@ namespace winrt::GraphPaper::implementation
 		unselect_shape_all();
 		undo_push_append(s);
 		undo_push_select(s);
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 		main_bbox_update(s);
 		main_panel_size();
+		m_event_shape_pressed = s;
 		m_event_shape_last = s;
 		main_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.

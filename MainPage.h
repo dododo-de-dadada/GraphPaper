@@ -47,6 +47,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
@@ -62,6 +63,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
 	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
+	using winrt::Windows::UI::Text::Core::CoreTextEditContext;
+	using winrt::Windows::UI::Text::Core::CoreTextServicesManager;
+	using winrt::Windows::UI::ViewManagement::InputPane;
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
 	using winrt::Windows::UI::Xaml::Visibility;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
@@ -76,11 +80,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
-	using winrt::Microsoft::UI::Xaml::Controls::NumberBoxValueChangedEventArgs;
-	using winrt::Windows::UI::Xaml::Controls::TextBox;
-	using winrt::Windows::UI::ViewManagement::InputPane;
-	using winrt::Windows::UI::Text::Core::CoreTextEditContext;
-	using winrt::Windows::UI::Text::Core::CoreTextServicesManager;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)

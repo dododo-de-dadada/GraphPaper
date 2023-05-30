@@ -11,20 +11,20 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-	using winrt::Windows::UI::Xaml::Application;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Xaml::Media::Brush;
-	using winrt::Windows::UI::Xaml::Window;
-	using winrt::Windows::Foundation::Rect;
-	using winrt::Windows::System::VirtualKey;
-	using winrt::Windows::System::VirtualKeyModifiers;
-	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
-	using winrt::Windows::UI::Xaml::FocusState;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+	using winrt::Windows::Foundation::Rect;
+	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+	using winrt::Windows::UI::Text::Core::CoreTextRange;
+	using winrt::Windows::UI::Text::Core::CoreTextTextRequest;
+	using winrt::Windows::UI::Text::Core::CoreTextSelectionRequest;
+	using winrt::Windows::UI::Text::Core::CoreTextLayoutRequest;
+	using winrt::Windows::UI::Xaml::Application;
+	using winrt::Windows::UI::Xaml::Media::Brush;
+	using winrt::Windows::UI::Xaml::Window;
+	using winrt::Windows::UI::Xaml::FocusState;
 	using winrt::Windows::UI::Xaml::Controls::Control;
+	using winrt::Windows::UI::Xaml::Media::GeneralTransform;
 
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
@@ -190,8 +190,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の選択範囲の文字を削除する.
 	void MainPage::core_text_delete(void) noexcept
 	{
-		const ShapeText* t = m_core_text_shape;
-		const auto len = t->get_text_len();
+		const auto len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
 		const auto start = min(m_main_page.m_select_start, len);
 		// 選択範囲があるなら
@@ -206,8 +205,8 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の選択範囲に文字列を挿入する.
 	void MainPage::core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
 	{
-		const ShapeText* t = m_core_text_shape;
-		const auto old_len = t->get_text_len();
+		//const ShapeText* t = m_core_text_shape;
+		const auto old_len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, old_len);
 		const auto start = min(m_core_text_comp ? m_core_text_start : m_main_page.m_select_start, old_len);
 		const auto s = min(start, end);
@@ -225,8 +224,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, ins_text));
 			undo_push_text_select(m_core_text_shape, s + ins_len, s + ins_len, false);
-			//undo_menu_is_enabled();
-			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		else if (ins_len > 0) {
@@ -284,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 		// お約束.
 		InitializeComponent();
 
-		// 右クリックのコンテキストメニューを設定する.
+		// スワップチェーンパネル右クリックのコンテキストメニューを設定する.
 		mf_popup_menu().Opening([this](auto, auto) {
 			if (m_main_page.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 				rmfi_popup_stroke_dash_solid().IsChecked(true);
@@ -763,6 +760,7 @@ namespace winrt::GraphPaper::implementation
 			mfsi_popup_background_pattern().Visibility(menu_layout);
 		});
 
+		// ステータスバー右クリックのコンテキストメニューを設定する.
 		mf_popup_status().Opening([this](auto, auto) {
 			if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 				tmfi_popup_status_bar_draw().IsChecked(true);
@@ -802,6 +800,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		});
 
+		// 作図メニューにフォーカスが移る直前.
 		mbi_menu_drawing().GettingFocus([this](auto, auto) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				rmfi_menu_selection_tool().IsChecked(true);
@@ -895,6 +894,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		});
 
+		// 属性メニューにフォーカスが移る直前.
 		mbi_menu_property().as<Control>().GettingFocus([this](auto, auto) {
 			if (m_main_page.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 				rmfi_menu_stroke_dash_solid().IsChecked(true);
@@ -981,6 +981,8 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_stroke_join_round().IsChecked(true);
 			}
 		});
+
+		// 書体メニューにフォーカスが移る直前.
 		mbi_menu_font().as<Control>().GettingFocus([this](auto, auto) {
 			if (m_main_page.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
 				rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
@@ -1085,6 +1087,7 @@ namespace winrt::GraphPaper::implementation
 
 		});
 
+		// レイアウトメニューにフォーカスが移る直前.
 		mbi_menu_layout().as<Control>().GettingFocus([this](auto, auto) {
 			if (m_main_page.m_grid_emph.m_gauge_1 == 0 && m_main_page.m_grid_emph.m_gauge_2 == 0) {
 				rmfi_menu_grid_emph_1().IsChecked(true);
@@ -1145,7 +1148,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		});
 
-		mbi_menu_help().as<Control>().GettingFocus([this](auto, auto) {
+		// その他メニューにフォーカスが移る直前.
+		mbi_menu_misc().as<Control>().GettingFocus([this](auto, auto) {
 			if (m_len_unit == LEN_UNIT::PIXEL) {
 				rmfi_menu_len_unit_pixel().IsChecked(true);
 			}
@@ -1217,6 +1221,8 @@ namespace winrt::GraphPaper::implementation
 				tmfi_menu_status_bar_zoom().IsChecked(false);
 			}
 		});
+
+		// 編集メニューにフォーカスが移る直前.
 		mbi_menu_edit().as<Control>().GettingFocus([this](auto, auto) {
 			uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 			uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -1347,244 +1353,6 @@ namespace winrt::GraphPaper::implementation
 		//	- FormatUpdating
 		//	- CompositionCompleted
 		{
-			/*
-			tx_find_text_what().GettingFocus([this](auto, auto) {
-				if (m_core_text_shape != nullptr) {
-					m_core_text.NotifyFocusLeave();
-				}
-				});
-			tx_find_replace_with().GettingFocus([this](auto, auto) {
-				if (m_core_text_shape != nullptr) {
-					m_core_text.NotifyFocusLeave();
-				}
-				});
-			auto core_win{ CoreWindow::GetForCurrentThread() };
-			core_win.KeyDown([this](auto sender, auto args) {
-				if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-					tx_find_replace_with().FocusState() != FocusState::Unfocused ||
-					btn_find_next().FocusState() != FocusState::Unfocused ||
-					btn_find_replace().FocusState() != FocusState::Unfocused ||
-					btn_find_replace_all().FocusState() != FocusState::Unfocused ||
-					btn_summary_close().FocusState() != FocusState::Unfocused ||
-					lv_summary_list().FocusState() != FocusState::Unfocused) {
-					return;
-				}
-				if (m_core_text_shape == nullptr ||
-					m_core_text_shape->is_deleted() || !m_core_text_shape->is_selected()) {
-					return;
-				}
-				const ShapeText* t = m_core_text_shape;
-				if (args.VirtualKey() == VirtualKey::Enter) {
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					const auto s = min(start, end);
-					undo_push_null();
-					m_ustack_undo.push_back(new UndoText2(m_core_text_shape, L"\r"));
-					undo_push_text_select(m_core_text_shape, s + 1, s + 1, false);
-					//undo_menu_is_enabled();
-					main_draw();
-
-					winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
-						static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
-					};
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifyTextChanged(modified_ran, 1, new_ran);
-				}
-				else if (args.VirtualKey() == VirtualKey::Back) {
-					// 選択範囲がなくキャレット位置が文頭でないなら
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					if (end == start && end > 0) {
-						undo_push_null();
-						undo_push_text_select(m_core_text_shape, end - 1, end, false);
-						m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
-						//undo_menu_is_enabled();
-						main_draw();
-					}
-					// 選択範囲があるなら
-					else if (end != start) {
-						undo_push_null();
-						m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
-						//undo_menu_is_enabled();
-						main_draw();
-					}
-					winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
-						static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
-					};
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifyTextChanged(modified_ran, 0, new_ran);
-				}
-				else if (args.VirtualKey() == VirtualKey::Delete) {
-					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-					//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					core_text_del_c(shift_key);
-				}
-				else if (args.VirtualKey() == VirtualKey::Left) {
-					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-					//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					if (shift_key) {
-						if (end > 0) {
-							undo_push_text_select(m_core_text_shape, start, end - 1, false);
-							main_draw();
-						}
-					}
-					else {
-						if (end == start && end > 0) {
-							undo_push_text_select(m_core_text_shape, end - 1, end - 1, false);
-							main_draw();
-						}
-						else if (end != start) {
-							const auto new_end = min(start, end);
-							undo_push_text_select(m_core_text_shape, new_end, new_end, false);
-							main_draw();
-						}
-					}
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifySelectionChanged(new_ran);
-				}
-				else if (args.VirtualKey() == VirtualKey::Right) {
-					const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-					//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					if (shift_key) {
-						if (end < len) {
-							undo_push_text_select(m_core_text_shape, start, end + 1, false);
-							main_draw();
-						}
-					}
-					else {
-						if (end == start && end < len) {
-							undo_push_text_select(m_core_text_shape, end + 1, end + 1, false);
-							main_draw();
-						}
-						else if (end != start) {
-							const auto new_end = max(start, end);
-							undo_push_text_select(m_core_text_shape, new_end, new_end, false);
-							main_draw();
-						}
-					}
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifySelectionChanged(new_ran);
-				}
-				else if (args.VirtualKey() == VirtualKey::Up) {
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					const auto row = t->get_text_row(m_main_page.m_select_end);
-					if (end != start && row == 0) {
-						const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						if (shift_key) {
-							undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
-							main_draw();
-						}
-						else {
-							undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
-							main_draw();
-						}
-					}
-					else if (row != 0) {
-						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						const auto shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						const auto line_h = t->m_dwrite_test_metrics[row].top - t->m_dwrite_test_metrics[row - 1].top;
-						D2D1_POINT_2F car;
-						t->get_text_caret(end, row, m_main_page.m_select_trail, car);
-						const D2D1_POINT_2F new_car{ car.x, car.y - line_h };
-						bool new_trail;
-						const auto new_end = t->get_text_pos(new_car, new_trail);
-						if (shift_key) {
-							undo_push_text_select(m_core_text_shape, start, new_end, new_trail);
-							main_draw();
-						}
-						else {
-							const auto new_start = new_trail ? new_end + 1 : new_end;
-							undo_push_text_select(m_core_text_shape, new_start, new_end, new_trail);
-							main_draw();
-						}
-					}
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifySelectionChanged(new_ran);
-				}
-				else if (args.VirtualKey() == VirtualKey::Down) {
-					const auto len = t->get_text_len();
-					const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-					const auto start = min(m_main_page.m_select_start, len);
-					const auto row = t->get_text_row(m_main_page.m_select_end);	// キャレットがある行
-					const auto last = t->m_dwrite_test_cnt - 1;	// 最終行
-					if (end != start && row == last) {
-						const bool shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						if (shift_key) {
-							undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
-							main_draw();
-						}
-						else {
-							undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
-							main_draw();
-						}
-					}
-					else if (row != last) {
-						const bool shift_key = ((sender.GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
-						//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-						const auto line_h = t->m_dwrite_test_metrics[row + 1].top - t->m_dwrite_test_metrics[row].top;
-						D2D1_POINT_2F car;
-						t->get_text_caret(end, row, m_main_page.m_select_trail, car);
-						const D2D1_POINT_2F new_car{ car.x, car.y + line_h };
-						bool new_trail;
-						const auto new_end = t->get_text_pos(new_car, new_trail);
-						if (shift_key) {
-							undo_push_text_select(m_core_text_shape, start, new_end, new_trail);
-							main_draw();
-						}
-						else {
-							const auto new_start = new_trail ? new_end + 1 : new_end;
-							undo_push_text_select(m_core_text_shape, new_start, new_end, new_trail);
-							main_draw();
-						}
-					}
-					const auto new_start = m_main_page.m_select_start;
-					const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-					winrt::Windows::UI::Text::Core::CoreTextRange new_ran{
-						static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
-					};
-					m_core_text.NotifySelectionChanged(new_ran);
-				}
-			});
-			*/
 			m_core_text.InputPaneDisplayPolicy(winrt::Windows::UI::Text::Core::CoreTextInputPaneDisplayPolicy::Manual);
 			m_core_text.InputScope(winrt::Windows::UI::Text::Core::CoreTextInputScope::Text);
 			m_core_text.TextRequested([this](auto, auto args) {
@@ -1592,7 +1360,6 @@ namespace winrt::GraphPaper::implementation
 					return;
 				}
 				//__debugbreak();
-				using winrt::Windows::UI::Text::Core::CoreTextTextRequest;
 				CoreTextTextRequest req{ args.Request() };
 				const auto end = static_cast<uint32_t>(req.Range().EndCaretPosition);
 				const auto text = (m_core_text_shape->m_text == nullptr ? L"" : m_core_text_shape->m_text);
@@ -1607,8 +1374,6 @@ namespace winrt::GraphPaper::implementation
 					return;
 				}
 				//__debugbreak();
-				using winrt::Windows::UI::Text::Core::CoreTextSelectionRequest;
-				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextSelectionRequest req{ args.Request() };
 				CoreTextRange ran{};
 				const ShapeText* t = m_core_text_shape;
@@ -1633,18 +1398,14 @@ namespace winrt::GraphPaper::implementation
 			// 文字が入力される
 			m_core_text.TextUpdating([this](auto, auto args) {
 				//__debugbreak();
-				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextRange ran{ args.Range() };
 				const winrt::hstring ins_text{ args.Text() };
 				core_text_insert(ins_text.data(), static_cast<uint32_t>(ins_text.size()));
 				});
 			// 変換中, キャレットが移動した
 			m_core_text.SelectionUpdating([this](auto, auto args) {
-				//__debugbreak();
-				using winrt::Windows::UI::Text::Core::CoreTextRange;
 				CoreTextRange ran{ args.Selection() };
 				undo_push_text_select(m_core_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
-				////xcvd_menu_is_enabled();
 				main_draw();
 				});
 			m_core_text.FormatUpdating([](auto, auto) {
@@ -1655,9 +1416,6 @@ namespace winrt::GraphPaper::implementation
 				if (m_core_text_shape == nullptr) {
 					return;
 				}
-				using winrt::Windows::UI::Text::Core::CoreTextLayoutRequest;
-				using winrt::Windows::Graphics::Display::DisplayInformation;
-				using winrt::Windows::UI::Xaml::Media::GeneralTransform;
 				CoreTextLayoutRequest req{ args.Request() };
 				Rect con_rect;	// テキストの矩形
 				Rect sel_rect;	// 選択範囲の矩形

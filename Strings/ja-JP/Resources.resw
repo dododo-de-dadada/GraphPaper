@@ -317,8 +317,8 @@
     <value>レイアウト(L)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_help.Title" xml:space="preserve">
-    <value>ヘルプ(H)</value>
+  <data name="mbi_menu_misc.Title" xml:space="preserve">
+    <value>その他(M)</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_menu_property.Title" xml:space="preserve">

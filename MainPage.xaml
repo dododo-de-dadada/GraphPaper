@@ -1257,7 +1257,7 @@
 				<MenuFlyoutItem x:Name="mfi_menu_layout_reset" x:Uid="mfi_menu_layout_reset" Click="layout_reset_click_async" Text="Reset Layout" />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_menu_help" x:Uid="mbi_menu_help" AccessKey="H" Title="Help">
+            <muxc:MenuBarItem x:Name="mbi_menu_misc" x:Uid="mbi_menu_misc" AccessKey="M" Title="Misc">
 				<!-- 一覧 -->
 				<MenuFlyoutItem x:Name="mfi_menu_summary_list" x:Uid="mfi_menu_summary_list" Click="summary_list_click" Text="List Summary" >
 					<MenuFlyoutItem.Icon>
