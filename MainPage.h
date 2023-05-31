@@ -16,7 +16,7 @@
 //
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
-// MainPage_color.cpp	色 (線枠, 塗りつぶし, 書体, 方眼, ページ), 画像の不透明度
+// MainPage_color.cpp	色 (線枠, 塗りつぶし, 書体, 方眼, 用紙), 画像の不透明度
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
 // MainPage_edit.cpp	円弧や文字列の編集
@@ -27,7 +27,7 @@
 // MainPage_group.cpp	グループ化とグループの解除
 // MainPage_help.cpp	長さの単位, 色の基数, ステータスバー, 頂点をくっつける閾値
 // NainPage_image.cpp	画像
-// MainPage_layout.cpp	レイアウト (方眼, ページ, 背景パターン, 保存/リセット)
+// MainPage_layout.cpp	レイアウト (方眼, 用紙, 背景パターン, 保存/リセット)
 // MainPage_order.cpp	並び替え
 // MainPage_dialog.cpp	属性ダイアログ
 // MainPage_scroll.cpp	スクロールバー
@@ -51,29 +51,22 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
-	using winrt::Windows::Foundation::IInspectable;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
-	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Core::CoreCursor;
-	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
 	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
 	using winrt::Windows::UI::Text::Core::CoreTextEditContext;
 	using winrt::Windows::UI::Text::Core::CoreTextServicesManager;
-	using winrt::Windows::UI::ViewManagement::InputPane;
-	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
-	using winrt::Windows::UI::Xaml::Visibility;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
-	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
@@ -202,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 		POS = (1 | 2),	// カーソルの位置
 		DRAW = 4,	// 作図ツール
 		GRID = 8,	// 方眼の大きさ
-		PAGE = (16 | 32),	// ページの大きさ
+		SHEET = (16 | 32),	// 用紙の大きさ
 		UNIT = 64,	// 単位名
 		ZOOM = 128,	// 拡大率
 	};
@@ -267,8 +260,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
-		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_PAGE;	// ポインターが押された部位
-		//uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_PAGE;	// 右ポインターが押された部位
+		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_SHEET;	// ポインターが押された部位
+		//uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_SHEET;	// 右ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		//Shape* m_event_shape_r_pressed = nullptr;	// 右ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
@@ -287,22 +280,22 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//bool m_image_keep_aspect = true;	// 画像の縦横比の維持/可変
 
-		// メインページ
-		ShapePage m_main_page;	// ページ
+		// メイン用紙
+		ShapeSheet m_main_sheet;	// 用紙
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
-		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページと図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
+		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
+		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
 
-		float m_main_scale = 1.0f;	// メインページの拡大率
+		float m_main_scale = 1.0f;	// メイン用紙の拡大率
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
 		bool m_background_show = false;	// 背景の市松模様を表示
 		D2D1_COLOR_F m_background_color{ COLOR_WHITE };	// 背景の色
 
-		// 属性のページ
-		ShapePage m_prop_page;	// ページ
-		D2D_UI m_prop_d2d;	// 描画環境
+		// ダイアログで使用する用紙
+		ShapeSheet m_dialog_sheet;	// 用紙
+		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
 		//uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
@@ -342,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 		// MainPage.cpp
 		// メインページの作成, 
 		// メインのスワップチェーンパネルのハンドラー
-		// メインのページ図形の処理
+		// メインの用紙図形の処理
 		//-------------------------------
 
 		// 入力文字列の選択範囲の文字列を得る.
@@ -353,12 +346,12 @@ namespace winrt::GraphPaper::implementation
 		void core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept;
 		// 入力文字列から文字を削除する.
 		void core_text_del_c(const bool shift_key) noexcept;
-		// 更新された図形をもとにメインのページの境界矩形を更新する.
+		// 更新された図形をもとにメインの用紙の境界矩形を更新する.
 		void MainPage::main_bbox_update(const Shape* s) noexcept
 		{
 			s->get_bbox(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 		}
-		// メインのページ図形の境界矩形を更新する.
+		// メインの用紙図形の境界矩形を更新する.
 		void main_bbox_update(void) noexcept;
 		// メインページを作成する.
 		MainPage(void);
@@ -370,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		void main_panel_scale_changed(IInspectable const& sender, IInspectable const&);
 		// メインのスワップチェーンパネルの大きさを設定する.
 		void main_panel_size(void);
-		// メインのページ図形を表示する.
+		// メインの用紙図形を表示する.
 		void main_draw(void);
 		// メッセージダイアログを表示する.
 		void message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc);
@@ -441,9 +434,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 図形の変形を終了する.
-		void event_finish_deforming(const VirtualKeyModifiers key_mod);
+		void event_adjust_after_deforming(const VirtualKeyModifiers key_mod);
 		// 図形の移動を終了する.
-		void event_finish_moving(void);
+		void event_adjust_after_moving(void);
 		// 範囲選択を終了する.
 		void event_finish_rect_selection(const VirtualKeyModifiers key_mod);
 		// ポインターが動いた.
@@ -519,8 +512,8 @@ namespace winrt::GraphPaper::implementation
 		void color_grid_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::GRID_COLOR>(); }
 		// 属性メニューの「画像の不透明度...」が選択された.
 		IAsyncAction color_image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「ページの色」が選択された.
-		void color_page_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::PAGE_COLOR>(); }
+		// レイアウトメニューの「用紙の色」が選択された.
+		void color_sheet_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::SHEET_COLOR>(); }
 		// 属性メニューの「線枠の色」が選択された.
 		void color_stroke_click(IInspectable const&, RoutedEventArgs const&) { color_click_async<UNDO_T::STROKE_COLOR>(); }
 
@@ -753,14 +746,14 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「レイアウトを保存」が選択された
 		IAsyncAction layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「ページの大きさ」が選択された
-		IAsyncAction page_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// ページの大きさダイアログのテキストボックスの値が変更された.
-		void page_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&);
-		// ページの大きさダイアログのコンボボックスの選択が変更された.
-		void page_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
-		// レイアウトメニューの「ページのズーム」が選択された.
-		void page_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
+		// レイアウトメニューの「用紙の大きさ」が選択された
+		IAsyncAction sheet_size_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 用紙の大きさダイアログのテキストボックスの値が変更された.
+		void sheet_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&);
+		// 用紙の大きさダイアログのコンボボックスの選択が変更された.
+		void sheet_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+		// レイアウトメニューの「用紙のズーム」が選択された.
+		void sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_status.cpp
@@ -775,8 +768,8 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
 		void status_bar_set_grid(void);
-		// ページの大きさをステータスバーに格納する.
-		void status_bar_set_page(void);
+		// 用紙の大きさをステータスバーに格納する.
+		void status_bar_set_sheet(void);
 		// 単位をステータスバーに格納する.
 		void status_bar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
@@ -920,6 +913,20 @@ namespace winrt::GraphPaper::implementation
 		void undo_push_append(Shape* s)
 		{
 			m_ustack_undo.push_back(new UndoAppend(s));
+			if (s->is_selected()) {
+				m_list_sel_cnt++;
+			}
+#ifdef _DEBUG
+			uint32_t cnt = 0;
+			for (auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted() && s->is_selected()) {
+					cnt++;
+				}
+			}
+			if (cnt != m_list_sel_cnt) {
+				__debugbreak();
+			}
+#endif
 		}
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
 		void undo_push_append(ShapeGroup* g, Shape* s)
@@ -950,6 +957,20 @@ namespace winrt::GraphPaper::implementation
 		void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
 		{
 			m_ustack_undo.push_back(new UndoInsert(s, s_pos));
+			if (s->is_selected()) {
+				m_list_sel_cnt++;
+			}
+#ifdef _DEBUG
+			uint32_t cnt = 0;
+			for (auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted() && s->is_selected()) {
+					cnt++;
+				}
+			}
+			if (cnt != m_list_sel_cnt) {
+				__debugbreak();
+			}
+#endif
 		}
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
 		void undo_push_move(const D2D1_POINT_2F pos, const bool any = false);
@@ -959,11 +980,28 @@ namespace winrt::GraphPaper::implementation
 		void undo_push_remove(Shape* g, Shape* s)
 		{
 			m_ustack_undo.push_back(new UndoRemoveG(g, s));
+			//if (s->is_selected()) {
+			//	m_list_sel_cnt++;
+			//}
 		}
 		// 図形を取り去り, その操作をスタックに積む.
 		void undo_push_remove(Shape* s)
 		{
 			m_ustack_undo.push_back(new UndoRemove(s));
+			if (s->is_selected()) {
+				m_list_sel_cnt--;
+			}
+#ifdef _DEBUG
+			uint32_t cnt = 0;
+			for (auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted() && s->is_selected()) {
+					cnt++;
+				}
+			}
+			if (cnt != m_list_sel_cnt) {
+				__debugbreak();
+			}
+#endif
 		}
 		// 図形の選択を反転して, その操作をスタックに積む.
 		void undo_push_select(Shape* const s);
@@ -976,8 +1014,8 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の選択範囲を解除する. キャレット位置は変わらない.
 		void undo_push_text_unselect(ShapeText* s)
 		{
-			const auto start = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-			undo_push_text_select(s, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+			const auto start = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
+			undo_push_text_select(s, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
 		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
@@ -990,9 +1028,9 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				ShapeText* t = static_cast<ShapeText*>(s);
-				m_main_page.m_select_start = start;
-				m_main_page.m_select_end = end;
-				m_main_page.m_select_trail = trail;
+				m_main_sheet.m_select_start = start;
+				m_main_sheet.m_select_end = end;
+				m_main_sheet.m_select_trail = trail;
 				return;
 			}
 			// そうでなければ, スタックに操作を積む.
@@ -1014,8 +1052,6 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」が選択された.
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの可否を設定する.
-		//void xcvd_menu_is_enabled(void);
 		// 編集メニューの「貼り付け」が選択された.
 		void xcvd_paste_click(IInspectable const&, RoutedEventArgs const&);
 		// 画像を貼り付ける.
@@ -1030,7 +1066,7 @@ namespace winrt::GraphPaper::implementation
 		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{
 			bool changed = false;
-			for (Shape* s : m_main_page.m_shape_list) {
+			for (Shape* s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted() || !s->is_selected() || dynamic_cast<ShapeArrow*>(s) == nullptr) {
 					continue;
 				}

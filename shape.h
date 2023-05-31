@@ -13,7 +13,7 @@
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
 // shape_ruler.cpp	定規
-// shape_page.cpp	ページ
+// shape_sheet.cpp	用紙
 // shape_slist.cpp	図形リスト
 // shape_stroke.cpp	線枠のひな型
 // shape_svg.cpp	SVG への書き込み
@@ -34,7 +34,7 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapeSelect*| | ShapeGroup  | | ShapePage   |
+// | ShapeSelect*| | ShapeGroup  | | ShapeSheet   |
 // +------+------+ +-------------+ +-------------+
 //        |
 //        +---------------+
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 	//  SW    S    SE
 	//
 	enum LOC_TYPE : uint32_t {
-		LOC_PAGE,		// 図形の外部 (矢印カーソル)
+		LOC_SHEET,		// 図形の外部 (矢印カーソル)
 		LOC_FILL,		// 図形の内部 (移動カーソル)
 		LOC_STROKE,	// 線枠 (移動カーソル)
 		LOC_TEXT,		// 文字列 (移動カーソル)
@@ -208,8 +208,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr float JOIN_MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
 	constexpr D2D1_SIZE_F TEXT_PAD_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
-	constexpr float PAGE_SIZE_MAX = 32768.0f;	// 最大のページ大きさ
-	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0f * 96.0f, 11.0f * 96.0f };	// ページの大きさの既定値
+	constexpr float SHEET_SIZE_MAX = 32768.0f;	// 最大の用紙大きさ
+	constexpr D2D1_SIZE_F SHEET_SIZE_DEFVAL{ 8.0f * 96.0f, 11.0f * 96.0f };	// 用紙の大きさの既定値
 	constexpr float FONT_SIZE_MAX = 512.0f;	// 書体の大きさの最大値
 	constexpr D2D1_LINE_JOIN JOIN_STYLE_DEFVAL = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 
@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/) { return 0; }
+		virtual size_t export_pdf(const D2D1_SIZE_F/*sheet_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& /*dt_writer*/) noexcept {}
 		// 円弧の方向を得る
@@ -457,12 +457,12 @@ namespace winrt::GraphPaper::implementation
 		virtual	void get_pos_loc(const uint32_t/*loc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 始点を得る.
 		virtual bool get_pos_start(D2D1_POINT_2F&/*val*/) const noexcept { return false; }
-		// ページの色を得る.
-		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
-		// ページの余白を得る.
-		virtual bool get_page_margin(D2D1_RECT_F&/*val*/) const noexcept { return false; }
-		// ページの大きさを得る.
-		virtual bool get_page_size(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
+		// 用紙の色を得る.
+		virtual bool get_sheet_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
+		// 用紙の余白を得る.
+		virtual bool get_sheet_margin(D2D1_RECT_F&/*val*/) const noexcept { return false; }
+		// 用紙の大きさを得る.
+		virtual bool get_sheet_size(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 端の形式を得る.
 		//virtual bool get_stroke_cap(CAP_STYLE& /*val*/) const noexcept { return false; }
 		virtual bool get_stroke_cap(D2D1_CAP_STYLE& /*val*/) const noexcept { return false; }
@@ -487,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool ctrl_key = false) const noexcept { return LOC_TYPE::LOC_PAGE; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool ctrl_key = false) const noexcept { return LOC_TYPE::LOC_SHEET; }
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -564,12 +564,12 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_pos_loc(const D2D1_POINT_2F/*val*/, const uint32_t/*anc*/, const float/*snap_point*/, const bool/*keep_aspect*/) noexcept { return false; }
 		// 値を始点に格納する. 他の部位の点も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F/*val*/) noexcept { return false; }
-		// 値をページの色に格納する.
-		virtual bool set_page_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
-		// ページの余白に格納する.
-		virtual bool set_page_margin(const D2D1_RECT_F&/*val*/) noexcept { return false; }
-		// 値をページの大きさに格納する.
-		virtual bool set_page_size(const D2D1_SIZE_F/*val*/) noexcept { return false; }
+		// 値を用紙の色に格納する.
+		virtual bool set_sheet_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
+		// 用紙の余白に格納する.
+		virtual bool set_sheet_margin(const D2D1_RECT_F&/*val*/) noexcept { return false; }
+		// 値を用紙の大きさに格納する.
+		virtual bool set_sheet_size(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を選択されてるか判定に格納する.
 		virtual bool set_select(const bool/*val*/) noexcept { return false; }
 		// 値を線枠の色に格納する.
@@ -711,7 +711,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept final override;
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F p, const D2D1_SIZE_F page_size, const SoftwareBitmap& bitmap, const float opacity);
+		ShapeImage(const D2D1_POINT_2F pt, const D2D1_SIZE_F view, const SoftwareBitmap& bitmap, const float opacity);
 		// 図形をデータリーダーから読み込む.
 		ShapeImage(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
@@ -733,9 +733,9 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// ページ図形
+	// 用紙図形
 	//------------------------------
-	struct ShapePage : Shape {
+	struct ShapeSheet : Shape {
 		SHAPE_LIST m_shape_list{};	// 図形リスト
 
 		// 矢じるし
@@ -796,12 +796,11 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
 		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };	// 方眼のオフセット
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
-		//bool m_snap_grid = true;	// 方眼に合わせる
 
-		// ページ
-		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
-		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
-		D2D1_RECT_F m_page_margin{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
+		// 用紙
+		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色
+		D2D1_SIZE_F	m_sheet_size{ SHEET_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_RECT_F m_sheet_margin{ 0.0f, 0.0f, 0.0f, 0.0f };	// 用紙の内余白
 
 		// 図形リストの最後の図形を得る.
 		Shape* slist_back() const noexcept
@@ -884,14 +883,14 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_stroke_join_limit(float& val) const noexcept final override;
 		// 線の結合の形式を得る.
 		virtual bool get_stroke_join(D2D1_LINE_JOIN& val) const noexcept final override;
-		// ページの色を得る.
-		virtual bool get_page_color(D2D1_COLOR_F& val) const noexcept final override;
-		// ページの大きさを得る.
-		virtual bool get_page_size(D2D1_SIZE_F& val) const noexcept final override;
-		// ページの余白を得る.
-		virtual bool get_page_margin(D2D1_RECT_F& val) const noexcept final override
+		// 用紙の色を得る.
+		virtual bool get_sheet_color(D2D1_COLOR_F& val) const noexcept final override;
+		// 用紙の大きさを得る.
+		virtual bool get_sheet_size(D2D1_SIZE_F& val) const noexcept final override;
+		// 用紙の余白を得る.
+		virtual bool get_sheet_margin(D2D1_RECT_F& val) const noexcept final override
 		{
-			val = m_page_margin;
+			val = m_sheet_margin;
 			return true;
 		}
 		// 線枠の色を得る.
@@ -963,21 +962,21 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_stroke_join_limit(const float& val) noexcept final override;
 		// 値を線の結合の形式に格納する.
 		virtual bool set_stroke_join(const D2D1_LINE_JOIN& val) noexcept final override;
-		// 値をページの色に格納する.
-		virtual bool set_page_color(const D2D1_COLOR_F& val) noexcept final override;
-		// 値をページの余白に格納する.
-		virtual bool set_page_margin(const D2D1_RECT_F& val) noexcept final override
+		// 値を用紙の色に格納する.
+		virtual bool set_sheet_color(const D2D1_COLOR_F& val) noexcept final override;
+		// 値を用紙の余白に格納する.
+		virtual bool set_sheet_margin(const D2D1_RECT_F& val) noexcept final override
 		{
-			if (!equal(m_page_margin, val)) {
-				m_page_margin = val;
+			if (!equal(m_sheet_margin, val)) {
+				m_sheet_margin = val;
 				return true;
 			}
 			return false;
 		}
-		// 値をページの倍率に格納する.
-		//virtual bool set_page_scale(const float val) noexcept final override;
-		// 値をページの大きさに格納する.
-		virtual bool set_page_size(const D2D1_SIZE_F val) noexcept final override;
+		// 値を用紙の倍率に格納する.
+		//virtual bool set_sheet_scale(const float val) noexcept final override;
+		// 値を用紙の大きさに格納する.
+		virtual bool set_sheet_size(const D2D1_SIZE_F val) noexcept final override;
 		// 値を線枠の色に格納する.
 		virtual bool set_stroke_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を書体の太さに格納する.
@@ -1001,7 +1000,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
-		size_t export_pdf_page(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
+		size_t export_pdf_sheet(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
 		size_t export_pdf_grid(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
@@ -1064,7 +1063,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		IAsyncAction export_as_svg_async(const DataWriter& dt_writer);
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer) final override;
 	};
 
 	//------------------------------
@@ -1191,7 +1190,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept override;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) override;
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer) override;
 	};
 
 	struct ShapeRect : ShapeOblong {
@@ -1255,7 +1254,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
+		size_t export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer) final override;
 	};
 
 	//------------------------------
@@ -1283,7 +1282,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形が点を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F pt, const bool ctrl_key = false) const noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
@@ -1316,7 +1315,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
@@ -1552,7 +1551,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 		// 値を端の形式に格納する.
@@ -1705,7 +1704,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};
@@ -1734,7 +1733,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeBezier(DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
+		virtual size_t export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに書き込む.
@@ -1827,7 +1826,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(const DataWriter& dt_writer) noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
+		size_t export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer);
 		// 図形を作成する.
 		ShapeArc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* prop);
 		// 図形をデータリーダーから読み込む.
@@ -2174,7 +2173,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		size_t export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer) final override;
 		// データライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& dt_writer) noexcept final override;
 	};

@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		undo_push_null();
-		for (Shape* const s : m_main_page.m_shape_list) {
+		for (Shape* const s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}

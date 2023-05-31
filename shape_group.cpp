@@ -134,11 +134,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(pt, false) != LOC_TYPE::LOC_PAGE) {
+			if (s->hit_test(pt, false) != LOC_TYPE::LOC_SHEET) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	//------------------------------

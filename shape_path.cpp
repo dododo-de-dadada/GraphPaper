@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「始点」ならば, 始点を得る.
-		if (loc == LOC_TYPE::LOC_PAGE || loc == LOC_TYPE::LOC_P0) {
+		if (loc == LOC_TYPE::LOC_SHEET || loc == LOC_TYPE::LOC_P0) {
 			val = m_start;
 		}
 		else if (loc > LOC_TYPE::LOC_P0) {

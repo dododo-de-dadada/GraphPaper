@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
-		if (loc != LOC_TYPE::LOC_PAGE) {
+		if (loc != LOC_TYPE::LOC_SHEET) {
 			return loc;
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	HRESULT ShapeRuler::create_text_format(void) noexcept

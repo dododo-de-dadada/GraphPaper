@@ -1101,7 +1101,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// 円弧をベジェ曲線で近似する.

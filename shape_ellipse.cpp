@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const auto loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
-		if (loc != LOC_TYPE::LOC_PAGE) {
+		if (loc != LOC_TYPE::LOC_SHEET) {
 			return loc;
 		}
 
@@ -78,8 +78,8 @@ namespace winrt::GraphPaper::implementation
 			const double ox = rx + s_width * 0.5;
 			const double oy = ry + s_width * 0.5;
 			if (!pt_in_ellipse(pt, c, ox, oy)) {
-				// ŠO‘¤‚È‚ç LOC_PAGE ‚ð•Ô‚·.
-				return LOC_TYPE::LOC_PAGE;
+				// ŠO‘¤‚È‚ç LOC_SHEET ‚ð•Ô‚·.
+				return LOC_TYPE::LOC_SHEET;
 			}
 			// ‚¾‰~‚Ì“àŒa‚É‘Î‚µ, “_‚Ì“àŠO‚ð”»’è‚·‚é.
 			const double ix = ox - s_width;
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 }

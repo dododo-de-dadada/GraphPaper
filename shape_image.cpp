@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 			p[0].y <= pt.y && pt.y <= p[2].y) {
 			return LOC_TYPE::LOC_FILL;
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// 矩形に含まれるか判定する.
@@ -860,19 +860,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	左上位置
+	// pt	左上点
 	// view	表示される大きさ
 	// bmp	ビットマップ
 	// opac	不透明度
-	ShapeImage::ShapeImage(const D2D1_POINT_2F start, const D2D1_SIZE_F view, 
-		const SoftwareBitmap& bmp, const float opac)
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pt, const D2D1_SIZE_F view, const SoftwareBitmap& bmp, const float opac)
 	{
 		const uint32_t image_w = bmp.PixelWidth();
 		const uint32_t image_h = bmp.PixelHeight();
 
 		m_orig.width = image_w;
 		m_orig.height = image_h;
-		m_start = start;
+		m_start = pt;
 		m_view = view;
 		m_clip.left = m_clip.top = 0;
 		m_clip.right = static_cast<FLOAT>(image_w);
@@ -888,8 +887,9 @@ namespace winrt::GraphPaper::implementation
 			auto image_ref{
 				image_buf.CreateReference()
 			};
-			winrt::com_ptr<IMemoryBufferByteAccess> image_mem = 
-				image_ref.as<IMemoryBufferByteAccess>();
+			winrt::com_ptr<IMemoryBufferByteAccess> image_mem{
+				image_ref.as<IMemoryBufferByteAccess>()
+			};
 			BYTE* image_data = nullptr;
 			UINT32 capacity = 0;
 			if (SUCCEEDED(image_mem->GetBuffer(&image_data, &capacity))) {

@@ -77,10 +77,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
-	// 戻り値	つねに LOC_PAGE
+	// 戻り値	つねに LOC_SHEET
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F/*pt*/, const bool/*ctrl_key*/) const noexcept
 	{
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// D2D ストロークスタイルを作成する.

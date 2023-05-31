@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	// 図形リストをもとに図形の一覧を作成する.
 	static void summary_create(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict);
@@ -223,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 			m_core_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
 			m_core_text.NotifyFocusEnter();
 		}
-		m_main_page.set_attr_to(m_event_shape_pressed);
+		m_main_sheet.set_attr_to(m_event_shape_pressed);
 	}
 
 	// 編集メニューの「一覧を表示」が選択された.
@@ -253,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形の一覧の排他制御を false と入れ替える.
 		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
-		summary_create(lv_summary_list(), m_main_page.m_shape_list, Resources());
+		summary_create(lv_summary_list(), m_main_sheet.m_shape_list, Resources());
 		m_summary_atomic.store(summary_visible, std::memory_order_release);
 	}
 
@@ -320,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 			m_summary_atomic.store(false, std::memory_order_release);
 			const auto& list = lv_summary_list();
 			list.Items().Clear();
-			summary_create(list, m_main_page.m_shape_list, Resources());
+			summary_create(list, m_main_sheet.m_shape_list, Resources());
 			list.UpdateLayout();
 			m_summary_atomic.store(true, std::memory_order_release);
 		}

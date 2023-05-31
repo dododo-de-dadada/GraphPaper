@@ -14,6 +14,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 	using winrt::Windows::UI::Xaml::Setter;
 	using winrt::Windows::Storage::StorageDeleteOption;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
@@ -92,10 +93,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		GRID_EMPH g_emph;
-		m_main_page.get_grid_emph(g_emph);
+		m_main_sheet.get_grid_emph(g_emph);
 		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_page, val);
+			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_sheet, val);
 			//undo_menu_is_enabled();
 			main_draw();
 		}
@@ -114,11 +115,11 @@ namespace winrt::GraphPaper::implementation
 		const auto str_title{
 			ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")
 		};
-		m_prop_page.set_attr_to(&m_main_page);
-		const auto dpi = m_prop_d2d.m_logical_dpi;
-		const auto g_len = m_prop_page.m_grid_base + 1.0;
+		m_dialog_sheet.set_attr_to(&m_main_sheet);
+		const auto dpi = m_dialog_d2d.m_logical_dpi;
+		const auto g_len = m_dialog_sheet.m_grid_base + 1.0;
 		float g_base;
-		m_prop_page.get_grid_base(g_base);
+		m_dialog_sheet.get_grid_base(g_base);
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, g_base + 1.0, dpi, g_len, buf);
 
@@ -155,28 +156,30 @@ namespace winrt::GraphPaper::implementation
 		cd_dialog_prop().Title(box_value(str_title));
 		{
 			const auto revoker0{
-				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_grid_length](auto const&, auto const& args) {
+					// IInspectable const&, RangeBaseValueChangedEventArgs const& args
 					const auto unit = m_len_unit;
-					const auto dpi = m_prop_d2d.m_logical_dpi;
-					const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
+					const auto dpi = m_dialog_d2d.m_logical_dpi;
+					const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val + 1.0, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_grid_length + buf));
-					if (m_prop_page.set_grid_base(val)) {
+					if (m_dialog_sheet.set_grid_base(val)) {
 						dialog_draw();
 					}
 				})
 			};
 			const auto revoker1{
-				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this, str_grid_length](IInspectable const&, SelectionChangedEventArgs const&) {
+				dialog_combo_box_0().SelectionChanged(winrt::auto_revoke, [this, str_grid_length](auto const&, auto const&) {
+					// IInspectable const&, SelectionChangedEventArgs const&
 					if (dialog_combo_box_0().SelectedIndex() == 0) {
 						if (m_len_unit != LEN_UNIT::PIXEL) {
 							m_len_unit = LEN_UNIT::PIXEL;
 							const auto unit = m_len_unit;
-							const auto dpi = m_prop_d2d.m_logical_dpi;
-							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_prop_page.m_grid_base + 1.0f;
+							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
+							const auto val = m_dialog_sheet.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -186,9 +189,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::INCH) {
 							m_len_unit = LEN_UNIT::INCH;
 							const auto unit = m_len_unit;
-							const auto dpi = m_prop_d2d.m_logical_dpi;
-							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_prop_page.m_grid_base + 1.0f;
+							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
+							const auto val = m_dialog_sheet.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -198,9 +201,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::MILLI) {
 							m_len_unit = LEN_UNIT::MILLI;
 							const auto unit = m_len_unit;
-							const auto dpi = m_prop_d2d.m_logical_dpi;
-							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_prop_page.m_grid_base + 1.0f;
+							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
+							const auto val = m_dialog_sheet.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -210,9 +213,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::POINT) {
 							m_len_unit = LEN_UNIT::POINT;
 							const auto unit = m_len_unit;
-							const auto dpi = m_prop_d2d.m_logical_dpi;
-							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_prop_page.m_grid_base + 1.0f;
+							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
+							const auto val = m_dialog_sheet.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -222,9 +225,9 @@ namespace winrt::GraphPaper::implementation
 						if (m_len_unit != LEN_UNIT::GRID) {
 							m_len_unit = LEN_UNIT::GRID;
 							const auto unit = m_len_unit;
-							const auto dpi = m_prop_d2d.m_logical_dpi;
-							const auto g_len = m_main_page.m_grid_base + 1.0f;	// <---
-							const auto val = m_prop_page.m_grid_base + 1.0f;
+							const auto dpi = m_dialog_d2d.m_logical_dpi;
+							const auto g_len = m_main_sheet.m_grid_base + 1.0f;	// <---
+							const auto val = m_dialog_sheet.m_grid_base + 1.0f;
 							wchar_t buf[32];
 							conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val , dpi, g_len, buf);
 							dialog_slider_0().Header(box_value(str_grid_length + buf));
@@ -234,15 +237,13 @@ namespace winrt::GraphPaper::implementation
 				})
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
-				float setting_val;
-				float page_val;
+				float dialog_val;
+				float sheet_val;
 
-				m_main_page.get_grid_base(page_val);
-				m_prop_page.get_grid_base(setting_val);
-				if (!equal(page_val, setting_val)) {
-					//undo_menu_is_enabled();
-					undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, setting_val);
-					//undo_menu_is_enabled();
+				m_main_sheet.get_grid_base(sheet_val);
+				m_dialog_sheet.get_grid_base(dialog_val);
+				if (!equal(sheet_val, dialog_val)) {
+					undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, dialog_val);
 					main_draw();
 				}
 
@@ -259,11 +260,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_main_page.get_grid_base(g_base);
+		m_main_sheet.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, val);
 			//undo_menu_is_enabled();
 			main_draw();
 		}
@@ -274,11 +275,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_main_page.get_grid_base(g_base);
+		m_main_sheet.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
+		if (val <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_page, val);
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, val);
 			//undo_menu_is_enabled();
 			main_draw();
 		}
@@ -302,9 +303,9 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		if (m_main_page.m_grid_show != new_val) {
+		if (m_main_sheet.m_grid_show != new_val) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_page, new_val);
+			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_sheet, new_val);
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -365,11 +366,11 @@ namespace winrt::GraphPaper::implementation
 		// 書体の属性を初期化する.
 		{
 			// リソースの取得に失敗した場合に備えて, 静的な既定値を書体属性に格納する.
-			m_main_page.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
-			m_main_page.set_font_size(FONT_SIZE_DEFVAL);
-			m_main_page.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
-			m_main_page.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
-			m_main_page.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
+			m_main_sheet.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
+			m_main_sheet.set_font_size(FONT_SIZE_DEFVAL);
+			m_main_sheet.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
+			m_main_sheet.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
+			m_main_sheet.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
 			// BodyTextBlockStyle をリソースディクショナリから得る.
 			auto resource = Resources().TryLookup(box_value(FONT_STYLE_DEFVAL));
 			if (resource != nullptr) {
@@ -399,31 +400,31 @@ namespace winrt::GraphPaper::implementation
 								// プロパティーが FontFamily の場合,
 								// セッターの値から, 書体名を得る.
 								const auto val = unbox_value<winrt::Windows::UI::Xaml::Media::FontFamily>(setter.Value());
-								m_main_page.set_font_family(wchar_cpy(val.Source().c_str()));
+								m_main_sheet.set_font_family(wchar_cpy(val.Source().c_str()));
 							}
 							else if (prop == TextBlock::FontSizeProperty()) {
 								// プロパティーが FontSize の場合,
 								// セッターの値から, 書体の大きさを得る.
 								const auto val = unbox_value<float>(setter.Value());
-								m_main_page.m_font_size = val;
+								m_main_sheet.m_font_size = val;
 							}
 							else if (prop == TextBlock::FontStretchProperty()) {
 								// プロパティーが FontStretch の場合,
 								// セッターの値から, 書体の幅を得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_page.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
+								m_main_sheet.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
 							}
 							else if (prop == TextBlock::FontStyleProperty()) {
 								// プロパティーが FontStyle の場合,
 								// セッターの値から, 字体を得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_page.set_font_style(static_cast<DWRITE_FONT_STYLE>(val));
+								m_main_sheet.set_font_style(static_cast<DWRITE_FONT_STYLE>(val));
 							}
 							else if (prop == TextBlock::FontWeightProperty()) {
 								// プロパティーが FontWeight の場合,
 								// セッターの値から, 書体の太さを得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_page.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
+								m_main_sheet.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
 							}
 						}
 					}
@@ -434,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 				style = nullptr;
 				resource = nullptr;
 			}
-			ShapeText::is_available_font(m_main_page.m_font_family);
+			ShapeText::is_available_font(m_main_sheet.m_font_family);
 		}
 
 		{
@@ -449,31 +450,31 @@ namespace winrt::GraphPaper::implementation
 			else {
 				grid_color = GRID_COLOR_DEFVAL;
 			}
-			m_main_page.set_arrow_size(ARROW_SIZE_DEFVAL);
-			m_main_page.set_arrow_style(ARROW_STYLE::ARROW_NONE);
-			m_main_page.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
-			m_main_page.set_fill_color(COLOR_WHITE);
-			m_main_page.set_font_color(COLOR_BLACK);
-			m_main_page.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
-			m_main_page.set_grid_base(GRID_LEN_DEFVAL - 1.0);
-			m_main_page.set_grid_color(grid_color);
-			m_main_page.set_grid_emph(GRID_EMPH_0);
-			m_main_page.set_grid_show(GRID_SHOW::BACK);
-			m_main_page.set_page_color(COLOR_WHITE);
-			m_main_page.set_page_size(PAGE_SIZE_DEFVAL);
-			m_main_page.set_page_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
-			m_main_page.set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_main_page.set_stroke_color(COLOR_BLACK);
-			//m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_main_page.set_stroke_dash_pat(DASH_PAT_DEFVAL);
-			m_main_page.set_stroke_dash(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_main_page.set_stroke_join_limit(JOIN_MITER_LIMIT_DEFVAL);
-			m_main_page.set_stroke_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-			m_main_page.set_stroke_width(1.0);
-			m_main_page.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-			m_main_page.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-			m_main_page.set_text_line_sp(0.0);
-			m_main_page.set_text_pad(TEXT_PAD_DEFVAL);
+			m_main_sheet.set_arrow_size(ARROW_SIZE_DEFVAL);
+			m_main_sheet.set_arrow_style(ARROW_STYLE::ARROW_NONE);
+			m_main_sheet.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
+			m_main_sheet.set_fill_color(COLOR_WHITE);
+			m_main_sheet.set_font_color(COLOR_BLACK);
+			m_main_sheet.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
+			m_main_sheet.set_grid_base(GRID_LEN_DEFVAL - 1.0);
+			m_main_sheet.set_grid_color(grid_color);
+			m_main_sheet.set_grid_emph(GRID_EMPH_0);
+			m_main_sheet.set_grid_show(GRID_SHOW::BACK);
+			m_main_sheet.set_sheet_color(COLOR_WHITE);
+			m_main_sheet.set_sheet_size(SHEET_SIZE_DEFVAL);
+			m_main_sheet.set_sheet_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_main_sheet.set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			m_main_sheet.set_stroke_color(COLOR_BLACK);
+			//m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			m_main_sheet.set_stroke_dash_pat(DASH_PAT_DEFVAL);
+			m_main_sheet.set_stroke_dash(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+			m_main_sheet.set_stroke_join_limit(JOIN_MITER_LIMIT_DEFVAL);
+			m_main_sheet.set_stroke_join(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+			m_main_sheet.set_stroke_width(1.0);
+			m_main_sheet.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_main_sheet.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+			m_main_sheet.set_text_line_sp(0.0);
+			m_main_sheet.set_text_pad(TEXT_PAD_DEFVAL);
 		}
 		//m_image_keep_aspect = true;
 		m_len_unit = LEN_UNIT::PIXEL;
@@ -488,11 +489,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-// レイアウトメニューの「ページの大きさ」が選択された
+// レイアウトメニューの「用紙の大きさ」が選択された
 //------------------------------
-	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_page.set_attr_to(&m_main_page);
+		m_dialog_sheet.set_attr_to(&m_main_sheet);
 
 		if (m_len_unit == LEN_UNIT::GRID) {
 			cb_len_unit().SelectedItem(box_value(cbi_len_unit_grid()));
@@ -510,27 +511,27 @@ namespace winrt::GraphPaper::implementation
 			cb_len_unit().SelectedItem(box_value(cbi_len_unit_pixel()));
 		}
 
-		const double g_len = m_main_page.m_grid_base + 1.0;
+		const double g_len = m_main_sheet.m_grid_base + 1.0;
 		const double dpi = m_main_d2d.m_logical_dpi;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
-		tx_page_size_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
-		tx_page_size_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.left, dpi, g_len, buf);
-		tx_page_margin_left().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.top, dpi, g_len, buf);
-		tx_page_margin_top().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.right, dpi, g_len, buf);
-		tx_page_margin_right().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_page.m_page_margin.bottom, dpi, g_len, buf);
-		tx_page_margin_bottom().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.width, dpi, g_len, buf);
+		tx_sheet_size_width().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.height, dpi, g_len, buf);
+		tx_sheet_size_height().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.left, dpi, g_len, buf);
+		tx_sheet_margin_left().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.top, dpi, g_len, buf);
+		tx_sheet_margin_top().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.right, dpi, g_len, buf);
+		tx_sheet_margin_right().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.bottom, dpi, g_len, buf);
+		tx_sheet_margin_bottom().Text(buf);
 
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
-		cd_page_size_dialog().IsPrimaryButtonEnabled(true);
-		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
-		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
+		cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
+		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_main_sheet.m_shape_list.size() > 0);
+		const auto d_result = co_await cd_sheet_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
@@ -554,27 +555,27 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			float new_left;
-			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+			if (swscanf_s(tx_sheet_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_left/Header");
 				co_return;
 			}
 			float new_top;
-			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+			if (swscanf_s(tx_sheet_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_top/Header");
 				co_return;
 			}
 			float new_right;
-			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+			if (swscanf_s(tx_sheet_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_right/Header");
 				co_return;
 			}
 			float new_bottom;
-			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+			if (swscanf_s(tx_sheet_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_bottom/Header");
 				co_return;
 			}
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
@@ -586,15 +587,15 @@ namespace winrt::GraphPaper::implementation
 			};
 
 			float new_width;
-			if (swscanf_s(tx_page_size_width().Text().c_str(), L"%f", &new_width) != 1) {
+			if (swscanf_s(tx_sheet_size_width().Text().c_str(), L"%f", &new_width) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_width/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_size_width/Header");
 				co_return;
 			}
 			float new_height;
-			if (swscanf_s(tx_page_size_height().Text().c_str(), L"%f", &new_height) != 1) {
+			if (swscanf_s(tx_sheet_size_height().Text().c_str(), L"%f", &new_height) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_size_height/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_size_height/Header");
 				co_return;
 			}
 			D2D1_SIZE_F p_size{
@@ -602,15 +603,15 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
 			};
 
-			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
-			const bool flag_mar = !equal(p_mar, m_main_page.m_page_margin);
+			const bool flag_size = !equal(p_size, m_main_sheet.m_sheet_size);
+			const bool flag_mar = !equal(p_mar, m_main_sheet.m_sheet_margin);
 			if (flag_size || flag_mar) {
 				undo_push_null();
 				if (flag_size) {
-					undo_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+					undo_push_set<UNDO_T::SHEET_SIZE>(&m_main_sheet, p_size);
 				}
 				if (flag_mar) {
-					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+					undo_push_set<UNDO_T::SHEET_PAD>(&m_main_sheet, p_mar);
 				}
 				//undo_menu_is_enabled();
 				main_bbox_update();
@@ -618,7 +619,7 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 				status_bar_set_pos();
 				status_bar_set_grid();
-				status_bar_set_page();
+				status_bar_set_sheet();
 				status_bar_set_unit();
 			}
 		}
@@ -645,31 +646,31 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			float new_left;
-			if (swscanf_s(tx_page_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+			if (swscanf_s(tx_sheet_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_left/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_left/Header");
 				co_return;
 			}
 			float new_top;
-			if (swscanf_s(tx_page_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+			if (swscanf_s(tx_sheet_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_top/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_top/Header");
 				co_return;
 			}
 			float new_right;
-			if (swscanf_s(tx_page_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+			if (swscanf_s(tx_sheet_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_right/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_right/Header");
 				co_return;
 			}
 			float new_bottom;
-			if (swscanf_s(tx_page_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+			if (swscanf_s(tx_sheet_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_margin_bottom/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_bottom/Header");
 				co_return;
 			}
 			// 長さの値をピクセル単位の値に変換する.
-			D2D1_RECT_F p_mar{	// ページの余白
+			D2D1_RECT_F p_mar{	// 用紙の余白
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
@@ -679,7 +680,7 @@ namespace winrt::GraphPaper::implementation
 			// リスト中の図形を囲む矩形を得る.
 			D2D1_POINT_2F b_lt{ FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
-			slist_bbox_shape(m_main_page.m_shape_list, b_lt, b_rb);
+			slist_bbox_shape(m_main_sheet.m_shape_list, b_lt, b_rb);
 
 			// 矩形の大きさがゼロ,なら中断する.
 			if (b_rb.x - b_lt.x < 1.0F || b_rb.y - b_lt.y < 1.0F) {
@@ -709,16 +710,16 @@ namespace winrt::GraphPaper::implementation
 				b_rb.y += b_lt.y;
 			}
 
-			// 右下点に余白を加えた値がページの大きさとなる.
-			D2D1_SIZE_F p_size{	// ページの大きさ.
+			// 右下点に余白を加えた値が用紙の大きさとなる.
+			D2D1_SIZE_F p_size{	// 用紙の大きさ.
 				new_left + b_rb.x + new_right,
 				new_top + b_rb.y + new_bottom
 			};
 
-			// ページの大きさ, 余白, いずれかが異なる.
+			// 用紙の大きさ, 余白, いずれかが異なる.
 			// あるいは矩形が移動したなら
-			const bool size_changed = !equal(p_size, m_main_page.m_page_size);
-			const bool mar_chanfed = !equal(p_mar, m_main_page.m_page_margin);
+			const bool size_changed = !equal(p_size, m_main_sheet.m_sheet_size);
+			const bool mar_chanfed = !equal(p_mar, m_main_sheet.m_sheet_margin);
 			if (size_changed || mar_chanfed || dx > 0.0f || dy > 0.0f) {
 				undo_push_null();
 				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
@@ -726,37 +727,37 @@ namespace winrt::GraphPaper::implementation
 					constexpr auto ANY = true;
 					undo_push_move({ dx, dy }, ANY);
 				}
-				// ページの大きさが異なるなら, 更新する.
+				// 用紙の大きさが異なるなら, 更新する.
 				if (size_changed) {
-					undo_push_set<UNDO_T::PAGE_SIZE>(&m_main_page, p_size);
+					undo_push_set<UNDO_T::SHEET_SIZE>(&m_main_sheet, p_size);
 				}
-				// ページの余白が異なるなら, 更新する.
+				// 用紙の余白が異なるなら, 更新する.
 				if (mar_chanfed) {
-					undo_push_set<UNDO_T::PAGE_PAD>(&m_main_page, p_mar);
+					undo_push_set<UNDO_T::SHEET_PAD>(&m_main_sheet, p_mar);
 				}
 				//undo_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
 				status_bar_set_grid();
-				status_bar_set_page();
+				status_bar_set_sheet();
 			}
 			status_bar_set_unit();
 		}
 		status_bar_set_pos();
 	}
 
-	// ページの大きさダイアログのテキストボックスの値が変更された.
-	void MainPage::page_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&)
+	// 用紙の大きさダイアログのテキストボックスの値が変更された.
+	void MainPage::sheet_size_value_changed(IInspectable const&, NumberBoxValueChangedEventArgs const&)
 	{
 		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
-		const auto g_len = m_main_page.m_grid_base + 1.0;
-		double w = tx_page_size_width().Value();
-		double h = tx_page_size_height().Value();
-		double l = tx_page_margin_left().Value();
-		double t = tx_page_margin_top().Value();
-		double r = tx_page_margin_right().Value();
-		double b = tx_page_margin_bottom().Value();
+		const auto g_len = m_main_sheet.m_grid_base + 1.0;
+		double w = tx_sheet_size_width().Value();
+		double h = tx_sheet_size_height().Value();
+		double l = tx_sheet_margin_left().Value();
+		double t = tx_sheet_margin_top().Value();
+		double r = tx_sheet_margin_right().Value();
+		double b = tx_sheet_margin_bottom().Value();
 		LEN_UNIT u;
 		if (cbi_len_unit_grid().IsSelected()) {
 			u = LEN_UNIT::GRID;
@@ -781,17 +782,17 @@ namespace winrt::GraphPaper::implementation
 			r = conv_len_to_pixel(u, r, dpi, g_len);
 			b = conv_len_to_pixel(u, b, dpi, g_len);
 		}
-		if (w >= 1.0 && w <= PAGE_SIZE_MAX && l + r <= w - 1.0 &&
-			h >= 1.0 && h <= PAGE_SIZE_MAX && t + b <= h - 1.0) {
-			cd_page_size_dialog().IsPrimaryButtonEnabled(true);
+		if (w >= 1.0 && w <= SHEET_SIZE_MAX && l + r <= w - 1.0 &&
+			h >= 1.0 && h <= SHEET_SIZE_MAX && t + b <= h - 1.0) {
+			cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
 		}
 		else {
-			cd_page_size_dialog().IsPrimaryButtonEnabled(false);
+			cd_sheet_size_dialog().IsPrimaryButtonEnabled(false);
 		}
 	}
 
-	// ページの大きさダイアログのコンボボックスの選択が変更された.
-	void MainPage::page_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	// 用紙の大きさダイアログのコンボボックスの選択が変更された.
+	void MainPage::sheet_size_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept
 	{
 		LEN_UNIT old_unit = LEN_UNIT::PIXEL;
 		for (const auto i : args.RemovedItems()) {
@@ -837,73 +838,73 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (old_unit != new_unit) {
 			const double dpi = m_main_d2d.m_logical_dpi;
-			const double g_len = m_main_page.m_grid_base + 1.0;
+			const double g_len = m_main_sheet.m_grid_base + 1.0;
 			double val;
-			if (swscanf_s(tx_page_size_width().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_size_width().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_size_width().Text(buf);
+				tx_sheet_size_width().Text(buf);
 			}
-			if (swscanf_s(tx_page_size_height().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_size_height().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_size_height().Text(buf);
+				tx_sheet_size_height().Text(buf);
 			}
-			if (swscanf_s(tx_page_margin_left().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_margin_left().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_left().Text(buf);
+				tx_sheet_margin_left().Text(buf);
 			}
-			if (swscanf_s(tx_page_margin_top().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_margin_top().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_top().Text(buf);
+				tx_sheet_margin_top().Text(buf);
 			}
-			if (swscanf_s(tx_page_margin_right().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_margin_right().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_right().Text(buf);
+				tx_sheet_margin_right().Text(buf);
 			}
-			if (swscanf_s(tx_page_margin_bottom().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_margin_bottom().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_page_margin_bottom().Text(buf);
+				tx_sheet_margin_bottom().Text(buf);
 			}
 		}
 	}
 
-	// レイアウトメニューの「ページのズーム」が選択された.
-	void MainPage::page_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	// レイアウトメニューの「用紙のズーム」が選択された.
+	void MainPage::sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == rmfi_menu_page_zoom_100() || sender == rmfi_popup_page_zoom_100()) {
+		if (sender == rmfi_menu_sheet_zoom_100() || sender == rmfi_popup_sheet_zoom_100()) {
 			scale = 1.0f;
 		}
-		else if (sender == rmfi_menu_page_zoom_150() || sender == rmfi_popup_page_zoom_150()) {
+		else if (sender == rmfi_menu_sheet_zoom_150() || sender == rmfi_popup_sheet_zoom_150()) {
 			scale = 1.5f;
 		}
-		else if (sender == rmfi_menu_page_zoom_200() || sender == rmfi_popup_page_zoom_200()) {
+		else if (sender == rmfi_menu_sheet_zoom_200() || sender == rmfi_popup_sheet_zoom_200()) {
 			scale = 2.0f;
 		}
-		else if (sender == rmfi_menu_page_zoom_300() || sender == rmfi_popup_page_zoom_300()) {
+		else if (sender == rmfi_menu_sheet_zoom_300() || sender == rmfi_popup_sheet_zoom_300()) {
 			scale = 3.0f;
 		}
-		else if (sender == rmfi_menu_page_zoom_400() || sender == rmfi_popup_page_zoom_400()) {
+		else if (sender == rmfi_menu_sheet_zoom_400() || sender == rmfi_popup_sheet_zoom_400()) {
 			scale = 4.0f;
 		}
-		else if (sender == rmfi_menu_page_zoom_075() || sender == rmfi_popup_page_zoom_075()) {
+		else if (sender == rmfi_menu_sheet_zoom_075() || sender == rmfi_popup_sheet_zoom_075()) {
 			scale = 0.75f;
 		}
-		else if (sender == rmfi_menu_page_zoom_050() || sender == rmfi_popup_page_zoom_050()) {
+		else if (sender == rmfi_menu_sheet_zoom_050() || sender == rmfi_popup_sheet_zoom_050()) {
 			scale = 0.5f;
 		}
-		else if (sender == rmfi_menu_page_zoom_025() || sender == rmfi_popup_page_zoom_025()) {
+		else if (sender == rmfi_menu_sheet_zoom_025() || sender == rmfi_popup_sheet_zoom_025()) {
 			scale = 0.25f;
 		}
 		else {

@@ -10,6 +10,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::CheckBox;
 	using winrt::Windows::UI::Xaml::Controls::Slider;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	IAsyncAction MainPage::edit_text_async(ShapeText* s)
 	{
@@ -28,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			if (m_fit_text_frame) {
 				undo_push_position(s, LOC_TYPE::LOC_SE);
-				s->fit_frame_to_text(m_snap_grid ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			main_draw();
 		}
@@ -46,8 +47,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// ‘I‘ð‚³‚ê‚½}Œ`‚Ì‚¤‚¿Å‘O–Ê‚É‚ ‚é•¶Žš—ñ}Œ`‚ð“¾‚é.
-			for (auto it = m_main_page.m_shape_list.rbegin(); 
-				it != m_main_page.m_shape_list.rend(); it++) {
+			for (auto it = m_main_sheet.m_shape_list.rbegin(); 
+				it != m_main_sheet.m_shape_list.rend(); it++) {
 				auto t = *it;
 				if (t->is_deleted()) {
 					continue;
@@ -70,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::meth_poly_end_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool changed = false;
-		for (Shape* s : m_main_page.m_shape_list) {
+		for (Shape* s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
@@ -118,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		};
 
 		m_mutex_event.lock();
-		m_prop_page.set_attr_to(&m_main_page);
+		m_dialog_sheet.set_attr_to(&m_main_sheet);
 
 		float a_start;
 		t->get_arc_start(a_start);
@@ -143,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		Shape* s = new ShapeArc(start, pos, t);
 		s->set_select(true);
-		m_prop_page.m_shape_list.push_back(s);
+		m_dialog_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -224,62 +225,62 @@ namespace winrt::GraphPaper::implementation
 		cd_dialog_prop().Title(box_value(str_title));
 		{
 			const auto revoker0{
-				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arc_start](auto, auto args) {
+				dialog_slider_0().ValueChanged(winrt::auto_revoke, [this, str_arc_start](auto const&, auto const& args) {
 					// (IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					swprintf_s(buf, L"%f‹", val);
 					dialog_slider_0().Header(box_value(str_arc_start + buf));
 					D2D1_SWEEP_DIRECTION dir;
-					m_prop_page.slist_back()->get_arc_dir(dir);
+					m_dialog_sheet.slist_back()->get_arc_dir(dir);
 					if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-						if (m_prop_page.slist_back()->set_arc_start(val)) {
+						if (m_dialog_sheet.slist_back()->set_arc_start(val)) {
 							dialog_draw();
 						}
 					}
 					else {
-						if (m_prop_page.slist_back()->set_arc_end(-val)) {
+						if (m_dialog_sheet.slist_back()->set_arc_end(-val)) {
 							dialog_draw();
 						}
 					}
 				})
 			};
 			const auto revoker1{
-				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arc_end](auto, auto args) {
+				dialog_slider_1().ValueChanged(winrt::auto_revoke, [this, str_arc_end](auto const&, auto const& args) {
 					// (IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					swprintf_s(buf, L"%f‹", val);
 					dialog_slider_1().Header(box_value(str_arc_end + buf));
 					D2D1_SWEEP_DIRECTION dir;
-					m_prop_page.slist_back()->get_arc_dir(dir);
+					m_dialog_sheet.slist_back()->get_arc_dir(dir);
 					if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-						if (m_prop_page.slist_back()->set_arc_end(val)) {
+						if (m_dialog_sheet.slist_back()->set_arc_end(val)) {
 							dialog_draw();
 						}
 					}
 					else {
-						if (m_prop_page.slist_back()->set_arc_start(-val)) {
+						if (m_dialog_sheet.slist_back()->set_arc_start(-val)) {
 							dialog_draw();
 						}
 					}
 				})
 			};
 			const auto revoker2{
-				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arc_rot](auto, auto args) {
+				dialog_slider_2().ValueChanged(winrt::auto_revoke, [this, str_arc_rot](auto const&, auto const& args) {
 					const float val = static_cast<float>(args.NewValue());
 					wchar_t buf[32];
 					swprintf_s(buf, L"%f‹", val);
 					dialog_slider_2().Header(box_value(str_arc_rot + buf));
-					m_prop_page.slist_back()->set_arc_rot(val);
+					m_dialog_sheet.slist_back()->set_arc_rot(val);
 					dialog_draw();
 				})
 			};
 			const auto revoker3{
-				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](auto, auto) {
+				dialog_radio_btns().SelectionChanged(winrt::auto_revoke, [this](auto const&, auto const&) {
 					// (IInspectable const&, SelectionChangedEventArgs const&)
 					if (dialog_radio_btns().SelectedIndex() == 0) {
-						if (m_prop_page.slist_back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+						if (m_dialog_sheet.slist_back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 							const auto val0 = dialog_slider_0().Value();
 							const auto val1 = dialog_slider_1().Value();
 							dialog_slider_0().Value(-val1);
@@ -288,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 					else if (dialog_radio_btns().SelectedIndex() == 1) {
-						if (m_prop_page.slist_back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+						if (m_dialog_sheet.slist_back()->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 							const auto val0 = dialog_slider_0().Value();
 							const auto val1 = dialog_slider_1().Value();
 							dialog_slider_0().Value(-val1);
@@ -300,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				undo_push_null();
-				Shape* s = m_prop_page.slist_back();
+				Shape* s = m_dialog_sheet.slist_back();
 				// ’ˆÓ: ‡”Ô‚ª OK ‚©‚Ç‚¤‚©.
 				D2D1_SWEEP_DIRECTION new_dir;
 				s->get_arc_dir(new_dir);
@@ -315,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			}
 		}
-		slist_clear(m_prop_page.m_shape_list);
+		slist_clear(m_dialog_sheet.m_shape_list);
 
 		dialog_slider_0().Minimum(min0);
 		dialog_slider_0().Maximum(max0);
@@ -337,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(vis2);
 		dialog_radio_btns().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
-		slist_clear(m_prop_page.m_shape_list);
+		slist_clear(m_dialog_sheet.m_shape_list);
 	}
 
 	void MainPage::meth_arc_click(IInspectable const&, RoutedEventArgs const&)
@@ -350,8 +351,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			// ‘I‘ð‚³‚ê‚½}Œ`‚Ì‚¤‚¿Å‘O–Ê‚É‚ ‚é‰~ŒÊ}Œ`‚ð“¾‚é.
 			t = nullptr;
-			for (auto it = m_main_page.m_shape_list.rbegin();
-				it != m_main_page.m_shape_list.rend(); it++) {
+			for (auto it = m_main_sheet.m_shape_list.rbegin();
+				it != m_main_sheet.m_shape_list.rend(); it++) {
 				Shape* s = *it;
 				if (s->is_deleted()) {
 					continue;

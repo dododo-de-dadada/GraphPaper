@@ -567,7 +567,7 @@ namespace winrt::GraphPaper::implementation
 		if (f_opaque && f_test) {
 			return LOC_TYPE::LOC_FILL;
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 
 	}
 
@@ -748,7 +748,7 @@ namespace winrt::GraphPaper::implementation
 		if (f_opaque && f_test) {
 			return LOC_TYPE::LOC_FILL;
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	//------------------------------

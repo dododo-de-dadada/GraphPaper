@@ -149,19 +149,19 @@
     <value>Ok</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_page_size_dialog.CloseButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.CloseButtonText" xml:space="preserve">
     <value>閉じる</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_page_size_dialog.PrimaryButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.PrimaryButtonText" xml:space="preserve">
     <value>適用する</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_page_size_dialog.SecondaryButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.SecondaryButtonText" xml:space="preserve">
     <value>図形に合わせる</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_page_size_dialog.Title" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.Title" xml:space="preserve">
     <value>ページの大きさ</value>
     <comment>ContentDialog</comment>
   </data>
@@ -429,11 +429,11 @@
     <value>新規</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_page_color.Text" xml:space="preserve">
+  <data name="mfi_menu_sheet_color.Text" xml:space="preserve">
     <value>ページの色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_page_size.Text" xml:space="preserve">
+  <data name="mfi_menu_sheet_size.Text" xml:space="preserve">
     <value>ページの大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -521,15 +521,15 @@
     <value>グループを解除</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_in.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_in.Text" xml:space="preserve">
     <value>拡大</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_out.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_out.Text" xml:space="preserve">
     <value>縮小</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_page_zoom_100.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_100.Text" xml:space="preserve">
     <value>100%</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -573,7 +573,7 @@
     <value>行間</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_menu_page_zoom.Text" xml:space="preserve">
+  <data name="mfsi_menu_sheet_zoom.Text" xml:space="preserve">
     <value>ページのズーム</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -853,7 +853,7 @@
     <value>不透明度</value>
     <comment>String</comment>
   </data>
-  <data name="str_page_layouts" xml:space="preserve">
+  <data name="str_sheet_layouts" xml:space="preserve">
     <value>ページ設定</value>
     <comment>String</comment>
   </data>
@@ -942,7 +942,7 @@
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_menu_status_bar_page.Text" xml:space="preserve">
+  <data name="tmfi_menu_status_bar_sheet.Text" xml:space="preserve">
     <value>ページの大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -962,27 +962,27 @@
     <value>検索する文字列</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_size_height.Header" xml:space="preserve">
+  <data name="tx_sheet_size_height.Header" xml:space="preserve">
     <value>高さ</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_size_width.Header" xml:space="preserve">
+  <data name="tx_sheet_size_width.Header" xml:space="preserve">
     <value>幅</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_margin_left.Header" xml:space="preserve">
+  <data name="tx_sheet_margin_left.Header" xml:space="preserve">
     <value>左余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_margin_top.Header" xml:space="preserve">
+  <data name="tx_sheet_margin_top.Header" xml:space="preserve">
     <value>上余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_margin_right.Header" xml:space="preserve">
+  <data name="tx_sheet_margin_right.Header" xml:space="preserve">
     <value>右余白</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_page_margin_bottom.Header" xml:space="preserve">
+  <data name="tx_sheet_margin_bottom.Header" xml:space="preserve">
     <value>下余白</value>
     <comment>TextBox</comment>
   </data>

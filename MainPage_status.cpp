@@ -11,6 +11,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	// AND 演算する.
 	//static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
@@ -59,11 +60,11 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_grid().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
-		else if (sender == tmfi_menu_status_bar_page()) {
-			const bool is_checked = tmfi_menu_status_bar_page().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
-			tmfi_popup_status_bar_page().IsChecked(is_checked);
-			status_bar_set_page();
+		else if (sender == tmfi_menu_status_bar_sheet()) {
+			const bool is_checked = tmfi_menu_status_bar_sheet().IsChecked();
+			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::SHEET) : status_and(m_status_bar, status_not(STATUS_BAR::SHEET));
+			tmfi_popup_status_bar_sheet().IsChecked(is_checked);
+			status_bar_set_sheet();
 		}
 		else if (sender == tmfi_menu_status_bar_zoom()) {
 			const bool is_checked = tmfi_menu_status_bar_zoom().IsChecked();
@@ -94,11 +95,11 @@ namespace winrt::GraphPaper::implementation
 			tmfi_menu_status_bar_grid().IsChecked(is_checked);
 			status_bar_set_grid();
 		}
-		else if (sender == tmfi_popup_status_bar_page()) {
-			const bool is_checked = tmfi_popup_status_bar_page().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::PAGE) : status_and(m_status_bar, status_not(STATUS_BAR::PAGE));
-			tmfi_menu_status_bar_page().IsChecked(is_checked);
-			status_bar_set_page();
+		else if (sender == tmfi_popup_status_bar_sheet()) {
+			const bool is_checked = tmfi_popup_status_bar_sheet().IsChecked();
+			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::SHEET) : status_and(m_status_bar, status_not(STATUS_BAR::SHEET));
+			tmfi_menu_status_bar_sheet().IsChecked(is_checked);
+			status_bar_set_sheet();
 		}
 		else if (sender == tmfi_popup_status_bar_zoom()) {
 			const bool is_checked = tmfi_popup_status_bar_zoom().IsChecked();
@@ -156,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 			const double ps = m_main_scale;
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
-			const float g_len = m_main_page.m_grid_base + 1.0f;
+			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf_x[32];
 			wchar_t buf_y[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
@@ -254,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_bar_set_grid(void)
 	{
 		if (status_and(m_status_bar, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
-			const float g_len = m_main_page.m_grid_base + 1.0f;
+			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
 				m_len_unit, g_len, m_main_d2d.m_logical_dpi, g_len, buf);
@@ -270,25 +271,25 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ページの大きさをステータスバーに格納する.
-	void MainPage::status_bar_set_page(void)
+	// 用紙の大きさをステータスバーに格納する.
+	void MainPage::status_bar_set_sheet(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::PAGE) == STATUS_BAR::PAGE) {
-			const float g_len = m_main_page.m_grid_base + 1.0f;
+		if (status_and(m_status_bar, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
+			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, m_main_page.m_page_size.width, m_main_d2d.m_logical_dpi, g_len, buf);
-			tk_status_bar_page_w().Text(buf);
+				m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf);
+			tk_status_bar_sheet_w().Text(buf);
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, m_main_page.m_page_size.height, m_main_d2d.m_logical_dpi, g_len, buf);
-			tk_status_bar_page_h().Text(buf);
-			if (sp_status_bar_page().Visibility() != Visibility::Visible) {
-				sp_status_bar_page().Visibility(Visibility::Visible);
+				m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf);
+			tk_status_bar_sheet_h().Text(buf);
+			if (sp_status_bar_sheet().Visibility() != Visibility::Visible) {
+				sp_status_bar_sheet().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_page().Visibility() != Visibility::Collapsed) {
-				sp_status_bar_page().Visibility(Visibility::Collapsed);
+			if (sp_status_bar_sheet().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_sheet().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -330,7 +331,7 @@ namespace winrt::GraphPaper::implementation
 			constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
 			wchar_t buf[32];
 			swprintf_s(buf, 31, FMT_ZOOM, m_main_scale * 100.0);
-			//swprintf_s(buf, 31, FMT_ZOOM, m_main_page.m_page_scale * 100.0);
+			//swprintf_s(buf, 31, FMT_ZOOM, m_main_sheet.m_sheet_scale * 100.0);
 			tk_status_bar_zoom().Text(buf);
 			if (sp_status_bar_zoom().Visibility() != Visibility::Visible) {
 				sp_status_bar_zoom().Visibility(Visibility::Visible);

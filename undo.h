@@ -49,9 +49,9 @@ namespace winrt::GraphPaper::implementation
 		DEFORM,	// 図形の形 (部位の位置) の操作
 		MOVE,	// 図形の移動の操作
 		SELECT,	// 図形の選択を切り替え
-		PAGE_COLOR,	// ページの色の操作
-		PAGE_SIZE,	// ページの大きさの操作
-		PAGE_PAD,	// ページの内余白の操作
+		SHEET_COLOR,	// 用紙の色の操作
+		SHEET_SIZE,	// 用紙の大きさの操作
+		SHEET_PAD,	// 用紙の内余白の操作
 		POLY_END,	// 多角形の端の操作
 		REVERSE_PATH,	// 線の方向を反転する操作
 		STROKE_CAP,	// 端の形式の操作
@@ -100,9 +100,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::JOIN_LIMIT> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_T::MOVE> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<UNDO_T::PAGE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_T::PAGE_SIZE> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<UNDO_T::PAGE_PAD> { using type = D2D1_RECT_F; };
+	template <> struct U_TYPE<UNDO_T::SHEET_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_T::SHEET_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_T::SHEET_PAD> { using type = D2D1_RECT_F; };
 	template <> struct U_TYPE<UNDO_T::POLY_END> { using type = D2D1_FIGURE_END; };
 	template <> struct U_TYPE<UNDO_T::STROKE_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_T::STROKE_COLOR> { using type = D2D1_COLOR_F; };
@@ -116,14 +116,14 @@ namespace winrt::GraphPaper::implementation
 	//template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
 	constexpr auto UNDO_SHAPE_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
-	constexpr auto UNDO_SHAPE_PAGE = static_cast<uint32_t>(-1);	// ページ図形の添え字
+	constexpr auto UNDO_SHAPE_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
 	//------------------------------
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
 		//static SHAPE_LIST* undo_slist;	// 参照する図形リスト
-		static ShapePage* undo_page;	// 参照するページ
+		static ShapeSheet* undo_sheet;	// 参照する用紙
 
 		Shape* m_shape;	// 操作する図形
 
@@ -136,10 +136,10 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 操作が参照するための図形リストと表示図形を格納する.
-		static void begin(/*SHAPE_LIST* slist,*/ ShapePage* page) noexcept
+		static void begin(/*SHAPE_LIST* slist,*/ ShapeSheet* page) noexcept
 		{
 			//undo_slist = slist;
-			undo_page = page;
+			undo_sheet = page;
 		}
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
@@ -152,14 +152,14 @@ namespace winrt::GraphPaper::implementation
 		{
 			Shape* s = static_cast<Shape*>(nullptr);
 			const uint32_t i = dt_reader.ReadUInt32();
-			if (i == UNDO_SHAPE_PAGE) {
-				s = Undo::undo_page;
+			if (i == UNDO_SHAPE_SHEET) {
+				s = Undo::undo_sheet;
 			}
 			else if (i == UNDO_SHAPE_NIL) {
 				s = nullptr;
 			}
 			else {
-				auto& slist = Undo::undo_page->m_shape_list;
+				auto& slist = Undo::undo_sheet->m_shape_list;
 				slist_match<const uint32_t, Shape*>(slist, i, s);
 			}
 			return s;
@@ -170,9 +170,9 @@ namespace winrt::GraphPaper::implementation
 			DataWriter const& dt_writer	// データリーダー
 		)
 		{
-			// 図形がページ図形なら, ページを意味する添え字を書き込む.
-			if (s == Undo::undo_page) {
-				dt_writer.WriteUInt32(UNDO_SHAPE_PAGE);
+			// 図形が用紙図形なら, 用紙を意味する添え字を書き込む.
+			if (s == Undo::undo_sheet) {
+				dt_writer.WriteUInt32(UNDO_SHAPE_SHEET);
 			}
 			// 図形がヌルなら, ヌルを意味する添え字を書き込む.
 			else if (s == nullptr) {
@@ -182,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 			// リスト中に図形がなければ UNDO_SHAPE_NIL が書き込まれる.
 			else {
 				uint32_t i = UNDO_SHAPE_NIL;
-				auto& slist = Undo::undo_page->m_shape_list;
+				auto& slist = Undo::undo_sheet->m_shape_list;
 				slist_match<Shape* const, uint32_t>(slist, s, i);
 				dt_writer.WriteUInt32(i);
 			}
@@ -416,21 +416,21 @@ namespace winrt::GraphPaper::implementation
 		UndoTextSelect(Shape* const s, const int start, const int end, const bool is_trail) :
 			Undo(s)
 		{
-			m_start = undo_page->m_select_start;
-			m_end = undo_page->m_select_end;
-			m_is_trail = undo_page->m_select_trail;
-			undo_page->m_select_start = start;
-			undo_page->m_select_end = end;
-			undo_page->m_select_trail = is_trail;
+			m_start = undo_sheet->m_select_start;
+			m_end = undo_sheet->m_select_end;
+			m_is_trail = undo_sheet->m_select_trail;
+			undo_sheet->m_select_start = start;
+			undo_sheet->m_select_end = end;
+			undo_sheet->m_select_trail = is_trail;
 		}
 		virtual void exec(void) noexcept final override
 		{
-			const auto start = undo_page->m_select_start;
-			const auto end = undo_page->m_select_end;
-			const auto is_trail = undo_page->m_select_trail;
-			undo_page->m_select_start = m_start;
-			undo_page->m_select_end = m_end;
-			undo_page->m_select_trail = m_is_trail;
+			const auto start = undo_sheet->m_select_start;
+			const auto end = undo_sheet->m_select_end;
+			const auto is_trail = undo_sheet->m_select_trail;
+			undo_sheet->m_select_start = m_start;
+			undo_sheet->m_select_end = m_end;
+			undo_sheet->m_select_trail = m_is_trail;
 			m_start = start;
 			m_end = end;
 			m_is_trail = is_trail;
@@ -465,9 +465,9 @@ namespace winrt::GraphPaper::implementation
 			const auto old_len = wchar_len(old_text);
 
 			// 選択範囲と削除する文字列を保存する.
-			m_start = undo_page->m_select_start;
-			m_end = undo_page->m_select_end;
-			m_trail = undo_page->m_select_trail;
+			m_start = undo_sheet->m_select_start;
+			m_end = undo_sheet->m_select_end;
+			m_trail = undo_sheet->m_select_trail;
 			const auto end = min(m_trail ? m_end + 1 : m_end, old_len);
 			const auto start = min(m_start, old_len);
 			const auto m = min(start, end);
@@ -523,9 +523,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeText*>(s)->m_text_len = new_len;
 
 			// 編集後の選択範囲は, 挿入された文字列になる.
-			undo_page->m_select_start = m;
-			undo_page->m_select_end = m + ins_len;
-			undo_page->m_select_trail = false;
+			undo_sheet->m_select_start = m;
+			undo_sheet->m_select_end = m + ins_len;
+			undo_sheet->m_select_trail = false;
 			static_cast<ShapeText*>(s)->m_dwrite_text_layout = nullptr;
 		}
 		// 図形の文字列を編集する.

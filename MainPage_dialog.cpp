@@ -58,33 +58,33 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// ï`âÊëOÇ…ïKóvÇ»ïœêîÇäiî[Ç∑ÇÈ.
-		m_prop_page.begin_draw(m_prop_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
-		m_prop_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
-		m_prop_d2d.m_d2d_context->BeginDraw();
-		m_prop_d2d.m_d2d_context->Clear(m_background_color);
+		m_dialog_sheet.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_wic_background.get(), 1.0f);
+		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
+		m_dialog_d2d.m_d2d_context->BeginDraw();
+		m_dialog_d2d.m_d2d_context->Clear(m_background_color);
 		const D2D1_RECT_F w_rect{
-			0, 0, m_prop_d2d.m_logical_width, m_prop_d2d.m_logical_height
+			0, 0, m_dialog_d2d.m_logical_width, m_dialog_d2d.m_logical_height
 		};
 		if (m_background_show) {
 			// îwåiÉpÉ^Å[ÉìÇï`âÊÇ∑ÇÈ,
-			m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+			m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
 		}
-		Shape::m_d2d_color_brush->SetColor(m_prop_page.m_page_color);
-		m_prop_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
+		Shape::m_d2d_color_brush->SetColor(m_dialog_sheet.m_sheet_color);
+		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
 
-		const float offset = static_cast<FLOAT>(std::fmod(m_prop_page.m_page_size.width * 0.5, m_prop_page.m_grid_base + 1.0));
-		m_prop_page.m_grid_offset.x = offset;
-		m_prop_page.m_grid_offset.y = offset;
-		m_prop_page.m_page_margin.left = 0.0f;
-		m_prop_page.m_page_margin.top = 0.0f;
-		m_prop_page.m_page_margin.right = 0.0f;
-		m_prop_page.m_page_margin.bottom = 0.0f;
-		m_prop_page.draw();
+		const float offset = static_cast<FLOAT>(std::fmod(m_dialog_sheet.m_sheet_size.width * 0.5, m_dialog_sheet.m_grid_base + 1.0));
+		m_dialog_sheet.m_grid_offset.x = offset;
+		m_dialog_sheet.m_grid_offset.y = offset;
+		m_dialog_sheet.m_sheet_margin.left = 0.0f;
+		m_dialog_sheet.m_sheet_margin.top = 0.0f;
+		m_dialog_sheet.m_sheet_margin.right = 0.0f;
+		m_dialog_sheet.m_sheet_margin.bottom = 0.0f;
+		m_dialog_sheet.draw();
 		winrt::check_hresult(
-			m_prop_d2d.m_d2d_context->EndDraw()
+			m_dialog_d2d.m_d2d_context->EndDraw()
 		);
-		m_prop_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
-		m_prop_d2d.Present();
+		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
+		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();
 	}
 
@@ -125,7 +125,7 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;
 //#endif
-		m_prop_d2d.Trim();
+		m_dialog_d2d.Trim();
 	}
 
 	// ëÆê´ÇÃâÊëúÇì«Ç›çûÇﬁ
@@ -155,10 +155,10 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_SIZE_F size{
 				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
 			};
-			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_prop_page.m_image_opac);
+			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_sheet.m_image_opac);
 			bitmap.Close();
 
-			m_prop_page.m_shape_list.push_back(s);
+			m_dialog_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -194,12 +194,12 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SIZE_CHANGED;
 //#endif
-		m_prop_d2d.SetSwapChainPanel(scp_dialog_panel());
+		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
 		const float w = args.NewSize().Width;
 		const float h = args.NewSize().Height;
-		m_prop_page.m_page_size.width = w;
-		m_prop_page.m_page_size.height = h;
-		m_prop_d2d.SetLogicalSize2({ w, h });
+		m_dialog_sheet.m_sheet_size.width = w;
+		m_dialog_sheet.m_sheet_size.height = h;
+		m_dialog_d2d.SetLogicalSize2({ w, h });
 		dialog_draw();
 	}
 
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 //#endif
 		const float x = scp_dialog_panel().CompositionScaleX();
 		const float y = scp_dialog_panel().CompositionScaleY();
-		m_prop_d2d.SetCompositionScale(x, y);
+		m_dialog_d2d.SetCompositionScale(x, y);
 
 		dialog_draw();
 	}

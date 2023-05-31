@@ -91,6 +91,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Window;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::UI::Core::CoreCursorType;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
@@ -172,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		cd_message_dialog().Hide();
 		cd_snap_point().Hide();
 		cd_dialog_prop().Hide();
-		cd_page_size_dialog().Hide();
+		cd_sheet_size_dialog().Hide();
 
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
@@ -220,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 			// この後, スワップチェーンパネルの SizeChanged が呼び出されてしまう.
 			// その時, 描画処理しないよう排他制御をロックする.
 			// winrt::com_ptr で確保されたオブジェクトは Release するとエラーになる.
-			// 例えば, m_main_page.m_state_block->Release();
+			// 例えば, m_main_sheet.m_state_block->Release();
 			m_mutex_draw.lock();
 			if (Shape::m_state_block != nullptr) {
 				Shape::m_state_block = nullptr;
@@ -235,12 +237,12 @@ namespace winrt::GraphPaper::implementation
 				Shape::m_d2d_bitmap_brush = nullptr;
 			}
 			m_main_d2d.Trim();
-			m_prop_d2d.Trim();
+			m_dialog_d2d.Trim();
 		}
 
 		undo_clear();
-		slist_clear(m_main_page.m_shape_list);
-		slist_clear(m_prop_page.m_shape_list);
+		slist_clear(m_main_sheet.m_shape_list);
+		slist_clear(m_dialog_sheet.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_DEBUG, DEBUG_MSG, {});
@@ -348,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_finish_reading(void)
 	{
 		wchar_t* unavailable_font;	// 無効な書体名
-		if (!slist_check_avaiable_font(m_main_page.m_shape_list, unavailable_font)) {
+		if (!slist_check_avaiable_font(m_main_sheet.m_shape_list, unavailable_font)) {
 
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, L"str_err_font", unavailable_font);
@@ -356,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
-			if (m_main_page.m_shape_list.empty()) {
+			if (m_main_sheet.m_shape_list.empty()) {
 				summary_close_click(nullptr, nullptr);
 			}
 			else if (lv_summary_list() != nullptr) {
@@ -371,12 +373,18 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
+		m_list_sel_cnt = 0;
+		for (const auto s : m_main_sheet.m_shape_list) {
+			if (!s->is_deleted() && s->is_selected()) {
+				m_list_sel_cnt++;
+			}
+		}
 		main_bbox_update();
 		main_panel_size();
 		status_bar_set_pos();
 		status_bar_set_draw();
 		status_bar_set_grid();
-		status_bar_set_page();
+		status_bar_set_sheet();
 		status_bar_set_zoom();
 		status_bar_set_unit();
 	}
@@ -453,7 +461,7 @@ namespace winrt::GraphPaper::implementation
 
 			// 操作スタックと図形リストを消去する.
 			undo_clear();
-			slist_clear(m_main_page.m_shape_list);
+			slist_clear(m_main_sheet.m_shape_list);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
 				message_show(ICON_DEBUG, DEBUG_MSG, {});
@@ -521,7 +529,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
 
 			// メイン表示を読み込む.
-			m_main_page.read(dt_reader);
+			m_main_sheet.read(dt_reader);
 
 			// メイン表示のみの読み込みか判定する.
 			if constexpr (SETTING_ONLY) {
@@ -532,7 +540,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				scroll_h = dt_reader.ReadSingle();
 				scroll_v = dt_reader.ReadSingle();
 				// 図形を読み込む.
-				if (slist_read(m_main_page.m_shape_list, dt_reader)) {
+				if (slist_read(m_main_sheet.m_shape_list, dt_reader)) {
 					// 再開なら,
 					if constexpr (RESUME) {
 						// スタックも読み込む.
@@ -889,7 +897,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 			dt_writer.WriteBoolean(summary_is_visible());
 
-			m_main_page.write(dt_writer);
+			m_main_sheet.write(dt_writer);
 			if constexpr (SUSPEND) {
 				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
 				// 現在のスクロールバーの値 (ページ座標) を保存する. 
@@ -897,7 +905,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形も含めて書き込む.
 				// 操作スタックも書き込む.
-				slist_write<!REDUCE>(m_main_page.m_shape_list, dt_writer);
+				slist_write<!REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 				undo_write_stack(dt_writer);
 			}
 			else if constexpr (!SETTING_ONLY) {
@@ -907,7 +915,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形は省いて書き込む.
 				// 操作スタックは消去する.
-				slist_write<REDUCE>(m_main_page.m_shape_list, dt_writer);
+				slist_write<REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 			}
 			ra_stream.Size(ra_stream.Position());
 			co_await dt_writer.StoreAsync();
@@ -941,8 +949,8 @@ m_snap_grid = dt_reader.ReadBoolean();
 					summary_clear();
 				}
 				undo_clear();
-				slist_clear(m_main_page.m_shape_list);
-				slist_clear(m_prop_page.m_shape_list);
+				slist_clear(m_main_sheet.m_shape_list);
+				slist_clear(m_dialog_sheet.m_shape_list);
 #if defined(_DEBUG)
 				if (debug_leak_cnt != 0) {
 					// 「メモリリーク」メッセージダイアログを表示する.
@@ -990,7 +998,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			summary_close_click(nullptr, nullptr);
 		}
 		undo_clear();
-		slist_clear(m_main_page.m_shape_list);
+		slist_clear(m_main_sheet.m_shape_list);
 
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
@@ -1045,7 +1053,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 		{
 			m_main_bbox_lt = D2D1_POINT_2F{ 0.0F, 0.0F };
 			m_main_bbox_rb = D2D1_POINT_2F{
-				m_main_page.m_page_size.width, m_main_page.m_page_size.height
+				m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height
 			};
 		}
 
@@ -1097,7 +1105,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 			// 表示された部分の中心の位置を求める.
 			const double scale = m_main_scale;
-			//const double scale = m_main_page.m_page_scale;
+			//const double scale = m_main_sheet.m_sheet_scale;
 			const double win_x = sb_horz().Value();
 			const double win_y = sb_vert().Value();
 			const double win_w = scp_main_panel().ActualWidth();

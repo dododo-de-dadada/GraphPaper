@@ -701,22 +701,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼を表示する.
-	void ShapePage::export_svg(const DataWriter& dt_writer) noexcept
+	void ShapeSheet::export_svg(const DataWriter& dt_writer) noexcept
 	{
-		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページから余白を除いた分)
-			m_page_size.width - (m_page_margin.left + m_page_margin.right),
-			m_page_size.height - (m_page_margin.top + m_page_margin.bottom)
-		};
-
+		//const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (用紙から余白を除いた分)
+		//	m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right),
+		//	m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom)
+		//};
+		const auto draw_w = m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right);
+		const auto draw_h = m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom);
 		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		const auto sh = g_size.height;
-		const auto sw = g_size.width;
+		const auto sh = draw_h;
+		const auto sw = draw_w;
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		v_end.y = g_size.height;
-		h_end.x = g_size.width;
+		v_end.y = draw_h;
+		h_end.x = draw_w;
 		const double g_len = max(m_grid_base + 1.0, 1.0);
 
 		wchar_t buf[1024];

@@ -368,7 +368,7 @@ namespace winrt::GraphPaper::implementation
 				if (pt_in_circle(t.x, t.y, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
-				return LOC_TYPE::LOC_PAGE;
+				return LOC_TYPE::LOC_SHEET;
 			}
 			// •Ó‚ª•Â‚¶‚Ä‚¢‚é‚©”»’è‚·‚é.
 			if (e_closed) {
@@ -530,7 +530,7 @@ namespace winrt::GraphPaper::implementation
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// –î‚¶‚è‚Ì•Ô‚µ‚Ææ’[‚ÌˆÊ’u‚ğ“¾‚é.

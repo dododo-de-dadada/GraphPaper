@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 		if (loc_hit_test(t, n, a_len)) {
 			return LOC_TYPE::LOC_NORTH;
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// ‹«ŠE‹éŒ`‚ğ“¾‚é.
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		switch (loc) {
-		case LOC_TYPE::LOC_PAGE:
+		case LOC_TYPE::LOC_SHEET:
 		{
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);

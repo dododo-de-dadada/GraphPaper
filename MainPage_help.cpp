@@ -11,6 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	// ヘルプメニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
@@ -35,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		POLY_OPTION p_opt{ m_drawing_poly_opt };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
-		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_prop_page, p_opt);
+		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_dialog_sheet, p_opt);
 		D2D1_POINT_2F b_lt;
 		D2D1_POINT_2F b_rb;
 		D2D1_POINT_2F b_pos;
@@ -44,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 		s->move(
 			D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_pos.x) * 0.5),
 			static_cast<FLOAT>((samp_h - b_pos.y) * 0.5) });
-		m_prop_page.m_shape_list.push_back(s);
+		m_dialog_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -55,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 		cd_dialog_prop().CloseButtonText(close_text);
 		cd_dialog_prop().DefaultButton(def_text);
 		tb_version().Visibility(Visibility::Collapsed);
-		slist_clear(m_prop_page.m_shape_list);
+		slist_clear(m_dialog_sheet.m_shape_list);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
@@ -88,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_pos();
 		if (old_unit != new_val) {
 			status_bar_set_grid();
-			status_bar_set_page();
+			status_bar_set_sheet();
 			status_bar_set_unit();
 		}
 	}
@@ -108,16 +109,16 @@ namespace winrt::GraphPaper::implementation
 		};
 		const auto val = m_snap_point;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0, buf);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_sheet.m_grid_base + 1.0, buf);
 		sd_snap_point().Header(box_value(str_snap_point + buf));
 		sd_snap_point().Value(static_cast<double>(m_snap_point));
 		m_mutex_event.lock();
 		{
 			const auto revoler{
-				sd_snap_point().ValueChanged(winrt::auto_revoke, [this, str_snap_point](auto, auto args) {
+				sd_snap_point().ValueChanged(winrt::auto_revoke, [this, str_snap_point](auto const&, auto const& args) {
 					const auto val = args.NewValue();
 					wchar_t buf[32];
-					conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_page.m_grid_base + 1.0, buf);
+					conv_len_to_str<LEN_UNIT_NAME_APPEND>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_sheet.m_grid_base + 1.0, buf);
 					sd_snap_point().Header(box_value(str_snap_point + buf));
 				})
 			};

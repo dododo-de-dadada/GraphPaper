@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
+	using winrt::Windows::UI::Xaml::Visibility;
 
 	// スクロールバーが操作された.
 	void MainPage::scroll(IInspectable const& sender, ScrollEventArgs const& args)
@@ -47,8 +47,8 @@ namespace winrt::GraphPaper::implementation
 		constexpr double SB_SIZE = 16.0;
 		const double view_w = act_w / m_main_scale;	// 見えている部分の幅
 		const double view_h = act_h / m_main_scale;	// 見えている部分の高さ
-		const auto lt = m_main_bbox_lt;	// ページを含む図形全体の境界矩形の左上位置
-		const auto rb = m_main_bbox_rb;	// ページを含む図形全体の境界矩形の右下位置
+		const auto lt = m_main_bbox_lt;	// 用紙を含む図形全体の境界矩形の左上位置
+		const auto rb = m_main_bbox_rb;	// 用紙を含む図形全体の境界矩形の右下位置
 		const auto mw = static_cast<double>(rb.x) - static_cast<double>(lt.x) - view_w;
 		const auto mh = static_cast<double>(rb.y) - static_cast<double>(lt.y) - view_h;
 		sb_horz().ViewportSize(view_w);
@@ -119,13 +119,13 @@ namespace winrt::GraphPaper::implementation
 		// 表示される図形が編集対象の図形なら, 文字列の選択範囲を判定される矩形に格納する.
 		if (static_cast<const ShapeText*>(s) == m_core_text_shape) {
 			const ShapeText* t = m_core_text_shape;
-			const auto end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
-			if (m_main_page.m_select_start != end) {
+			const auto end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
+			if (m_main_sheet.m_select_start != end) {
 				// 文字列の選択範囲のキャレット点を得て, これを判定する矩形に格納する.
 				D2D1_POINT_2F car_start;
 				D2D1_POINT_2F car_end;
-				t->get_text_caret(m_main_page.m_select_start, t->get_text_row(m_main_page.m_select_start), false, car_start);
-				t->get_text_caret(m_main_page.m_select_end, t->get_text_row(m_main_page.m_select_end), m_main_page.m_select_trail, car_end);
+				t->get_text_caret(m_main_sheet.m_select_start, t->get_text_row(m_main_sheet.m_select_start), false, car_start);
+				t->get_text_caret(m_main_sheet.m_select_end, t->get_text_row(m_main_sheet.m_select_end), m_main_sheet.m_select_trail, car_end);
 				test_lt.x = min(car_start.x, car_end.x);
 				test_lt.y = min(car_start.y, car_end.y);
 				test_rb.x = max(car_start.x, car_end.x);

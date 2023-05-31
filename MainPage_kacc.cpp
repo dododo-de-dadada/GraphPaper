@@ -15,8 +15,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択範囲がなくキャレット位置が文頭でないなら
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		if (end == start && end > 0) {
 			undo_push_null();
 			undo_push_text_select(m_core_text_shape, end - 1, end, false);
@@ -32,8 +32,8 @@ namespace winrt::GraphPaper::implementation
 		CoreTextRange modified_ran{
 			static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
 		};
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -67,19 +67,19 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
-		const auto row = m_core_text_shape->get_text_row(m_main_page.m_select_end);	// キャレットがある行
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
+		const auto row = m_core_text_shape->get_text_row(m_main_sheet.m_select_end);	// キャレットがある行
 		const auto last = m_core_text_shape->m_dwrite_test_cnt - 1;	// 最終行
 		if (end != start && row == last) {
 			//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
-			//	undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+			//	undo_push_text_select(m_core_text_shape, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//	main_draw();
 			//}
 			//else {
-				undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+				undo_push_text_select(m_core_text_shape, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			const auto h = m_core_text_shape->m_dwrite_test_metrics[row + 1].top - m_core_text_shape->m_dwrite_test_metrics[row].top;
 			D2D1_POINT_2F car;
-			m_core_text_shape->get_text_caret(end, row, m_main_page.m_select_trail, car);
+			m_core_text_shape->get_text_caret(end, row, m_main_sheet.m_select_trail, car);
 			const D2D1_POINT_2F new_car{ car.x, car.y + h };
 			bool new_trail;
 			const auto new_end = m_core_text_shape->get_text_pos(new_car, new_trail);
@@ -104,8 +104,8 @@ namespace winrt::GraphPaper::implementation
 				main_draw();
 			//}
 		}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -118,20 +118,20 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
-		const auto row = m_core_text_shape->get_text_row(m_main_page.m_select_end);	// キャレットがある行
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
+		const auto row = m_core_text_shape->get_text_row(m_main_sheet.m_select_end);	// キャレットがある行
 		const auto last = m_core_text_shape->m_dwrite_test_cnt - 1;	// 最終行
 		if (end != start && row == last) {
 			//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
-				undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+				undo_push_text_select(m_core_text_shape, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 			//else {
-			//undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+			//undo_push_text_select(m_core_text_shape, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//main_draw();
 			//}
 		}
@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			const auto h = m_core_text_shape->m_dwrite_test_metrics[row + 1].top - m_core_text_shape->m_dwrite_test_metrics[row].top;
 			D2D1_POINT_2F car;
-			m_core_text_shape->get_text_caret(end, row, m_main_page.m_select_trail, car);
+			m_core_text_shape->get_text_caret(end, row, m_main_sheet.m_select_trail, car);
 			const D2D1_POINT_2F new_car{ car.x, car.y + h };
 			bool new_trail;
 			const auto new_end = m_core_text_shape->get_text_pos(new_car, new_trail);
@@ -155,8 +155,8 @@ namespace winrt::GraphPaper::implementation
 			//main_draw();
 			//}
 		}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -169,8 +169,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		const auto s = min(start, end);
 		undo_push_null();
 		// 改行を挿入する.
@@ -183,8 +183,8 @@ namespace winrt::GraphPaper::implementation
 		CoreTextRange modified_ran{
 			static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
 		};
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
-		m_event_loc_pressed = LOC_TYPE::LOC_PAGE;
+		m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
 	}
 
 	void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
@@ -215,8 +215,8 @@ namespace winrt::GraphPaper::implementation
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		//if (shift_key) {
 		//	if (end > 0) {
 		//		undo_push_text_select(m_core_text_shape, start, end - 1, false);
@@ -236,8 +236,8 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 		}
 		//}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -252,8 +252,8 @@ namespace winrt::GraphPaper::implementation
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		//if (shift_key) {
 		if (end > 0) {
 			undo_push_text_select(m_core_text_shape, start, end - 1, false);
@@ -272,8 +272,8 @@ namespace winrt::GraphPaper::implementation
 		//		main_draw();
 		//	}
 		//}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -288,8 +288,8 @@ namespace winrt::GraphPaper::implementation
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		//if (shift_key) {
 		//	if (end < len) {
 		//		undo_push_text_select(m_core_text_shape, start, end + 1, false);
@@ -309,8 +309,8 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 		}
 		//}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -325,8 +325,8 @@ namespace winrt::GraphPaper::implementation
 		//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 		//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
 		//if (shift_key) {
 		if (end < len) {
 			undo_push_text_select(m_core_text_shape, start, end + 1, false);
@@ -345,8 +345,8 @@ namespace winrt::GraphPaper::implementation
 		//		main_draw();
 		//	}
 		//}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -359,18 +359,18 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
-		const auto row = m_core_text_shape->get_text_row(m_main_page.m_select_end);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
+		const auto row = m_core_text_shape->get_text_row(m_main_sheet.m_select_end);
 		if (end != start && row == 0) {
 			//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
-			//	undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+			//	undo_push_text_select(m_core_text_shape, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//	main_draw();
 			//}
 			//else {
-			undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+			undo_push_text_select(m_core_text_shape, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			const auto h = m_core_text_shape->m_dwrite_test_metrics[row].top - m_core_text_shape->m_dwrite_test_metrics[row - 1].top;
 			D2D1_POINT_2F car;
-			m_core_text_shape->get_text_caret(end, row, m_main_page.m_select_trail, car);
+			m_core_text_shape->get_text_caret(end, row, m_main_sheet.m_select_trail, car);
 			const D2D1_POINT_2F new_car{ car.x, car.y - h };
 			bool new_trail;
 			const auto new_end = m_core_text_shape->get_text_pos(new_car, new_trail);
@@ -395,8 +395,8 @@ namespace winrt::GraphPaper::implementation
 			main_draw();
 			//}
 		}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
@@ -410,19 +410,19 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		const auto len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end, len);
-		const auto start = min(m_main_page.m_select_start, len);
-		const auto row = m_core_text_shape->get_text_row(m_main_page.m_select_end);
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_main_sheet.m_select_start, len);
+		const auto row = m_core_text_shape->get_text_row(m_main_sheet.m_select_end);
 		if (end != start && row == 0) {
 			//const auto key_state = CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift);
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
-			undo_push_text_select(m_core_text_shape, start, m_main_page.m_select_end, m_main_page.m_select_trail);
+			undo_push_text_select(m_core_text_shape, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 			//else {
-			//	undo_push_text_select(m_core_text_shape, end, m_main_page.m_select_end, m_main_page.m_select_trail);
+			//	undo_push_text_select(m_core_text_shape, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 			//	main_draw();
 			//}
 		}
@@ -431,7 +431,7 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			const auto h = m_core_text_shape->m_dwrite_test_metrics[row].top - m_core_text_shape->m_dwrite_test_metrics[row - 1].top;
 			D2D1_POINT_2F car;
-			m_core_text_shape->get_text_caret(end, row, m_main_page.m_select_trail, car);
+			m_core_text_shape->get_text_caret(end, row, m_main_sheet.m_select_trail, car);
 			const D2D1_POINT_2F new_car{ car.x, car.y - h };
 			bool new_trail;
 			const auto new_end = m_core_text_shape->get_text_pos(new_car, new_trail);
@@ -446,8 +446,8 @@ namespace winrt::GraphPaper::implementation
 			//	main_draw();
 			//}
 		}
-		const auto new_start = m_main_page.m_select_start;
-		const auto new_end = m_main_page.m_select_trail ? m_main_page.m_select_end + 1 : m_main_page.m_select_end;
+		const auto new_start = m_main_sheet.m_select_start;
+		const auto new_end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
 		CoreTextRange new_ran{
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};

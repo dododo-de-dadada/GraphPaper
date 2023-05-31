@@ -821,7 +821,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
-		if (loc != LOC_TYPE::LOC_PAGE) {
+		if (loc != LOC_TYPE::LOC_SHEET) {
 			return loc;
 		}
 		const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?

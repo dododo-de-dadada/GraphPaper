@@ -413,8 +413,8 @@ namespace winrt::GraphPaper::implementation
 
 			// ページの幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
-			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// ポイントに変換された幅
-			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// ポイントに変換された高さ
+			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// ポイントに変換された幅
+			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// ポイントに変換された高さ
 
 			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
 			const IRandomAccessStream& pdf_stream{
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			// フォント
 			int text_cnt = 0;	// 文字列オブジェクトの計数
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -520,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 画像
 			int image_cnt = 0;
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -558,22 +558,22 @@ namespace winrt::GraphPaper::implementation
 			);
 			len = dt_writer.WriteString(buf);
 
-			len += m_main_page.export_pdf_page(m_background_color, dt_writer);
+			len += m_main_sheet.export_pdf_sheet(m_background_color, dt_writer);
 
-			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
-				len += m_main_page.export_pdf_grid(m_background_color, dt_writer);
+			if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
+				len += m_main_sheet.export_pdf_grid(m_background_color, dt_writer);
 			}
 
 			// 図形を出力
-			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
-			for (const auto s : m_main_page.m_shape_list) {
+			const D2D1_SIZE_F sheet_size = m_main_sheet.m_sheet_size;
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				len += s->export_pdf(page_size, dt_writer);
+				len += s->export_pdf(sheet_size, dt_writer);
 			}
-			if (m_main_page.m_grid_show == GRID_SHOW::FRONT) {
-				len += m_main_page.export_pdf_grid(m_background_color, dt_writer);
+			if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
+				len += m_main_sheet.export_pdf_grid(m_background_color, dt_writer);
 			}
 			len += dt_writer.WriteString(
 				L"Q\n"
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 
 			// フォント辞書
 			text_cnt = 0;
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -665,7 +665,7 @@ namespace winrt::GraphPaper::implementation
 
 			// 画像 XObject
 			image_cnt = 0;
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -840,8 +840,8 @@ namespace winrt::GraphPaper::implementation
 
 		// デバイスの作成
 		/*
-		const UINT w = m_main_page.m_page_size.width;
-		const UINT h = m_main_page.m_page_size.height;
+		const UINT w = m_main_sheet.m_sheet_size.width;
+		const UINT h = m_main_sheet.m_sheet_size.height;
 		std::vector<uint8_t> mem(4 * w * h);
 		winrt::com_ptr<IWICBitmap> wic_bitmap;
 		ShapeImage::wic_factory->CreateBitmapFromMemory(
@@ -874,8 +874,8 @@ namespace winrt::GraphPaper::implementation
 		// D2D1_PIXEL_FORMAT には D2D1_ALPHA_MODE_PREMULTIPLIED を指定する.
 		// D2D1_ALPHA_MODE_STRAIGHT は使用できない
 		const D2D1_SIZE_U p_size{	// 画素単位での大きさ
-			static_cast<UINT32>(m_main_page.m_page_size.width),
-			static_cast<UINT32>(m_main_page.m_page_size.height)
+			static_cast<UINT32>(m_main_sheet.m_sheet_size.width),
+			static_cast<UINT32>(m_main_sheet.m_sheet_size.height)
 		};
 		const D2D1_PIXEL_FORMAT p_format{	// 画素フォーマット
 			DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1BitmapRenderTarget> target;
 		if (hr == S_OK) {
 			hr = offscreen.m_d2d_context->CreateCompatibleRenderTarget(
-				m_main_page.m_page_size, p_size, p_format, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, target.put()
+				m_main_sheet.m_sheet_size, p_size, p_format, D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE, target.put()
 			);
 		}
 
@@ -892,22 +892,22 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.lock();
 
 			// ビットマップオブジェクトは, レンダーターゲット依存するため全て消去
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (typeid(*s) == typeid(ShapeImage)) {
 					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 				}
 			}
 
 			// ビットマップへの描画
-			m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
+			m_main_sheet.begin_draw(target.get(), false, nullptr, 1.0f);
 			target->SaveDrawingState(Shape::m_state_block.get());
 			target->BeginDraw();
-			m_main_page.draw();
+			m_main_sheet.draw();
 			hr = target->EndDraw();
 			target->RestoreDrawingState(Shape::m_state_block.get());
 
 			// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
-			for (const auto s : m_main_page.m_shape_list) {
+			for (const auto s : m_main_sheet.m_shape_list) {
 				if (typeid(*s) == typeid(ShapeImage)) {
 					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 				}
@@ -985,24 +985,24 @@ namespace winrt::GraphPaper::implementation
 				double h;	// 単位変換後の高さ
 				wchar_t* u;	// 単位
 				if (m_len_unit == LEN_UNIT::INCH) {
-					w = m_main_page.m_page_size.width / dpi;
-					h = m_main_page.m_page_size.height / dpi;
+					w = m_main_sheet.m_sheet_size.width / dpi;
+					h = m_main_sheet.m_sheet_size.height / dpi;
 					u = L"in";
 				}
 				else if (m_len_unit == LEN_UNIT::MILLI) {
-					w = m_main_page.m_page_size.width * MM_PER_INCH / dpi;
-					h = m_main_page.m_page_size.height * MM_PER_INCH / dpi;
+					w = m_main_sheet.m_sheet_size.width * MM_PER_INCH / dpi;
+					h = m_main_sheet.m_sheet_size.height * MM_PER_INCH / dpi;
 					u = L"mm";
 				}
 				else if (m_len_unit == LEN_UNIT::POINT) {
-					w = m_main_page.m_page_size.width * PT_PER_INCH / dpi;
-					h = m_main_page.m_page_size.height * PT_PER_INCH / dpi;
+					w = m_main_sheet.m_sheet_size.width * PT_PER_INCH / dpi;
+					h = m_main_sheet.m_sheet_size.height * PT_PER_INCH / dpi;
 					u = L"pt";
 				}
 				// SVG で使用できる上記の単位以外はすべてピクセル.
 				else {
-					w = m_main_page.m_page_size.width;
-					h = m_main_page.m_page_size.height;
+					w = m_main_sheet.m_sheet_size.width;
+					h = m_main_sheet.m_sheet_size.height;
 					u = L"px";
 				}
 
@@ -1011,31 +1011,31 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf,
 					L"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" "
 					L"width=\"%f%s\" height=\"%f%s\" viewBox=\"0 0 %f %f\" >",
-					w, u, h, u, m_main_page.m_page_size.width, m_main_page.m_page_size.height
+					w, u, h, u, m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height
 				);
 				dt_writer.WriteString(buf);
-				// ページの塗りつぶしと, 余白の平行移動.
+				// 用紙の塗りつぶしと, 余白の平行移動.
 				swprintf_s(buf,
 					L"<rect width=\"%f\" height=\"%f\" "
 					L"fill=\"#%02x%02x%02x\" opacity=\"%f\" />\n"
 					L"<g transform=\"translate(%f,%f)\" >\n",
-					m_main_page.m_page_size.width, m_main_page.m_page_size.height,
-					conv_color_comp(m_main_page.m_page_color.r),
-					conv_color_comp(m_main_page.m_page_color.g),
-					conv_color_comp(m_main_page.m_page_color.b),
-					m_main_page.m_page_color.a,
-					m_main_page.m_page_margin.left,
-					m_main_page.m_page_margin.top
+					m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height,
+					conv_color_comp(m_main_sheet.m_sheet_color.r),
+					conv_color_comp(m_main_sheet.m_sheet_color.g),
+					conv_color_comp(m_main_sheet.m_sheet_color.b),
+					m_main_sheet.m_sheet_color.a,
+					m_main_sheet.m_sheet_margin.left,
+					m_main_sheet.m_sheet_margin.top
 				);
 				dt_writer.WriteString(buf);
 			}
 
-			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
-				m_main_page.export_svg(dt_writer);
+			if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
+				m_main_sheet.export_svg(dt_writer);
 			}
 
 			// 図形リストの各図形について以下を繰り返す.
-			for (auto s : m_main_page.m_shape_list) {
+			for (auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -1051,8 +1051,8 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 
-			if (m_main_page.m_grid_show == GRID_SHOW::FRONT) {
-				m_main_page.export_svg(dt_writer);
+			if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
+				m_main_sheet.export_svg(dt_writer);
 			}
 
 			// SVG 終了タグを書き込む.

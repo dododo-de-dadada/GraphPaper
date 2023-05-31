@@ -26,6 +26,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
 	using winrt::Windows::UI::Xaml::FocusState;
 
+	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
+
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
 	// 貼り付ける位置を求める.
@@ -57,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			winrt::apartment_context context;
 			// 選択された図形のリストを得る.
 			SHAPE_LIST selected_list;
-			slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
+			slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
 			// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
 			wchar_t* text_ptr = nullptr;
 			RandomAccessStreamReference img_ref = nullptr;
@@ -175,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				// 選択された図形のリストを得る.
 				SHAPE_LIST selected_list;
-				slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
+				slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
 				// リストの各図形について以下を繰り返す.
 				m_mutex_draw.lock();
 				for (auto s : selected_list) {
@@ -274,16 +276,14 @@ namespace winrt::GraphPaper::implementation
 		// 図形の大きさは元画像と同じにする.
 		const float img_w = static_cast<float>(bmp.PixelWidth());
 		const float img_h = static_cast<float>(bmp.PixelHeight());
-		//const float scale = m_main_page.m_page_scale;
 		const float scale = m_main_scale;
 		D2D1_POINT_2F pos{
 			static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
 			static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
 		};
-		const D2D1_SIZE_F page_size{ img_w, img_h };
 
 		// ビットマップから図形を作成する.
-		ShapeImage* s = new ShapeImage(pos, page_size, bmp, 1.0f);
+		ShapeImage* s = new ShapeImage(pos, D2D1_SIZE_F{ img_w, img_h }, bmp, 1.0f);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -295,10 +295,9 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
-		const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
-		xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / m_main_scale);
+		const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
+		xcvd_get_paste_pos(pos, /*<---*/pos, m_main_sheet.m_shape_list, g_len, m_snap_point / m_main_scale);
 		s->set_pos_start(pos);
-
 		{
 			m_mutex_draw.lock();
 			undo_push_null();
@@ -375,8 +374,6 @@ namespace winrt::GraphPaper::implementation
 						main_bbox_update(s);
 					}
 					m_mutex_draw.unlock();
-					//undo_menu_is_enabled();
-					//xcvd_menu_is_enabled();
 					main_panel_size();
 					main_draw();
 					slist_pasted.clear();
@@ -415,28 +412,28 @@ namespace winrt::GraphPaper::implementation
 
 				// パネルの大きさで文字列図形を作成する,.
 				const float scale = m_main_scale;
-				//const float scale = m_main_page.m_page_scale;
+				//const float scale = m_main_sheet.m_sheet_scale;
 				const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
 				const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
 				const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
-					m_main_page.m_page_size.width); // ページの表示されている幅
+					m_main_sheet.m_sheet_size.width); // ページの表示されている幅
 				const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale,
-					m_main_page.m_page_size.height); // ページの表示されている高さ
+					m_main_sheet.m_sheet_size.height); // ページの表示されている高さ
 				const float lt_x = m_main_bbox_lt.x;
 				const float lt_y = m_main_bbox_lt.y;
-				ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_page);
+				ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_sheet);
 #if (_DEBUG)
 				debug_leak_cnt++;
 #endif
 				// 枠を文字列に合わせる.
-				const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+				const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
 				t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 				// パネルの中央になるよう左上位置を求める.
 				D2D1_POINT_2F pos{
 					static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
 					static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
 				};
-				xcvd_get_paste_pos(pos, /*<---*/pos, m_main_page.m_shape_list, g_len, m_snap_point / scale);
+				xcvd_get_paste_pos(pos, /*<---*/pos, m_main_sheet.m_shape_list, g_len, m_snap_point / scale);
 				t->set_pos_start(pos);
 				{
 					m_mutex_draw.lock();
@@ -496,8 +493,8 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept
 	{
-		const auto& slist = m_main_page.m_shape_list;
-		const double g_len = (m_snap_grid ? m_main_page.m_grid_base + 1.0 : 0.0);
+		const auto& slist = m_main_sheet.m_shape_list;
+		const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
 		const auto interval = m_snap_point / m_main_scale;
 		xcvd_get_paste_pos(p, q, slist, g_len, interval);
 	}

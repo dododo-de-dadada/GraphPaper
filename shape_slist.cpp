@@ -278,12 +278,12 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const uint32_t loc = t->hit_test(pt, ctrl_key);
-			if (loc != LOC_TYPE::LOC_PAGE) {
+			if (loc != LOC_TYPE::LOC_SHEET) {
 				s = t;
 				return loc;
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// ƒŠƒXƒg‚É}Œ`‚ğ‘}“ü‚·‚é.

@@ -14,7 +14,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionReason;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
-	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
 	using winrt::Windows::ApplicationModel::SuspendingDeferral;
 	using winrt::Windows::ApplicationModel::SuspendingOperation;
@@ -33,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_mutex_draw.lock();
 		m_main_d2d.Trim();
-		m_prop_d2d.Trim();
+		m_dialog_d2d.Trim();
 		m_mutex_draw.unlock();
 	}
 
@@ -90,7 +89,8 @@ namespace winrt::GraphPaper::implementation
 		// 延長実行セッションが取り消されたときのコルーチンを登録する.
 		winrt::event_token ext_token = ext_session.Revoked(
 			// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
-			[&cancel_src, &sus_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
+			[&cancel_src, &sus_deferral](auto const&, auto const& args)
+			// IInspectable const&, ExtendedExecutionRevokedEventArgs const& args
 			{
 				// トークンの元をキャンセルする.
 				cancel_src.cancel();

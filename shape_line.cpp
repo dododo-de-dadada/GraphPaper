@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// ‹éŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.

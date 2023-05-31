@@ -248,21 +248,21 @@ namespace winrt::GraphPaper::implementation
 			loc_r = LOC_TYPE::LOC_R_NE;
 		}
 		else {
-			loc_r = LOC_TYPE::LOC_PAGE;
+			loc_r = LOC_TYPE::LOC_SHEET;
 		}
 
 		// 角丸のいずれかの中心点に含まれる,
-		if (loc_r != LOC_TYPE::LOC_PAGE &&
+		if (loc_r != LOC_TYPE::LOC_SHEET &&
 			// かつ, 方形の大きさが図形の部位の倍の大きさより大きいか判定する.
 			fabs(m_pos.x) > m_loc_width && fabs(m_pos.y) > 2.0f * m_loc_width) {
 			return loc_r;
 		}
 		const uint32_t loc_v = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
-		if (loc_v != LOC_TYPE::LOC_PAGE) {
+		if (loc_v != LOC_TYPE::LOC_SHEET) {
 			return loc_v;
 		}
 		// 頂点に含まれず, 角丸の円弧の中心点に含まれるか判定する.
-		else if (loc_r != LOC_TYPE::LOC_PAGE) {
+		else if (loc_r != LOC_TYPE::LOC_SHEET) {
 			return loc_r;
 		}
 
@@ -321,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return LOC_TYPE::LOC_PAGE;
+		return LOC_TYPE::LOC_SHEET;
 	}
 
 	// 値を, 指定した部位の点に格納する.

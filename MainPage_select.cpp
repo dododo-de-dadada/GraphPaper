@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			bool done = false;
-			for (auto s : m_main_page.m_shape_list) {
+			for (auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted() || s->is_selected()) {
 					continue;
 				}
@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::select_shape_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
 		bool done = false;
-		for (auto s : m_main_page.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -110,11 +110,11 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
 			if (m_event_shape_last == nullptr) {
-				s = slist_front(m_main_page.m_shape_list);
+				s = slist_front(m_main_sheet.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_next(m_main_page.m_shape_list, m_event_shape_last);
+				s = slist_next(m_main_sheet.m_shape_list, m_event_shape_last);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -123,11 +123,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (K == VirtualKey::Up) {
 			if (m_event_shape_last == nullptr) {
-				s = slist_back(m_main_page.m_shape_list);
+				s = slist_back(m_main_sheet.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_prev(m_main_page.m_shape_list, m_event_shape_last);
+				s = slist_prev(m_main_sheet.m_shape_list, m_event_shape_last);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 		auto st = BEGIN;
 		auto s_end = static_cast<Shape*>(nullptr);
 		auto i = 0u;
-		for (auto s : m_main_page.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::toggle_shape_inside(const D2D1_POINT_2F left_top, const D2D1_POINT_2F right_bot)
 	{
 		bool done = false;
-		for (auto s : m_main_page.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_inside(left_top, right_bot)) {
 				continue;
 			}
@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 			m_core_text_shape = nullptr;
 			changed = true;
 		}
-		for (auto s : m_main_page.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
@@ -276,9 +276,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const ShapeText* t = static_cast<ShapeText*>(s);
-			if (m_main_page.m_select_start != 0 ||
-				m_main_page.m_select_end != 0 ||
-				m_main_page.m_select_trail != false) {
+			if (m_main_sheet.m_select_start != 0 ||
+				m_main_sheet.m_select_end != 0 ||
+				m_main_sheet.m_select_trail != false) {
 				undo_push_text_select(s, 0, 0, false);
 				changed = true;
 			}

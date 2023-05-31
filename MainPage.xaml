@@ -466,42 +466,42 @@
 				<!-- 方眼の色 -->
 				<MenuFlyoutItem x:Name="mfi_popup_grid_color" x:Uid="mfi_menu_grid_color" Click="color_grid_click" Text="Grid Color..." />
 				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_grid_page"/>
-				<!-- ページの大きさ -->
-				<MenuFlyoutItem x:Name="mfi_popup_page_size" x:Uid="mfi_menu_page_size" Click="page_size_click_async" Text="Page Size..." />
-				<!-- ページの色 -->
-				<MenuFlyoutItem x:Name="mfi_popup_page_color" x:Uid="mfi_menu_page_color" Click="color_page_click" Text="Page Color..." />
-				<!-- ページの拡大率 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_page_zoom" x:Uid="mfsi_menu_page_zoom" Icon="Zoom" Text="Page Zoom">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_025" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_050" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
+				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_grid_sheet"/>
+                <!-- 用紙の大きさ -->
+				<MenuFlyoutItem x:Name="mfi_popup_sheet_size" x:Uid="mfi_menu_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
+                <!-- 用紙の色 -->
+                <MenuFlyoutItem x:Name="mfi_popup_sheet_color" x:Uid="mfi_menu_sheet_color" Click="color_sheet_click" Text="Sheet Color..." />
+                <!-- 用紙の拡大率 -->
+                <MenuFlyoutSubItem x:Name="mfsi_popup_sheet_zoom" x:Uid="mfsi_menu_sheet_zoom" Icon="Zoom" Text="Sheet Zoom">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_025" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_050" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomOut" Text="50%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_075" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_075" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomOut" Text="75%" />
 					<muxc:RadioMenuFlyoutItem 
-						x:Name="rmfi_popup_page_zoom_100" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="Zoom" Text="100%">
+						x:Name="rmfi_popup_sheet_zoom_100" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="Zoom" Text="100%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_150" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_200" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_150" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_200" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomIn" Text="200%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_300" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_300" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomIn" Text="300%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_page_zoom_400" GroupName="gn_popup_page_zoom" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_sheet_zoom_400" GroupName="gn_popup_sheet_zoom" Click="sheet_zoom_click" Icon="ZoomIn" Text="400%" >
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
@@ -1189,40 +1189,40 @@
 				<!-- 方眼の色 -->
 				<MenuFlyoutItem x:Uid="mfi_menu_grid_color" Click="color_grid_click" Text="Grid Color..." />
 				<MenuFlyoutSeparator />
-				<!-- ページの大きさ -->
-				<MenuFlyoutItem x:Uid="mfi_menu_page_size" Click="page_size_click_async" Text="Page Size..." />
-				<!-- ページの色 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_page_color" Click="color_page_click" Text="Page Color..." />
-				<!-- ページのズーム -->
-				<MenuFlyoutSubItem x:Uid="mfsi_menu_page_zoom" Icon="Zoom" Text="Page Zoom">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
+                <!-- 用紙の大きさ -->
+				<MenuFlyoutItem x:Uid="mfi_menu_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
+                <!-- 用紙の色 -->
+                <MenuFlyoutItem x:Uid="mfi_menu_sheet_color" Click="color_sheet_click" Text="Sheet Color..." />
+                <!-- 用紙のズーム -->
+                <MenuFlyoutSubItem x:Uid="mfsi_menu_sheet_zoom" Icon="Zoom" Text="Sheet Zoom">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_025" Click="sheet_zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_050" Click="sheet_zoom_click" Icon="ZoomOut" Text="50%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_100" Click="page_zoom_click" Icon="Zoom" Text="100%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_075" Click="sheet_zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_100" Click="sheet_zoom_click" Icon="Zoom" Text="100%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_150" Click="sheet_zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_200" Click="sheet_zoom_click" Icon="ZoomIn" Text="200%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_300" Click="sheet_zoom_click" Icon="ZoomIn" Text="300%">
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_sheet_zoom_400" Click="sheet_zoom_click" Icon="ZoomIn" Text="400%" >
 						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
@@ -1297,8 +1297,8 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_page" x:Uid="tmfi_menu_status_bar_page" Click="status_bar_click" Text="Page Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Page Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Sheet Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
                 <!-- 点を方眼にくっつける -->
@@ -1428,7 +1428,7 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Len Unit Name" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_page" x:Uid="tmfi_menu_status_bar_page" Click="status_bar_click" Text="Page Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Text="Page Size" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Scale" />
 				</MenuFlyout>
 			</StackPanel.ContextFlyout>
@@ -1460,11 +1460,11 @@
 				<TextBlock x:Uid="tk_status_bar_grid" Text="Grid:"/>
 				<TextBlock x:Name="tk_status_bar_grid" Text="0" />
 			</StackPanel>
-			<StackPanel x:Name="sp_status_bar_page" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_page_w" Text="W:"/>
-				<TextBlock x:Name="tk_status_bar_page_w" Margin="0,0,4,0" Text="0"/>
-				<TextBlock x:Uid="tk_status_bar_page_h" Text="H:"/>
-				<TextBlock x:Name="tk_status_bar_page_h" Text="0"/>
+			<StackPanel x:Name="sp_status_bar_sheet" Margin="0,0,12,0" Orientation="Horizontal">
+				<TextBlock x:Uid="tk_status_bar_sheet_w" Text="W:"/>
+				<TextBlock x:Name="tk_status_bar_sheet_w" Margin="0,0,4,0" Text="0"/>
+				<TextBlock x:Uid="tk_status_bar_sheet_h" Text="H:"/>
+				<TextBlock x:Name="tk_status_bar_sheet_h" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_zoom" Margin="0,0,12,0" Orientation="Horizontal">
 				<TextBlock x:Uid="tk_status_bar_zoom" Text="Zoom:"/>
@@ -1504,9 +1504,9 @@
 				<TextBlock x:Name="tk_message"/>
 			</StackPanel>
 		</ContentDialog>
-		<!-- ページの大きさダイアログ -->
+		<!-- 用紙の大きさダイアログ -->
 		<ContentDialog
-			x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close"
+			x:Name="cd_sheet_size_dialog" x:Uid="cd_sheet_size_dialog" CloseButtonText="Close"
 			DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
 			<Grid>
 				<Grid.RowDefinitions>
@@ -1534,27 +1534,27 @@
 					</Style>
 				</Grid.Resources>
 				<muxc:NumberBox
-					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Grid.Column="0" Grid.Row="0"
-					Header="Width" Margin="0,0,4,12" ToolTipService.ToolTip="Must be between 1-32768" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_size_width" x:Uid="tx_sheet_size_width" Grid.Column="0" Grid.Row="0"
+					Header="Width" Margin="0,0,4,12" ToolTipService.ToolTip="Must be between 1-32768" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Grid.Column="2" Grid.Row="0"
-					Header="Height" Margin="4,0,0,12" ToolTipService.ToolTip="Must be between 1-32768" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_size_height" x:Uid="tx_sheet_size_height" Grid.Column="2" Grid.Row="0"
+					Header="Height" Margin="4,0,0,12" ToolTipService.ToolTip="Must be between 1-32768" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_page_margin_top" x:Uid="tx_page_margin_top" Grid.Column="1" Grid.Row="1"
-					Header="Top Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than page height" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_margin_top" x:Uid="tx_sheet_margin_top" Grid.Column="1" Grid.Row="1"
+					Header="Top Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than sheet height" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_page_margin_left" x:Uid="tx_page_margin_left" Grid.Column="0" Grid.Row="2"
-					Header="Left Padding" Margin="0,0,4,12" ToolTipService.ToolTip="Must be less than page width" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_margin_left" x:Uid="tx_sheet_margin_left" Grid.Column="0" Grid.Row="2"
+					Header="Left Padding" Margin="0,0,4,12" ToolTipService.ToolTip="Must be less than sheet width" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_page_margin_right" x:Uid="tx_page_margin_right" Grid.Column="2" Grid.Row="2"
-					Header="Right Padding" Margin="4,0,0,12" ToolTipService.ToolTip="Must be less than page width" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_margin_right" x:Uid="tx_sheet_margin_right" Grid.Column="2" Grid.Row="2"
+					Header="Right Padding" Margin="4,0,0,12" ToolTipService.ToolTip="Must be less than sheet width" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_page_margin_bottom" x:Uid="tx_page_margin_bottom" Grid.Column="1" Grid.Row="3"
-					Header="Bottom Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than page height" ValueChanged="page_size_value_changed" />
+					x:Name="tx_sheet_margin_bottom" x:Uid="tx_sheet_margin_bottom" Grid.Column="1" Grid.Row="3"
+					Header="Bottom Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than sheet height" ValueChanged="sheet_size_value_changed" />
 				<ComboBox
 					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit"
 					Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="0,0,0,12"
-					SelectionChanged="page_size_selection_changed">
+					SelectionChanged="sheet_size_selection_changed">
 					<ComboBoxItem x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel" IsSelected="True"/>
 					<ComboBoxItem x:Name="cbi_len_unit_inch" x:Uid="cbi_len_unit_inch" Content="Inch"/>
 					<ComboBoxItem x:Name="cbi_len_unit_milli" x:Uid="cbi_len_unit_milli" Content="Millimeter"/>
