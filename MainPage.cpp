@@ -27,7 +27,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::ViewManagement::InputPane;
 	using winrt::Windows::UI::Xaml::Visibility;
 
-
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3lf \u33CC";	// インチ単位の書式
@@ -1340,7 +1339,7 @@ namespace winrt::GraphPaper::implementation
 
 		// テキスト入力
 		// CoreTextEditContext::NotifyFocusEnter
-		//	-SelectionRequested
+		//	- SelectionRequested
 		//	- TextRequested
 		// 半角文字入力
 		//	- TextUpdating
@@ -1360,11 +1359,12 @@ namespace winrt::GraphPaper::implementation
 				}
 				//__debugbreak();
 				CoreTextTextRequest req{ args.Request() };
-				const auto end = static_cast<uint32_t>(req.Range().EndCaretPosition);
+				const CoreTextRange ran{ req.Range() };
+				const auto end = static_cast<uint32_t>(ran.EndCaretPosition);
 				const auto text = (m_core_text_shape->m_text == nullptr ? L"" : m_core_text_shape->m_text);
-				const auto sub_len = min(end, m_core_text_shape->get_text_len()) - req.Range().StartCaretPosition;	// 部分文字列の長さ
+				const auto sub_len = min(end, m_core_text_shape->get_text_len()) - ran.StartCaretPosition;	// 部分文字列の長さ
 				winrt::hstring sub_text{	// 部分文字列
-					text + req.Range().StartCaretPosition, static_cast<winrt::hstring::size_type>(sub_len)
+					text + ran.StartCaretPosition, static_cast<winrt::hstring::size_type>(sub_len)
 				};
 				req.Text(sub_text);
 			});
@@ -1374,11 +1374,11 @@ namespace winrt::GraphPaper::implementation
 				}
 				//__debugbreak();
 				CoreTextSelectionRequest req{ args.Request() };
-				CoreTextRange ran{};
 				const ShapeText* t = m_core_text_shape;
 				const auto len = t->get_text_len();
 				const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
 				const auto start = min(m_main_sheet.m_select_start, len);
+				CoreTextRange ran{};
 				ran.StartCaretPosition = min(start, end);
 				ran.EndCaretPosition = max(start, end);
 				req.Selection(ran);
@@ -1407,6 +1407,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_text_select(m_core_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
 				main_draw();
 				});
+			// 変換候補などの書式
 			m_core_text.FormatUpdating([](auto const&, auto const&) {
 				//__debugbreak();
 				});
