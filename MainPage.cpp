@@ -1407,7 +1407,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_text_select(m_core_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
 				main_draw();
 				});
-			// 変換候補などの書式
+			// 変換候補が表示される直前に呼ばれ, たぶん変換候補の書体などを設定するやつ.
 			m_core_text.FormatUpdating([](auto const&, auto const&) {
 				//__debugbreak();
 				});
@@ -1596,7 +1596,7 @@ namespace winrt::GraphPaper::implementation
 		// > たとえば、段階的に公開される UI の UI や、ポップアップのコンテンツなどは作成しないでください。
 		Dispatcher().RunIdleAsync([=](winrt::Windows::UI::Core::IdleDispatchedHandlerArgs) {
 			auto _{ cd_message_dialog().ShowAsync() };
-			});
+		});
 	}
 
 	/*

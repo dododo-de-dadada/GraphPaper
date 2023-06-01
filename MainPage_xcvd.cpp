@@ -40,99 +40,97 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
-			return;
+			co_return;
 		}
+		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納し, 中断する.
 		if (m_core_text_shape != nullptr) {
 			const auto sele_text = core_text_substr();
 			if (!sele_text.empty()) {
-				// 部分文字列をデータパッケージに格納する.
 				DataPackage dt_pack{ DataPackage() };
 				dt_pack.RequestedOperation(DataPackageOperation::Copy);
 				dt_pack.SetText(sele_text);
-				// クリップボードにデータパッケージを格納する.
 				Clipboard::SetContent(dt_pack);
 				dt_pack = nullptr;
+				co_return;
 			}
 		}
-		else {
-			// コルーチンが呼び出されたスレッドコンテキストを保存する.
-			winrt::apartment_context context;
-			// 選択された図形のリストを得る.
-			SHAPE_LIST selected_list;
-			slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
-			// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
-			wchar_t* text_ptr = nullptr;
-			RandomAccessStreamReference img_ref = nullptr;
-			for (auto it = selected_list.rbegin(); it != selected_list.rend(); it++) {
-				if (text_ptr == nullptr) {
-					// 文字列をポインターに格納する.
-					(*it)->get_text_content(text_ptr);
-				}
-				if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
-					// ビットマップをストリームに格納し, その参照を得る.
-					InMemoryRandomAccessStream img_stream{
-						InMemoryRandomAccessStream()
-					};
-					const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
-						BitmapEncoder::BmpEncoderId(), img_stream);
-					if (ret && img_stream.Size() > 0) {
-						img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
-					}
-				}
-				if (text_ptr != nullptr && img_ref != nullptr) {
-					// 文字列と画像図形, 両方とも見つかったなら中断する.
-					break;
+		// 部分文字列が得られなかったなら, 図形の内容の文字列や画像, そして選択された図形をクリップボードに格納す
+		winrt::apartment_context context;
+		// 選択された図形のリストを得る.
+		SHAPE_LIST selected_list;
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
+		// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
+		wchar_t* text_ptr = nullptr;
+		RandomAccessStreamReference img_ref = nullptr;
+		for (auto it = selected_list.rbegin(); it != selected_list.rend(); it++) {
+			if (text_ptr == nullptr) {
+				// 文字列をポインターに格納する.
+				(*it)->get_text_content(text_ptr);
+			}
+			if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
+				// ビットマップをストリームに格納し, その参照を得る.
+				InMemoryRandomAccessStream img_stream{
+					InMemoryRandomAccessStream()
+				};
+				const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
+					BitmapEncoder::BmpEncoderId(), img_stream);
+				if (ret && img_stream.Size() > 0) {
+					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
 				}
 			}
-			// メモリストリームを作成して, そのデータライターを得る.
-			InMemoryRandomAccessStream mem_stream{
-				InMemoryRandomAccessStream()
-			};
-			IOutputStream out_stream{
-				mem_stream.GetOutputStreamAt(0)
-			};
-			DataWriter dt_writer{ DataWriter(out_stream) };
-			// データライターに選択された図形のリストを書き込む.
-			constexpr bool REDUCED = true;
-			slist_write<REDUCED>(selected_list, /*--->*/dt_writer);
-			// 選択された図形のリストを破棄する.
-			selected_list.clear();
-			// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
-			uint32_t n_byte{ co_await dt_writer.StoreAsync() };
-			if (n_byte > 0) {
-				// メインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(Dispatcher());
-				// データパッケージを作成し, データパッケージにメモリストリームを格納する.
-				DataPackage dt_pack{ DataPackage() };
-				dt_pack.RequestedOperation(DataPackageOperation::Copy);
-				dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
-				// 文字列が得られたか判定する.
-				if (text_ptr != nullptr) {
-					// データパッケージにテキストを格納する.
-					dt_pack.SetText(text_ptr);
-				}
-				// 画像が得られたか判定する.
-				if (img_ref != nullptr) {
-					// データパッケージに画像を格納する.
-					dt_pack.SetBitmap(img_ref);
-				}
-				// クリップボードにデータパッケージを格納する.
-				Clipboard::SetContent(dt_pack);
-				dt_pack = nullptr;
+			if (text_ptr != nullptr && img_ref != nullptr) {
+				// 文字列と画像図形, 両方とも見つかったなら中断する.
+				break;
 			}
-			// データライターを閉じる.
-			dt_writer.Close();
-			dt_writer = nullptr;
-			// 出力ストリームを閉じる.
-			// メモリストリームは閉じちゃダメ.
-			out_stream.Close();
-			out_stream = nullptr;
-			//xcvd_menu_is_enabled();
-			// スレッドコンテキストを復元する.
-			co_await context;
+		}
+		// メモリストリームを作成して, そのデータライターを得る.
+		InMemoryRandomAccessStream mem_stream{
+			InMemoryRandomAccessStream()
+		};
+		IOutputStream out_stream{
+			mem_stream.GetOutputStreamAt(0)
+		};
+		DataWriter dt_writer{ DataWriter(out_stream) };
+		// データライターに選択された図形のリストを書き込む.
+		constexpr bool REDUCED = true;
+		slist_write<REDUCED>(selected_list, /*--->*/dt_writer);
+		// 選択された図形のリストを破棄する.
+		selected_list.clear();
+		// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
+		uint32_t n_byte{ co_await dt_writer.StoreAsync() };
+		if (n_byte > 0) {
+			// メインページの UI スレッドに変える.
+			co_await winrt::resume_foreground(Dispatcher());
+			// データパッケージを作成し, データパッケージにメモリストリームを格納する.
+			DataPackage dt_pack{ DataPackage() };
+			dt_pack.RequestedOperation(DataPackageOperation::Copy);
+			dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
+			// 文字列が得られたか判定する.
+			if (text_ptr != nullptr) {
+				// データパッケージにテキストを格納する.
+				dt_pack.SetText(text_ptr);
+			}
+			// 画像が得られたか判定する.
+			if (img_ref != nullptr) {
+				// データパッケージに画像を格納する.
+				dt_pack.SetBitmap(img_ref);
+			}
+			// クリップボードにデータパッケージを格納する.
+			Clipboard::SetContent(dt_pack);
+			dt_pack = nullptr;
+		}
+		// データライターを閉じる.
+		dt_writer.Close();
+		dt_writer = nullptr;
+		// 出力ストリームを閉じる.
+		// メモリストリームは閉じちゃダメ.
+		out_stream.Close();
+		out_stream = nullptr;
+		//xcvd_menu_is_enabled();
+		// スレッドコンテキストを復元する.
+		co_await context;
 
-			status_bar_set_pos();
-		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------
