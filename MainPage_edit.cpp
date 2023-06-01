@@ -37,6 +37,27 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
+	// 操作メニューの「画像を原画像に戻す」が選択された.
+	void MainPage::revert_image_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	{
+		bool push_null = true;
+		for (Shape* const s : m_main_sheet.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
+				continue;
+			}
+			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
+			if (push_null) {
+				undo_push_null();
+				push_null = false;
+			}
+			undo_push_image(s);
+			static_cast<ShapeImage*>(s)->revert();
+		}
+		main_panel_size();
+		main_draw();
+		status_bar_set_pos();
+	}
+
 	// 編集メニューの「文字列の編集」が選択された.
 	void MainPage::meth_text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -68,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::meth_poly_end_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::open_close_polygon_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool changed = false;
 		for (Shape* s : m_main_sheet.m_shape_list) {

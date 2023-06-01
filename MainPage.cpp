@@ -647,8 +647,8 @@ namespace winrt::GraphPaper::implementation
 
 			// 図形編集メニューの表示/非表示を設定する.
 			mfi_popup_reverse_path().Visibility(exists_selected_cap ? Visibility::Visible : Visibility::Collapsed);
-			mfi_popup_meth_poly_end().Visibility(exists_selected_poly_close || exists_selected_poly_open ? Visibility::Visible : Visibility::Collapsed);
-			mfi_popup_edit_text().Visibility(exists_selected_text ? Visibility::Visible : Visibility::Collapsed);
+			mfi_popup_open_close_polygon().Visibility(exists_selected_poly_close || exists_selected_poly_open ? Visibility::Visible : Visibility::Collapsed);
+			//mfi_popup_edit_text().Visibility(exists_selected_text ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_find_text().Visibility(exists_text ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_revert_image().Visibility(exists_selected_image ? Visibility::Visible : Visibility::Collapsed);
 			//m_list_sel_cnt = selected_cnt;
@@ -1322,8 +1322,8 @@ namespace winrt::GraphPaper::implementation
 			mfi_menu_ungroup().IsEnabled(exists_selected_group);
 
 			mfi_menu_reverse_path().IsEnabled(exists_selected_cap);
-			mfi_menu_meth_poly_end().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
-			mfi_menu_edit_text().IsEnabled(exists_selected_text);
+			mfi_menu_open_close_polygon().IsEnabled(exists_selected_poly_close || exists_selected_poly_open);
+			//mfi_menu_edit_text().IsEnabled(exists_selected_text);
 			mfi_menu_find_text().IsEnabled(exists_text);
 			mfi_menu_revert_image().IsEnabled(exists_selected_image);
 			//m_list_sel_cnt = selected_cnt;

@@ -357,10 +357,6 @@
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
-    <value>Edit Text...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
   <data name="mfi_menu_exit.Text" xml:space="preserve">
     <value>Exit</value>
     <comment>MenuFlyoutItem</comment>
@@ -1254,7 +1250,7 @@
     <value>Arc Rotation</value>
     <comment>String</comment>
   </data>
-  <data name="mfi_menu_meth_poly_end.Text" xml:space="preserve">
+  <data name="mfi_menu_open_close_polygon.Text" xml:space="preserve">
     <value>Open/Close Polygon End</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

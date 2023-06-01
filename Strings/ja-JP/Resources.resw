@@ -357,10 +357,6 @@
     <value>消去</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_edit_text.Text" xml:space="preserve">
-    <value>文字列の編集...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
   <data name="mfi_menu_exit.Text" xml:space="preserve">
     <value>終了</value>
     <comment>MenuFlyoutItem</comment>
@@ -1242,7 +1238,7 @@
     <value>円弧の傾き</value>
     <comment>String</comment>
   </data>
-  <data name="mfi_menu_meth_poly_end.Text" xml:space="preserve">
+  <data name="mfi_menu_open_close_polygon.Text" xml:space="preserve">
     <value>多角形の端を開く/閉じる</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

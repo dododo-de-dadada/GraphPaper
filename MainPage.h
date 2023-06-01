@@ -525,7 +525,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「円弧の傾きの編集」が選択された.
 		void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「多角形の終端を開く/閉じる」が選択された.
-		void meth_poly_end_click(IInspectable const&, RoutedEventArgs const&);
+		void open_close_polygon_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
 		IAsyncAction edit_text_async(ShapeText* s);
@@ -651,7 +651,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作メニューの「画像の縦横比を維持」が選択された.
 		//void image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 操作メニューの「原画像に戻す」が選択された.
-		void image_revert_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		void revert_image_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 
 		//-----------------------------
 		// MainPage_help.cpp

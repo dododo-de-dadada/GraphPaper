@@ -127,18 +127,19 @@
                 <!-- 始点と終点を入れ替える-->
                 <MenuFlyoutItem x:Name="mfi_popup_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
                 <!-- 多角形の端を開く/閉じる -->
-                <MenuFlyoutItem x:Name="mfi_popup_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
+                <MenuFlyoutItem x:Name="mfi_popup_open_close_polygon" x:Uid="mfi_menu_open_close_polygon" Click="open_close_polygon_click" Text="Open/Close Polygon End">
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_end_open}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_popup_revert_image" x:Uid="mfi_menu_revert_image" Click="image_revert_click" Text="Revert Image to Original" >
+                <MenuFlyoutItem x:Name="mfi_popup_revert_image" x:Uid="mfi_menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
+                <!--
                 <MenuFlyoutItem x:Name="mfi_popup_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
@@ -147,6 +148,7 @@
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                -->
                 <!-- 文字列の検索/置換 -->
                 <MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -737,18 +739,19 @@
                 <!-- 始点と終点を入れ替える-->
                 <MenuFlyoutItem x:Name="mfi_menu_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
                 <!-- 多角形の端を開く/閉じる -->
-                <MenuFlyoutItem x:Name="mfi_menu_meth_poly_end" x:Uid="mfi_menu_meth_poly_end" Click="meth_poly_end_click" Text="Open/Close Polygon End">
+                <MenuFlyoutItem x:Name="mfi_menu_open_close_polygon" x:Uid="mfi_menu_open_close_polygon" Click="open_close_polygon_click" Text="Open/Close Polygon End">
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_end_open}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 画像を原画像に戻す -->
-                <MenuFlyoutItem x:Name="mfi_menu_revert_image" x:Uid="mfi_menu_revert_image" Click="image_revert_click" Text="Revert Image to Original" >
+                <MenuFlyoutItem x:Name="mfi_menu_revert_image" x:Uid="mfi_menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 文字列の編集 -->
+                <!--
                 <MenuFlyoutItem x:Name="mfi_menu_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
                     <MenuFlyoutItem.Icon>
                         <FontIcon Glyph="{StaticResource glyph_ibeam}"/>
@@ -757,6 +760,7 @@
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                -->
                 <!-- 文字列の検索/置換 -->
                 <MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
