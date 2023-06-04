@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 		slist_clear(m_dialog_sheet.m_shape_list);
 	}
-
+	/*
 	void MainPage::meth_arc_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeArc* t;	// ï“èWÇ∑ÇÈâ~å ê}å`
@@ -391,5 +391,5 @@ namespace winrt::GraphPaper::implementation
 		}
 		status_bar_set_pos();
 	}
-
+	*/
 }

@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 				// ‘I‘ð‚³‚ê‚½}Œ`‚Ì”‚ª 1 ‚ð’´‚¦‚é,
 				// ‚Ü‚½‚Í‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªü˜g, “à‘¤‚Ì‚Æ‚«‚Í, }Œ`‚ðˆÚ“®‚µ‚Ä‚¢‚éó‘Ô‚É‘JˆÚ‚·‚é.
 				else if (m_drawing_tool == DRAWING_TOOL::SELECT &&
-					(m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL || m_list_sel_cnt > 1)) {
+					(m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL || m_ustack_scnt > 1)) {
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_null();
@@ -1341,7 +1341,7 @@ namespace winrt::GraphPaper::implementation
 			if (loc == LOC_TYPE::LOC_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
-			else if (m_list_sel_cnt > 1) {
+			else if (m_ustack_scnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 			}
 			else if (loc == LOC_TYPE::LOC_TEXT) {

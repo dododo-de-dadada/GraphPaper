@@ -279,10 +279,10 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSelect)) {
 			if (u->m_shape->is_selected()) {
-				m_list_sel_cnt++;
+				m_ustack_scnt++;
 			}
 			else {
-				m_list_sel_cnt--;
+				m_ustack_scnt--;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -291,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_list_sel_cnt) {
+			if (cnt != m_ustack_scnt) {
 				__debugbreak();
 			}
 #endif
@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 			// 削除した後, 挿入フラグが立つので選択された数は 1 減らす.
 			if (static_cast<UndoList*>(u)->m_insert) {
 				if (u->m_shape->is_selected()) {
-					m_list_sel_cnt--;
+					m_ustack_scnt--;
 				}
 #ifdef _DEBUG
 				uint32_t cnt = 0;
@@ -309,14 +309,14 @@ namespace winrt::GraphPaper::implementation
 						cnt++;
 					}
 				}
-				if (cnt != m_list_sel_cnt) {
+				if (cnt != m_ustack_scnt) {
 					__debugbreak();
 				}
 #endif
 			}
 			else {
 				if (u->m_shape->is_selected()) {
-					m_list_sel_cnt++;
+					m_ustack_scnt++;
 				}
 #ifdef _DEBUG
 				uint32_t cnt = 0;
@@ -325,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 						cnt++;
 					}
 				}
-				if (cnt != m_list_sel_cnt) {
+				if (cnt != m_ustack_scnt) {
 					__debugbreak();
 				}
 #endif
@@ -526,11 +526,11 @@ namespace winrt::GraphPaper::implementation
 				// 以前の操作をスタックから取り除き, 終了する.
 				if (s->is_selected()) {
 					s->set_select(false);
-					m_list_sel_cnt--;
+					m_ustack_scnt--;
 				}
 				else {
 					s->set_select(true);
-					m_list_sel_cnt++;
+					m_ustack_scnt++;
 				}
 #ifdef _DEBUG
 		uint32_t cnt = 0;
@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 				cnt++;
 			}
 		}
-		if (cnt != m_list_sel_cnt) {
+		if (cnt != m_ustack_scnt) {
 			__debugbreak();
 		}
 #endif
@@ -550,10 +550,10 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_ustack_undo.push_back(new UndoSelect(s));
 		if (s->is_selected()) {
-			m_list_sel_cnt++;
+			m_ustack_scnt++;
 		}
 		else {
-			m_list_sel_cnt--;
+			m_ustack_scnt--;
 		}
 #ifdef _DEBUG
 		uint32_t cnt = 0;
@@ -562,7 +562,7 @@ namespace winrt::GraphPaper::implementation
 				cnt++;
 			}
 		}
-		if (cnt != m_list_sel_cnt) {
+		if (cnt != m_ustack_scnt) {
 			__debugbreak();
 		}
 #endif

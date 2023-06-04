@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 選択された図形の数がゼロか判定する.
-			if (m_list_sel_cnt > 0) {
+			if (m_ustack_scnt > 0) {
 				undo_push_null();
 				// 選択された図形のリストを得る.
 				SHAPE_LIST selected_list;

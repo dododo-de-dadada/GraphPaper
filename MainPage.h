@@ -274,19 +274,12 @@ namespace winrt::GraphPaper::implementation
 		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
 		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の作成方法
 
-		// 図形リスト
-		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
-
-		// 画像
-		//bool m_image_keep_aspect = true;	// 画像の縦横比の維持/可変
-
 		// メイン用紙
 		ShapeSheet m_main_sheet;	// 用紙
 		D2D_UI m_main_d2d;	// 描画環境
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
-
-		float m_main_scale = 1.0f;	// メイン用紙の拡大率
+		float m_main_scale = 1.0f;	// 用紙の拡大率
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
@@ -298,11 +291,10 @@ namespace winrt::GraphPaper::implementation
 		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
-		//uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
 		UNDO_STACK m_ustack_redo;	// やり直し操作スタック
-		//uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
 		bool m_ustack_is_changed = false;	// スタックが更新されたか判定
+		uint32_t m_ustack_scnt = 0;	// 選択された図形の数
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
@@ -523,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
-		void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
+		//void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「多角形の終端を開く/閉じる」が選択された.
 		void open_close_polygon_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
@@ -914,7 +906,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_ustack_undo.push_back(new UndoAppend(s));
 			if (s->is_selected()) {
-				m_list_sel_cnt++;
+				m_ustack_scnt++;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -923,7 +915,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_list_sel_cnt) {
+			if (cnt != m_ustack_scnt) {
 				__debugbreak();
 			}
 #endif
@@ -958,7 +950,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_ustack_undo.push_back(new UndoInsert(s, s_pos));
 			if (s->is_selected()) {
-				m_list_sel_cnt++;
+				m_ustack_scnt++;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -967,7 +959,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_list_sel_cnt) {
+			if (cnt != m_ustack_scnt) {
 				__debugbreak();
 			}
 #endif
@@ -980,16 +972,13 @@ namespace winrt::GraphPaper::implementation
 		void undo_push_remove(Shape* g, Shape* s)
 		{
 			m_ustack_undo.push_back(new UndoRemoveG(g, s));
-			//if (s->is_selected()) {
-			//	m_list_sel_cnt++;
-			//}
 		}
 		// 図形を取り去り, その操作をスタックに積む.
 		void undo_push_remove(Shape* s)
 		{
 			m_ustack_undo.push_back(new UndoRemove(s));
 			if (s->is_selected()) {
-				m_list_sel_cnt--;
+				m_ustack_scnt--;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -998,7 +987,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_list_sel_cnt) {
+			if (cnt != m_ustack_scnt) {
 				__debugbreak();
 			}
 #endif
@@ -1124,7 +1113,9 @@ namespace winrt::GraphPaper::implementation
 			PrintCanvas().UpdateLayout();
 			*/
 		}
-	};
+		void rmfi_menu_drawing_poly_PointerEntered(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const& e);
+		void rmfi_menu_drawing_poly_PointerExited(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const& e);
+};
 	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
 	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
 

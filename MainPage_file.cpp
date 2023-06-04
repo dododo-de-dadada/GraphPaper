@@ -373,10 +373,10 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
-		m_list_sel_cnt = 0;
+		m_ustack_scnt = 0;
 		for (const auto s : m_main_sheet.m_shape_list) {
 			if (!s->is_deleted() && s->is_selected()) {
-				m_list_sel_cnt++;
+				m_ustack_scnt++;
 			}
 		}
 		main_bbox_update();

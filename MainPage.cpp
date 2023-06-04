@@ -197,13 +197,11 @@ namespace winrt::GraphPaper::implementation
 			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
-
 	}
 
 	// 文字列の選択範囲に文字列を挿入する.
 	void MainPage::core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
 	{
-		//const ShapeText* t = m_core_text_shape;
 		const auto old_len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, old_len);
 		const auto start = min(m_core_text_comp ? m_core_text_start : m_main_sheet.m_select_start, old_len);
@@ -245,6 +243,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::core_text_del_c(const bool shift_key) noexcept
 	{
 		// シフトキー押下でなく選択範囲がなくキャレット位置が文末でないなら
+		// キャレット位置の文字を削除する.
 		const auto len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
 		const auto start = min(m_main_sheet.m_select_start, len);
@@ -254,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
-		// 選択範囲があるなら
+		// 選択範囲があるなら選択範囲の文字列を削除する.
 		else if (end != start) {
 			undo_push_null();
 			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
@@ -650,7 +649,6 @@ namespace winrt::GraphPaper::implementation
 			//mfi_popup_edit_text().Visibility(exists_selected_text ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_find_text().Visibility(exists_text ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_revert_image().Visibility(exists_selected_image ? Visibility::Visible : Visibility::Collapsed);
-			//m_list_sel_cnt = selected_cnt;
 
 			winrt::Windows::UI::Xaml::Visibility menu_prop;	// 図形属性メニューの表示/非表示
 			winrt::Windows::UI::Xaml::Visibility menu_font;	// 書体メニューの表示/非表示
@@ -833,6 +831,7 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				rmfi_menu_eyedropper().IsChecked(true);
 			}
+
 			if (m_drawing_poly_opt.m_vertex_cnt == 2) {
 				rmfi_menu_drawing_poly_di().IsChecked(true);
 			}
@@ -1325,7 +1324,6 @@ namespace winrt::GraphPaper::implementation
 			//mfi_menu_edit_text().IsEnabled(exists_selected_text);
 			mfi_menu_find_text().IsEnabled(exists_text);
 			mfi_menu_revert_image().IsEnabled(exists_selected_image);
-			//m_list_sel_cnt = selected_cnt;
 		});
 
 		//	winrt::Windows::UI::Xaml::UIElement::PointerPressedEvent(), box_value(winrt::Windows::UI::Xaml::Input::PointerEventHandler(
