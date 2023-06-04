@@ -1398,17 +1398,17 @@ namespace winrt::GraphPaper::implementation
 				CoreTextRange ran{ args.Range() };
 				const winrt::hstring ins_text{ args.Text() };
 				core_text_insert(ins_text.data(), static_cast<uint32_t>(ins_text.size()));
-				});
+			});
 			// 変換中, キャレットが移動した
 			m_core_text.SelectionUpdating([this](auto const&, auto const& args) {
 				CoreTextRange ran{ args.Selection() };
 				undo_push_text_select(m_core_text_shape, ran.StartCaretPosition, ran.EndCaretPosition, false);
 				main_draw();
-				});
+			});
 			// 変換候補が表示される直前に呼ばれ, たぶん変換候補の書体などを設定するやつ.
 			m_core_text.FormatUpdating([](auto const&, auto const&) {
 				//__debugbreak();
-				});
+			});
 			m_core_text.LayoutRequested([this](auto const&, auto const& args) {
 				// __debugbreak();
 				if (m_core_text_shape == nullptr) {
