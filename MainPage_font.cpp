@@ -78,7 +78,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -119,8 +118,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-			//undo_menu_is_enabled();
-			////xcvd_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -542,99 +539,4 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
-	// 書体メニューの「イタリック体」が選択された.
-	/*
-	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
-			undo_push_null();
-			//undo_menu_is_enabled();
-			////xcvd_menu_is_enabled();
-			main_draw();
-		}
-		status_bar_set_pos();
-	}
-
-	// 書体メニューの「字体「標準」が選択された.
-	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
-			undo_push_null();
-			//undo_menu_is_enabled();
-			////xcvd_menu_is_enabled();
-			main_draw();
-		}
-		status_bar_set_pos();
-	}
-
-	// 書体メニューの「斜体」が選択された.
-	void MainPage::font_style_oblique_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (undo_push_set<UNDO_T::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
-			undo_push_null();
-			//undo_menu_is_enabled();
-			////xcvd_menu_is_enabled();
-			main_draw();
-		}
-		status_bar_set_pos();
-	}
-	*/
-
-	// 書体メニューの「太さ」が選択された.
-	/*
-	IAsyncAction MainPage::font_weight_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		m_dialog_sheet.set_attr_to(&m_main_sheet);
-		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
-			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
-			lv_dialog_list().Items().Append(item);
-		}
-		lv_dialog_list().SelectedIndex(-1);
-		const auto k = lv_dialog_list().Items().Size();
-		for (uint32_t i = 0; i < k; i++) {
-			DWRITE_FONT_WEIGHT f_weight;
-			m_main_sheet.get_font_weight(f_weight);
-			if (FONT_WEIGHTS[i] == f_weight) {
-				lv_dialog_list().SelectedIndex(i);
-				IInspectable item[1];
-				lv_dialog_list().Items().GetMany(i, item);
-				lv_dialog_list().ScrollIntoView(item[0]);
-				break;
-			}
-		}
-		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_sheet);
-		cd_dialog_prop().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_weight")));
-		m_mutex_event.lock();
-		{
-			const auto revoker{
-				lv_dialog_list().SelectionChanged(winrt::auto_revoke, [this](auto, const& auto const&) {
-					uint32_t i = lv_dialog_list().SelectedIndex();
-					m_dialog_sheet.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-					if (scp_dialog_panel().IsLoaded()) {
-						dialog_draw();
-					}
-				})
-			};
-			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
-				DWRITE_FONT_WEIGHT new_val;
-				m_dialog_sheet.back()->get_font_weight(new_val);
-				if (undo_push_set<UNDO_T::FONT_WEIGHT>(new_val)) {
-					undo_push_null();
-					//xcvd_menu_is_enabled();
-					main_draw();
-				}
-			}
-		}
-		slist_clear(m_dialog_sheet.m_shape_list);
-		//lv_dialog_list().Loaded(loaded_token);
-		lv_dialog_list().Visibility(Visibility::Collapsed);
-		lv_dialog_list().Items().Clear();
-		status_bar_set_pos();
-		m_mutex_event.unlock();
-	}
-	*/
 }

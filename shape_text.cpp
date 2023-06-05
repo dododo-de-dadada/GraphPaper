@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 			t_box.y = floor((t_box.y + g_len - 1.0f) / g_len) * g_len;
 		}
 		// 図形の大きさを変更する.
-		if (!equal(t_box, m_pos)) {
+		if (!equal(t_box, m_lineto)) {
 			D2D1_POINT_2F se;
 			pt_add(m_start, t_box, se);
 			set_pos_loc(se, LOC_TYPE::LOC_SE, 0.0f, false);
@@ -193,8 +193,8 @@ namespace winrt::GraphPaper::implementation
 
 			// 文字列フォーマットから文字列レイアウトを作成する.
 			if (hr == S_OK) {
-				const double text_w = std::fabs(m_pos.x) - 2.0 * m_text_pad.width;
-				const double text_h = std::fabs(m_pos.y) - 2.0 * m_text_pad.height;
+				const double text_w = std::fabs(m_lineto.x) - 2.0 * m_text_pad.width;
+				const double text_h = std::fabs(m_lineto.y) - 2.0 * m_text_pad.height;
 				const FLOAT max_w = static_cast<FLOAT>(max(text_w, 0.0));
 				const FLOAT max_h = static_cast<FLOAT>(max(text_h, 0.0));
 				if (m_text == nullptr) {
@@ -353,7 +353,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 文字列のパディングが変更されたなら文字列レイアウトに格納する.
-			FLOAT text_w = static_cast<FLOAT>(std::fabs(m_pos.x) - m_text_pad.width * 2.0);
+			FLOAT text_w = static_cast<FLOAT>(std::fabs(m_lineto.x) - m_text_pad.width * 2.0);
 			if (text_w < 0.0f) {
 				text_w = 0.0;
 			}
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 					updated = true;
 				}
 			}
-			FLOAT text_h = static_cast<FLOAT>(std::fabs(m_pos.y) - m_text_pad.height * 2.0);
+			FLOAT text_h = static_cast<FLOAT>(std::fabs(m_lineto.y) - m_text_pad.height * 2.0);
 			if (text_h < 0.0f) {
 				text_h = 0.0f;
 			}
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 						}
 						last_top = last_top + m_font_size;	// 最終行の高さは書体の大きさ
 						last_pos = last_pos + m_dwrite_line_metrics[m_dwrite_line_cnt - 1].length;
-						last_top = fabs(m_pos.y) - min(fabs(m_pos.y), 2.0f * m_text_pad.height) - last_top;
+						last_top = fabs(m_lineto.y) - min(fabs(m_lineto.y), 2.0f * m_text_pad.height) - last_top;
 					}
 					else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER) {
 						last_top = 0.0f;
@@ -567,11 +567,11 @@ namespace winrt::GraphPaper::implementation
 		ID2D1SolidColorBrush* const range_brush = Shape::m_d2d_range_brush.get();
 
 		// 余白分をくわえた, 文字列の左上位置を計算する.
-		const double h = min(m_text_pad.width, fabs(m_pos.x) * 0.5f);
-		const double v = min(m_text_pad.height, fabs(m_pos.y) * 0.5f);
+		const double h = min(m_text_pad.width, fabs(m_lineto.x) * 0.5f);
+		const double v = min(m_text_pad.height, fabs(m_lineto.y) * 0.5f);
 		D2D1_POINT_2F t_lt{
-			m_pos.x < 0.0f ? h + m_start.x + m_pos.x : h + m_start.x,
-			m_pos.y < 0.0f ? v + m_start.y + m_pos.y : v + m_start.y
+			m_lineto.x < 0.0f ? h + m_start.x + m_lineto.x : h + m_start.x,
+			m_lineto.y < 0.0f ? v + m_start.y + m_lineto.y : v + m_start.y
 		};
 
 		// 選択範囲があれば選択範囲の計量を得る.
@@ -661,11 +661,11 @@ namespace winrt::GraphPaper::implementation
 		create_text_layout();
 
 		// 余白分をくわえた, 文字列の左上位置を計算する.
-		const double h = min(m_text_pad.width, fabs(m_pos.x) * 0.5f);
-		const double v = min(m_text_pad.height, fabs(m_pos.y) * 0.5f);
+		const double h = min(m_text_pad.width, fabs(m_lineto.x) * 0.5f);
+		const double v = min(m_text_pad.height, fabs(m_lineto.y) * 0.5f);
 		D2D1_POINT_2F t_lt{
-			m_pos.x < 0.0f ? h + m_start.x + m_pos.x : h + m_start.x,
-			m_pos.y < 0.0f ? v + m_start.y + m_pos.y : v + m_start.y
+			m_lineto.x < 0.0f ? h + m_start.x + m_lineto.x : h + m_start.x,
+			m_lineto.y < 0.0f ? v + m_start.y + m_lineto.y : v + m_start.y
 		};
 
 		HRESULT hr = S_OK;
@@ -816,11 +816,11 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 図形が点を含むか判定する.
-	// pt	判定される点
+	// test_pt	判定される点
 	// 戻り値	点を含む部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
+		const uint32_t loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
 		if (loc != LOC_TYPE::LOC_SHEET) {
 			return loc;
 		}
@@ -829,12 +829,12 @@ namespace winrt::GraphPaper::implementation
 			(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
 		// 文字列の矩形の左上点と右下の Y 値を得る.
-		const float h = fabs(m_pos.x) * 0.5f;
-		const float v = fabs(m_pos.y) * 0.5f;
+		const float h = fabs(m_lineto.x) * 0.5f;
+		const float v = fabs(m_lineto.y) * 0.5f;
 		const float f = m_font_size * 0.5f;
-		float left = (m_pos.x < 0.0f ? m_start.x + m_pos.x : m_start.x) + min(m_text_pad.width, h);
-		float right = (m_pos.x < 0.0f ? m_start.x : m_start.x + m_pos.x) - min(m_text_pad.width, h);
-		const float top = (m_pos.y < 0.0f ? m_start.y + m_pos.y : m_start.y) + min(m_text_pad.height, v);
+		float left = (m_lineto.x < 0.0f ? m_start.x + m_lineto.x : m_start.x) + min(m_text_pad.width, h);
+		float right = (m_lineto.x < 0.0f ? m_start.x : m_start.x + m_lineto.x) - min(m_text_pad.width, h);
+		const float top = (m_lineto.y < 0.0f ? m_start.y + m_lineto.y : m_start.y) + min(m_text_pad.height, v);
 
 		float tt = 0.0f;
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -854,7 +854,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F w{	// 行の右下点
 				max(right, left + tl + tw + f), top + tt + bl + descent
 			};
-			if (pt_in_rect(pt, v, w)) {
+			if (pt_in_rect(test_pt, v, w)) {
 				return LOC_TYPE::LOC_TEXT;
 			}
 		}
@@ -887,7 +887,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		*/
-		return ShapeRect::hit_test(pt);
+		return ShapeRect::hit_test(test_pt);
 	}
 
 	// 矩形に含まれるか判定する.

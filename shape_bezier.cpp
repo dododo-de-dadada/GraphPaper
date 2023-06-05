@@ -332,9 +332,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if ((exist_stroke || is_opaque(m_fill_color)) && m_d2d_path_geom == nullptr) {
 			if (!b_flag) {
-				pt_add(m_start, m_pos[0], b_seg.point1);
-				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				pt_add(m_start, m_lineto[0], b_seg.point1);
+				pt_add(b_seg.point1, m_lineto[1], b_seg.point2);
+				pt_add(b_seg.point2, m_lineto[2], b_seg.point3);
 				b_flag = true;
 			}
 			if (hr == S_OK) {
@@ -358,9 +358,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			if (!b_flag) {
-				pt_add(m_start, m_pos[0], b_seg.point1);
-				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				b_seg.point1.x = m_start.x + m_lineto[0].x;
+				b_seg.point1.y = m_start.y + m_lineto[0].y;
+				b_seg.point2.x = b_seg.point1.x + m_lineto[1].x;
+				b_seg.point2.y = b_seg.point1.y + m_lineto[1].y;
+				b_seg.point3.x = b_seg.point2.x + m_lineto[2].x;
+				b_seg.point3.y = b_seg.point2.y + m_lineto[2].y;
 				b_flag = true;
 			}
 			hr = bezi_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style, m_arrow_size,
@@ -383,9 +386,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (m_loc_show && is_selected()) {
 			if (!b_flag) {
-				pt_add(m_start, m_pos[0], b_seg.point1);
-				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				b_seg.point1.x = m_start.x + m_lineto[0].x;
+				b_seg.point1.y = m_start.y + m_lineto[0].y;
+				b_seg.point2.x = b_seg.point1.x + m_lineto[1].x;
+				b_seg.point2.y = b_seg.point1.y + m_lineto[1].y;
+				b_seg.point3.x = b_seg.point2.x + m_lineto[2].x;
+				b_seg.point3.y = b_seg.point2.y + m_lineto[2].y;
 				b_flag = true;
 			}
 			// 補助線を描く
@@ -416,24 +422,27 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F tp, const D2D1_POINT_2F b_pt[4], const D2D1_POINT_2F b_vec[3], const D2D1_CAP_STYLE stroke_cap, const bool f_opaque, const double ew) noexcept
+	// test_pt	判定される点
+	// b_pt	制御点
+	// b_to	次の制御点へのベクトル
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F test_pt, const D2D1_POINT_2F bezi_pt[4], const D2D1_POINT_2F bezi_to[3], const D2D1_CAP_STYLE stroke_cap, const bool fill_opa, const double ew) noexcept
 	{
-		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
+		bool fill_test = false;	// 位置が塗りつぶしに含まれるか判定
 		if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
-			if (pt_in_circle(tp, b_pt[0], ew)) {
+			if (pt_in_circle(test_pt, bezi_pt[0], ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
-			if (pt_in_circle(tp, b_pt[3], ew)) {
+			if (pt_in_circle(test_pt, bezi_pt[3], ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, b_pt, b_vec, ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(test_pt, bezi_pt, bezi_to, ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, b_pt, b_vec, ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(test_pt, bezi_pt, bezi_to, ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
@@ -442,10 +451,10 @@ namespace winrt::GraphPaper::implementation
 		constexpr int32_t D_MAX = 64;	// 分割する深さの最大値
 		POINT_2D s[1 + D_MAX * 3]{};	// 制御点のスタック
 		int32_t s_cnt = 0;	// スタックに積まれた点の数
-		s[0] = b_pt[0];
-		s[1] = b_pt[1];
-		s[2] = b_pt[2];
-		s[3] = b_pt[3];
+		s[0] = bezi_pt[0];
+		s[1] = bezi_pt[1];
+		s[2] = bezi_pt[2];
+		s[3] = bezi_pt[3];
 		s_cnt += 4;
 		// スタックに 一組以上の制御点が残っているか判定する.
 		while (s_cnt >= 4) {
@@ -511,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 			POINT_2D c1[3 * 4];
 			bezi_get_convex((d_cnt - 1) * 4, e, c1_cnt, c1);
 			// 点が凸包 c1 に含まれないか判定する.
-			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1)) {
+			if (!bezi_in_convex(test_pt.x, test_pt.y, c1_cnt, c1)) {
 				// これ以上この制御点の組を分割する必要はない.
 				// スタックに残った他の制御点の組を試す.
 				continue;
@@ -541,14 +550,14 @@ namespace winrt::GraphPaper::implementation
 			c[7] = (c[4] + c[5]) * 0.5;
 			c[8] = (c[5] + c[6]) * 0.5;
 			c[9] = (c[7] + c[8]) * 0.5;
-			if (f_opaque && !f_test) {
+			if (fill_opa && !fill_test) {
 				// 分割された凸包のあいだにできた三角形は, 塗りつぶしの領域.
 				// この領域に点が含まれるか, 分割するたびに判定する.
 				// ただし 1 度でも含まれるなら, それ以上の判定は必要ない.
 				const POINT_2D tri[3]{
 					c[0], c[9], c[3]
 				};
-				f_test = bezi_in_convex(tp.x, tp.y, 3, tri);
+				fill_test = bezi_in_convex(test_pt.x, test_pt.y, 3, tri);
 			}
 			// 一方の組をプッシュする.
 			// 始点 (0) はスタックに残っているので, 
@@ -564,7 +573,7 @@ namespace winrt::GraphPaper::implementation
 			s[s_cnt + 5] = c[3];
 			s_cnt += 6;
 		}
-		if (f_opaque && f_test) {
+		if (fill_opa && fill_test) {
 			return LOC_TYPE::LOC_FILL;
 		}
 		return LOC_TYPE::LOC_SHEET;
@@ -573,48 +582,56 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が点を含むか判定する.
 	// 戻り値	点を含む部位
-	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const auto f_opaque = is_opaque(m_fill_color);
-		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
+		const auto fill_opa = is_opaque(m_fill_color);
+		bool fill_test = false;	// 位置が塗りつぶしに含まれるか判定
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
-		const D2D1_POINT_2F tp{
-			pt.x - m_start.x, pt.y - m_start.y
+		const D2D1_POINT_2F t_pt{
+			test_pt.x - m_start.x, test_pt.y - m_start.y
 		};
 		//pt_sub(pt, m_start, tp);
 		// 判定される点によって精度が落ちないよう, 曲線の始点が原点となるよう平行移動し, 制御点を得る.
-		D2D1_POINT_2F cp[4];
-		cp[0].x = cp[0].y = 0.0;
-		pt_add(cp[0], m_pos[0], cp[1]);
-		pt_add(cp[1], m_pos[1], cp[2]);
-		pt_add(cp[2], m_pos[2], cp[3]);
-		if (loc_hit_test(tp, cp[3], m_loc_width)) {
+		D2D1_POINT_2F cp[4]{
+			{ 0.0f, 0.0f },
+			{ m_lineto[0] },
+			{ m_lineto[0].x + m_lineto[1].x, m_lineto[0].y + m_lineto[1].y },
+			{ m_lineto[0].x + m_lineto[1].x + m_lineto[2].x, m_lineto[0].y + m_lineto[1].y + m_lineto[2].y }
+		};
+		//cp[0].x = cp[0].y = 0.0;
+		//cp[1].x = cp[0].x + m_lineto[0].x;
+		//cp[1].y = cp[0].y + m_lineto[0].y;
+		//cp[2].x = cp[1].x + m_lineto[1].x;
+		//cp[2].y = cp[1].y + m_lineto[1].y;
+		//cp[3].x = cp[2].x + m_lineto[2].x;
+		//cp[3].y = cp[2].y + m_lineto[2].y;
+		if (loc_hit_test(t_pt, cp[3], m_loc_width)) {
 			return LOC_TYPE::LOC_P0 + 3;
 		}
-		if (loc_hit_test(tp, cp[2], m_loc_width)) {
+		if (loc_hit_test(t_pt, cp[2], m_loc_width)) {
 			return LOC_TYPE::LOC_P0 + 2;
 		}
-		if (loc_hit_test(tp, cp[1], m_loc_width)) {
+		if (loc_hit_test(t_pt, cp[1], m_loc_width)) {
 			return LOC_TYPE::LOC_P0 + 1;
 		}
-		if (loc_hit_test(tp, cp[0], m_loc_width)) {
+		if (loc_hit_test(t_pt, cp[0], m_loc_width)) {
 			return LOC_TYPE::LOC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
-			if (pt_in_circle(tp.x, tp.y, ew)) {
+			if (pt_in_circle(t_pt.x, t_pt.y, ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
-			if (pt_in_circle(tp, cp[3], ew)) {
+			if (pt_in_circle(t_pt, cp[3], ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, cp, m_pos.data(), ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(t_pt, cp, m_lineto.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, cp, m_pos.data(), ew)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(t_pt, cp, m_lineto.data(), ew)) {
 				return LOC_TYPE::LOC_STROKE;
 			}
 		}
@@ -692,7 +709,7 @@ namespace winrt::GraphPaper::implementation
 			POINT_2D c1[3 * 4];
 			bezi_get_convex((d_cnt - 1) * 4, e, c1_cnt, c1);
 			// 点が凸包 c1 に含まれないか判定する.
-			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1)) {
+			if (!bezi_in_convex(t_pt.x, t_pt.y, c1_cnt, c1)) {
 				// これ以上この制御点の組を分割する必要はない.
 				// スタックに残った他の制御点の組を試す.
 				continue;
@@ -722,14 +739,14 @@ namespace winrt::GraphPaper::implementation
 			c[7] = (c[4] + c[5]) * 0.5;
 			c[8] = (c[5] + c[6]) * 0.5;
 			c[9] = (c[7] + c[8]) * 0.5;
-			if (f_opaque && !f_test) {
+			if (fill_opa && !fill_test) {
 				// 分割された凸包のあいだにできた三角形は, 塗りつぶしの領域.
 				// この領域に点が含まれるか, 分割するたびに判定する.
 				// ただし 1 度でも含まれるなら, それ以上の判定は必要ない.
 				const POINT_2D tri[3]{ 
 					c[0], c[9], c[3] 
 				};
-				f_test = bezi_in_convex(tp.x, tp.y, 3, tri);
+				fill_test = bezi_in_convex(t_pt.x, t_pt.y, 3, tri);
 			}
 			// 一方の組をプッシュする.
 			// 始点 (0) はスタックに残っているので, 
@@ -745,7 +762,7 @@ namespace winrt::GraphPaper::implementation
 			s[s_cnt + 5] = c[3];
 			s_cnt += 6;
 		}
-		if (f_opaque && f_test) {
+		if (fill_opa && fill_test) {
 			return LOC_TYPE::LOC_FILL;
 		}
 		return LOC_TYPE::LOC_SHEET;
@@ -758,8 +775,7 @@ namespace winrt::GraphPaper::implementation
 	// rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezier::is_inside(
-		const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeBezier::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
@@ -767,9 +783,9 @@ namespace winrt::GraphPaper::implementation
 		const double h = static_cast<double>(rb.y) - lt.y;
 		D2D1_POINT_2F cp[4];
 		pt_sub(m_start, lt, cp[0]);
-		pt_add(cp[0], m_pos[0], cp[1]);
-		pt_add(cp[1], m_pos[1], cp[2]);
-		pt_add(cp[2], m_pos[2], cp[3]);
+		pt_add(cp[0], m_lineto[0], cp[1]);
+		pt_add(cp[1], m_lineto[1], cp[2]);
+		pt_add(cp[2], m_lineto[2], cp[3]);
 		// 最初の制御点の組をプッシュする.
 		constexpr auto D_MAX = 52;	// 分割する最大回数
 		POINT_2D s_arr[1 + D_MAX * 3] = {};
@@ -851,19 +867,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeBezier::ShapeBezier(
-		const D2D1_POINT_2F start,	// 始点
-		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
-		const Shape* prop	// 属性
-	) :
+	// start	始点
+	// end_to	終点への位置ベクトル
+	// prop	属性
+	ShapeBezier::ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const Shape* prop) :
 		ShapePath::ShapePath(prop, false)
 	{
 		m_start = start;
-		m_pos.resize(3);
-		m_pos.shrink_to_fit();
-		m_pos[0] = D2D1_POINT_2F{ pos.x , 0.0f };
-		m_pos[1] = D2D1_POINT_2F{ -pos.x , pos.y };
-		m_pos[2] = D2D1_POINT_2F{ pos.x , 0.0f };
+		m_lineto.resize(3);
+		m_lineto.shrink_to_fit();
+		m_lineto[0] = D2D1_POINT_2F{ end_to.x , 0.0f };
+		m_lineto[1] = D2D1_POINT_2F{ -end_to.x , end_to.y };
+		m_lineto[2] = D2D1_POINT_2F{ end_to.x , 0.0f };
 	}
 
 	//------------------------------

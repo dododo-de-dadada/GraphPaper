@@ -266,12 +266,12 @@ namespace winrt::GraphPaper::implementation
 			} while (find_next());
 		}
 		else {
-			while (m_ustack_undo.size() > 0) {
-				auto u = m_ustack_undo.back();
+			while (m_undo_stack.size() > 0) {
+				auto u = m_undo_stack.back();
 				if (u != nullptr && typeid(*u) != typeid(UndoTextSelect)) {
 					break;
 				}
-				m_ustack_undo.pop_back();
+				m_undo_stack.pop_back();
 				if (u == nullptr) {
 					break;
 				}
@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 			if (s < e) {
 				// 置換して, 置換後の文字範囲を選択
 				undo_push_select(m_core_text_shape);
-				m_ustack_undo.push_back(new UndoText2(m_core_text_shape, m_find_repl));
+				m_undo_stack.push_back(new UndoText2(m_core_text_shape, m_find_repl));
 				const auto repl_len = wchar_len(m_find_repl);
 				undo_push_text_select(m_core_text_shape, s + repl_len, s + repl_len, false);
 				m_core_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
@@ -327,7 +327,7 @@ namespace winrt::GraphPaper::implementation
 				if (!m_core_text_shape->is_selected()) {
 					undo_push_select(m_core_text_shape);
 				}
-				m_ustack_undo.push_back(new UndoText2(m_core_text_shape, m_find_repl));
+				m_undo_stack.push_back(new UndoText2(m_core_text_shape, m_find_repl));
 				const auto repl_len = wchar_len(m_find_repl);
 				undo_push_text_select(m_core_text_shape, s + repl_len, s + repl_len, false);
 				m_core_text_shape->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.

@@ -724,8 +724,8 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
 				if (dx > 0.0f || dy > 0.0f) {
-					constexpr auto ANY = true;
-					undo_push_move({ dx, dy }, ANY);
+					constexpr auto ANY_SHAPE = true;
+					undo_push_move({ dx, dy }, ANY_SHAPE);
 				}
 				// 用紙の大きさが異なるなら, 更新する.
 				if (size_changed) {

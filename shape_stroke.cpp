@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 
 	// }Œ`‚ª“_‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// –ß‚è’l	‚Â‚Ë‚É LOC_SHEET
-	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F/*pt*/, const bool/*ctrl_key*/) const noexcept
+	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F/*test_pt*/, const bool/*ctrl_key*/) const noexcept
 	{
 		return LOC_TYPE::LOC_SHEET;
 	}

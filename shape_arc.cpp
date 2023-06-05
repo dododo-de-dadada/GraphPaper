@@ -565,8 +565,8 @@ namespace winrt::GraphPaper::implementation
 		constexpr double R[]{ 0.0, 90.0, 180.0, 270.0 };
 
 		p[AXIS_Y] = m_start;
-		p[AXIS_X].x = m_start.x + m_pos[0].x;
-		p[AXIS_X].y = m_start.y + m_pos[0].y;
+		p[AXIS_X].x = m_start.x + m_lineto[0].x;
+		p[AXIS_X].y = m_start.y + m_lineto[0].y;
 		const double r = M_PI * m_angle_rot / 180.0;
 		const double c = cos(r);
 		const double s = sin(r);
@@ -580,63 +580,17 @@ namespace winrt::GraphPaper::implementation
 		//const double s = sin(rot);
 		D2D1_POINT_2F b_start;
 		D2D1_BEZIER_SEGMENT b_seg;
-		arc_alter_bezier(m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, clockwise, b_start, b_seg);
+		arc_alter_bezier(m_lineto[0].x, m_lineto[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, clockwise, b_start, b_seg);
 		p[START].x = b_start.x + p[CENTER].x;
 		p[START].y = b_start.y + p[CENTER].y;
 		p[END].x = b_seg.point3.x + p[CENTER].x;
 		p[END].y = b_seg.point3.y + p[CENTER].y;
 		return 5;
-		/*
-		double cx;
-		double cy;
-		if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-			cx = p[CENTER].x + (m_start.x - p[CENTER].x) + (m_start.x + m_pos[0].x - p[CENTER].x);
-			cy = p[CENTER].y + (m_start.y - p[CENTER].y) + (m_start.y + m_pos[0].y - p[CENTER].y);
-		}
-		else {
-			cx = p[CENTER].x;
-			cy = p[CENTER].y;
-		}
-		int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, c, s);
-		//////////////////
-
-		if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-			if (qn == 1) {
-				qn = 2;
-			}
-			else if (qn == 2) {
-				qn = 3;
-			}
-			else if (qn == 3) {
-				qn = 4;
-			}
-			else if (qn == 4) {
-				qn = 1;
-			}
-		}
-		const double er = M_PI * (R[qn - 1] + m_angle_end) / 180.0;
-		const double ec = cos(er);
-		const double es = sin(er);
-		const double ex = c * m_radius.width * ec - s * m_radius.height * es;
-		const double ey = s * m_radius.width * ec + c * m_radius.height * es;
-		p[END].x = static_cast<FLOAT>(ex + cx);
-		p[END].y = static_cast<FLOAT>(ey + cy);
-
-		const double sr = M_PI * (R[(qn + 2) % 4] + m_angle_start) / 180.0;
-		const double sc = cos(sr);
-		const double ss = sin(sr);
-		const double sx = c * m_radius.width * sc - s * m_radius.height * ss;
-		const double sy = s * m_radius.width * sc + c * m_radius.height * ss;
-		p[START].x = static_cast<FLOAT>(sx + cx);
-		p[START].y = static_cast<FLOAT>(sy + cy);
-		return 5;
-		*/
 	}
 
 	// 値を傾き角度に格納する.
-	bool ShapeArc::set_arc_rot(
-		const float val	// 格納する値
-	) noexcept
+	// val	格納する値
+	bool ShapeArc::set_arc_rot(const float val) noexcept
 	{
 		if (equal(m_angle_rot, val)) {
 			return false;
@@ -644,12 +598,12 @@ namespace winrt::GraphPaper::implementation
 		const double old_r = M_PI * m_angle_rot / 180.0;	// 元の傾き
 		const auto old_c = cos(old_r);
 		const auto old_s = sin(old_r);
-		const int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, old_c, old_s);	// 象限番号
+		const int qn = arc_quadrant_number(m_lineto[0].x, m_lineto[0].y, old_c, old_s);	// 象限番号
 
 		// だ円での中心点を得る.
 		D2D1_POINT_2F ctr;
 		D2D1_POINT_2F end{
-			m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+			m_start.x + m_lineto[0].x, m_start.y + m_lineto[0].y
 		};
 		arc_center(m_start, end, m_radius, old_c, old_s, ctr);
 
@@ -664,9 +618,9 @@ namespace winrt::GraphPaper::implementation
 			constexpr double qy = 0.0;
 			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + ctr.x);
 			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + ctr.y);
-			m_pos.resize(1);
-			m_pos[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
-			m_pos[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
+			m_lineto.resize(1);
+			m_lineto[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
+			m_lineto[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
 		}
 		else if (qn == 2) {
 			const double px = m_radius.width;
@@ -675,9 +629,9 @@ namespace winrt::GraphPaper::implementation
 			const double qy = m_radius.height;
 			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + ctr.x);
 			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + ctr.y);
-			m_pos.resize(1);
-			m_pos[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
-			m_pos[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
+			m_lineto.resize(1);
+			m_lineto[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
+			m_lineto[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
 		}
 		else if (qn == 3) {
 			constexpr double px = 0.0;
@@ -686,9 +640,9 @@ namespace winrt::GraphPaper::implementation
 			constexpr double qy = 0.0;
 			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + ctr.x);
 			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + ctr.y);
-			m_pos.resize(1);
-			m_pos[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
-			m_pos[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
+			m_lineto.resize(1);
+			m_lineto[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
+			m_lineto[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
 		}
 		else if (qn == 4) {
 			const double px = -m_radius.width;
@@ -697,13 +651,13 @@ namespace winrt::GraphPaper::implementation
 			const double qy = -m_radius.height;
 			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + ctr.x);
 			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + ctr.y);
-			m_pos.resize(1);
-			m_pos[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
-			m_pos[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
+			m_lineto.resize(1);
+			m_lineto[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + ctr.x - m_start.x);
+			m_lineto[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + ctr.y - m_start.y);
 		}
 		else {
 			m_start = ctr;
-			m_pos[0] = ctr;
+			m_lineto[0] = ctr;
 		}
 		m_angle_rot = val;
 		m_d2d_fill_geom = nullptr;
@@ -768,12 +722,12 @@ namespace winrt::GraphPaper::implementation
 			const double c = cos(a);
 			const double s = sin(a);
 			const D2D1_POINT_2F end{
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				m_start.x + m_lineto[0].x, m_start.y + m_lineto[0].y
 			};
 			D2D1_POINT_2F ctr2;
 			if (arc_center(m_start, end, m_radius, c, s, ctr2)) {
-				const double ax = m_start.x + m_pos[0].x - ctr2.x;	// 水平軸の X 座標
-				const double ay = m_start.y + m_pos[0].y - ctr2.y;	// 水平軸の Y 座標
+				const double ax = m_start.x + m_lineto[0].x - ctr2.x;	// 水平軸の X 座標
+				const double ay = m_start.y + m_lineto[0].y - ctr2.y;	// 水平軸の Y 座標
 				const double ad = sqrt(ax * ax + ay * ay);	// a の長さ
 				if (ad > FLT_MIN) {
 					const double px = val.x - ctr2.x;
@@ -795,7 +749,7 @@ namespace winrt::GraphPaper::implementation
 			const double c = cos(a);
 			const double s = sin(a);
 			const D2D1_POINT_2F end{
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				m_start.x + m_lineto[0] .x, m_start.y + m_lineto[0].y
 			};
 			D2D1_POINT_2F ctr2;
 			if (arc_center(m_start, end, m_radius, c, s, ctr2)) {
@@ -823,15 +777,15 @@ namespace winrt::GraphPaper::implementation
 			const double s = sin(a);
 			D2D1_POINT_2F start = m_start;
 			const D2D1_POINT_2F end{
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				m_start.x + m_lineto[0].x, m_start.y + m_lineto[0].y
 			};
 			D2D1_POINT_2F ctr2;
 			if (arc_center(start, end, m_radius, c, s, ctr2)) {
 				if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_pos[0].x - ctr2.x);
-					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_pos[0].y - ctr2.y);
+					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_lineto[0].x - ctr2.x);
+					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_lineto[0].y - ctr2.y);
 				}
-				int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, c, s);	// 象限番号
+				int qn = arc_quadrant_number(m_lineto[0].x, m_lineto[0].y, c, s);	// 象限番号
 				if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 					if (qn == 1) {
 						qn = 2;
@@ -893,15 +847,15 @@ namespace winrt::GraphPaper::implementation
 			const double c = cos(rot);
 			const double s = sin(rot);
 			const D2D1_POINT_2F end{
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				m_start.x + m_lineto[0].x, m_start.y + m_lineto[0].y
 			};
 			D2D1_POINT_2F ctr2;
 			if (arc_center(m_start, end, m_radius, c, s, ctr2)) {
 				if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_pos[0].x - ctr2.x);
-					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_pos[0].y - ctr2.y);
+					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_lineto[0].x - ctr2.x);
+					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_lineto[0].y - ctr2.y);
 				}
-				int qn = arc_quadrant_number(m_pos[0].x, m_pos[0].y, c, s);
+				int qn = arc_quadrant_number(m_lineto[0].x, m_lineto[0].y, c, s);
 				if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 					if (qn == 1) {
 						qn = 2;
@@ -964,13 +918,13 @@ namespace winrt::GraphPaper::implementation
 			const double c = cos(rot);
 			const double s = sin(rot);
 			const D2D1_POINT_2F end{
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				m_start.x + m_lineto[0].x, m_start.y + m_lineto[0].y
 			};
 			D2D1_POINT_2F ctr2;
 			if (arc_center(m_start, end, m_radius, c, s, ctr2)) {
 				if (m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_pos[0].x - ctr2.x);
-					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_pos[0].y - ctr2.y);
+					ctr2.x = ctr2.x + (m_start.x - ctr2.x) + (m_start.x + m_lineto[0].x - ctr2.x);
+					ctr2.y = ctr2.y + (m_start.y - ctr2.y) + (m_start.y + m_lineto[0].y - ctr2.y);
 				}
 				const D2D1_POINT_2F start{
 					static_cast<FLOAT>(m_start.x + val.x - ctr2.x),
@@ -987,8 +941,8 @@ namespace winrt::GraphPaper::implementation
 				const double rot = M_PI * m_angle_rot / 180.0;
 				const double c = cos(rot);
 				const double s = sin(rot);
-				const double x = m_pos[0].x;
-				const double y = m_pos[0].y;
+				const double x = m_lineto[0].x;
+				const double y = m_lineto[0].y;
 				const double w = c * x + s * y;
 				const double h = -s * x + c * y;
 				m_radius.width = static_cast<FLOAT>(fabs(w));
@@ -1037,31 +991,31 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 	// 図形が点を含むか判定する.
-	// pt	判定する図形
+	// test_pt	判定する点
 	// 戻り値	点を含む部位
-	uint32_t ShapeArc::hit_test(const D2D1_POINT_2F pt, const bool ctrl_key) const noexcept
+	uint32_t ShapeArc::hit_test(const D2D1_POINT_2F test_pt, const bool ctrl_key) const noexcept
 	{
 		D2D1_POINT_2F p[5];
 		get_verts(p);
-		if (ctrl_key && loc_hit_test(pt, p[END], m_loc_width)) {
+		if (ctrl_key && loc_hit_test(test_pt, p[END], m_loc_width)) {
 			return LOC_TYPE::LOC_A_END;
 		}
-		else if (ctrl_key && loc_hit_test(pt, p[START], m_loc_width)) {
+		else if (ctrl_key && loc_hit_test(test_pt, p[START], m_loc_width)) {
 			return LOC_TYPE::LOC_A_START;
 		}
-		else if (loc_hit_test(pt, p[AXIS_X], m_loc_width)) {
+		else if (loc_hit_test(test_pt, p[AXIS_X], m_loc_width)) {
 			return ctrl_key ? LOC_TYPE::LOC_A_AXIS_X : LOC_TYPE::LOC_P0 + 1;
 		}
-		else if (loc_hit_test(pt, p[AXIS_Y], m_loc_width)) {
+		else if (loc_hit_test(test_pt, p[AXIS_Y], m_loc_width)) {
 			return ctrl_key ? LOC_TYPE::LOC_A_AXIS_Y : LOC_TYPE::LOC_P0;
 		}
-		else if (!ctrl_key && loc_hit_test(pt, p[END], m_loc_width)) {
+		else if (!ctrl_key && loc_hit_test(test_pt, p[END], m_loc_width)) {
 			return LOC_TYPE::LOC_A_END;
 		}
-		else if (!ctrl_key && loc_hit_test(pt, p[START], m_loc_width)) {
+		else if (!ctrl_key && loc_hit_test(test_pt, p[START], m_loc_width)) {
 			return LOC_TYPE::LOC_A_START;
 		}
-		else if (loc_hit_test(pt, p[CENTER], m_loc_width)) {
+		else if (loc_hit_test(test_pt, p[CENTER], m_loc_width)) {
 			return LOC_TYPE::LOC_FILL;
 		}
 		D2D1_POINT_2F b_start;
@@ -1073,30 +1027,27 @@ namespace winrt::GraphPaper::implementation
 			{ b_seg.point2.x - b_start.x, b_seg.point2.y - b_start.y },
 			{ b_seg.point3.x - b_start.x, b_seg.point3.y - b_start.y }
 		};
-		D2D1_POINT_2F b_vec[3]{
+		D2D1_POINT_2F b_to[3]{
 			{ b_seg.point1.x - b_start.x, b_seg.point1.y - b_start.y },
 			{ b_seg.point2.x - b_seg.point1.x, b_seg.point2.y - b_seg.point1.y },
 			{ b_seg.point3.x - b_seg.point2.x, b_seg.point3.y - b_seg.point2.y }
 		};
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);
-		D2D1_POINT_2F tp{
-			pt.x - m_start.x, pt.y - m_start.y
-		};
-		const auto loc = ShapeBezier::hit_test(tp, b_pt, b_vec, m_stroke_cap, true, ew);
+		const auto loc = ShapeBezier::hit_test({ test_pt.x - m_start.x, test_pt.y - m_start.y }, b_pt, b_to, m_stroke_cap, true, ew);
 		if (loc == LOC_TYPE::LOC_STROKE) {
 			return LOC_TYPE::LOC_STROKE;
 		}
-		if (is_opaque(m_fill_color)) {
+		else if (is_opaque(m_fill_color)) {
 			if (loc == LOC_TYPE::LOC_FILL) {
 				if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 					return LOC_TYPE::LOC_FILL;
 				}
 			}
 			else {
-				const D2D1_POINT_2F t[3]{
+				const D2D1_POINT_2F tri[3]{
 					p[CENTER], p[START], p[END]
 				};
-				if (pt_in_poly(pt, 3, t)) {
+				if (pt_in_poly(test_pt, 3, tri)) {
 					return LOC_TYPE::LOC_FILL;
 				}
 			}
@@ -1106,10 +1057,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧をベジェ曲線で近似する.
 	// ただし, だ円の中心点と始点, 終点がなす角度が 90 度以上, 開けば開くほどズレる.
-	void ShapeArc::alter_bezier(
-		D2D1_POINT_2F& b_start,	// 曲線の始点
-		D2D1_BEZIER_SEGMENT& b_seg	// 曲線の制御点
-	) const noexcept
+	// bezi_start	曲線の始点
+	// bezi_seg	曲線の制御点
+	void ShapeArc::alter_bezier(D2D1_POINT_2F& bezi_start, D2D1_BEZIER_SEGMENT& bezi_seg) const noexcept
 	{
 		const double rot = M_PI * m_angle_rot / 180.0;
 		const double c = cos(rot);
@@ -1117,39 +1067,29 @@ namespace winrt::GraphPaper::implementation
 		const double t_min = 0.0 + m_angle_start / 90.0;
 		const double t_max = 1.0 + m_angle_end / 90.0;
 		const bool clockwise = (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
-		arc_alter_bezier(m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, clockwise, b_start, b_seg);
-		//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-		//	arc_alter_bezier(
-		//		m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, true,
-		//		b_start, b_seg);
-		//}
-		//else {
-		//	arc_alter_bezier(
-		//		m_pos[0].x, m_pos[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, false,
-		//		b_start, b_seg);
-		//}
+		arc_alter_bezier(m_lineto[0].x, m_lineto[0].y, m_radius.width, m_radius.height, c, s, t_min, t_max, clockwise, bezi_start, bezi_seg);
 		D2D1_POINT_2F p[5];
 		get_verts(p);
 		// 精度がさがらないよう, 始点と終点には, 近似したベジェ曲線からでなく, 元の始点と終点を格納する.
-		b_start = p[START];
-		b_seg.point1.x += p[CENTER].x;
-		b_seg.point1.y += p[CENTER].y;
-		b_seg.point2.x += p[CENTER].x;
-		b_seg.point2.y += p[CENTER].y;
-		b_seg.point3 = p[END];
+		bezi_start = p[START];
+		bezi_seg.point1.x += p[CENTER].x;
+		bezi_seg.point1.y += p[CENTER].y;
+		bezi_seg.point2.x += p[CENTER].x;
+		bezi_seg.point2.y += p[CENTER].y;
+		bezi_seg.point3 = p[END];
 	}
 
 	// 矢じりの返しと先端の位置を得る
 	bool ShapeArc::arc_get_pos_arrow(
-		const D2D1_POINT_2F pos,	// 始点からの終点ベクトル.
-		const D2D1_POINT_2F ctr,	// 円弧がなすだ円の中心点
+		const D2D1_POINT_2F line_to,	// 始点からの終点ベクトル.
+		const D2D1_POINT_2F ctr_pt,	// 円弧がなすだ円の中心点
 		const D2D1_SIZE_F rad,	//	標準形における X 軸方向の半径と, Y 軸方向の半径.
 		const double deg_start,	// 始点の角度
 		const double deg_end,	// 終点の角度
 		const double deg_rot,	// 円弧がなすだ円の傾き
 		const ARROW_SIZE a_size,	// 矢じりの大きさ
 		const D2D1_SWEEP_DIRECTION sweep_dir,	// 円弧を掃く方向
-		D2D1_POINT_2F arrow[]	// 矢じりの返しと先端の位置
+		D2D1_POINT_2F arrow_pt[]	// 矢じりの返しと先端の位置
 	)
 	{
 		D2D1_POINT_2F b_start{};	// ベジェ曲線の始点
@@ -1160,15 +1100,15 @@ namespace winrt::GraphPaper::implementation
 		const double c = cos(rot);
 		const double s = sin(rot);
 		const bool clockwise = (sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
-		arc_alter_bezier(pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, clockwise, b_start, b_seg);
-		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, arrow)) {
+		arc_alter_bezier(line_to.x, line_to.y, rad.width, rad.height, c, s, t_min, t_max, clockwise, b_start, b_seg);
+		if (ShapeBezier::bezi_get_pos_arrow(b_start, b_seg, a_size, arrow_pt)) {
 			// 得られた各点は, だ円中心点を原点とする座標なので, もとの座標へ戻す.
-			arrow[0].x += ctr.x;
-			arrow[0].y += ctr.y;
-			arrow[1].x += ctr.x;
-			arrow[1].y += ctr.y;
-			arrow[2].x += ctr.x;
-			arrow[2].y += ctr.y;
+			arrow_pt[0].x += ctr_pt.x;
+			arrow_pt[0].y += ctr_pt.y;
+			arrow_pt[1].x += ctr_pt.x;
+			arrow_pt[1].y += ctr_pt.y;
+			arrow_pt[2].x += ctr_pt.x;
+			arrow_pt[2].y += ctr_pt.y;
 			return true;
 		}
 		return false;
@@ -1221,7 +1161,7 @@ namespace winrt::GraphPaper::implementation
 		if (exist_stroke && m_arrow_style != ARROW_STYLE::ARROW_NONE && m_d2d_arrow_geom == nullptr) {
 			// だ円の弧長を求めるのはしんどいので, ベジェで近似
 			D2D1_POINT_2F arrow[3];
-			arc_get_pos_arrow(m_pos[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir,
+			arc_get_pos_arrow(m_lineto[0], p[CENTER], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir,
 				arrow);
 			winrt::com_ptr<ID2D1GeometrySink> sink;
 			const ARROW_STYLE a_style{
@@ -1330,11 +1270,11 @@ namespace winrt::GraphPaper::implementation
 
 	ShapeArc::ShapeArc(
 		const D2D1_POINT_2F start,
-		const D2D1_POINT_2F pos,
+		const D2D1_POINT_2F end_to,
 		const Shape* prop
 	) : 
 		ShapePath(prop, false),
-		m_radius(D2D1_SIZE_F{ fabs(pos.x), fabs(pos.y) }),
+		m_radius(D2D1_SIZE_F{ fabs(end_to.x), fabs(end_to.y) }),
 		m_angle_rot(0.0f),
 		m_angle_start(0.0f),
 		m_angle_end(0.0f),
@@ -1342,7 +1282,7 @@ namespace winrt::GraphPaper::implementation
 		m_larg_flag(D2D1_ARC_SIZE_SMALL)
 	{
 		m_start = start;	// 始点
-		m_pos.push_back(pos);	// 終点
+		m_lineto.push_back(end_to);	// 終点
 		if (typeid(*prop) == typeid(ShapeArc)) {
 			const float angle_start = static_cast<const ShapeArc*>(prop)->m_angle_start;
 			const float angle_end = static_cast<const ShapeArc*>(prop)->m_angle_end;

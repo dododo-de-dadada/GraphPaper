@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shape_data" };	// 図形データのクリップボード書式
 
 	// 貼り付ける位置を求める.
-	static void xcvd_get_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q, const SHAPE_LIST& slist, const double grid_len, const float interval);
+	static void xcvd_get_paste_pos(D2D1_POINT_2F& paste_pt, const D2D1_POINT_2F q, const SHAPE_LIST& slist, const double grid_len, const float interval);
 
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 選択された図形の数がゼロか判定する.
-			if (m_ustack_scnt > 0) {
+			if (m_undo_select_cnt > 0) {
 				undo_push_null();
 				// 選択された図形のリストを得る.
 				SHAPE_LIST selected_list;
@@ -275,13 +275,13 @@ namespace winrt::GraphPaper::implementation
 		const float img_w = static_cast<float>(bmp.PixelWidth());
 		const float img_h = static_cast<float>(bmp.PixelHeight());
 		const float scale = m_main_scale;
-		D2D1_POINT_2F pos{
+		D2D1_POINT_2F lt{
 			static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
 			static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
 		};
 
 		// ビットマップから図形を作成する.
-		ShapeImage* s = new ShapeImage(pos, D2D1_SIZE_F{ img_w, img_h }, bmp, 1.0f);
+		ShapeImage* s = new ShapeImage(lt, D2D1_SIZE_F{ img_w, img_h }, bmp, 1.0f);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -294,8 +294,8 @@ namespace winrt::GraphPaper::implementation
 		reference = nullptr;
 
 		const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-		xcvd_get_paste_pos(pos, /*<---*/pos, m_main_sheet.m_shape_list, g_len, m_snap_point / m_main_scale);
-		s->set_pos_start(pos);
+		xcvd_get_paste_pos(lt , /*<---*/lt, m_main_sheet.m_shape_list, g_len, m_snap_point / m_main_scale);
+		s->set_pos_start(lt);
 		{
 			m_mutex_draw.lock();
 			undo_push_null();
@@ -427,12 +427,12 @@ namespace winrt::GraphPaper::implementation
 				const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
 				t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 				// パネルの中央になるよう左上位置を求める.
-				D2D1_POINT_2F pos{
-					static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
-					static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
+				D2D1_POINT_2F lt{
+					static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_lineto.x * 0.5),
+					static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_lineto.y * 0.5)
 				};
-				xcvd_get_paste_pos(pos, /*<---*/pos, m_main_sheet.m_shape_list, g_len, m_snap_point / scale);
-				t->set_pos_start(pos);
+				xcvd_get_paste_pos(lt, /*<---*/lt, m_main_sheet.m_shape_list, g_len, m_snap_point / scale);
+				t->set_pos_start(lt);
 				{
 					m_mutex_draw.lock();
 					undo_push_append(t);
@@ -459,42 +459,40 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 貼り付ける位置を求める.
-	// p	求める点
+	// paste_pt	求める点
 	// q	貼り付けたい点
 	// g_len	方眼の大きさ
 	// interval	点に点をくっつける間隔
-	static void xcvd_get_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q, const SHAPE_LIST& slist, const double g_len, const float interval)
+	static void xcvd_get_paste_pos(D2D1_POINT_2F& paste_pt, const D2D1_POINT_2F src_pt, const SHAPE_LIST& slist, const double g_len, const float interval)
 	{
 		D2D1_POINT_2F r;	// 最も近い点への位置ベクトル
-		if (g_len >= 1.0f && interval >= FLT_MIN && slist_find_vertex_closest(slist, q, interval, r)) {
-			pt_sub(r, q, r);
+		if (g_len >= 1.0f && interval >= FLT_MIN && slist_find_vertex_closest(slist, src_pt, interval, r)) {
+			pt_sub(r, src_pt, r);
 			D2D1_POINT_2F g;	// 最も近い方眼への位置ベクトル
-			pt_round(q, g_len, g);
-			pt_sub(g, q, g);
+			pt_round(src_pt, g_len, g);
+			pt_sub(g, src_pt, g);
 			if (pt_abs2(g) < pt_abs2(r)) {
-				p = g;
+				paste_pt = g;
 			}
 			else {
-				p = r;
+				paste_pt = r;
 			}
 		}
 		else if (g_len >= 1.0f) {
-			pt_round(q, g_len, p);
+			pt_round(src_pt, g_len, paste_pt);
 		}
 		else if (interval >= FLT_MIN) {
-			slist_find_vertex_closest(slist, q, interval, p);
+			slist_find_vertex_closest(slist, src_pt, interval, paste_pt);
 		}
 		else {
-			p = q;
+			paste_pt = src_pt;
 		}
 	}
 
-	void MainPage::xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept
+	// 貼り付ける点を得る.
+	void MainPage::xcvd_paste_pos(D2D1_POINT_2F& past_pt, const D2D1_POINT_2F src_pt) const noexcept
 	{
-		const auto& slist = m_main_sheet.m_shape_list;
-		const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-		const auto interval = m_snap_point / m_main_scale;
-		xcvd_get_paste_pos(p, q, slist, g_len, interval);
+		xcvd_get_paste_pos(past_pt, src_pt, m_main_sheet.m_shape_list, m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0, m_snap_point / m_main_scale);
 	}
 
 }

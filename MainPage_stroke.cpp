@@ -181,10 +181,10 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F start{	// 始点
 			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
-		const D2D1_POINT_2F pos{	// 対角点の位置ベクトル
+		const D2D1_POINT_2F end_to{	// 対角点の位置ベクトル
 			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
 		};
-		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_sheet));
+		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, end_to, &m_dialog_sheet));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -431,11 +431,11 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F start{
 			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
-		const D2D1_POINT_2F pos{
+		const D2D1_POINT_2F end_to{
 			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
 		};
 		POLY_OPTION p_opt{ 3, true, true, false, true };
-		auto s = new ShapePoly(start, pos, &m_dialog_sheet, p_opt);
+		auto s = new ShapePoly(start, end_to, &m_dialog_sheet, p_opt);
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
@@ -539,10 +539,10 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F start{
 			static_cast<FLOAT>(mar), static_cast<FLOAT>(mar)
 		};
-		const D2D1_POINT_2F pos{
+		const D2D1_POINT_2F end_to{
 			static_cast<FLOAT>(p_width - 2.0 * mar), static_cast<FLOAT>(p_height - 2.0 * mar)
 		};
-		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_sheet));
+		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, end_to, &m_dialog_sheet));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -956,10 +956,10 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F start{	// 始点
 			static_cast<FLOAT>(m), static_cast<FLOAT>(m)
 		};
-		const D2D1_POINT_2F pos{	// 終点への位置ベクトル
+		const D2D1_POINT_2F end_to{	// 終点への位置ベクトル
 			static_cast<FLOAT>(panel_w - 2.0 * m), static_cast<FLOAT>(panel_h - 2.0 * m)
 		};
-		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_sheet));
+		m_dialog_sheet.m_shape_list.push_back(new ShapeLine(start, end_to, &m_dialog_sheet));
 		m_dialog_sheet.slist_back()->set_select(true);
 #if defined(_DEBUG)
 		debug_leak_cnt++;

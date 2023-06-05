@@ -29,16 +29,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
-	constexpr auto FMT_INCH_UNIT = L"%.3lf \u33CC";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3lf in";// \u33CC";	// インチ単位の書式
 	constexpr auto FMT_MILLI = L"%.3lf";	// ミリメートル単位の書式
-	constexpr auto FMT_MILLI_UNIT = L"%.3lf \u339C";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3lf mm";// \u339C";	// ミリメートル単位の書式
 	constexpr auto FMT_POINT = L"%.2lf";	// ポイント単位の書式
 	constexpr auto FMT_POINT_UNIT = L"%.2lf pt";	// ポイント単位の書式
 	constexpr auto FMT_PIXEL = L"%.1lf";	// ピクセル単位の書式
 	constexpr auto FMT_PIXEL_UNIT = L"%.1lf px";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
-	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3lf grid";	// グリッド単位の書式
+	constexpr auto FMT_GRID = L"%.3lf";	// 方眼単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3lf grid";	// 方眼単位の書式
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
 	// 待機カーソルを表示する.
@@ -180,8 +180,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
-		const auto s = min(m_main_sheet.m_select_start, end);
-		const auto e = max(m_main_sheet.m_select_start, end);
+		const auto start = min(m_main_sheet.m_select_start, len);
+		const auto s = min(start, end);
+		const auto e = max(start, end);
 		return winrt::hstring{ m_core_text_shape->m_text + s, e - s };
 	}
 
@@ -191,10 +192,10 @@ namespace winrt::GraphPaper::implementation
 		const auto len = m_core_text_shape->get_text_len();
 		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
 		const auto start = min(m_main_sheet.m_select_start, len);
-		// 選択範囲があるなら
+		// 文字列の選択範囲があるならそれを削除する.
 		if (end != start) {
 			undo_push_null();
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
 	}
@@ -202,38 +203,26 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の選択範囲に文字列を挿入する.
 	void MainPage::core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept
 	{
-		const auto old_len = m_core_text_shape->get_text_len();
-		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, old_len);
-		const auto start = min(m_core_text_comp ? m_core_text_start : m_main_sheet.m_select_start, old_len);
+		const auto len = m_core_text_shape->get_text_len();
+		const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
+		const auto start = min(m_core_text_comp ? m_core_text_start : m_main_sheet.m_select_start, len);
 		const auto s = min(start, end);
 		const auto e = max(start, end);
-		if (s < e) {
+		if (s < e || ins_len > 0) {
+			// 入力変換中フラグが下りているなら, 元に戻すスタックに区切りを積んで文字列を挿入する.
 			if (!m_core_text_comp) {
 				undo_push_null();
 			}
+			// 入力変換中フラグが立っているなら, 直前の変換結果を捨てて, あらたな変換結果をスタックに積みなおす.
 			else {
-				for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-					m_ustack_undo.pop_back();
+				Undo* u;
+				while (!m_undo_stack.empty() && (u = m_undo_stack.back()) != nullptr) {
 					u->exec();
 					delete u;
+					m_undo_stack.pop_back();
 				}
 			}
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, ins_text));
-			undo_push_text_select(m_core_text_shape, s + ins_len, s + ins_len, false);
-			main_draw();
-		}
-		else if (ins_len > 0) {
-			if (!m_core_text_comp) {
-				undo_push_null();
-			}
-			else {
-				for (Undo* u = m_ustack_undo.back(); u != nullptr; u = m_ustack_undo.back()) {
-					m_ustack_undo.pop_back();
-					u->exec();
-					delete u;
-				}
-			}
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, ins_text));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, ins_text));
 			undo_push_text_select(m_core_text_shape, s + ins_len, s + ins_len, false);
 			main_draw();
 		}
@@ -250,13 +239,13 @@ namespace winrt::GraphPaper::implementation
 		if (!shift_key && end == start && end < len) {
 			undo_push_null();
 			undo_push_text_select(m_core_text_shape, end, end + 1, false);
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
 		// 選択範囲があるなら選択範囲の文字列を削除する.
 		else if (end != start) {
 			undo_push_null();
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
 		winrt::Windows::UI::Text::Core::CoreTextRange modified_ran{
@@ -600,13 +589,13 @@ namespace winrt::GraphPaper::implementation
 				dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 
 			// 元に戻すメニューの表示/非表示を設定する.
-			mfi_popup_undo().Visibility(m_ustack_undo.size() > 0 ? Visibility::Visible : Visibility::Collapsed);
-			mfi_popup_redo().Visibility(m_ustack_redo.size() > 0 ? Visibility::Visible : Visibility::Collapsed);
+			mfi_popup_undo().Visibility(m_undo_stack.size() > 0 ? Visibility::Visible : Visibility::Collapsed);
+			mfi_popup_redo().Visibility(m_redo_stack.size() > 0 ? Visibility::Visible : Visibility::Collapsed);
 
 			// 元に戻すメニューとカット＆ペーストメニュー間のセパレーターの表示/非表示を設定する.
 			bool sepa_over = false;	// セパレーターより上の項目フラグ
 			bool sepa_under = false;	// セパレーターより下の項目フラグ
-			sepa_over = (m_ustack_undo.size() > 0 || m_ustack_redo.size() > 0);
+			sepa_over = (m_undo_stack.size() > 0 || m_redo_stack.size() > 0);
 			sepa_under = (exists_selected || exists_clipboard_data);
 			mfs_popup_sepa_undo_xcvd().Visibility(sepa_over && sepa_under ? Visibility::Visible : Visibility::Collapsed);
 
@@ -1272,7 +1261,8 @@ namespace winrt::GraphPaper::implementation
 			if (m_core_text_shape != nullptr) {
 				const auto len = m_core_text_shape->get_text_len();
 				const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, m_core_text_shape->get_text_len());
-				text_unselected_char_cnt = len - (end - m_main_sheet.m_select_start);
+				const auto start = min(m_main_sheet.m_select_start, len);
+				text_unselected_char_cnt = len - (end - start);
 			}
 			else {
 				text_unselected_char_cnt = 0;
@@ -1301,8 +1291,8 @@ namespace winrt::GraphPaper::implementation
 			// まずサブ項目をもつメニューの可否を設定してから, 子の項目を設定する.
 			// そうしないと, 子の項目の可否がただちに反映しない.
 
-			mbi_menu_undo().IsEnabled(m_ustack_undo.size() > 0);
-			mfi_menu_redo().IsEnabled(m_ustack_redo.size() > 0);
+			mbi_menu_undo().IsEnabled(m_undo_stack.size() > 0);
+			mfi_menu_redo().IsEnabled(m_redo_stack.size() > 0);
 
 			mfi_menu_xcvd_cut().IsEnabled(exists_selected);
 			mfi_menu_xcvd_copy().IsEnabled(exists_selected);
@@ -1360,9 +1350,9 @@ namespace winrt::GraphPaper::implementation
 				const CoreTextRange ran{ req.Range() };
 				const auto end = static_cast<uint32_t>(ran.EndCaretPosition);
 				const auto text = (m_core_text_shape->m_text == nullptr ? L"" : m_core_text_shape->m_text);
-				const auto sub_len = min(end, m_core_text_shape->get_text_len()) - ran.StartCaretPosition;	// 部分文字列の長さ
+				const auto len = min(end, m_core_text_shape->get_text_len()) - ran.StartCaretPosition;	// 部分文字列の長さ
 				winrt::hstring sub_text{	// 部分文字列
-					text + ran.StartCaretPosition, static_cast<winrt::hstring::size_type>(sub_len)
+					text + ran.StartCaretPosition, static_cast<winrt::hstring::size_type>(len)
 				};
 				req.Text(sub_text);
 			});
@@ -1432,8 +1422,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				height = max(height, t->m_dwrite_text_layout->GetMaxHeight());
 				float width = t->m_dwrite_text_layout->GetMaxWidth();
-				float left = (t->m_pos.x < 0.0 ? t->m_start.x + t->m_pos.x : t->m_start.x);
-				float top = (t->m_pos.y < 0.0 ? t->m_start.y + t->m_pos.y : t->m_start.y);
+				float left = (t->m_lineto.x < 0.0 ? t->m_start.x + t->m_lineto.x : t->m_start.x);
+				float top = (t->m_lineto.y < 0.0 ? t->m_start.y + t->m_lineto.y : t->m_start.y);
 				GeneralTransform tran{	// 変換子
 					scp_main_panel().TransformToVisual(nullptr)
 				};
@@ -1488,7 +1478,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 
 				m_core_text.NotifyLayoutChanged();
-				});
+			});
 			// 変換終了 (中断) のとき呼び出される.
 			// 入力変換フラグを下ろす.
 			// 後退キーなどで変換中の文字列が空にされた場合.
@@ -1498,7 +1488,7 @@ namespace winrt::GraphPaper::implementation
 			m_core_text.CompositionCompleted([this](auto const&, auto const&) {
 				//__debugbreak();				
 				m_core_text_comp = false;
-				});
+			});
 		}
 
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.

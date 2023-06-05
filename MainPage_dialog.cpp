@@ -149,13 +149,13 @@ namespace winrt::GraphPaper::implementation
 			const SoftwareBitmap bitmap{
 				co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight)
 			};
-			const D2D1_POINT_2F pos{
+			const D2D1_POINT_2F pt{
 				static_cast<FLOAT>(p_width * 0.125), static_cast<FLOAT>(p_height * 0.125)
 			};
 			const D2D1_SIZE_F size{
 				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
 			};
-			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_sheet.m_image_opac);
+			ShapeImage* s = new ShapeImage(pt, size, bitmap, m_dialog_sheet.m_image_opac);
 			bitmap.Close();
 
 			m_dialog_sheet.m_shape_list.push_back(s);

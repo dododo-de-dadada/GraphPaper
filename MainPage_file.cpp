@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sheet_size_dialog().Hide();
 
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
+		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
 			// 「キャンセル」なら, 排他処理を解除して中断する.
 			recursion.unlock();
 			co_return;
@@ -373,10 +373,10 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
-		m_ustack_scnt = 0;
+		m_undo_select_cnt = 0;
 		for (const auto s : m_main_sheet.m_shape_list) {
 			if (!s->is_deleted() && s->is_selected()) {
-				m_ustack_scnt++;
+				m_undo_select_cnt++;
 			}
 		}
 		main_bbox_update();
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
+		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
 			co_return;
 		}
 		// ダブルクリックでファイルが選択された場合,
@@ -654,7 +654,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			mru_entries.GetMany(n, item);
 
 			// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
-			if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
+			if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
 				co_return;
 			}
 
@@ -974,7 +974,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				// ここでエラーが出る.
 				file_recent_add(s_file);
 				// false をスタックが更新されたか判定に格納する.
-				m_ustack_is_changed = false;
+				//m_ustack_is_changed = false;
 			}
 		}
 		m_mutex_exit.unlock();
@@ -990,7 +990,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 	{
 		// スタックが更新されたなら確認ダイアログを表示して, 
 		// ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
+		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
 			co_return;
 		}
 		// 一覧が表示されてるか判定する.

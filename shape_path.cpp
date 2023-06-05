@@ -28,8 +28,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		D2D1_POINT_2F q{ m_start };	// 次の点
-		for (const D2D1_POINT_2F pos : m_pos) {
-			pt_add(q, pos, q);
+		for (const D2D1_POINT_2F to : m_lineto) {
+			pt_add(q, to, q);
 			pt_sub(q, p, r);
 			r_abs = static_cast<float>(pt_abs2(r));
 			if (r_abs < dd) {
@@ -53,14 +53,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
-		const size_t d_cnt = m_pos.size();	// 差分の数
+		const size_t d_cnt = m_lineto.size();	// 差分の数
 		if (loc >= LOC_TYPE::LOC_P0 && loc <= LOC_TYPE::LOC_P0 + d_cnt) {
 			D2D1_POINT_2F p[N_GON_MAX];	// 頂点の位置
 			const size_t l_cnt = loc - LOC_TYPE::LOC_P0;	// 変更する点の添え字
 			// 変更する頂点までの, 各頂点の位置を得る.
 			p[0] = m_start;
 			for (size_t i = 0; i < l_cnt; i++) {
-				pt_add(p[i], m_pos[i], p[i + 1]);
+				pt_add(p[i], m_lineto[i], p[i + 1]);
 			}
 			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F d;
@@ -75,13 +75,13 @@ namespace winrt::GraphPaper::implementation
 				}
 				else {
 					// 頂点の直前の差分に変更分を加える.
-					pt_add(m_pos[l_cnt - 1], d, m_pos[l_cnt - 1]);
+					pt_add(m_lineto[l_cnt - 1], d, m_lineto[l_cnt - 1]);
 				}
 				// 変更するのが最後の頂点以外か判定する.
 				if (l_cnt < d_cnt) {
 					// 次の頂点が動かないように,
 					// 変更する頂点の次の頂点への差分から変更分を引く.
-					pt_sub(m_pos[l_cnt], d, m_pos[l_cnt]);
+					pt_sub(m_lineto[l_cnt], d, m_lineto[l_cnt]);
 				}
 				if (!flag) {
 					flag = true;
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 			if (snap_point >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
 				for (size_t i = l_cnt; i < d_cnt; i++) {
-					pt_add(p[i], m_pos[i], p[i + 1]);
+					pt_add(p[i], m_lineto[i], p[i + 1]);
 				}
 				const double dd = static_cast<double>(snap_point) * static_cast<double>(snap_point);
 				for (size_t i = 0; i < d_cnt + 1; i++) {
@@ -109,11 +109,11 @@ namespace winrt::GraphPaper::implementation
 						pt_add(m_start, d, m_start);
 					}
 					else {
-						pt_add(m_pos[l_cnt - 1], d, m_pos[l_cnt - 1]);
+						pt_add(m_lineto[l_cnt - 1], d, m_lineto[l_cnt - 1]);
 					}
 					// 変更するのが最後の頂点以外か判定する.
 					if (l_cnt < d_cnt) {
-						pt_sub(m_pos[l_cnt], d, m_pos[l_cnt]);
+						pt_sub(m_lineto[l_cnt], d, m_lineto[l_cnt]);
 					}
 					if (!flag) {
 						flag = true;
@@ -132,11 +132,11 @@ namespace winrt::GraphPaper::implementation
 	// 頂点を得る.
 	size_t ShapePath::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
-		const size_t p_cnt = m_pos.size();
+		const size_t p_cnt = m_lineto.size();
 		p[0] = m_start;
 		for (size_t i = 0; i < p_cnt; i++) {
-			p[i + 1].x = p[i].x + m_pos[i].x;
-			p[i + 1].y = p[i].y + m_pos[i].y;
+			p[i + 1].x = p[i].x + m_lineto[i].x;
+			p[i + 1].y = p[i].y + m_lineto[i].y;
 		}
 		return p_cnt + 1;
 	}
@@ -153,21 +153,21 @@ namespace winrt::GraphPaper::implementation
 		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
 		b_rb.x = m_start.x > a_rb.x ? m_start.x : a_rb.x;
 		b_rb.y = m_start.y > a_rb.y ? m_start.y : a_rb.y;
-		const size_t d_cnt = m_pos.size();	// 差分の数
-		D2D1_POINT_2F pos = m_start;
+		const size_t d_cnt = m_lineto.size();	// 差分の数
+		D2D1_POINT_2F p = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(pos, m_pos[i], pos);
-			if (pos.x < b_lt.x) {
-				b_lt.x = pos.x;
+			pt_add(p, m_lineto[i], p);
+			if (p.x < b_lt.x) {
+				b_lt.x = p.x;
 			}
-			if (pos.x > b_rb.x) {
-				b_rb.x = pos.x;
+			if (p.x > b_rb.x) {
+				b_rb.x = p.x;
 			}
-			if (pos.y < b_lt.y) {
-				b_lt.y = pos.y;
+			if (p.y < b_lt.y) {
+				b_lt.y = p.y;
 			}
-			if (pos.y > b_rb.y) {
-				b_rb.y = pos.y;
+			if (p.y > b_rb.y) {
+				b_rb.y = p.y;
 			}
 		}
 	}
@@ -175,12 +175,12 @@ namespace winrt::GraphPaper::implementation
 	// 境界矩形の左上位置を得る.
 	void ShapePath::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
-		const size_t p_cnt = m_pos.size();	// 位置の数
+		const size_t p_cnt = m_lineto.size();	// 位置の数
 		D2D1_POINT_2F p = m_start;	// 頂点
 		D2D1_POINT_2F lt;	// 左上位置
 		lt = m_start;
 		for (size_t i = 0; i < p_cnt; i++) {
-			pt_add(p, m_pos[i], p);
+			pt_add(p, m_lineto[i], p);
 			if (lt.x > p.x) {
 				lt.x = p.x;
 			}
@@ -204,10 +204,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (loc > LOC_TYPE::LOC_P0) {
 			const size_t  l_cnt = loc - LOC_TYPE::LOC_P0;
-			if (l_cnt < m_pos.size() + 1) {
+			if (l_cnt < m_lineto.size() + 1) {
 				val = m_start;
 				for (size_t i = 0; i < l_cnt; i++) {
-					pt_add(val, m_pos[i], val);
+					pt_add(val, m_lineto[i], val);
 				}
 			}
 		}
@@ -223,12 +223,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を移動する.
-	// pos	位置ベクトル
-	bool ShapePath::move(const D2D1_POINT_2F pos) noexcept
+	// to	移動先へのベクトル
+	bool ShapePath::move(const D2D1_POINT_2F to) noexcept
 	{
-		D2D1_POINT_2F start;
-		pt_add(m_start, pos, start);
-		if (set_pos_start(start)) {
+		const D2D1_POINT_2F pt{
+			m_start.x + to.x, m_start.y + to.y
+		};
+		if (set_pos_start(pt)) {
 			m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
 			return true;
@@ -266,11 +267,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
-		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
-		m_pos.resize(vec_cnt);
-		for (size_t i = 0; i < vec_cnt; i++) {
-			m_pos[i].x = dt_reader.ReadSingle();
-			m_pos[i].y = dt_reader.ReadSingle();
+		const size_t to_cnt = dt_reader.ReadUInt32();	// 要素数
+		m_lineto.resize(to_cnt);
+		for (size_t i = 0; i < to_cnt; i++) {
+			m_lineto[i].x = dt_reader.ReadSingle();
+			m_lineto[i].y = dt_reader.ReadSingle();
 		}
 		const D2D1_COLOR_F fill_color{
 			dt_reader.ReadSingle(),
@@ -292,10 +293,10 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
 		// 次の点への位置ベクトル
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
-		for (const D2D1_POINT_2F vec : m_pos) {
-			dt_writer.WriteSingle(vec.x);
-			dt_writer.WriteSingle(vec.y);
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_lineto.size()));
+		for (const D2D1_POINT_2F lineto : m_lineto) {
+			dt_writer.WriteSingle(lineto.x);
+			dt_writer.WriteSingle(lineto.y);
 		}
 		// 塗りつぶし色
 		dt_writer.WriteSingle(m_fill_color.r);

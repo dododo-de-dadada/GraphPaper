@@ -173,21 +173,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の角が図形が点を含むか判定する.
-	// t_pos	判定される点
+	// test_pt	判定される点
 	// s_cnt	辺の数
 	// e_close	辺が閉じているか判定
 	// e_width	辺の太さの半分.
 	// s	辺の配列 [exp_cnt][4+1]
 	// miter_limit	線の尖り制限
 	// j_style	線の結合方法
-	static bool poly_test_join_miter(
-		const D2D1_POINT_2F test,
-		const size_t s_cnt,
-		const bool e_close,
-		const double e_width,
-		const D2D1_POINT_2F s[][4 + 1],
-		const double miter_limit,
-		const D2D1_LINE_JOIN j_style) noexcept
+	static bool poly_test_join_miter(const D2D1_POINT_2F test_pt, const size_t s_cnt, const bool e_close, const double e_width, const D2D1_POINT_2F s[][4 + 1], const double miter_limit, const D2D1_LINE_JOIN j_style) noexcept
 	{
 		for (size_t i = (e_close ? 0 : 1), j = (e_close ? s_cnt - 1 : 0); i < s_cnt; j = i++) {
 			// 拡張された辺について角の部分を求める.
@@ -216,7 +209,7 @@ namespace winrt::GraphPaper::implementation
 					pt_add(s[j][2], direction, quadrilateral[2]);
 					pt_add(s[j][3], direction, quadrilateral[3]);
 					// 調べる位置が四辺形に含まれるか判定する.
-					if (pt_in_poly(test, 4, quadrilateral)) {
+					if (pt_in_poly(test_pt, 4, quadrilateral)) {
 						return true;
 					}
 				}
@@ -259,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 			const double limit_len = e_width * miter_limit;
 			if (d_abs2 <= limit_len * limit_len) {
 				// 尖り制限以下ならば, 調べる位置を四辺形 { q0, q1, q2, q3 } が含むか判定する.
-				if (pt_in_poly(test, 4, q)) {
+				if (pt_in_poly(test_pt, 4, q)) {
 					// 位置を含むなら true を返す.
 					return true;
 				}
@@ -269,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 			if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 				// 線の結合が尖りまたは面取りならば, 調べる位置を三角形 { q1, q2, q3 } が含むか判定する.
 				const D2D1_POINT_2F* triangle = q + 1;
-				if (pt_in_poly(test, 3, triangle)) {
+				if (pt_in_poly(test_pt, 3, triangle)) {
 					// 位置を含むなら true を返す.
 					return true;
 				}
@@ -287,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 			poly_find_intersection(q[3], q[0], mitered, orthogonal, t, u, q[4]);
 			poly_find_intersection(q[0], q[1], mitered, orthogonal, t, u, q[0]);
 			const D2D1_POINT_2F* pentagon = q;
-			if (pt_in_poly(test, 5, pentagon)) {
+			if (pt_in_poly(test_pt, 5, pentagon)) {
 				// 位置を含むなら true を返す.
 				return true;
 			}
@@ -296,12 +289,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の角が図形が点を含むか判定する (丸まった角)
+	// s_cnt	辺の数
+	// s_pt	頂点の配列
 	// e_width	辺の半分の太さ
-	static bool poly_test_join_round(
-		const D2D1_POINT_2F& t, const size_t s_cnt, const D2D1_POINT_2F s[], const double e_width)
+	static bool poly_test_join_round(const D2D1_POINT_2F& test_pt, const size_t s_cnt, const D2D1_POINT_2F s_pt[], const double e_width)
 	{
 		for (size_t i = 0; i < s_cnt; i++) {
-			if (pt_in_circle(t, s[i], e_width)) {
+			if (pt_in_circle(test_pt, s_pt[i], e_width)) {
 				return true;
 			}
 		}
@@ -314,95 +308,95 @@ namespace winrt::GraphPaper::implementation
 	// p	始点を除く位置ベクトルの配列
 	// s_opaque	線が不透明か判定
 	// s_width	線の太さ
-	// e_closed	線が閉じているか判定
+	// end_closed	線が閉じているか判定
 	// s_join	線の結合
-	// s_limit	尖り制限
+	// miter_limit	尖り制限
 	// f_opa	塗りつぶしが不透明か判定
 	static uint32_t poly_hit_test(
-		const D2D1_POINT_2F t,	// 判定される点 (線分の始点を原点とする)
-		const size_t p_cnt,	// 始点を除く位置ベクトルの数
-		const D2D1_POINT_2F p[],	// 始点を除く位置ベクトルの配列
-		const bool s_opaque,	// 線が不透明か判定
+		const D2D1_POINT_2F test_pt,	// 判定される点 (線分の始点を原点とする)
+		const size_t to_cnt,	// 始点を除く位置ベクトルの数
+		const D2D1_POINT_2F to[],	// 始点を除く位置ベクトルの配列
+		const bool stroke_opa,	// 線が不透明か判定
 		const double s_width,	// 線の太さ
-		const bool e_closed,	// 線が閉じているか判定
+		const bool end_closed,	// 線が閉じているか判定
 		const D2D1_CAP_STYLE& s_cap,	// 線の端の形式
 		const D2D1_LINE_JOIN s_join,	// 線の結合の形式
-		const double s_limit,	// 尖り制限
-		const bool f_opaque,	// 塗りつぶしが不透明か判定
+		const double miter_limit,	// 尖り制限
+		const bool fill_opa,	// 塗りつぶしが不透明か判定
 		const double a_len
 	)
 	{
-		D2D1_POINT_2F q[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点 (始点 { 0,0 } を含めた)
-		double s_len[N_GON_MAX];	// 辺の長さ
+		D2D1_POINT_2F pt[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点 (始点 { 0,0 } を含めた)
+		double side_len[N_GON_MAX];	// 辺の長さ
 		size_t n_cnt = 0;	// 長さのある辺の数
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
-		for (size_t i = 0; i < p_cnt; i++) {
+		for (size_t i = 0; i < to_cnt; i++) {
 			// 判定される点が, 頂点の部位に含まれるか判定する.
-			if (loc_hit_test(t, q[i], a_len)) {
+			if (loc_hit_test(test_pt, pt[i], a_len)) {
 				k = i;
 			}
 			// 辺の長さを求める.
-			s_len[i] = sqrt(pt_abs2(p[i]));
+			side_len[i] = sqrt(pt_abs2(to[i]));
 			// 辺の長さがあるか判定する.
-			if (s_len[i] >= FLT_MIN) {
+			if (side_len[i] >= FLT_MIN) {
 				n_cnt++;
 			}
 			// 頂点に辺ベクトルを加え, 次の頂点を求める.
-			pt_add(q[i], p[i], q[i + 1]);
+			pt_add(pt[i], to[i], pt[i + 1]);
 		}
 		// 判定される点が, 終点の部位に含まれるか判定する.
-		if (loc_hit_test(t, q[p_cnt], a_len)) {
-			k = p_cnt;
+		if (loc_hit_test(test_pt, pt[to_cnt], a_len)) {
+			k = to_cnt;
 		}
 		// 頂点が見つかったか判定する.
 		if (k != -1) {
 			return LOC_TYPE::LOC_P0 + static_cast<uint32_t>(k);
 		}
 		// 線が不透明か判定する.
-		if (s_opaque) {
+		if (stroke_opa) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
 			const auto e_width = max(max(static_cast<double>(s_width), a_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (n_cnt == 0) {
 				// ゼロならば, 判定される点が, 拡張する幅を半径とする円に含まれるか判定する.
-				if (pt_in_circle(t.x, t.y, e_width)) {
+				if (pt_in_circle(test_pt.x, test_pt.y, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 				return LOC_TYPE::LOC_SHEET;
 			}
 			// 辺が閉じているか判定する.
-			if (e_closed) {
+			if (end_closed) {
 				// 閉じているなら, 始点は { 0, 0 } なので終点へのベクトルを, そのまま最後の辺の長さとする.
-				s_len[p_cnt] = sqrt(pt_abs2(q[p_cnt]));
+				side_len[to_cnt] = sqrt(pt_abs2(pt[to_cnt]));
 			}
 			// 閉じてないなら, 端の形式が円形か判定する.
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
-				if (pt_in_circle(t.x, t.y, e_width) ||
-					pt_in_circle(t, q[p_cnt], e_width)) {
+				if (pt_in_circle(test_pt.x, test_pt.y, e_width) ||
+					pt_in_circle(test_pt, pt[to_cnt], e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
-				if (poly_test_cap_square(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
+				if (poly_test_cap_square(test_pt, pt[to_cnt], to_cnt, to, side_len, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
-				if (poly_test_cap_triangle(t, q[p_cnt], p_cnt, p, s_len, e_width)) {
+				if (poly_test_cap_triangle(test_pt, pt[to_cnt], to_cnt, to, side_len, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			D2D1_POINT_2F s[N_GON_MAX][4 + 1];	// 太さ分拡張された辺 (+頂点)
 			size_t s_cnt = 0;
-			for (size_t i = 0; i < p_cnt; i++) {
+			for (size_t i = 0; i < to_cnt; i++) {
 				// 辺 i の長さがないか判定する.
-				if (s_len[i] < FLT_MIN) {
+				if (side_len[i] < FLT_MIN) {
 					// 点 i から降順に, 長さのある辺 m を見つける.
 					size_t m = static_cast<size_t>(-1);
 					for (size_t h = i; h > 0; h--) {
-						if (s_len[h - 1] >= FLT_MIN) {
+						if (side_len[h - 1] >= FLT_MIN) {
 							m = h - 1;
 							break;
 						}
@@ -411,21 +405,21 @@ namespace winrt::GraphPaper::implementation
 					D2D1_POINT_2F prev;	// 直前の辺ベクトル
 					if (m != static_cast<size_t>(-1)) {
 						// 見つかった辺を直前の辺ベクトルに格納する.
-						prev = p[m];
+						prev = to[m];
 					}
 					// 見つからなかったならば,
 					// 辺が閉じている, かつ最後の辺の長さが非ゼロか判定する.
-					else if (e_closed && s_len[p_cnt] >= FLT_MIN) {
+					else if (end_closed && side_len[to_cnt] >= FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直前の辺ベクトルとする.
-						prev = D2D1_POINT_2F{ -q[p_cnt].x, -q[p_cnt].y };
+						prev = D2D1_POINT_2F{ -pt[to_cnt].x, -pt[to_cnt].y };
 					}
 					else {
 						continue;
 					}
 					// 点 i から昇順に, 長さのある辺を見つける.
 					size_t n = static_cast<size_t>(-1);
-					for (size_t j = i + 1; j < p_cnt; j++) {
-						if (s_len[j] >= FLT_MIN) {
+					for (size_t j = i + 1; j < to_cnt; j++) {
+						if (side_len[j] >= FLT_MIN) {
 							n = j;
 							break;
 						}
@@ -434,13 +428,13 @@ namespace winrt::GraphPaper::implementation
 					D2D1_POINT_2F next;	// 直後の辺ベクトル
 					if (n != -1) {
 						// 見つかった辺を直後の辺ベクトルに格納する.
-						next = p[n];
+						next = to[n];
 					}
 					// 見つからなかったならば,
 					// 辺が閉じている, かつ最後の辺に長さがあるか判定する.
-					else if (e_closed && s_len[p_cnt] >= FLT_MIN) {
+					else if (end_closed && side_len[to_cnt] >= FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直後の辺ベクトルとする.
-						next = D2D1_POINT_2F{ -q[p_cnt].x, -q[p_cnt].y };
+						next = D2D1_POINT_2F{ -pt[to_cnt].x, -pt[to_cnt].y };
 					}
 					else {
 						continue;
@@ -464,69 +458,68 @@ namespace winrt::GraphPaper::implementation
 					const double cy = r.y;
 					const double ox = orthogonal.x;
 					const double oy = orthogonal.y;
-					pt_add(q[i], -cx - ox, -cy - oy, s[s_cnt][0]);
-					pt_add(q[i], -cx + ox, -cy + oy, s[s_cnt][1]);
-					pt_add(q[i], cx + ox, cy + oy, s[s_cnt][2]);
-					pt_add(q[i], cx - ox, cy - oy, s[s_cnt][3]);
-					s[s_cnt][4] = q[i];
+					pt_add(pt[i], -cx - ox, -cy - oy, s[s_cnt][0]);
+					pt_add(pt[i], -cx + ox, -cy + oy, s[s_cnt][1]);
+					pt_add(pt[i], cx + ox, cy + oy, s[s_cnt][2]);
+					pt_add(pt[i], cx - ox, cy - oy, s[s_cnt][3]);
+					s[s_cnt][4] = pt[i];
 				}
 				else {
 					// 辺ベクトルに直交するベクトルを求める.
 					// 直交ベクトルの長さは, 拡張する幅とする.
 					D2D1_POINT_2F direction;	// 方向ベクトル
-					pt_mul(p[i], e_width / s_len[i], direction);
+					pt_mul(to[i], e_width / side_len[i], direction);
 					const D2D1_POINT_2F orthogonal{ direction.y, -direction.x };	// 直交するベクトル
 					// 頂点 i と i+1 を直交ベクトルに沿って正逆に拡張し, 拡張された辺 i に格納する.
-					pt_sub(q[i], orthogonal, s[s_cnt][0]);
-					pt_add(q[i], orthogonal, s[s_cnt][1]);
-					pt_add(q[i + 1], orthogonal, s[s_cnt][2]);
-					pt_sub(q[i + 1], orthogonal, s[s_cnt][3]);
-					s[s_cnt][4] = q[i];
+					pt_sub(pt[i], orthogonal, s[s_cnt][0]);
+					pt_add(pt[i], orthogonal, s[s_cnt][1]);
+					pt_add(pt[i + 1], orthogonal, s[s_cnt][2]);
+					pt_sub(pt[i + 1], orthogonal, s[s_cnt][3]);
+					s[s_cnt][4] = pt[i];
 				}
 				// 調べる位置が, 拡張された辺に含まれるか判定する.
-				if (pt_in_poly(t, 4, s[s_cnt++])) {
+				if (pt_in_poly(test_pt, 4, s[s_cnt++])) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
-			if (e_closed && s_len[p_cnt] >= FLT_MIN) {
+			if (end_closed && side_len[to_cnt] >= FLT_MIN) {
 				// 最後の辺の位置を反転させ, 拡張する幅の長さに合わせ, 辺ベクトルを求める.
 				// 辺ベクトルに直交するベクトルを求める.
 				// 始点と終点を直交ベクトルに沿って正逆に拡張し, 拡張された辺に格納する.
 				D2D1_POINT_2F direction;
-				pt_mul(q[p_cnt], -e_width / s_len[p_cnt], direction);
+				pt_mul(pt[to_cnt], -e_width / side_len[to_cnt], direction);
 				const D2D1_POINT_2F orthogonal{ direction.y, -direction.x };
-				pt_sub(q[p_cnt], orthogonal, s[s_cnt][0]);
-				pt_add(q[p_cnt], orthogonal, s[s_cnt][1]);
-				s[s_cnt][2] = orthogonal; // v0 + o_vec
-				//pt_neg(o_vec, e_side[e_cnt][3]); // v0 - o_vec
+				pt_sub(pt[to_cnt], orthogonal, s[s_cnt][0]);
+				pt_add(pt[to_cnt], orthogonal, s[s_cnt][1]);
+				s[s_cnt][2] = orthogonal;
 				s[s_cnt][3].x = -orthogonal.x;
 				s[s_cnt][3].y = -orthogonal.y;
-				s[s_cnt][4] = q[p_cnt];
+				s[s_cnt][4] = pt[to_cnt];
 				// 判定される点が拡張された辺に含まれるか判定する.
-				if (pt_in_poly(t, 4, s[s_cnt++])) {
+				if (pt_in_poly(test_pt, 4, s[s_cnt++])) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-				if (poly_test_join_bevel(t, s_cnt, e_closed, s)) {
+				if (poly_test_join_bevel(test_pt, s_cnt, end_closed, s)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				if (poly_test_join_miter(t, s_cnt, e_closed, e_width, s, s_limit, s_join)) {
+				if (poly_test_join_miter(test_pt, s_cnt, end_closed, e_width, s, miter_limit, s_join)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-				if (poly_test_join_round(t, p_cnt + 1, q, e_width)) {
+				if (poly_test_join_round(test_pt, to_cnt + 1, pt, e_width)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 		}
-		if (f_opaque) {
-			if (pt_in_poly(t, p_cnt + 1, q)) {
+		if (fill_opa) {
+			if (pt_in_poly(test_pt, to_cnt + 1, pt)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
@@ -583,7 +576,7 @@ namespace winrt::GraphPaper::implementation
 	// 矩形をもとに多角形を作成する.
 	void ShapePoly::poly_create_by_box(
 		const D2D1_POINT_2F start,	// 始点
-		const D2D1_POINT_2F pos,	// 終点の位置ベクトル
+		const D2D1_POINT_2F end_to,	// 終点の位置ベクトル
 		const POLY_OPTION& p_opt,	// 多角形の作成方法
 		D2D1_POINT_2F p[]	// 各点の配列
 	) noexcept
@@ -598,8 +591,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (p_cnt == 2) {
 			p[0] = start;
-			p[1].x = start.x + pos.x;
-			p[1].y = start.y + pos.y;
+			p[1].x = start.x + end_to.x;
+			p[1].y = start.y + end_to.y;
 			return;
 		}
 		const auto p_up = p_opt.m_vertex_up;
@@ -632,8 +625,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 境界矩形を位置ベクトルで表される方形に合致させるための, 拡大率を得る.
 		// 正多角形の場合, X 方向と Y 方向の, どちらか小さい方の拡大率に一致させる.
-		const double px = fabs(pos.x);
-		const double py = fabs(pos.y);
+		const double px = fabs(end_to.x);
+		const double py = fabs(end_to.y);
 		const double bw = static_cast<double>(box_rb.x) - static_cast<double>(box_lt.x);
 		const double bh = static_cast<double>(box_rb.y) - static_cast<double>(box_lt.y);
 		double sx;	// X 方向の拡大率
@@ -660,15 +653,15 @@ namespace winrt::GraphPaper::implementation
 		// 位置ベクトルの正負によって, 境界矩形のどの頂点を基点にするか決める.
 		double bx;	// 基点 X 座標
 		double by;	// 基点 Y 座標
-		if (pos.x >= 0.0f && pos.y >= 0.0f) {
+		if (end_to.x >= 0.0f && end_to.y >= 0.0f) {
 			bx = box_lt.x;
 			by = box_lt.y;
 		}
-		else if (pos.x < 0.0f && pos.y >= 0.0f) {
+		else if (end_to.x < 0.0f && end_to.y >= 0.0f) {
 			bx = box_rb.x;
 			by = box_lt.y;
 		}
-		else if (pos.x < 0.0f && pos.y <= 0.0f) {
+		else if (end_to.x < 0.0f && end_to.y <= 0.0f) {
 			bx = box_rb.x;
 			by = box_rb.y;
 		}
@@ -813,13 +806,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
+	// test_pt	判定される点
 	// 戻り値	点を含む部位
-	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
+	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const D2D1_POINT_2F u{ 
-			pt.x - m_start.x, pt.y - m_start.y
+			test_pt.x - m_start.x, test_pt.y - m_start.y
 		};
-		return poly_hit_test(u, m_pos.size(), m_pos.data(), is_opaque(m_stroke_color), m_stroke_width, m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED, m_stroke_cap, m_stroke_join, m_stroke_join_limit, is_opaque(m_fill_color), m_loc_width);
+		return poly_hit_test(u, m_lineto.size(), m_lineto.data(), is_opaque(m_stroke_color), m_stroke_width, m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED, m_stroke_cap, m_stroke_join, m_stroke_join_limit, is_opaque(m_fill_color), m_loc_width);
 	}
 
 	// 矩形に含まれるか判定する.
@@ -832,11 +826,11 @@ namespace winrt::GraphPaper::implementation
 		if (!pt_in_rect(m_start, lt, rb)) {
 			return false;
 		}
-		const size_t p_cnt = m_pos.size();	// 差分の数
+		const size_t p_cnt = m_lineto.size();	// 差分の数
 		D2D1_POINT_2F p{ m_start };
 		for (size_t i = 0; i < p_cnt; i++) {
-			p.x += m_pos[i].x;
-			p.y += m_pos[i].y;
+			p.x += m_lineto[i].x;
+			p.y += m_lineto[i].y;
 			if (!pt_in_rect(p, lt, rb)) {
 				return false;
 			}
@@ -855,7 +849,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	ShapePoly::ShapePoly(
 		const D2D1_POINT_2F start,	// 矩形の始点
-		const D2D1_POINT_2F pos,	// 矩形の終点への位置ベクトル
+		const D2D1_POINT_2F end_to,	// 矩形の終点への位置ベクトル
 		const Shape* prop,	// 属性
 		const POLY_OPTION& p_opt	// 作成方法
 	) :
@@ -863,14 +857,14 @@ namespace winrt::GraphPaper::implementation
 		m_end(p_opt.m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)
 	{
 		D2D1_POINT_2F p[N_GON_MAX];
-		poly_create_by_box(start, pos, p_opt, p);
+		poly_create_by_box(start, end_to, p_opt, p);
 
 		m_start = p[0];
-		m_pos.resize(p_opt.m_vertex_cnt - 1);
-		m_pos.shrink_to_fit();
+		m_lineto.resize(p_opt.m_vertex_cnt - 1);
+		m_lineto.shrink_to_fit();
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
-			m_pos[i - 1].x = p[i].x - p[i - 1].x;
-			m_pos[i - 1].y = p[i].y - p[i - 1].y;
+			m_lineto[i - 1].x = p[i].x - p[i - 1].x;
+			m_lineto[i - 1].y = p[i].y - p[i - 1].y;
 		}
 	}
 

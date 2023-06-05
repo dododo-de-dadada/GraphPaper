@@ -127,14 +127,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形が点を含むか判定する.
+	// test_pt	判定される点
 	// 戻り値	点を含む部位
-	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
+	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(pt, false) != LOC_TYPE::LOC_SHEET) {
+			if (s->hit_test(test_pt, false) != LOC_TYPE::LOC_SHEET) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
@@ -159,12 +160,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 位置を移動する
-	// pos	移動する位置ベクトル
+	// 位置を移動する.
+	// to	移動先へのベクトル
 	//------------------------------
-	bool ShapeGroup::move(const D2D1_POINT_2F pos) noexcept
+	bool ShapeGroup::move(const D2D1_POINT_2F to) noexcept
 	{
-		return slist_move_selected(m_list_grouped, pos);
+		return slist_move_selected(m_list_grouped, to);
 	}
 
 	//------------------------------

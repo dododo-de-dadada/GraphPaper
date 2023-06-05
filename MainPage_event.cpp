@@ -167,15 +167,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 最も近い方眼への位置ベクトルを求める.
-	static bool event_get_nearest_grid(
-		const SHAPE_LIST& slist,	// 図形リスト
-		const float g_len,	// 方眼の大きさ
-		D2D1_POINT_2F& g_pos	// 図形から方眼への位置ベクトル
-	) noexcept
+	// slist	図形リスト
+	// g_len	方眼の大きさ
+	// to_grid	図形から方眼への位置ベクトル
+	static bool event_get_nearest_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& to_grid) noexcept
 	{
 		D2D1_POINT_2F p[2 + N_GON_MAX];
 		D2D1_POINT_2F g;	// 方眼の大きさで丸めた位置
-		D2D1_POINT_2F d;	// 丸めた位置と元の位置の差分
+		D2D1_POINT_2F to;	// 丸めた位置と元の位置の差分
 		double d_min = FLT_MAX;	// 最も短い距離
 		for (const auto s : slist) {
 			if (s->is_deleted() || !s->is_selected()) {
@@ -186,10 +185,10 @@ namespace winrt::GraphPaper::implementation
 			const auto p_cnt = s->get_verts(p + 2);
 			for (size_t i = 0; i < 2 + p_cnt; i++) {
 				pt_round(p[i], g_len, g);
-				pt_sub(g, p[i], d);
-				const auto g_abs = pt_abs2(d);	// 丸めた位置と元の位置の距離の二乗
+				pt_sub(g, p[i], to);
+				const auto g_abs = pt_abs2(to);	// 丸めた位置と元の位置の距離の二乗
 				if (g_abs < d_min) {
-					g_pos = d;
+					to_grid = to;
 					d_min = g_abs;
 					if (g_abs <= FLT_MIN) {
 						return true;
@@ -201,11 +200,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 最も近い頂点を得る.
+	// slist	図形リスト
+	// interval	間隔 (これ以上離れた点は無視する)
+	// to_pt	最も近い頂点への位置ベクトル
 	// 戻り値	見つかったなら true
 	static bool event_get_nearest_point(
 		const SHAPE_LIST& slist,	// 図形リスト
 		const double interval,	// 間隔 (これ以上離れた点は無視する)
-		D2D1_POINT_2F& pos	// 最も近い頂点への位置ベクトル
+		D2D1_POINT_2F& to_pt	// 最も近い頂点への位置ベクトル
 	) noexcept
 	{
 		double dd = interval * interval;
@@ -231,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			pt_sub(n, q, pos);
+			pt_sub(n, q, to_pt);
 		}
 		return flag;
 	}
@@ -390,43 +392,43 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形の作成を終了する.
 	// start	始点
-	// pos	対角点への位置ベクトル
+	// end_to	対角点への位置ベクトル
 	//------------------------------
-	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
+	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto)
 	{
 		const auto d_tool = m_drawing_tool;
 		Shape* s;
 		if (d_tool == DRAWING_TOOL::RECT) {
-			s = new ShapeRect(start, pos, &m_main_sheet);
+			s = new ShapeRect(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::RRECT) {
-			s = new ShapeRRect(start, pos, &m_main_sheet);
+			s = new ShapeRRect(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::POLY) {
 			const auto poly_opt = m_drawing_poly_opt;
-			s = new ShapePoly(start, pos, &m_main_sheet, poly_opt);
+			s = new ShapePoly(start, lineto, &m_main_sheet, poly_opt);
 		}
 		else if (d_tool == DRAWING_TOOL::ELLIPSE) {
-			s = new ShapeEllipse(start, pos, &m_main_sheet);
+			s = new ShapeEllipse(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::LINE) {
-			s = new ShapeLine(start, pos, &m_main_sheet);
+			s = new ShapeLine(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::BEZIER) {
-			s = new ShapeBezier(start, pos, &m_main_sheet);
+			s = new ShapeBezier(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::RULER) {
-			s = new ShapeRuler(start, pos, &m_main_sheet);
+			s = new ShapeRuler(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::ARC) {
-			s = new ShapeArc(start, pos, &m_main_sheet);
+			s = new ShapeArc(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::TEXT) {
 			if (m_core_text_shape != nullptr) {
 				m_core_text.NotifyFocusLeave();
 				undo_push_text_unselect(m_core_text_shape);
 			}
-			s = new ShapeText(start, pos, nullptr, &m_main_sheet);
+			s = new ShapeText(start, lineto, nullptr, &m_main_sheet);
 			m_core_text_shape = static_cast<ShapeText*>(s);
 			m_core_text_shape->create_text_layout();
 			m_core_text.NotifyFocusEnter();
@@ -437,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
+		event_reduce_slist(m_main_sheet.m_shape_list, m_undo_stack, m_redo_stack);
 		undo_push_null();
 		unselect_shape_all();
 		undo_push_append(s);
@@ -686,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 				// 選択された図形の数が 1 を超える,
 				// または押された図形の部位が線枠, 内側のときは, 図形を移動している状態に遷移する.
 				else if (m_drawing_tool == DRAWING_TOOL::SELECT &&
-					(m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL || m_ustack_scnt > 1)) {
+					(m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL || m_undo_select_cnt > 1)) {
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_null();
@@ -1341,7 +1343,7 @@ namespace winrt::GraphPaper::implementation
 			if (loc == LOC_TYPE::LOC_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
-			else if (m_ustack_scnt > 1) {
+			else if (m_undo_select_cnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 			}
 			else if (loc == LOC_TYPE::LOC_TEXT) {
@@ -1391,7 +1393,7 @@ namespace winrt::GraphPaper::implementation
 							typeid(*s) == typeid(ShapeBezier) ||
 							typeid(*s) == typeid(ShapeArc)) {
 							// 図形の部位が, 頂点の数を超えないか判定する.
-							if (loc >= LOC_TYPE::LOC_P0 && loc < LOC_TYPE::LOC_P0 + static_cast<ShapePath*>(s)->m_pos.size() + 1) {
+							if (loc >= LOC_TYPE::LOC_P0 && loc < LOC_TYPE::LOC_P0 + static_cast<ShapePath*>(s)->m_lineto.size() + 1) {
 								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 								break;
 							}

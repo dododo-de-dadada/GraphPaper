@@ -291,10 +291,9 @@ namespace winrt::GraphPaper::implementation
 		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
-		UNDO_STACK m_ustack_redo;	// やり直し操作スタック
-		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
-		bool m_ustack_is_changed = false;	// スタックが更新されたか判定
-		uint32_t m_ustack_scnt = 0;	// 選択された図形の数
+		UNDO_STACK m_redo_stack;	// やり直し操作スタック
+		UNDO_STACK m_undo_stack;	// 元に戻す操作スタック
+		uint32_t m_undo_select_cnt = 0;	// 選択された図形の数
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
@@ -424,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 		// 指定した部位の色を検出する.
 		void event_eyedropper_detect(const Shape* s, const uint32_t loc);
 		// 図形の作成を終了する.
-		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
+		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to);
 		// 図形の変形を終了する.
 		void event_adjust_after_deforming(const VirtualKeyModifiers key_mod);
 		// 図形の移動を終了する.
@@ -904,9 +903,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を追加して, その操作をスタックに積む.
 		void undo_push_append(Shape* s)
 		{
-			m_ustack_undo.push_back(new UndoAppend(s));
+			m_undo_stack.push_back(new UndoAppend(s));
 			if (s->is_selected()) {
-				m_ustack_scnt++;
+				m_undo_select_cnt++;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -915,7 +914,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_ustack_scnt) {
+			if (cnt != m_undo_select_cnt) {
 				__debugbreak();
 			}
 #endif
@@ -923,34 +922,34 @@ namespace winrt::GraphPaper::implementation
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
 		void undo_push_append(ShapeGroup* g, Shape* s)
 		{
-			m_ustack_undo.push_back(new UndoAppendG(g, s));
+			m_undo_stack.push_back(new UndoAppendG(g, s));
 		}
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void undo_push_order(Shape* const s, Shape* const t)
 		{
-			m_ustack_undo.push_back(new UndoOrder(s, t));
+			m_undo_stack.push_back(new UndoOrder(s, t));
 		}
 		// 指定した部位の点をスタックに保存する.
 		void undo_push_position(Shape* const s, const uint32_t loc)
 		{
 			if (typeid(*s) == typeid(ShapeImage)) {
-				m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage* const>(s)));
+				m_undo_stack.push_back(new UndoImage(static_cast<ShapeImage* const>(s)));
 			}
 			else {
-				m_ustack_undo.push_back(new UndoDeform(s, loc));
+				m_undo_stack.push_back(new UndoDeform(s, loc));
 			}
 		}
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
 		void undo_push_image(Shape* const s)
 		{
-			m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
+			m_undo_stack.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
 		}
 		// 図形を挿入して, その操作をスタックに積む.
-		void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
+		void MainPage::undo_push_insert(Shape* s, Shape* s_at)
 		{
-			m_ustack_undo.push_back(new UndoInsert(s, s_pos));
+			m_undo_stack.push_back(new UndoInsert(s, s_at));
 			if (s->is_selected()) {
-				m_ustack_scnt++;
+				m_undo_select_cnt++;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -959,26 +958,26 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_ustack_scnt) {
+			if (cnt != m_undo_select_cnt) {
 				__debugbreak();
 			}
 #endif
 		}
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F pos, const bool any = false);
+		void undo_push_move(const D2D1_POINT_2F to, const bool any_shape = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.
 		void undo_push_remove(Shape* g, Shape* s)
 		{
-			m_ustack_undo.push_back(new UndoRemoveG(g, s));
+			m_undo_stack.push_back(new UndoRemoveG(g, s));
 		}
 		// 図形を取り去り, その操作をスタックに積む.
 		void undo_push_remove(Shape* s)
 		{
-			m_ustack_undo.push_back(new UndoRemove(s));
+			m_undo_stack.push_back(new UndoRemove(s));
 			if (s->is_selected()) {
-				m_ustack_scnt--;
+				m_undo_select_cnt--;
 			}
 #ifdef _DEBUG
 			uint32_t cnt = 0;
@@ -987,7 +986,7 @@ namespace winrt::GraphPaper::implementation
 					cnt++;
 				}
 			}
-			if (cnt != m_ustack_scnt) {
+			if (cnt != m_undo_select_cnt) {
 				__debugbreak();
 			}
 #endif
@@ -1012,7 +1011,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
 			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.
-			for (auto u = m_ustack_undo.rbegin(); u != m_ustack_undo.rend() && *u != nullptr && typeid(*u) == typeid(UndoTextSelect); u++) {
+			for (auto u = m_undo_stack.rbegin(); u != m_undo_stack.rend() && *u != nullptr && typeid(*u) == typeid(UndoTextSelect); u++) {
 				if ((*u)->m_shape != s) {
 					continue;
 				}
@@ -1023,7 +1022,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			// そうでなければ, スタックに操作を積む.
-			m_ustack_undo.push_back(new UndoTextSelect(s, start, end, trail));
+			m_undo_stack.push_back(new UndoTextSelect(s, start, end, trail));
 		}
 		// データリーダーから操作スタックを読み込む.
 		void undo_read_stack(DataReader const& dt_reader);
@@ -1050,7 +1049,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列を貼り付ける.
 		IAsyncAction xcvd_paste_text(void);
 		// 貼り付ける点を得る
-		void xcvd_paste_pos(D2D1_POINT_2F& p, const D2D1_POINT_2F q) const noexcept;
+		void xcvd_paste_pos(D2D1_POINT_2F& paste_pt, const D2D1_POINT_2F src_pt) const noexcept;
 
 		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{
@@ -1063,7 +1062,7 @@ namespace winrt::GraphPaper::implementation
 					changed = true;
 					undo_push_null();
 				}
-				m_ustack_undo.push_back(new UndoReverse(s));
+				m_undo_stack.push_back(new UndoReverse(s));
 			}
 			if (changed) {
 				//undo_menu_is_enabled();

@@ -20,13 +20,13 @@ namespace winrt::GraphPaper::implementation
 		if (end == start && end > 0) {
 			undo_push_null();
 			undo_push_text_select(m_core_text_shape, end - 1, end, false);
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
 		// ‘I‘ğ”ÍˆÍ‚ª‚ ‚é‚È‚ç
 		else if (end != start) {
 			undo_push_null();
-			m_ustack_undo.push_back(new UndoText2(m_core_text_shape, nullptr));
+			m_undo_stack.push_back(new UndoText2(m_core_text_shape, nullptr));
 			main_draw();
 		}
 		CoreTextRange modified_ran{
@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		const auto s = min(start, end);
 		undo_push_null();
 		// ‰üs‚ğ‘}“ü‚·‚é.
-		m_ustack_undo.push_back(new UndoText2(m_core_text_shape, L"\r"));
+		m_undo_stack.push_back(new UndoText2(m_core_text_shape, L"\r"));
 		undo_push_text_select(m_core_text_shape, s + 1, s + 1, false);
 		//undo_menu_is_enabled();
 		//xcvd_menu_is_enabled();

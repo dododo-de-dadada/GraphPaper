@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::Buffer;
 	using winrt::Windows::Storage::Streams::InputStreamOptions;
 
-	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos);
+	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pt);
 	static void export_svg_color(wchar_t* buf, const size_t len, const D2D1_COLOR_F color, const wchar_t* name);
 	static void export_svg_stroke(wchar_t* buf, const size_t len, const float width, const D2D1_COLOR_F& color, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_CAP_STYLE cap, const D2D1_LINE_JOIN join, const float limit);
 
@@ -34,13 +34,13 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_LINE_JOIN join,	// 線分の連結の形式
 		const float miter_limit,	// 尖り制限
 		const D2D1_POINT_2F barbs[],	// 矢じりの両端の位置
-		const D2D1_POINT_2F tip_pos)	// 矢じりの先端の位置
+		const D2D1_POINT_2F tip_pt)	// 矢じりの先端の位置
 	{
 		if (arrow == ARROW_STYLE::ARROW_FILLED) {
 			swprintf_s(buf, len,
 				L"<path d=\"M%f %f L%f %f L%f %f z\" ",
 				barbs[0].x, barbs[0].y,
-				tip_pos.x, tip_pos.y,
+				tip_pt.x, tip_pt.y,
 				barbs[1].x, barbs[1].y
 			);
 			const auto len1 = wcslen(buf);
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len,
 				L"<path d=\"M%f %f L%f %f L%f %f\" fill=\"none\" ",
 				barbs[0].x, barbs[0].y,
-				tip_pos.x, tip_pos.y,
+				tip_pt.x, tip_pt.y,
 				barbs[1].x, barbs[1].y
 			);
 		}
@@ -190,9 +190,9 @@ namespace winrt::GraphPaper::implementation
 	void ShapeBezier::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
-		pt_add(m_start, m_pos[0], b_seg.point1);
-		pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-		pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+		pt_add(m_start, m_lineto[0], b_seg.point1);
+		pt_add(b_seg.point1, m_lineto[1], b_seg.point2);
+		pt_add(b_seg.point2, m_lineto[2], b_seg.point3);
 
 		// パスの始点と制御点
 		wchar_t buf[1024];
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeEllipse::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		D2D1_POINT_2F r;
-		pt_mul(m_pos, 0.5, r);
+		pt_mul(m_lineto, 0.5, r);
 		D2D1_POINT_2F c;
 		pt_add(m_start, r, c);
 
@@ -307,14 +307,14 @@ namespace winrt::GraphPaper::implementation
 		if (equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) {
 			return;
 		}
-		const D2D1_POINT_2F end{
-			m_start.x + m_pos.x,
-			m_start.y + m_pos.y
+		const D2D1_POINT_2F end_pt{
+			m_start.x + m_lineto.x,
+			m_start.y + m_lineto.y
 		};
 		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" ",
-			m_start.x, m_start.y, end.x, end.y
+			m_start.x, m_start.y, end_pt.x, end_pt.y
 		);
 		dt_writer.WriteString(buf);
 
@@ -323,9 +323,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F barb[2];
-			D2D1_POINT_2F tip;
-			if (ShapeLine::line_get_pos_arrow(m_start, m_pos, m_arrow_size, barb, tip)) {
-				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, barb, tip);
+			D2D1_POINT_2F tip_pt;
+			if (ShapeLine::line_get_pos_arrow(m_start, m_lineto, m_arrow_size, barb, tip_pt)) {
+				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, barb, tip_pt);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -340,8 +340,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		const auto d_cnt = m_pos.size();	// 始点を除くの頂点数
-		std::vector<D2D1_POINT_2F> v_pos(d_cnt + 1);
+		const auto d_cnt = m_lineto.size();	// 始点を除くの頂点数
+		std::vector<D2D1_POINT_2F> p(d_cnt + 1);
 		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"<path d=\"M%f %f ",
@@ -349,12 +349,12 @@ namespace winrt::GraphPaper::implementation
 		);
 		dt_writer.WriteString(buf);
 
-		v_pos[0] = m_start;
+		p[0] = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			swprintf_s(buf,
-				L"l%f %f ", m_pos[i].x, m_pos[i].y);
+				L"l%f %f ", m_lineto[i].x, m_lineto[i].y);
 			dt_writer.WriteString(buf);
-			pt_add(v_pos[i], m_pos[i], v_pos[i + 1]);
+			pt_add(p[i], m_lineto[i], p[i + 1]);
 		}
 		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
 			dt_writer.WriteString(L"Z");
@@ -372,7 +372,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (ShapePoly::poly_get_pos_arrow(d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
+			if (ShapePoly::poly_get_pos_arrow(d_cnt + 1, std::data(p), m_arrow_size, barb, tip)) {
 				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
@@ -389,10 +389,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		wchar_t buf[1024];
 
-		const auto x = min(m_start.x, m_start.x + m_pos.x);
-		const auto y = min(m_start.y, m_start.y + m_pos.y);
-		const auto w = fabsf(m_pos.x);
-		const auto h = fabsf(m_pos.y);
+		const auto x = min(m_start.x, m_start.x + m_lineto.x);
+		const auto y = min(m_start.y, m_start.y + m_lineto.y);
+		const auto w = fabsf(m_lineto.x);
+		const auto h = fabsf(m_lineto.y);
 		swprintf_s(buf,
 			L"<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" ",
 			x, y, w, h);
@@ -417,10 +417,10 @@ namespace winrt::GraphPaper::implementation
 
 		wchar_t buf[1024];
 
-		const auto x = min(m_start.x, m_start.x + m_pos.x);
-		const auto y = min(m_start.y, m_start.y + m_pos.y);
-		const auto w = fabsf(m_pos.x);
-		const auto h = fabsf(m_pos.y);
+		const auto x = min(m_start.x, m_start.x + m_lineto.x);
+		const auto y = min(m_start.y, m_start.y + m_lineto.y);
+		const auto w = fabsf(m_lineto.x);
+		const auto h = fabsf(m_lineto.y);
 		const auto rx = fabsf(m_corner_radius.x);
 		const auto ry = fabsf(m_corner_radius.y);
 		swprintf_s(buf,
@@ -479,8 +479,8 @@ namespace winrt::GraphPaper::implementation
 			// 塗りつぶし色が不透明なら, 方形を塗りつぶす.
 			const double sx = m_start.x;
 			const double sy = m_start.y;
-			const double px = m_pos.x;
-			const double py = m_pos.y;
+			const double px = m_lineto.x;
+			const double py = m_lineto.y;
 			const double x = min(sx, sx + px);
 			const double y = min(sy, sy + py);
 			const double w = abs(px);
@@ -501,15 +501,15 @@ namespace winrt::GraphPaper::implementation
 
 			// 目盛りとラベルを表示する.
 			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
-			const bool w_ge_h = fabs(m_pos.x) >= fabs(m_pos.y);	// 高さより幅の方が大きい
-			const double vec_x = (w_ge_h ? m_pos.x : m_pos.y);	// 大きい方の値を x
-			const double vec_y = (w_ge_h ? m_pos.y : m_pos.x);	// 小さい方の値を y
-			const double intvl_x = vec_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
+			const bool w_ge_h = fabs(m_lineto.x) >= fabs(m_lineto.y);	// 高さより幅の方が大きい
+			const double to_x = (w_ge_h ? m_lineto.x : m_lineto.y);	// 大きい方の値を x
+			const double to_y = (w_ge_h ? m_lineto.y : m_lineto.x);	// 小さい方の値を y
+			const double intvl_x = to_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
 			const double intvl_y = min(f_size, g_len);	// 目盛りの長さ.
 			const double x0 = (w_ge_h ? m_start.x : m_start.y);
-			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + vec_y;
-			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
-			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
+			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + to_y;
+			const double y1 = y0 - (to_y >= 0.0 ? intvl_y : -intvl_y);
+			const double y1_5 = y0 - 0.625 * (to_y >= 0.0 ? intvl_y : -intvl_y);
 
 			dt_writer.WriteString(L"<g ");
 			export_svg_stroke(buf, 1024, 1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PAT{}, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_LINE_JOIN_MITER_OR_BEVEL, JOIN_MITER_LIMIT_DEFVAL);
@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 
 			dt_writer.WriteString(L">\n");
 
-			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
+			const uint32_t k = static_cast<uint32_t>(floor(to_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
 				const double x = x0 + i * intvl_x;
 				const D2D1_POINT_2F p{	// 目盛りの始点
@@ -557,12 +557,12 @@ namespace winrt::GraphPaper::implementation
 					static_cast<FLOAT>(x - w / 2) :
 					// 目盛りの位置から, 書体の半分の大きさだけずらし, 文字の中央位置を求め,
 					// その位置から字体の幅の半分だけずらして, 文字の基点とする.
-					static_cast<FLOAT>(m_pos.x >= 0.0f ? y1 - f_size / 2.0 - w / 2.0 : y1 + f_size / 2.0 - w / 2.0),
+					static_cast<FLOAT>(m_lineto.x >= 0.0f ? y1 - f_size / 2.0 - w / 2.0 : y1 + f_size / 2.0 - w / 2.0),
 				w_ge_h ?
 					// 目盛りの位置から, 書体大きさの半分だけずらし, さらに行の高さの半分だけずらし,
 					// 文字の上位置を求めたあと, その位置からベースラインの距離だけずらし,
 					// 文字の基点とする.
-					static_cast<FLOAT>(m_pos.y >= 0.0f ? y1 - f_size / 2.0 - l_height / 2.0 + b_line : y1 + f_size / 2.0 - l_height / 2.0 + b_line) :
+					static_cast<FLOAT>(m_lineto.y >= 0.0f ? y1 - f_size / 2.0 - l_height / 2.0 + b_line : y1 + f_size / 2.0 - l_height / 2.0 + b_line) :
 					// 目盛りの位置から, 行の高さの半分だけずらして, 文字の上位置を求め,
 					// その位置からベースラインまでの距離を加え, 文字の基点とする.
 					static_cast<FLOAT>(x - l_height / 2.0 + b_line)
@@ -663,16 +663,16 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_font_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		// 書体を表示する左上位置に余白を加える.
-		D2D1_POINT_2F lt_pos{};	// 左上位置
-		pt_add(m_start, m_text_pad.width, m_text_pad.height, lt_pos);
+		// 文字列を表示する左上点に余白を加える.
+		D2D1_POINT_2F lt_pt{};	// 左上点
+		pt_add(m_start, m_text_pad.width, m_text_pad.height, lt_pt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;
 			const uint32_t t_len = tm.length;
-			const double px = static_cast<double>(lt_pos.x);
+			const double px = static_cast<double>(lt_pt.x);
 			const double qx = static_cast<double>(tm.left);
-			const double py = static_cast<double>(lt_pos.y);
+			const double py = static_cast<double>(lt_pt.y);
 			const double qy = static_cast<double>(tm.top);
 			// 文字列を表示する垂直なずらし位置を求める.
 			const double dy = static_cast<double>(m_dwrite_line_metrics[i].baseline);
@@ -831,7 +831,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_get_pos_arrow(m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir,
+				arc_get_pos_arrow(m_lineto[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_arrow_size, m_sweep_dir,
 					arrow);
 				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_arrow_cap, m_arrow_join, m_arrow_join_limit, arrow, arrow[2]);
 				dt_writer.WriteString(buf);

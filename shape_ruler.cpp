@@ -10,27 +10,27 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 図形が点を含むか判定する.
-	// t_pos	判定される点
-	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F pt, const bool/*ctrl_key*/) const noexcept
+	// test_pt	判定される点
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_pos, pt, m_loc_width);
+		const uint32_t loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
 		if (loc != LOC_TYPE::LOC_SHEET) {
 			return loc;
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dwrite_text_format->GetFontSize();
-			const bool x_ge_y = fabs(m_pos.x) >= fabs(m_pos.y);
-			const double vec_x = (x_ge_y ? m_pos.x : m_pos.y);
-			const double vec_y = (x_ge_y ? m_pos.y : m_pos.x);
-			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
+			const bool x_ge_y = fabs(m_lineto.x) >= fabs(m_lineto.y);
+			const double to_x = (x_ge_y ? m_lineto.x : m_lineto.y);
+			const double to_y = (x_ge_y ? m_lineto.y : m_lineto.x);
+			const double grad_x = to_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
-			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
+			const uint32_t k = static_cast<uint32_t>(floor(to_x / grad_x));
 			const double x0 = (x_ge_y ? m_start.x : m_start.y);
-			const double y0 = static_cast<double>(x_ge_y ? m_start.y : m_start.x) + vec_y;
-			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
-			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
-			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
+			const double y0 = static_cast<double>(x_ge_y ? m_start.y : m_start.x) + to_y;
+			const double y1 = y0 - (to_y >= 0.0 ? grad_y : -grad_y);
+			const double y1_5 = y0 - 0.625 * (to_y >= 0.0 ? grad_y : -grad_y);
+			const double y2 = y1 - (to_y >= 0.0 ? f_size : -f_size);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * grad_x;
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 					const D2D1_POINT_2F p_max{
 						static_cast<FLOAT>(p0.x + m_loc_width * 0.5f), max(p0.y, p1.y)
 					};
-					if (pt_in_rect(pt, p_min, p_max)) {
+					if (pt_in_rect(test_pt, p_min, p_max)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 					const D2D1_POINT_2F p_max{
 						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_loc_width * 0.5)
 					};
-					if (pt_in_rect(pt, p_min, p_max)) {
+					if (pt_in_rect(test_pt, p_min, p_max)) {
 						return LOC_TYPE::LOC_STROKE;
 					}
 				}
@@ -89,36 +89,15 @@ namespace winrt::GraphPaper::implementation
 					r_lt.y = less_y;
 				}
 				*/
-				if (pt_in_rect(pt, r_lt, r_rb)) {
+				if (pt_in_rect(test_pt, r_lt, r_rb)) {
 					return LOC_TYPE::LOC_STROKE;
 				}
 			}
 		}
 		if (is_opaque(m_fill_color)) {
-			D2D1_POINT_2F e_pos;
-			pt_add(m_start, m_pos, e_pos);
-			//D2D1_POINT_2F r_lt, r_rb;
-			//pt_bound(m_start, e_pos, r_lt, r_rb);
-			/*
-			if (m_start.x < e_pos.x) {
-				r_lt.x = m_start.x;
-				r_rb.x = e_pos.x;
-			}
-			else {
-				r_lt.x = e_pos.x;
-				r_rb.x = m_start.x;
-			}
-			if (m_start.y < e_pos.y) {
-				r_lt.y = m_start.y;
-				r_rb.y = e_pos.y;
-			}
-			else {
-				r_lt.y = e_pos.y;
-				r_rb.y = m_start.y;
-			}
-			*/
-			//if (pt_in_rect(t_pos, r_lt, r_rb)) {
-			if (pt_in_rect(pt, m_start, e_pos)) {
+			D2D1_POINT_2F end_pt;
+			pt_add(m_start, m_lineto, end_pt);
+			if (pt_in_rect(test_pt, m_start, end_pt)) {
 				return LOC_TYPE::LOC_FILL;
 			}
 		}
@@ -173,8 +152,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_start.x,
 			m_start.y,
-			m_start.x + m_pos.x,
-			m_start.y + m_pos.y
+			m_start.x + m_lineto.x,
+			m_start.y + m_lineto.y
 		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
@@ -186,17 +165,17 @@ namespace winrt::GraphPaper::implementation
 			// 線枠の色が不透明な場合,
 			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
 			const double f_size = m_dwrite_text_format->GetFontSize();	// 書体の大きさ
-			const bool w_ge_h = fabs(m_pos.x) >= fabs(m_pos.y);	// 高さより幅の方が大きい
-			const double vec_x = (w_ge_h ? m_pos.x : m_pos.y);	// 大きい方の値を x
-			const double vec_y = (w_ge_h ? m_pos.y : m_pos.x);	// 小さい方の値を y
-			const double intvl_x = vec_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
+			const bool w_ge_h = fabs(m_lineto.x) >= fabs(m_lineto.y);	// 高さより幅の方が大きい
+			const double to_x = (w_ge_h ? m_lineto.x : m_lineto.y);	// 大きい方の値を x
+			const double to_y = (w_ge_h ? m_lineto.y : m_lineto.x);	// 小さい方の値を y
+			const double intvl_x = to_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
 			const double intvl_y = min(f_size, g_len);	// 目盛りの間隔
-			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
+			const uint32_t k = static_cast<uint32_t>(floor(to_x / intvl_x));	// 目盛りの数
 			const double x0 = (w_ge_h ? m_start.x : m_start.y);
-			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + vec_y;
-			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
-			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
-			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
+			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + to_y;
+			const double y1 = y0 - (to_y >= 0.0 ? intvl_y : -intvl_y);
+			const double y1_5 = y0 - 0.625 * (to_y >= 0.0 ? intvl_y : -intvl_y);
+			const double y2 = y1 - (to_y >= 0.0 ? f_size : -f_size);
 			/*
 			DWRITE_PARAGRAPH_ALIGNMENT p_align;
 			if (w_ge_h) {
@@ -285,12 +264,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeRuler::ShapeRuler(
-		const D2D1_POINT_2F start,	// 始点
-		const D2D1_POINT_2F pos,	// 終点への位置ベクトル
-		const Shape* prop	// 属性
-	) :
-		ShapeOblong::ShapeOblong(start, pos, prop)
+	// start	始点
+	// end_to	終点への位置ベクトル
+	// prop	属性
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const Shape* prop) :
+		ShapeOblong::ShapeOblong(start, end_to, prop)
 	{
 		ShapeText::is_available_font(m_font_family);
 		prop->get_grid_base(m_grid_base);

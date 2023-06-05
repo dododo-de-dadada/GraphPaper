@@ -1165,6 +1165,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_text_align_vert(m_text_align_vert);
 			s->get_text_line_sp(m_text_line_sp);
 			s->get_text_pad(m_text_pad);
+			s->get_text_wrap(m_text_word_wrap);
 		}
 	}
 
