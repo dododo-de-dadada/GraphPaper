@@ -1480,13 +1480,13 @@ namespace winrt::GraphPaper::implementation
 				m_core_text.NotifyLayoutChanged();
 			});
 			// 変換終了 (中断) のとき呼び出される.
-			// 入力変換フラグを下ろす.
 			// 後退キーなどで変換中の文字列が空にされた場合.
 			// 改行キー押下や漢字変換キー, エスケープキーなどで変換が終了場合.
 			// LayoutRequested で設定したコンテキスト矩形以外でマウスボタンを使った (押下のあと離した後に呼び出される) 場合.
 			// NotifyFocusLeave が呼び出された場合.
 			m_core_text.CompositionCompleted([this](auto const&, auto const&) {
 				//__debugbreak();				
+				// 入力変換フラグを下ろす.
 				m_core_text_comp = false;
 			});
 		}
