@@ -687,19 +687,19 @@ namespace winrt::GraphPaper::implementation
 			mfi_popup_stroke_arrow_size().Visibility(exists_selected_cap ? Visibility::Visible : Visibility::Collapsed);
 
 			sepa_over = (sepa_over || sepa_under);
-			sepa_under = (exists_stroke || exists_fill || exists_image);
+			sepa_under = (exists_stroke || exists_fill || exists_selected_image);
 			mfs_popup_sepa_arrow_color().Visibility(sepa_over&& sepa_under ? Visibility::Visible : Visibility::Collapsed);
 
 			mfi_popup_stroke_color().Visibility(exists_stroke ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_fill_color().Visibility(exists_fill ? Visibility::Visible : Visibility::Collapsed);
-			mfi_popup_image_opacity().Visibility(exists_image ? Visibility::Visible : Visibility::Collapsed);
+			mfi_popup_image_opacity().Visibility(exists_selected_image ? Visibility::Visible : Visibility::Collapsed);
 
 			// 書体メニューの表示/非表示を設定する.
 			mfi_popup_font_family().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			mfi_popup_font_size().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			mfsi_popup_font_weight().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			mfsi_popup_font_stretch().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
-			mfsi_popup_font_style().Visibility(exists_selected_tex || exists_selected_rulert ? Visibility::Visible : Visibility::Collapsed);
+			mfsi_popup_font_style().Visibility(exists_selected_text || exists_selected_rulert ? Visibility::Visible : Visibility::Collapsed);
 			sepa_over = (exists_selected_text || exists_selected_ruler);
 			sepa_under = exists_selected_text;
 
