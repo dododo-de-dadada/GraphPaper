@@ -699,7 +699,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_popup_font_size().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			mfsi_popup_font_weight().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			mfsi_popup_font_stretch().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
-			mfsi_popup_font_style().Visibility(exists_selected_text || exists_selected_rulert ? Visibility::Visible : Visibility::Collapsed);
+			mfsi_popup_font_style().Visibility(exists_selected_text || exists_selected_ruler ? Visibility::Visible : Visibility::Collapsed);
 			sepa_over = (exists_selected_text || exists_selected_ruler);
 			sepa_under = exists_selected_text;
 
@@ -771,13 +771,13 @@ namespace winrt::GraphPaper::implementation
 			mfsi_popup_stroke_width().Visibility(menu_prop);
 			if (menu_prop == Visibility::Visible && m_event_shape_pressed->exist_cap()) {
 				mfsi_popup_stroke_cap().Visibility(Visibility::Visible);
-				mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Visible);
+				//mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Visible);
 				mfsi_popup_stroke_arrow().Visibility(Visibility::Visible);
 				mfi_popup_stroke_arrow_size().Visibility(Visibility::Visible);
 			}
 			else {
 				mfsi_popup_stroke_cap().Visibility(Visibility::Collapsed);
-				mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Collapsed);
+				//mfs_popup_sepa_stroke_arrow().Visibility(Visibility::Collapsed);
 				mfsi_popup_stroke_arrow().Visibility(Visibility::Collapsed);
 				mfi_popup_stroke_arrow_size().Visibility(Visibility::Collapsed);
 			}

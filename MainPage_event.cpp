@@ -829,183 +829,11 @@ namespace winrt::GraphPaper::implementation
 					// ただし, 押された図形の部位が, 枠線や塗り以外の部位だったならば, 変形を行なう.
 					m_event_shape_pressed = nullptr;
 					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, true, m_event_shape_pressed);
-					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
-						/////
-						// 編集中の文字列図形があるならフォーカスを取り消す.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-							changed = true;
-						}
-					}
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
-						if (!m_event_shape_pressed->is_selected()) {
-							m_main_sheet.set_attr_to(m_event_shape_pressed);
-							m_event_shape_last = m_event_shape_pressed;
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_select(m_event_shape_pressed);
-							}
-						}
-						else {
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_unselect(m_event_shape_pressed);
-							}
-						}
-						/////
-						// 編集中の文字列図形があるならフォーカスを取り消す.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-						}
-						changed = true;
-					}
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						if (!m_event_shape_pressed->is_selected()) {
-							m_main_sheet.set_attr_to(m_event_shape_pressed);
-							m_event_shape_last = m_event_shape_pressed;
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_select(m_event_shape_pressed);
-							}
-						}
-						else {
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_unselect(m_event_shape_pressed);
-							}
-						}
-						/////
-						// 編集中の文字列図形があるならフォーカスを取り消す.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-						}
-						changed = true;
-					}
-					else {
-						m_main_sheet.set_attr_to(m_event_shape_pressed);
-						////
-						// 編集中の文字列図形があるならフォーカスを取り消す.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-							changed = true;
-						}
-					}
-				}
-				// シフトキー押下では, 図形リストの中で, 直前に押された図形から, たった今押された図形までの間に並んでいる図形を, 範囲選択する.
-				// ただし, 編集中の文字列がある場合は, 直前に押されたキャレット位置から, たった今押された位置の間に並んでいる文字列を, 範囲選択する.
-				else if ((args.KeyModifiers() & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
-					m_event_shape_pressed = nullptr;
-					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
-					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
-						////
-						// 編集中の文字列図形があるならフォーカスを取り消す.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-							changed = true;
-						}
-					}
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						////
-						// 押された図形は編集中の図形
-						if (m_core_text_shape == m_event_shape_pressed) {
-							//押された点からキャレット位置を設定し, 文字列を選択する.
-							m_main_sheet.set_attr_to(m_event_shape_pressed);
-							////
-							bool trail;
-							const auto end = m_core_text_shape->get_text_pos(m_event_pos_curr, trail);
-							undo_push_text_select(m_core_text_shape, m_main_sheet.m_select_start, end, trail);
-							changed = true;
-						}
-						// 押された図形は編集中の図形以外
-						else {
-							m_main_sheet.set_attr_to(m_event_shape_pressed);
-							if (m_event_shape_last == nullptr) {
-								m_event_shape_last = m_event_shape_pressed;
-							}
-							if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
-								changed = true;
-							}
-							// 現在に編集中の文字列があれば中断し, 押された文字列を編集中の図形にする.
-							if (m_core_text_shape != nullptr) {
-								m_core_text.NotifyFocusLeave();
-								undo_push_text_unselect(m_core_text_shape);
-								m_core_text_shape = nullptr;
-								changed = true;
-							}
-						}
-					}
-					else {
-						// 最後に押された図形があるなら, 指定した範囲の図形を選択, 範囲外の図形の選択を外す.
-						if (m_event_shape_last == nullptr) {
-							m_event_shape_last = m_event_shape_pressed;
-						}
-						if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
-							changed = true;
-						}
-						////
-						// 現在に編集中の文字列があれば中断する.
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
-							changed = true;
-						}
-					}
-				}
-				// 修飾キーがない場合は, 
-				else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
-					m_event_shape_pressed = nullptr;
-					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
-					// 押された図形はない.
-					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
-						if (unselect_shape_all()) {
-							m_event_shape_last = nullptr;
-							////
-							if (m_core_text_shape != nullptr) {
-								m_core_text.NotifyFocusLeave();
-								undo_push_text_unselect(m_core_text_shape);
-								m_core_text_shape = nullptr;
-							}
-							changed = true;
-						}
-					}
-					// 押された図形は文字列.
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						// 押された図形が選択されてない場合
-						//  
-						if (!m_event_shape_pressed->is_selected()) {
-							m_main_sheet.set_attr_to(m_event_shape_pressed);
-							m_event_shape_last = m_event_shape_pressed;
-
-							unselect_shape_all();
-							undo_push_select(m_event_shape_pressed);
-							if (summary_is_visible()) {
-								summary_select(m_event_shape_pressed);
-							}
-						}
-						// 押された図形が編集中の文字列でない場合
-						//  編集中の文字列があったなら, 編集を中断する.
-						//  押された図形を編集中の文字列図形に設定する.
-						// 押された図形が編集中の文字列である場合.
-						//  入力変換中なら変換を中断するためフォーカスをはずす.
-						///////
+					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 						if (m_core_text_shape != m_event_shape_pressed) {
-							if (m_core_text_shape != nullptr) {
-								m_core_text.NotifyFocusLeave();
-								undo_push_text_unselect(m_core_text_shape);
-							}
+							m_core_text.NotifyFocusLeave();
+							undo_push_text_unselect(m_core_text_shape);
 							m_core_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
-							m_core_text.NotifyFocusEnter();
 						}
 						else {
 							if (m_core_text_comp) {
@@ -1018,7 +846,128 @@ namespace winrt::GraphPaper::implementation
 						undo_push_text_select(m_core_text_shape, start, end, trail);
 						changed = true;
 					}
-					// 押された図形は文字列以外.
+					/////
+					// 編集中の文字列図形があるならフォーカスを取り消す.
+					if (m_core_text_shape != nullptr) {
+						m_core_text.NotifyFocusLeave();
+						undo_push_text_unselect(m_core_text_shape);
+						m_core_text_shape = nullptr;
+						changed = true;
+					}
+					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
+					}
+					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
+						if (!m_event_shape_pressed->is_selected()) {
+							m_main_sheet.set_attr_to(m_event_shape_pressed);
+							m_event_shape_last = m_event_shape_pressed;
+						}
+						undo_push_select(m_event_shape_pressed);
+						if (summary_is_visible()) {
+							summary_select(m_event_shape_pressed);
+						}
+						changed = true;
+					}
+					else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						if (!m_event_shape_pressed->is_selected()) {
+							m_main_sheet.set_attr_to(m_event_shape_pressed);
+							m_event_shape_last = m_event_shape_pressed;
+							undo_push_select(m_event_shape_pressed);
+							if (summary_is_visible()) {
+								summary_select(m_event_shape_pressed);
+							}
+						}
+						else {
+							undo_push_select(m_event_shape_pressed);
+							if (summary_is_visible()) {
+								summary_unselect(m_event_shape_pressed);
+							}
+						}
+						changed = true;
+					}
+					else {
+						m_main_sheet.set_attr_to(m_event_shape_pressed);
+					}
+				}
+				// シフトキー押下では, 図形リストの中で, 直前に押された図形から, たった今押された図形までの間に並んでいる図形を, 範囲選択する.
+				// ただし, 編集中の文字列がある場合は, 直前に押されたキャレット位置から, たった今押された位置の間に並んでいる文字列を, 範囲選択する.
+				else if ((args.KeyModifiers() & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
+					m_event_shape_pressed = nullptr;
+					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
+					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						if (m_event_shape_pressed != m_event_shape_pressed) {
+							m_core_text.NotifyFocusLeave();
+							undo_push_text_unselect(m_core_text_shape);
+							m_core_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+						}
+						else {
+							if (m_core_text_comp) {
+								m_core_text.NotifyFocusLeave();
+							}
+						}
+						bool trail;
+						const auto end = m_core_text_shape->get_text_pos(m_event_pos_curr, trail);
+						const auto start = m_main_sheet.m_select_start;
+						undo_push_text_select(m_core_text_shape, start, end, trail);
+						changed = true;
+					}
+					else {
+						// 現在に編集中の文字列があれば中断し, 押された文字列を編集中の図形にする.
+						if (m_core_text_shape != nullptr) {
+							m_core_text.NotifyFocusLeave();
+							undo_push_text_unselect(m_core_text_shape);
+							m_core_text_shape = nullptr;
+							changed = true;
+						}
+					}
+					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
+					}
+					else {
+						// 最後に押された図形があるなら, 指定した範囲の図形を選択, 範囲外の図形の選択を外す.
+						if (m_event_shape_last == nullptr) {
+							m_event_shape_last = m_event_shape_pressed;
+						}
+						if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
+							changed = true;
+						}
+					}
+				}
+				// 修飾キーがない場合は, 
+				else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
+					m_event_shape_pressed = nullptr;
+					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
+					if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						if (m_core_text_shape != m_event_shape_pressed) {
+							m_core_text.NotifyFocusLeave();
+							undo_push_text_unselect(m_core_text_shape);
+							m_core_text_shape = static_cast<ShapeText*>(m_event_shape_pressed);
+						}
+						else {
+							if (m_core_text_comp) {
+								m_core_text.NotifyFocusLeave();
+							}
+						}
+						bool trail;
+						const auto end = m_core_text_shape->get_text_pos(m_event_pos_curr, trail);
+						const auto start = trail ? end + 1 : end;
+						undo_push_text_select(m_core_text_shape, start, end, trail);
+						m_core_text.NotifyFocusEnter();
+						changed = true;
+					}
+					else {
+						if (m_event_shape_pressed != nullptr) {
+							m_core_text.NotifyFocusLeave();
+							undo_push_text_unselect(m_core_text_shape);
+							m_core_text_shape = nullptr;
+							changed = true;
+						}
+					}
+					// 押された図形はない.
+					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
+						if (unselect_shape_all()) {
+							m_event_shape_last = nullptr;
+							changed = true;
+						}
+					}
 					else {
 						// 押された図形が選択されてないなら選択する.
 						if (!m_event_shape_pressed->is_selected()) {
@@ -1029,14 +978,6 @@ namespace winrt::GraphPaper::implementation
 							if (summary_is_visible()) {
 								summary_select(m_event_shape_pressed);
 							}
-							changed = true;
-						}
-						// 編集中の文字列図形があったなら編集を中断する.
-						////
-						if (m_core_text_shape != nullptr) {
-							m_core_text.NotifyFocusLeave();
-							undo_push_text_unselect(m_core_text_shape);
-							m_core_text_shape = nullptr;
 							changed = true;
 						}
 					}
