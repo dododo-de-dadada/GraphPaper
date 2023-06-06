@@ -24,110 +24,116 @@
 				<Setter Property="Width" Value="16" />
 			</Style>
             <!-- 右クリックのポップアップメニュー -->
-			<MenuFlyout x:Name="mf_popup_menu">
+			<MenuFlyout x:Name="popup_menu">
 				<!-- 元に戻す -->
-				<MenuFlyoutItem x:Name="mfi_popup_undo" x:Uid="mbi_menu_undo" Click="undo_click" Icon="Undo" Text="Undo"  >
+				<MenuFlyoutItem x:Name="popup_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" Text="Undo"  >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="Z" Modifiers="Control" />
+                        <KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- やり直し -->
-				<MenuFlyoutItem x:Name="mfi_popup_redo" x:Uid="mfi_menu_redo" Click="redo_click" Icon="Redo" Text="Redo" >
+				<MenuFlyoutItem x:Name="popup_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" Text="Redo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="Y" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_undo_xcvd"/>
+				<MenuFlyoutSeparator x:Name="popup_sepa_undo_xcvd"/>
 				<!-- 切り取り -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_cut" x:Uid="mfi_menu_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" Text="Cut" >
+				<MenuFlyoutItem x:Name="popup_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" Text="Cut" >
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="X" Modifiers="Control" />
+                        <KeyboardAccelerator Key="X" Modifiers="Control" Invoked="cut_invoked" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
 				<!-- コピー -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_copy" x:Uid="mfi_menu_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" Text="Copy">
+				<MenuFlyoutItem x:Name="popup_copy" x:Uid="menu_copy" Click="copy_click_async" Icon="Copy" Text="Copy">
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="C" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" Invoked="copy_invoked" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 貼り付け -->
-				<MenuFlyoutItem x:Name="mfi_popup_xcvd_paste" x:Uid="mfi_menu_xcvd_paste" Click="xcvd_paste_click" Icon="Paste" Text="Paste" >
+				<MenuFlyoutItem x:Name="popup_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" Text="Paste" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="V" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="V" Modifiers="Control" Invoked="paste_invoked" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-                <MenuFlyoutItem x:Name="mfi_popup_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" Text="Delete">
+                <MenuFlyoutItem x:Name="popup_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" Text="Delete">
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="Delete" />
-                        <KeyboardAccelerator Key="D" Modifiers="Control" />
+                        <KeyboardAccelerator Key="Delete" Invoked="delete_invoked" />
+                        <KeyboardAccelerator Key="D" Modifiers="Control" Invoked="delete_invoked" />
 					</MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
 				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_xcvd_select"/>
+				<MenuFlyoutSeparator x:Name="popup_sepa_xcvd_select"/>
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="mfi_popup_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" Text="Select All">
+				<MenuFlyoutItem x:Name="popup_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="A" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 並び替え -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_order" x:Uid="mfsi_menu_order" Text="Order">
+				<MenuFlyoutSubItem x:Name="popup_order" x:Uid="menu_order" Text="Order">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click" Text="Bring to Front" >
+					<MenuFlyoutItem x:Name="popup_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click" Text="Bring to Front" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="End" Modifiers="Control" />
+                            <KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click" Text="Bring Forward">
+					<MenuFlyoutItem x:Name="popup_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click" Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" Text="Send Backward" >
+					<MenuFlyoutItem x:Name="popup_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_popup_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" Text="Send to Back" >
+					<MenuFlyoutItem x:Name="popup_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" Text="Send to Back" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Home" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_select_group"/>
+				<MenuFlyoutSeparator x:Name="popup_sepa_select_group"/>
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="mfi_popup_group" x:Uid="mfi_menu_group" Click="group_click" Text="Group" >
+				<MenuFlyoutItem x:Name="popup_group" x:Uid="menu_group" Click="group_click" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="G" Modifiers="Control" />
+                        <KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="mfi_popup_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click"  Text="Ungroup" >
+				<MenuFlyoutItem x:Name="popup_ungroup" x:Uid="menu_ungroup" Click="ungroup_click"  Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="U" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_group_edit"/>
+				<MenuFlyoutSeparator x:Name="popup_sepa_group_edit"/>
                 <!-- 始点と終点を入れ替える-->
-                <MenuFlyoutItem x:Name="mfi_popup_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
-                <!-- 多角形の端を開く/閉じる -->
-                <MenuFlyoutItem x:Name="mfi_popup_open_close_polygon" x:Uid="mfi_menu_open_close_polygon" Click="open_close_polygon_click" Text="Open/Close Polygon End">
+                <MenuFlyoutItem x:Name="popup_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
+                <!-- 多角形を開く -->
+                <MenuFlyoutItem x:Name="popup_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_end_open}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 折れ線を閉じる -->
+                <MenuFlyoutItem x:Name="popup_close_polyline" x:Uid="mfi_menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_end_open}" />
                     </MenuFlyoutItem.Icon>
@@ -152,7 +158,7 @@
                 <!-- 文字列の検索/置換 -->
                 <MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F" Modifiers="Control" />
+                        <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <!-- ================ -->
@@ -247,39 +253,8 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<!-- ================ -->
-					<MenuFlyoutSeparator />
 					<!-- その他 -->
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_width_other" x:Uid="rmfi_menu_stroke_width_other" GroupName="gn_popup_stroke_width" Click="stroke_width_click_async" Text="Others..." />
-				</MenuFlyoutSubItem>
-				<!-- 端の形式 -->
-				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_cap" x:Uid="mfsi_menu_stroke_cap" Text="Cap Style ">
-					<MenuFlyoutSubItem.Icon>
-						<PathIcon Data="{StaticResource data_cap_square}" />
-					</MenuFlyoutSubItem.Icon>
-					<!-- 平面 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_flat" x:Uid="rmfi_menu_stroke_cap_flat" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" IsChecked="true" Text="Flat">
-						<muxc:RadioMenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_cap_flat}" />
-						</muxc:RadioMenuFlyoutItem.Icon>
-					</muxc:RadioMenuFlyoutItem>
-					<!-- 正方形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_square" x:Uid="rmfi_menu_stroke_cap_square" GroupName="gn_popup_stroke_cap"  Click="stroke_cap_click" Text="Square" >
-						<muxc:RadioMenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_cap_square}" />
-						</muxc:RadioMenuFlyoutItem.Icon>
-					</muxc:RadioMenuFlyoutItem>
-					<!-- 円形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_round" x:Uid="rmfi_menu_stroke_cap_round" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Round" >
-						<muxc:RadioMenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_cap_round}" />
-						</muxc:RadioMenuFlyoutItem.Icon>
-					</muxc:RadioMenuFlyoutItem>
-					<!-- 三角形 -->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_triangle" x:Uid="rmfi_menu_stroke_cap_triangle" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Triangle">
-						<muxc:RadioMenuFlyoutItem.Icon>
-							<PathIcon Data="{StaticResource data_cap_triangle}" />
-						</muxc:RadioMenuFlyoutItem.Icon>
-					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- 線の結合の形式 -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_join" x:Uid="mfsi_menu_stroke_join" Text="Join Style ">
@@ -314,8 +289,36 @@
 					<!-- 尖り制限 -->
 					<MenuFlyoutItem x:Name="mfi_popup_stroke_join_limit" x:Uid="mfi_menu_stroke_join_limit" Click="stroke_join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
-				<!-- ================ -->
-				<MenuFlyoutSeparator x:Name="mfs_popup_sepa_stroke_arrow"/>
+                <!-- 端の形式 -->
+                <MenuFlyoutSubItem x:Name="mfsi_popup_stroke_cap" x:Uid="mfsi_menu_stroke_cap" Text="Cap Style ">
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_cap_square}" />
+                    </MenuFlyoutSubItem.Icon>
+                    <!-- 平面 -->
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_flat" x:Uid="rmfi_menu_stroke_cap_flat" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" IsChecked="true" Text="Flat">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_flat}" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <!-- 正方形 -->
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_square" x:Uid="rmfi_menu_stroke_cap_square" GroupName="gn_popup_stroke_cap"  Click="stroke_cap_click" Text="Square" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_square}" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <!-- 円形 -->
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_round" x:Uid="rmfi_menu_stroke_cap_round" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Round" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_round}" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <!-- 三角形 -->
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_stroke_cap_triangle" x:Uid="rmfi_menu_stroke_cap_triangle" GroupName="gn_popup_stroke_cap" Click="stroke_cap_click" Text="Triangle">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_triangle}" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
 				<!-- 矢じるしの形式 -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_arrow" x:Uid="mfsi_menu_stroke_arrow" Text="Arrowhead Style">
 					<MenuFlyoutSubItem.Icon>
@@ -357,7 +360,14 @@
 						<PathIcon Data="{StaticResource data_fill_color}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
-				<!-- ================ -->
+                <!-- 塗りつぶしの色 -->
+                <MenuFlyoutItem x:Name="mfi_popup_image_opacity" x:Uid="mfi_menu_image_opacity" Click="color_image_opac_click_async" Text="Image Opacity..." >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_image_opac}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- ================ -->
+                <MenuFlyoutSeparator x:Name="popup_sepa_color_font" />
 				<!-- 書体名 -->
 				<MenuFlyoutItem x:Name="mfi_popup_font_family" x:Uid="mfi_menu_font_family" Click="font_family_click_async" Icon="Font" Text="Font Family..." />
 				<!-- 書体の大きさ -->
@@ -441,12 +451,6 @@
                 </MenuFlyoutSubItem>
                 <!-- 書体の色 -->
 				<MenuFlyoutItem x:Name="mfi_popup_font_color" x:Uid="mfi_menu_font_color" Click="color_font_click" Icon="FontColor" Text="Font Color..." />
-				<!-- 画像の不透明度 -->
-				<MenuFlyoutItem x:Name="mfi_popup_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_image_opac}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
 				<!-- 方眼の表示 -->
 				<MenuFlyoutSubItem x:Name="mfsi_popup_grid_show" x:Uid="mfsi_menu_grid_show" Text="Show Grid">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_popup_grid_show_hide" x:Uid="rmfi_menu_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_popup_grid_show"/>
@@ -640,106 +644,112 @@
 			<!-- 編集メニュー -->
             <muxc:MenuBarItem x:Name="mbi_menu_edit" x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit" >
                 <!-- 元に戻す -->
-				<MenuFlyoutItem x:Name="mbi_menu_undo" x:Uid="mbi_menu_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
+				<MenuFlyoutItem x:Name="menu_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="Z" Modifiers="Control" />
+						<KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- やり直し -->
-				<MenuFlyoutItem x:Name="mfi_menu_redo" x:Uid="mfi_menu_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
+				<MenuFlyoutItem x:Name="menu_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="Y" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 切り取り -->
-				<MenuFlyoutItem x:Name="mfi_menu_xcvd_cut" x:Uid="mfi_menu_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
+				<MenuFlyoutItem x:Name="menu_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="X" Modifiers="Control" />
+                        <KeyboardAccelerator Key="X" Modifiers="Control" Invoked="cut_invoked"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- コピー -->
-				<MenuFlyoutItem x:Name="mfi_menu_xcvd_copy" x:Uid="mfi_menu_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy">
+				<MenuFlyoutItem x:Name="menu_copy" x:Uid="menu_copy" Click="copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy">
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="C" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" Invoked="copy_invoked"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 貼り付け -->
-				<MenuFlyoutItem x:Name="mfi_menu_xcvd_paste" x:Uid="mfi_menu_xcvd_paste" Click="xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste">
+				<MenuFlyoutItem x:Name="menu_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" IsEnabled="False" Text="Paste">
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="V" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="V" Modifiers="Control" Invoked="paste_invoked"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-				<MenuFlyoutItem x:Name="mfi_menu_xcvd_delete" x:Uid="mfi_menu_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" Text="Delete" >
+				<MenuFlyoutItem x:Name="menu_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" />
-                        <KeyboardAccelerator Key="D" Modifiers="Control" />
+                        <KeyboardAccelerator Key="D" Modifiers="Control" Invoked="delete_invoked"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="mfi_menu_select_all" x:Uid="mfi_menu_select_all" Click="select_shape_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
+				<MenuFlyoutItem x:Name="menu_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="A" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 並び替え -->
-				<MenuFlyoutSubItem x:Name="mfsi_menu_order" x:Uid="mfsi_menu_order" Text="Order">
+				<MenuFlyoutSubItem x:Name="menu_order" x:Uid="menu_order" Text="Order">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_bring_to_front" x:Uid="mfi_menu_bring_to_front" Click="order_bring_to_front_click"  Text="Bring to Front">
+					<MenuFlyoutItem x:Name="menu_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click"  Text="Bring to Front">
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="End" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_bring_forward" x:Uid="mfi_menu_bring_forward" Click="order_bring_forward_click"  Text="Bring Forward">
+					<MenuFlyoutItem x:Name="menu_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click"  Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_send_backward" x:Uid="mfi_menu_send_backward" Click="order_send_backward_click" Text="Send Backward" >
+					<MenuFlyoutItem x:Name="menu_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="mfi_menu_send_to_back" x:Uid="mfi_menu_send_to_back" Click="order_send_to_back_click" Text="Send to Back" >
+					<MenuFlyoutItem x:Name="menu_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" Text="Send to Back" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-							<KeyboardAccelerator Key="Home" Modifiers="Control" />
-						</MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="mfi_menu_group" x:Uid="mfi_menu_group" Click="group_click" Text="Group" >
+				<MenuFlyoutItem x:Name="menu_group" x:Uid="menu_group" Click="group_click" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="G" Modifiers="Control" />
+                        <KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="mfi_menu_ungroup" x:Uid="mfi_menu_ungroup" Click="ungroup_click" Text="Ungroup" >
+				<MenuFlyoutItem x:Name="menu_ungroup" x:Uid="menu_ungroup" Click="ungroup_click" Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="U" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
                 <!-- 始点と終点を入れ替える-->
-                <MenuFlyoutItem x:Name="mfi_menu_reverse_path" x:Uid="mfi_menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
-                <!-- 多角形の端を開く/閉じる -->
-                <MenuFlyoutItem x:Name="mfi_menu_open_close_polygon" x:Uid="mfi_menu_open_close_polygon" Click="open_close_polygon_click" Text="Open/Close Polygon End">
+                <MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Text="Reverse Path Direction" />
+                <!-- 多角形を開く -->
+                <MenuFlyoutItem x:Name="menu_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_end_open}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 折れ線を閉じる -->
+                <MenuFlyoutItem x:Name="mfi_menu_close_polyline" x:Uid="mfi_menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_end_open}" />
                     </MenuFlyoutItem.Icon>
@@ -764,7 +774,7 @@
                 <!-- 文字列の検索/置換 -->
                 <MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="F" Modifiers="Control" />
+                        <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
@@ -1071,7 +1081,7 @@
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
                 <!-- 画像の不透明度 -->
-                <MenuFlyoutItem x:Name="mfi_menu_image_opac" x:Uid="mfi_menu_image_opac" Click="color_image_opac_click_async" Text="Image Opacity..." >
+                <MenuFlyoutItem x:Name="mfi_menu_image_opacity" x:Uid="mfi_menu_image_opacity" Click="color_image_opac_click_async" Text="Image Opacity..." >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_image_opac}" />
                     </MenuFlyoutItem.Icon>

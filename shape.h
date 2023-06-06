@@ -332,9 +332,11 @@ namespace winrt::GraphPaper::implementation
 	void slist_count(
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, 
-		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
+		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_rulur_cnt, uint32_t& selected_arc_cnt,
 		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt, bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept;
+	// }Œ`‚ğí—Ş•Ê‚É”‚¦‚é.
+	void slist_count(const SHAPE_LIST& slist, uint32_t& selected_cnt, uint32_t& runlength_cnt, bool& fore_selected, bool& back_selected) noexcept;
 	// æ“ª‚©‚ç}Œ`‚Ü‚Å”‚¦‚é.
 	uint32_t slist_count(SHAPE_LIST const& slist, const Shape* s) noexcept;
 	// Å‰‚Ì}Œ`‚ğƒŠƒXƒg‚©‚ç“¾‚é.

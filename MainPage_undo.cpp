@@ -205,21 +205,25 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_undo_stack.size() > 0 && m_undo_stack.back() != nullptr) {
-			m_undo_stack.push_back(nullptr);
-		}
+		// 最初が空操作ならそれらを取りのぞく.
 		while (m_redo_stack.size() > 0 && m_redo_stack.back() == nullptr) {
 			m_redo_stack.pop_back();
 		}
-		bool flag = false;
-		while (m_redo_stack.size() > 0 && m_redo_stack.back() != nullptr) {
-			Undo* u = m_redo_stack.back();
+		bool pushed = false;
+		Undo* u;
+		while (m_redo_stack.size() > 0 && (u = m_redo_stack.back()) != nullptr) {
+			summary_reflect(u);
 			undo_exec(u);
 			m_redo_stack.pop_back();
+			if (!pushed) {
+				if (m_undo_stack.size() > 0) {
+					m_undo_stack.push_back(nullptr);
+				}
+				pushed = true;
+			}
 			m_undo_stack.push_back(u);
-			flag = true;
 		}
-		if (flag) {
+		if (pushed) {
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -242,23 +246,25 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_redo_stack.size() > 0 && m_redo_stack.back() != nullptr) {
-			m_redo_stack.push_back(nullptr);
-		}
+		// 最初が空操作ならそれらを取りのぞく.
 		while (m_undo_stack.size() > 0 && m_undo_stack.back() == nullptr) {
 			m_undo_stack.pop_back();
 		}
-		bool flag = false;
-		while (m_undo_stack.size() > 0 && m_undo_stack.back() != nullptr) {
-			Undo* u = m_undo_stack.back();
+		bool pushed = false;
+		Undo* u;
+		while (m_undo_stack.size() > 0 && (u = m_undo_stack.back()) != nullptr) {
+			summary_reflect(u);
 			undo_exec(u);
 			m_undo_stack.pop_back();
+			if (!pushed) {
+				if (m_redo_stack.size() > 0) {
+					m_redo_stack.push_back(nullptr);
+				}
+				pushed = true;
+			}
 			m_redo_stack.push_back(u);
-			flag = true;
 		}
-		if (flag) {
-			//undo_menu_is_enabled();
-			//xcvd_menu_is_enabled();
+		if (pushed) {
 			main_bbox_update();
 			main_panel_size();
 			main_draw();
@@ -274,7 +280,6 @@ namespace winrt::GraphPaper::implementation
 	// u	操作
 	void MainPage::undo_exec(Undo* u)
 	{
-		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSelect)) {

@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_core_text_shape == nullptr) {
-			xcvd_delete_click(nullptr, nullptr);
+			delete_click(nullptr, nullptr);
 		}
 		else {
 			core_text_del_c(false);
@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::kacc_delete_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_core_text_shape == nullptr) {
-			xcvd_delete_click(nullptr, nullptr);
+			delete_click(nullptr, nullptr);
 		}
 		else {
 			core_text_del_c(true);

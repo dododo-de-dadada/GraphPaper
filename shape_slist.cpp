@@ -117,21 +117,61 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を種類別に数える.
+	void slist_count(const SHAPE_LIST& slist, uint32_t& selected_cnt, uint32_t& runlength_cnt, bool& fore_selected, bool& back_selected) noexcept
+	{
+		uint32_t undeleted_cnt = 0;
+		bool prev_selected = false;
+
+		selected_cnt = 0;
+		runlength_cnt = 0;
+		fore_selected = false;
+
+		// 図形リストの各図形について以下を繰り返す.
+		for (const auto s : slist) {
+			// 図形の消去フラグを判定する.
+			if (s->is_deleted()) {
+				continue;
+			}
+			// 消去フラグがない図形の数をインクリメントする.
+			undeleted_cnt++;
+			// 図形の選択フラグを最前面の図形の選択フラグに格納する.
+			fore_selected = s->is_selected();
+			// 最前面の図形の選択フラグが立っている場合,
+			if (fore_selected) {
+				// 選択された図形の数をインクリメントする.
+				selected_cnt++;
+				// 消去フラグがない図形の数が 1 の場合,
+				if (undeleted_cnt == 1) {
+					// 最背面の図形の選択フラグを立てる.
+					back_selected = true;
+				}
+				// ひとつ背面の図形がヌルまたは選択されてない場合,
+				if (!prev_selected) {
+					// 選択された図形のランレングスの数をインクリメントする.
+					runlength_cnt++;
+				}
+			}
+			prev_selected = fore_selected;
+		}
+	}
+
+	// 図形を種類別に数える.
 	// undeleted_cnt	消去フラグがない図形の数
 	// selected_cnt	選択された図形の数
 	// selected_group_cnt	選択されたグループ図形の数
 	// runlength_cnt	選択された図形のランレングスの数
 	// selected_text_cnt	選択された文字列図形の数
-	// selected_image_cnt	選択された画像図形の数
-	// selected_arc_cnt	選択された円弧図形の数
 	// text_cnt	文字列図形の数
+	// selecred_line_cnt	選択された直線の数
+	// selected_image_cnt	選択された画像の数
+	// selected_arc_cnt	選択された円弧の数
 	// fore_selected	最前面の図形の選択フラグ
 	// back_selected	最背面の図形の選択フラグ
 	// prev_selected	ひとつ背面の図形の選択フラグ
 	void slist_count(
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
-		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
+		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_ruler_cnt, uint32_t& selected_arc_cnt,
 		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt,
 		bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept
@@ -141,9 +181,11 @@ namespace winrt::GraphPaper::implementation
 		selected_group_cnt = 0;	// 選択されたグループ図形の数
 		runlength_cnt = 0;	// 選択された図形のランレングスの数
 		selected_text_cnt = 0;	// 選択された文字列図形の数
-		selected_image_cnt = 0;	// 選択された画像図形の数
-		selected_poly_open_cnt = 0;	// 選択された開いた多角形図形の数
-		selected_poly_close_cnt = 0;	// 選択された閉じた多角形図形の数
+		selected_line_cnt = 0;	// 選択された直線の数
+		selected_image_cnt = 0;	// 選択された画像の数
+		selected_ruler_cnt = 0;	// 選択された定規の数
+		selected_poly_open_cnt = 0;	// 選択された開いた多角形の数
+		selected_poly_close_cnt = 0;	// 選択された閉じた多角形の数
 		selected_arc_cnt = 0;	// 選択された円弧図形の数
 		selected_exist_cap_cnt = 0;	// 選択された端をもつ図形の数
 		text_cnt = 0;	// 文字列図形の数
@@ -175,12 +217,12 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 図形の選択フラグを最前面の図形の選択フラグに格納する.
 			fore_selected = s->is_selected();
+			// 最前面の図形の選択フラグが立っている場合,
 			if (fore_selected) {
-				// 最前面の図形の選択フラグが立っている場合,
 				// 選択された図形の数をインクリメントする.
 				selected_cnt++;
+				// 消去フラグがない図形の数が 1 の場合,
 				if (undeleted_cnt == 1) {
-					// 消去フラグがない図形の数が 1 の場合,
 					// 最背面の図形の選択フラグを立てる.
 					back_selected = true;
 				}
@@ -193,19 +235,20 @@ namespace winrt::GraphPaper::implementation
 					selected_image_cnt++;
 				}
 				// 図形の型が画像か判定する.,
+				else if (tid == typeid(ShapeLine)) {
+					selected_line_cnt++;
+				}
+				// 図形の型が画像か判定する.,
 				else if (tid == typeid(ShapeArc)) {
 					selected_arc_cnt++;
 				}
 				// 図形の型がグループ図形か判定する.,
 				else if (tid == typeid(ShapeGroup)) {
-					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
 				}
 				else if (tid == typeid(ShapePoly)) {
 					// 図形の型が多角形図形の場合,
-					//bool closed;
-					//if (s->get_poly_closed(closed)) {
 					D2D1_FIGURE_END end;
 					s->get_poly_end(end);
 					if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
@@ -217,14 +260,18 @@ namespace winrt::GraphPaper::implementation
 						selected_poly_open_cnt++;
 					}
 				}
+				// 図形の型が文字列図形の場合,
 				else if (tid == typeid(ShapeText)) {
-					// 図形の型が文字列図形の場合,
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
 				}
+				// 図形の型が文字列図形の場合,
+				else if (tid == typeid(ShapeRuler)) {
+					// 選択された文字列図形の数をインクリメントする.
+					selected_ruler_cnt++;
+				}
+				// ひとつ背面の図形がヌルまたは選択されてない場合,
 				if (!prev_selected) {
-					// ひとつ背面の図形がヌル
-					// またはひとつ背面の図形の選択フラグがない場合,
 					// 選択された図形のランレングスの数をインクリメントする.
 					runlength_cnt++;
 				}

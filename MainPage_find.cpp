@@ -377,6 +377,19 @@ namespace winrt::GraphPaper::implementation
 			find_text_preserve();
 		}
 		else {
+			bool exist_text = false;
+			for (const auto s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				else if (typeid(*s) == typeid(ShapeText)) {
+					exist_text = true;
+					break;
+				}
+			}
+			if (!exist_text) {
+				return;
+			}
 			//if (m_core_text_shape != nullptr) {
 			//	m_core_text.NotifyFocusLeave();
 			//	undo_push_text_unselect(m_core_text_shape);

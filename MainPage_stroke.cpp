@@ -15,10 +15,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Visibility;
 
 	// 属性メニューの「矢じるしの形式」のサブ項目が選択された.
-	void MainPage::stroke_arrow_click(
-		IInspectable const& sender,	// クリックされたサブ項目
-		RoutedEventArgs const&
-	)
+	// sender	クリックされたサブ項目
+	void MainPage::stroke_arrow_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style = static_cast<ARROW_STYLE>(-1);
 		if (sender == rmfi_menu_stroke_arrow_none() || sender == rmfi_popup_stroke_arrow_none()) {

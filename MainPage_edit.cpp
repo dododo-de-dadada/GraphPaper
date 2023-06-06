@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::open_close_polygon_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::open_polygon_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool changed = false;
 		for (Shape* s : m_main_sheet.m_shape_list) {
@@ -97,17 +97,33 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			D2D1_FIGURE_END end;
-			if (s->get_poly_end(end)) {
+			if (s->get_poly_end(end) && end != D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
 				if (!changed) {
 					undo_push_null();
 					changed = true;
 				}
-				if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
-					undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
+				undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			}
+		}
+		if (changed) {
+			main_draw();
+		}
+	}
+
+	void MainPage::close_polyline_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		bool changed = false;
+		for (Shape* s : m_main_sheet.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected()) {
+				continue;
+			}
+			D2D1_FIGURE_END end;
+			if (s->get_poly_end(end) && end != D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
+				if (!changed) {
+					undo_push_null();
+					changed = true;
 				}
-				else {
-					undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-				}
+				undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
 			}
 		}
 		if (changed) {

@@ -39,8 +39,6 @@ namespace winrt::GraphPaper::implementation
 			undo_push_append(g, s);
 		}
 		undo_push_select(g);
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 		main_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
@@ -53,15 +51,15 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択されたグループ図形のリストを得て, リストが空か判定する.
-		SHAPE_LIST g_list;
-		slist_get_selected<ShapeGroup>(m_main_sheet.m_shape_list, g_list);
-		if (g_list.empty()) {
+		SHAPE_LIST group_list;
+		slist_get_selected<ShapeGroup>(m_main_sheet.m_shape_list, group_list);
+		if (group_list.empty()) {
 			return;
 		}
 		undo_push_null();
 		unselect_shape_all();
 		// 得られたリストの各グループ図形について以下を繰り返す.
-		for (auto t : g_list) {
+		for (auto t : group_list) {
 			uint32_t i = 0;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {

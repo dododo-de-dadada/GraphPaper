@@ -12,7 +12,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
@@ -21,7 +20,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::UI::Core::CoreVirtualKeyStates;
 	using winrt::Windows::UI::Xaml::FocusState;
@@ -36,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
 	//------------------------------
-	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	IAsyncAction MainPage::copy_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
@@ -136,27 +134,27 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「切り取り」が選択された.
 	//------------------------------
-	IAsyncAction MainPage::xcvd_cut_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	IAsyncAction MainPage::cut_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
 			return;
 		}
 
-		co_await xcvd_copy_click_async(nullptr, nullptr);
+		co_await copy_click_async(nullptr, nullptr);
 
 		if (m_core_text_shape != nullptr) {
 			core_text_delete();
 		}
 		else {
-			xcvd_delete_click(nullptr, nullptr);
+			delete_click(nullptr, nullptr);
 		}
 	}
 
 	//------------------------------
 	// 編集メニューの「削除」が選択された.
 	//------------------------------
-	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルのテキストボックスにフォーカスがあれば中断する.
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
@@ -201,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「貼り付け」が選択された.
 	//------------------------------
-	void MainPage::xcvd_paste_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
@@ -212,28 +210,26 @@ namespace winrt::GraphPaper::implementation
 		// を引き起こすので, try ... catch 文が必要.
 		try {
 			// クリップボードに図形が含まれているか判定する.
-			const DataPackageView& dp_view = Clipboard::GetContent();
+			const auto& dp_view = Clipboard::GetContent();
 			if (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES)) {
 				xcvd_paste_shape();
-				status_bar_set_pos();
-				return;
 			}
 			// クリップボードに文字列が含まれているか判定する.
 			else if (dp_view.Contains(StandardDataFormats::Text())) {
 				xcvd_paste_text();
-				status_bar_set_pos();
-				return;
 			}
 			// クリップボードにビットマップが含まれているか判定する.
 			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {
 				xcvd_paste_image();
-				status_bar_set_pos();
-				return;
+			}
+			else {
+				throw winrt::hresult_error();
 			}
 		}
 		catch (winrt::hresult_error const&) {
+			message_show(ICON_ALERT, L"str_err_paste", L"");
 		}
-		message_show(ICON_ALERT, L"str_err_paste", L"");
+		status_bar_set_pos();
 	}
 
 	//------------------------------

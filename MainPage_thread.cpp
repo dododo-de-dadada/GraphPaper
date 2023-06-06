@@ -46,10 +46,10 @@ namespace winrt::GraphPaper::implementation
 				dp_view.Contains(StandardDataFormats::Text()) ||
 				dp_view.Contains(StandardDataFormats::Bitmap())) {
 				//|| dp_view.Contains(CLIPBOARD_TIFF)) {
-				mfi_menu_xcvd_paste().IsEnabled(true);
+				menu_paste().IsEnabled(true);
 			}
 			else {
-				mfi_menu_xcvd_paste().IsEnabled(false);
+				menu_paste().IsEnabled(false);
 			}
 		}
 		else if (a_state == CoreWindowActivationState::Deactivated) {

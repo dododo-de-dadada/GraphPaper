@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool BRING_TO_FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::order_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		order_swap<BRING_FORWARD>();
@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::order_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
@@ -128,7 +128,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::order_send_backward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		order_swap<SEND_BACKWARD>();
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::order_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);

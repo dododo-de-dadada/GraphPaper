@@ -73,6 +73,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Visibility;
+	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -329,8 +332,14 @@ namespace winrt::GraphPaper::implementation
 		// メインの用紙図形の処理
 		//-------------------------------
 
+		// 文字列の長さを得る.
+		uint32_t core_text_len(void) const noexcept;
+		// 文字列のキャレット位置を得る.
+		uint32_t core_text_pos(void) const noexcept;
 		// 入力文字列の選択範囲の文字列を得る.
 		winrt::hstring core_text_substr(void) const noexcept;
+		// 文字列の選択範囲の長さを得る.
+		uint32_t core_text_selected_len(void) const noexcept;
 		// 入力文字列の選択範囲の文字を削除する.
 		void core_text_delete(void) noexcept;
 		// 入力文字列の選択範囲に文字列を挿入する.
@@ -389,13 +398,69 @@ namespace winrt::GraphPaper::implementation
 		// 選択された図形を次または前の図形と入れ替える.
 		template<typename T> void order_swap(void);
 		// 編集メニューの「前面に移動」が選択された.
-		void order_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
+		void bring_forward_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「前面に移動」のショートカットが押された.
+		void bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			uint32_t selected_cnt = 0;	// 選択された図形の数
+			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+			bool fore_selected = false;	// 最前面の図形の選択フラグ
+			bool back_selected = false;	// 最背面の図形の選択フラグ
+			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
+			const auto enable_forward = (runlength_cnt > 1 || (selected_cnt > 0 && !fore_selected));
+			if (enable_forward) {
+				menu_bring_forward().IsEnabled(true);
+				popup_bring_forward().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「最前面に移動」が選択された.
-		void order_bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
+		void bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「最前面に移動」のショートカットが押された.
+		void bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			uint32_t selected_cnt = 0;	// 選択された図形の数
+			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+			bool fore_selected = false;	// 最前面の図形の選択フラグ
+			bool back_selected = false;	// 最背面の図形の選択フラグ
+			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
+			const auto enable_forward = (runlength_cnt > 1 || (selected_cnt > 0 && !fore_selected));
+			if (enable_forward) {
+				menu_bring_to_front().IsEnabled(true);
+				popup_bring_to_front().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「ひとつ背面に移動」が選択された.
-		void order_send_backward_click(IInspectable const&, RoutedEventArgs const&);
+		void send_backward_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「ひとつ背面に移動」のショートカットが押された.
+		void send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			uint32_t selected_cnt = 0;	// 選択された図形の数
+			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+			bool fore_selected = false;	// 最前面の図形の選択フラグ
+			bool back_selected = false;	// 最背面の図形の選択フラグ
+			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
+			const auto enable_backward = (runlength_cnt > 1 || (selected_cnt > 0 && !back_selected));
+			if (enable_backward) {
+				menu_send_backward().IsEnabled(true);
+				popup_send_backward().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「最背面に移動」が選択された.
-		void order_send_to_back_click(IInspectable const&, RoutedEventArgs const&);
+		void send_to_back_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「最背面に移動」が選択された.
+		void send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			uint32_t selected_cnt = 0;	// 選択された図形の数
+			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+			bool fore_selected = false;	// 最前面の図形の選択フラグ
+			bool back_selected = false;	// 最背面の図形の選択フラグ
+			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
+			const auto enable_backward = (runlength_cnt > 1 || (selected_cnt > 0 && !back_selected));
+			if (enable_backward) {
+				menu_send_to_back().IsEnabled(true);
+				popup_send_to_back().Visibility(Visibility::Visible);
+			}
+		}
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -515,8 +580,10 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
 		//void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「多角形の終端を開く/閉じる」が選択された.
-		void open_close_polygon_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「多角形を開く」が選択された.
+		void open_polygon_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「折れ線を閉じる」が選択された.
+		void close_polyline_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
 		void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
 		IAsyncAction edit_text_async(ShapeText* s);
@@ -532,6 +599,26 @@ namespace winrt::GraphPaper::implementation
 		//bool find_next(ShapeText* edit_text_shape, uint32_t edit_text_end, ShapeText*& fint_text_shape, uint32_t& find_text_start, uint32_t& find_text_end, bool& find_text_trail);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「文字列の検索/置換」のショートカットが押された.
+		void find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			bool exist_find = false;
+			if (sp_find_text_panel().Visibility() == Visibility::Visible) {
+				exist_find = true;
+			}
+			else {
+				for (const auto s : m_main_sheet.m_shape_list) {
+					if (!s->is_deleted() && typeid(*s) == typeid(ShapeText)) {
+						exist_find = true;
+						break;
+					}
+				}
+			}
+			if (exist_find) {
+				mfi_menu_find_text().IsEnabled(true);
+				mfi_popup_find_text().Visibility(Visibility::Visible);
+			}
+		}
 		// 文字列検索パネルの「閉じる」ボタンが押された.
 		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
@@ -570,8 +657,27 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「グループ化」が選択された.
 		void group_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「グループ化」のショートカットが押された.
+		void group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (m_undo_select_cnt > 0) {
+				menu_group().IsEnabled(true);
+				popup_group().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「グループの解除」が選択された.
 		void ungroup_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「グループの解除」が選択された.
+		void ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			for (const auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted() && s->is_selected() && typeid(*s) == typeid(ShapeGroup)) {
+					menu_ungroup().IsEnabled(true);
+					popup_ungroup().Visibility(Visibility::Visible);
+					break;
+				}
+			}
+		}
 
 		//-------------------------------
 		//　MainPage_kacc.cpp
@@ -700,7 +806,25 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「すべて選択」が選択された.
-		void select_shape_all_click(IInspectable const&, RoutedEventArgs const&);
+		void select_all_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「すべて選択」のショートカットが押された.
+		void select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			bool exist_unselect = false;
+			if (core_text_len() - core_text_selected_len() > 0) {
+				exist_unselect = true;
+			}
+			for (const auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted() && !s->is_selected()) {
+					exist_unselect = true;
+					break;
+				}
+			}
+			if (exist_unselect) {
+				menu_select_all().IsEnabled(true);
+				popup_select_all().Visibility(Visibility::Visible);
+			}
+		}
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -892,8 +1016,24 @@ namespace winrt::GraphPaper::implementation
 		//void undo_menu_is_enabled(void);
 		// 編集メニューの「やり直し」が選択された.
 		void redo_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「やり直し」のショートカットが押された.
+		void redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (!m_redo_stack.empty()) {
+				menu_redo().IsEnabled(true);
+				popup_redo().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「元に戻す」が選択された.
 		void undo_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「元に戻す」のショートカットが押された.
+		void undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (!m_undo_stack.empty()) {
+				menu_undo().IsEnabled(true);
+				popup_undo().Visibility(Visibility::Visible);
+			}
+		}
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
 		// 操作を実行する.
@@ -1035,13 +1175,57 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「コピー」が選択された.
-		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction copy_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「コピー」のショートカットが押された.
+		void copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
+				menu_copy().IsEnabled(true);
+				popup_copy().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「切り取り」が選択された.
-		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction cut_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「切り取り」のショートカットが押された.
+		void cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
+				menu_cut().IsEnabled(true);
+				popup_cut().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「削除」が選択された.
-		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
+		void delete_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「削除」のショートカットが押された.
+		void delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0 || core_text_pos() < core_text_len()) {
+				menu_delete().IsEnabled(true);
+				popup_delete().Visibility(Visibility::Visible);
+			}
+		}
 		// 編集メニューの「貼り付け」が選択された.
-		void xcvd_paste_click(IInspectable const&, RoutedEventArgs const&);
+		void paste_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「貼り付け」のショートカットが押された.
+		void paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&) noexcept
+		{
+			// Clipboard::GetContent() は, 
+			// WinRT originate error 0x80040904
+			// を引き起こすので, try ... catch 文が必要.
+			try {
+				const auto& dp_view = Clipboard::GetContent();
+				if (!dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) &&
+					!dp_view.Contains(StandardDataFormats::Text()) &&
+					!dp_view.Contains(StandardDataFormats::Bitmap())) {
+					throw winrt::hresult_error();
+				}
+			}
+			catch (winrt::hresult_error const&) {
+				return;
+			}
+			menu_paste().IsEnabled(true);
+			popup_paste().Visibility(Visibility::Visible);
+		}
 		// 画像を貼り付ける.
 		IAsyncAction xcvd_paste_image(void);
 		// 図形を貼り付ける.
