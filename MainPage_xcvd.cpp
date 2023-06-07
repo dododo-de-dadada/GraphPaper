@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納し, 中断する.
-		if (m_core_text_shape != nullptr) {
+		if (m_core_text_focused != nullptr) {
 			const auto sele_text = core_text_substr();
 			if (!sele_text.empty()) {
 				DataPackage dt_pack{ DataPackage() };
@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 
 		co_await copy_click_async(nullptr, nullptr);
 
-		if (m_core_text_shape != nullptr) {
+		if (m_core_text_focused != nullptr) {
 			core_text_delete();
 		}
 		else {
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// XAML のキーボードアクセラレーターに削除キーは指定されていて,
 		// CoreWWindow の KeyDow でなく, このハンドラーで処理される.
-		if (m_core_text_shape != nullptr) {
+		if (m_core_text_focused != nullptr) {
 			const auto shift_key = ((CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			core_text_del_c(shift_key);
 		}
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
 
 		if (!text.empty()) {
-			if (m_core_text_shape != nullptr) {
+			if (m_core_text_focused != nullptr) {
 				core_text_insert(text.data(), static_cast<uint32_t>(text.size()));
 			}
 			// 文字列検索パネルのテキストボックスにフォーカスが無ければ文字列図形としてはりつける.

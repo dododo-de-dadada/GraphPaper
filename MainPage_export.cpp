@@ -41,32 +41,19 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::Buffer;
 	using winrt::Windows::Storage::Streams::InputStreamOptions;
 
-	static size_t export_pdf_font_dict(
-		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
-		const DataWriter& dt_writer);
-	static size_t export_pdf_descendant_font_dict(
-		int o_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
-		const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met,
-		const int upem, const DataWriter& dt_writer);
-	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name,
-		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle,
-		const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
-	static void export_pdf_font_info(IDWriteFontFace3* face, const wchar_t* t, const size_t t_len,
-		const wchar_t* family, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type,
-		winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid,
-		std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
+	static size_t export_pdf_font_dict(const int obj_num, const DWRITE_FONT_FACE_TYPE face_type, const winrt::hstring& ps_name, const DataWriter& dt_writer);
+	static size_t export_pdf_descendant_font_dict(int obj_num, DWRITE_FONT_FACE_TYPE face_type, const winrt::hstring& ps_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int upem, const DataWriter& dt_writer);
+	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
+	static void export_pdf_font_info(IDWriteFontFace3* font_face, const wchar_t* t, const size_t t_len, const wchar_t* font_fam, DWRITE_FONT_METRICS1& font_met, DWRITE_FONT_FACE_TYPE& face_type, winrt::hstring& ps_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, std::vector<DWRITE_GLYPH_METRICS>& glyph_met, FLOAT& angle);
 
 	//------------------------------
 	// PDF のフォント辞書を出力する.
-	// n_pdf	PDF のオブジェクト番号
-	// f_type	字面の種類
-	// p_name	ポストスクリプト名
+	// obj_num	PDF のオブジェクト番号
+	// face_type	字面の種類
+	// ps_name	ポストスクリプト名
 	// dt_writer	出力先
 	//------------------------------
-	static size_t export_pdf_font_dict(
-		const int n_pdf,
-		const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
-		const DataWriter& dt_writer)
+	static size_t export_pdf_font_dict(const int obj_num, const DWRITE_FONT_FACE_TYPE face_type, const winrt::hstring& ps_name, const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -79,32 +66,29 @@ namespace winrt::GraphPaper::implementation
 			L"/Encoding /Identity-H\n"
 			L"/DescendantFonts [%d 0 R]\n"
 			L">>\n",
-			n_pdf,
+			obj_num,
 			//std::data(p_name),
 			// OpenType の場合 ポストスクリプト名+'-'+CMap 名で CIDFontType0
-			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
+			face_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
 			//std::data(p_name) : std::data(p_name + L"-UniJIS-UTF16-H"),
-			std::data(p_name) : std::data(p_name + L"-Identity-H"),
-			n_pdf + 1
+			std::data(ps_name) : std::data(ps_name + L"-Identity-H"),
+			obj_num + 1
 		);
 		return dt_writer.WriteString(buf);
 	}
 
 	//------------------------------
 	// PDF の子孫フォント辞書を出力する.
-	// o_num	オブジェクト番号
-	// f_type	字面の種類
-	// p_name	書体のポストスクリプト名
+	// obj_num	オブジェクト番号
+	// face_type	字面の種類
+	// ps_name	書体のポストスクリプト名
 	// cid_len	CID 配列の大きさ
 	// cid_arr	CID 配列
-	// g_met	字形 (グリフ) の計量
-	// g_unit	計量の値の単位
+	// glyph_met	字形 (グリフ) の計量
+	// glyph_unit	計量の値の単位
 	// dt_writer	出力先
 	//------------------------------
-	static size_t export_pdf_descendant_font_dict(
-		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
-		const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, 
-		const int g_unit, const DataWriter& dt_writer)
+	static size_t export_pdf_descendant_font_dict(const int obj_num, const DWRITE_FONT_FACE_TYPE face_type, const winrt::hstring& ps_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* glyph_met, const int glyph_unit, const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
 		size_t len = 0;
@@ -122,11 +106,11 @@ namespace winrt::GraphPaper::implementation
 			L"/Supplement 0\n"
 			L">>\n"
 			L"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
-			o_num,
-			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
+			obj_num,
+			face_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
 			L"CIDFontType2" : L"CIDFontType0",
-			std::data(p_name),
-			o_num + 1
+			std::data(ps_name),
+			obj_num + 1
 		);
 		len += dt_writer.WriteString(buf);
 
@@ -136,9 +120,9 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(
 			L"/W [\n");	
 		uint32_t c0 = cid_arr[0];
-		uint32_t w0 = 1000 * g_met[0].advanceWidth / g_unit;
+		uint32_t w0 = 1000 * glyph_met[0].advanceWidth / glyph_unit;
 		for (int i = 1; i < cid_len; i++) {
-			uint32_t w1 = 1000 * g_met[i].advanceWidth / g_unit;
+			uint32_t w1 = 1000 * glyph_met[i].advanceWidth / glyph_unit;
 			if (w0 != w1) {
 				swprintf_s(buf,
 					L"%u %u %u\n",
@@ -158,10 +142,7 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	static size_t export_pdf_font_descriptor(
-		const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch,
-		const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met,
-		const DataWriter& dt_writer)
+	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& ps_name, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& font_met, const DataWriter& dt_writer)
 	{
 		// PDF の FontBBox (Black Box) のイメージ
 		//     y
@@ -175,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 		//   | |        |
 		//   +-+--------+
 		//     |
-		const int f_unit = f_met.designUnitsPerEm;
+		const int f_unit = font_met.designUnitsPerEm;
 		constexpr const wchar_t* FONT_STRETCH_NAME[] = {
 			L"Normal",
 			L"UltraCondensed",
@@ -206,41 +187,52 @@ namespace winrt::GraphPaper::implementation
 			L">>\n"
 			L"endobj\n",
 			obj_num,
-			std::data(p_name),
+			std::data(ps_name),
 			FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
 			weight <= 900 ? weight : 900,
-			1000 * f_met.glyphBoxLeft / f_unit,
-			(1000 * f_met.glyphBoxBottom / f_unit),
-			1000 * f_met.glyphBoxRight / f_unit,
-			(1000 * f_met.glyphBoxTop / f_unit),
+			1000 * font_met.glyphBoxLeft / f_unit,
+			(1000 * font_met.glyphBoxBottom / f_unit),
+			1000 * font_met.glyphBoxRight / f_unit,
+			(1000 * font_met.glyphBoxTop / f_unit),
 			static_cast<int>(std::ceil(angle)),
-			1000 * f_met.ascent / f_unit,
-			1000 * f_met.descent / f_unit,
-			1000 * f_met.capHeight / f_unit
+			1000 * font_met.ascent / f_unit,
+			1000 * font_met.descent / f_unit,
+			1000 * font_met.capHeight / f_unit
 		);
 		return dt_writer.WriteString(buf);
 	}
 
 	// フォントフェイスの情報を得る.
+	// font_face	フォントフェイス
+	// t	文字列
+	// t_len	文字列の長さ
+	// family	フォントファミリー
+	// font_met	書体の計量
+	// face_type	字面の形式
+	// ps_name	書体のポストスクリプト名
+	// cid	CID の配列
+	// gid	字形の計量
+	// glyph_met	字形の計量
+	// angle	イタリックの最大角度 (マイナスがいわゆる斜体)
 	static void export_pdf_font_info(
-		IDWriteFontFace3* face,	// フォントフェイス
+		IDWriteFontFace3* font_face,	// フォントフェイス
 		const wchar_t *t,	// 文字列
 		const size_t t_len,	// 文字列の長さ
-		const wchar_t *family,	// フォントファミリー
-		DWRITE_FONT_METRICS1& f_met,	// 書体の計量
-		DWRITE_FONT_FACE_TYPE& f_type,	// 字面の形式
-		winrt::hstring& p_name,	// 書体のポストスクリプト名
+		const wchar_t *font_fam,	// フォントファミリー
+		DWRITE_FONT_METRICS1& font_met,	// 書体の計量
+		DWRITE_FONT_FACE_TYPE& face_type,	// 字面の形式
+		winrt::hstring& ps_name,	// 書体のポストスクリプト名
 		std::vector<uint16_t>& cid,	// CID の配列
 		std::vector<uint16_t>& gid,	// 字形の計量
-		std::vector<DWRITE_GLYPH_METRICS>& g_met,	// 字形の計量
+		std::vector<DWRITE_GLYPH_METRICS>& glyph_met,	// 字形の計量
 		FLOAT& angle	// イタリックの最大角度 (マイナスがいわゆる斜体)
 	)
 	{
 		// 書体の計量を得る.
-		face->GetMetrics(&f_met);
+		font_face->GetMetrics(&font_met);
 
 		// 字面の形式を得る.
-		f_type = face->GetType();
+		face_type = font_face->GetType();
 
 		// 文字列を UTF-32 に変換する.
 		std::vector<uint32_t> utf32{
@@ -262,21 +254,21 @@ namespace winrt::GraphPaper::implementation
 		// UTF32 文字列からソートされた GID を得る.
 		gid.resize(utf32.size());
 		if (hr == S_OK) {
-			hr = face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid));
+			hr = font_face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid));
 		}
 		if (hr == S_OK) {
 			std::sort(std::begin(gid), std::end(gid));
 
 			// GID 文字列から字形 (グリフ) の計量を得る.
-			g_met.resize(utf32.size());
-			hr = face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
+			glyph_met.resize(utf32.size());
+			hr = font_face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(glyph_met));
 		}
 
 		if (hr == S_OK) {
 			// 字面からポストスクリプト名を得る.
 			IDWriteLocalizedStrings* str = nullptr;
 			BOOL exists = false;
-			if (face->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
+			if (font_face->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
 				if (exists) {
 					const UINT32 str_cnt = str->GetCount();
 					for (uint32_t j = 0; j < str_cnt; j++) {
@@ -284,8 +276,8 @@ namespace winrt::GraphPaper::implementation
 						if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
 							std::vector<wchar_t> wstr(static_cast<size_t>(wstr_len) + 1);
 							if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
-								p_name.clear();
-								p_name = std::data(wstr);
+								ps_name.clear();
+								ps_name = std::data(wstr);
 								break;
 							}
 						}
@@ -296,27 +288,27 @@ namespace winrt::GraphPaper::implementation
 				// ポストスクリプト名を要求したにもかかわらず空白の入った文字列を返す場合がある.
 				// ポストスクリプト名が存在しない, あるいは上記のような場合は,
 				// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
-				if (!exists || std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
-					const size_t k = wchar_len(family);
+				if (!exists || std::find(std::begin(ps_name), std::end(ps_name), L' ') != std::end(ps_name)) {
+					const size_t k = wchar_len(font_fam);
 					std::vector<wchar_t> wstr(k + 1);
 					int wstr_len = 0;
 					for (size_t i = 0; i < k; i++) {
-						if (!iswspace(family[i])) {
-							wstr[wstr_len++] = family[i];
+						if (!iswspace(font_fam[i])) {
+							wstr[wstr_len++] = font_fam[i];
 						}
 					}
 					wstr[wstr_len] = L'\0';
-					p_name.clear();
-					p_name = std::data(wstr);
+					ps_name.clear();
+					ps_name = std::data(wstr);
 				}
 			}
 
 			// 字面から傾きを得る.
 			// ただし, PDF は, 字面の変形はサポートしてないので, 字体そのものが
 			// イタリックでない限り, 斜体にはならない.
-			const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
+			const auto axis_cnt = static_cast<IDWriteFontFace5*>(font_face)->GetFontAxisValueCount();
 			std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
-			if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
+			if (static_cast<IDWriteFontFace5*>(font_face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
 				for (uint32_t i = 0; i < axis_cnt; i++) {
 					if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
 						angle = axis_val[i].value;
@@ -558,23 +550,8 @@ namespace winrt::GraphPaper::implementation
 			);
 			len = dt_writer.WriteString(buf);
 
-			len += m_main_sheet.export_pdf_sheet(m_background_color, dt_writer);
+			len += m_main_sheet.export_pdf(m_background_color, dt_writer);
 
-			if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
-				len += m_main_sheet.export_pdf_grid(m_background_color, dt_writer);
-			}
-
-			// 図形を出力
-			const D2D1_SIZE_F sheet_size = m_main_sheet.m_sheet_size;
-			for (const auto s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted()) {
-					continue;
-				}
-				len += s->export_pdf(sheet_size, dt_writer);
-			}
-			if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
-				len += m_main_sheet.export_pdf_grid(m_background_color, dt_writer);
-			}
 			len += dt_writer.WriteString(
 				L"Q\n"
 				L"endstream\n"
@@ -634,30 +611,30 @@ namespace winrt::GraphPaper::implementation
 					r->get_font_face(face);
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
-					DWRITE_FONT_METRICS1 f_met;
-					DWRITE_FONT_FACE_TYPE f_type;
-					winrt::hstring p_name{};
+					DWRITE_FONT_METRICS1 font_met;	// 書体の計量
+					DWRITE_FONT_FACE_TYPE face_type;	// 字面の種類
+					winrt::hstring ps_name{};	// ポストスクリプト名
 					std::vector<uint16_t> gid{};	// グリフ ID
 					std::vector<uint16_t> cid{};	// 文字 ID
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};	// グリフの計量
 					float angle;
 					export_pdf_font_info(
-						face, L"0123456789", 10, r->m_font_family, f_met, f_type, p_name, cid, gid,
+						face, L"0123456789", 10, r->m_font_family, font_met, face_type, ps_name, cid, gid,
 						g_met, angle);
 
 					// フォント辞書
-					len = export_pdf_font_dict(6 + 3 * text_cnt, f_type, p_name, dt_writer);
+					len = export_pdf_font_dict(6 + 3 * text_cnt, face_type, ps_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1, f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
+					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1, face_type, ps_name, std::size(gid), std::data(gid), std::data(g_met), font_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2, p_name, stretch, weight, angle, f_met, dt_writer);
+					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2, ps_name, stretch, weight, angle, font_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					text_cnt++;
 				}

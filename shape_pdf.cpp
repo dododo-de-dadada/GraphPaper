@@ -1058,10 +1058,11 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	// 図形をデータライターに PDF として書き込む.
-	size_t ShapeSheet::export_pdf_sheet(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
+	size_t ShapeSheet::export_pdf(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
 	{
-		wchar_t buf[1024];
+		wchar_t buf[1024];	// PDF
+		size_t len = 0;
+
 		// PDF はアルファに対応してないので, 背景色と混ぜて, ページを塗りつぶす.
 		const double page_a = m_sheet_color.a;
 		const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
@@ -1082,107 +1083,120 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_margin.left,
 			-m_sheet_margin.top
 		);
-		return dt_writer.WriteString(buf);
-	}
+		len += dt_writer.WriteString(buf);
 
-	// 図形をデータライターに PDF として書き込む.
-	size_t ShapeSheet::export_pdf_grid(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
-	{
-		const float grid_base = m_grid_base;
-		// PDF はアルファに対応してないので, 背景色, ページ色と混ぜる.
-		const double page_a = m_sheet_color.a;
-		const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
-		const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
-		const double page_b = page_a * m_sheet_color.b + (1.0 - page_a) * background.b;
-		const double grid_a = m_grid_color.a;
-		const double grid_r = grid_a * m_grid_color.r + (1.0f - grid_a) * page_r;
-		const double grid_g = grid_a * m_grid_color.g + (1.0f - grid_a) * page_g;
-		const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * page_b;
-		const GRID_EMPH grid_emph = m_grid_emph;
-		const D2D1_POINT_2F grid_offset = m_grid_offset;
-		//const float page_scale = m_sheet_scale;
-		const D2D1_SIZE_F g_size{	// 方眼を描く領域の大きさ
+
+		if (m_grid_show == GRID_SHOW::FRONT || m_grid_show == GRID_SHOW::HIDE) {
+			// 図形を出力
+			const D2D1_SIZE_F sheet_size = m_sheet_size;
+			for (const auto s : m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				len += s->export_pdf(sheet_size, dt_writer);
+			}
+		}
+
+		if (m_grid_show == GRID_SHOW::FRONT || m_grid_show == GRID_SHOW::BACK) {
+			const float grid_base = m_grid_base;
+			// PDF はアルファに対応してないので, 背景色, ページ色と混ぜる.
+			const double page_a = m_sheet_color.a;
+			const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
+			const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
+			const double page_b = page_a * m_sheet_color.b + (1.0 - page_a) * background.b;
+			const double grid_a = m_grid_color.a;
+			const double grid_r = grid_a * m_grid_color.r + (1.0f - grid_a) * page_r;
+			const double grid_g = grid_a * m_grid_color.g + (1.0f - grid_a) * page_g;
+			const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * page_b;
+			const GRID_EMPH grid_emph = m_grid_emph;
+			const D2D1_POINT_2F grid_offset = m_grid_offset;
 			// ページの大きさから内余白の大きさを除く.
-			m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right),
-			m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom)
-		};
+			const auto grid_w = m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right);	// 方眼を描く領域の大きさ
+			const auto grid_h = m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom);	// 方眼を描く領域の大きさ
 
-		const FLOAT g_width = 1.0;	// 方眼の太さ
-		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
-		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		v_start.y = 0.0f;
-		h_start.x = 0.0f;
-		const auto h = g_size.height;
-		const auto w = g_size.width;
-		v_end.y = h;
-		h_end.x = w;
-		const double grid_len = max(grid_base + 1.0, 1.0);
-		size_t len = 0;	// 書き込んだバイト数
-		len += dt_writer.WriteString(
-			L"% Grid Lines\n");
-		len += export_pdf_stroke(
-			0.0f,
-			D2D1_COLOR_F{ static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f },
-			D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
-			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
+			const FLOAT stroke_w = 1.0;	// 方眼の太さ
+			D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
+			D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
+			v_start.y = 0.0f;
+			h_start.x = 0.0f;
+			v_end.y = grid_h;
+			h_end.x = grid_w;
+			const double grid_len = max(grid_base + 1.0, 1.0);
+			len += dt_writer.WriteString(
+				L"% Grid Lines\n");
+			len += export_pdf_stroke(
+				0.0f,
+				D2D1_COLOR_F{ static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f },
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PAT{},
+				D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, JOIN_MITER_LIMIT_DEFVAL, dt_writer);
 
-		// 垂直な方眼を表示する.
-		wchar_t buf[1024];
-		float gw;
-		double x;
-		for (uint32_t i = 0;
-			(x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) <= w; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				gw = 2.0F * g_width;
+			// 垂直な方眼を表示する.
+			float sw;
+			double x;
+			for (uint32_t i = 0;
+				(x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) <= grid_w; i++) {
+				if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
+					sw = 2.0F * stroke_w;
+				}
+				else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
+					sw = stroke_w;
+				}
+				else {
+					sw = 0.5F * stroke_w;
+				}
+				v_start.x = v_end.x = static_cast<FLOAT>(x);
+				const double sx = v_start.x;
+				const double sy = v_start.y;
+				const double ex = v_end.x;
+				const double ey = v_end.y;
+				const double ph = m_sheet_size.height;
+				swprintf_s(buf,
+					L"%f w %f %f m %f %f l S\n",
+					sw,
+					sx, -sy + ph,
+					ex, -ey + ph
+				);
+				len += dt_writer.WriteString(buf);
 			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				gw = g_width;
+			// 水平な方眼を表示する.
+			double y;
+			for (uint32_t i = 0;
+				(y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) <= grid_h; i++) {
+				if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
+					sw = 2.0F * stroke_w;
+				}
+				else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
+					sw = stroke_w;
+				}
+				else {
+					sw = 0.5F * stroke_w;
+				}
+				h_start.y = h_end.y = static_cast<FLOAT>(y);
+				const double sx = h_start.x;
+				const double sy = h_start.y;
+				const double ex = h_end.x;
+				const double ey = h_end.y;
+				const double ph = m_sheet_size.height;
+				swprintf_s(buf,
+					L"%f w %f %f m %f %f l S\n",
+					sw,
+					sx, -sy + ph,
+					ex, -ey + ph
+				);
+				len += dt_writer.WriteString(buf);
 			}
-			else {
-				gw = 0.5F * g_width;
-			}
-			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			const double sx = v_start.x;
-			const double sy = v_start.y;
-			const double ex = v_end.x;
-			const double ey = v_end.y;
-			const double ph = m_sheet_size.height;
-			swprintf_s(buf,
-				L"%f w %f %f m %f %f l S\n",
-				gw,
-				sx, -sy + ph,
-				ex, -ey + ph
-			);
-			len += dt_writer.WriteString(buf);
-		}
-		// 水平な方眼を表示する.
-		double y;
-		for (uint32_t i = 0; 
-			(y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) <= h; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				gw = 2.0F * g_width;
-			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				gw = g_width;
-			}
-			else {
-				gw = 0.5F * g_width;
-			}
-			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			const double sx = h_start.x;
-			const double sy = h_start.y;
-			const double ex = h_end.x;
-			const double ey = h_end.y;
-			const double ph = m_sheet_size.height;
-			swprintf_s(buf,
-				L"%f w %f %f m %f %f l S\n",
-				gw,
-				sx, -sy + ph,
-				ex, -ey + ph
-			);
-			len += dt_writer.WriteString(buf);
+
 		}
 
+		if (m_grid_show == GRID_SHOW::BACK) {
+			// 図形を出力
+			for (const auto s : m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				len += s->export_pdf(m_sheet_size, dt_writer);
+			}
+		}
 		return len;
 	}
 

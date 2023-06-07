@@ -17,10 +17,10 @@ namespace winrt::GraphPaper::implementation
 		// 選択ツールが選択されている.
 		if (sender == rmfi_menu_selection_tool()) {
 			// XAML のキーボードアクセラレーターにエスケープキーが設定されている.
-			if (m_core_text_shape != nullptr) {
+			if (m_core_text_focused != nullptr) {
 				m_core_text.NotifyFocusLeave();
-				undo_push_text_unselect(m_core_text_shape);
-				m_core_text_shape = nullptr;
+				undo_push_text_unselect(m_core_text_focused);
+				m_core_text_focused = nullptr;
 				main_draw();
 			}
 			m_drawing_tool = DRAWING_TOOL::SELECT;

@@ -321,11 +321,15 @@
     <value>Misc</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_property.Title" xml:space="preserve">
-    <value>Property</value>
+  <data name="mbi_menu_stroke.Title" xml:space="preserve">
+    <value>Stroke</value>
     <comment>MenuBarItem</comment>
   </data>
-	<data name="mbi_menu_drawing.Title" xml:space="preserve">
+  <data name="menu_fill.Title" xml:space="preserve">
+    <value>Fill</value>
+    <comment>MenuBarItem</comment>
+  </data>
+  <data name="mbi_menu_drawing.Title" xml:space="preserve">
     <value>Draw</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -1249,6 +1253,10 @@
   <data name="str_arc_rotation" xml:space="preserve">
     <value>Arc Rotation</value>
     <comment>String</comment>
+  </data>
+  <data name="menu_reverse_path.Text" xml:space="preserve">
+    <value>Reverse Path Directuin</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="menu_open_polygon.Text" xml:space="preserve">
     <value>Open Polygon</value>

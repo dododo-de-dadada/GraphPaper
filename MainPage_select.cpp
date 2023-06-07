@@ -38,8 +38,8 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_core_text_shape != nullptr) {
-			undo_push_text_select(m_core_text_shape, 0, m_core_text_shape->get_text_len(), false);
+		if (m_core_text_focused != nullptr) {
+			undo_push_text_select(m_core_text_focused, 0, m_core_text_focused->get_text_len(), false);
 			//xcvd_menu_is_enabled();
 			main_draw();
 		}
@@ -257,10 +257,10 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::unselect_shape_all(const bool t_range_only)
 	{
 		bool changed = false;
-		if (m_core_text_shape == nullptr) {
-			undo_push_text_unselect(m_core_text_shape);
+		if (m_core_text_focused == nullptr) {
+			undo_push_text_unselect(m_core_text_focused);
 			m_core_text.NotifyFocusLeave();
-			m_core_text_shape = nullptr;
+			m_core_text_focused = nullptr;
 			changed = true;
 		}
 		for (auto s : m_main_sheet.m_shape_list) {

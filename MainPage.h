@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 		//    +-----+           +-----+
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
 		CoreTextEditContext m_core_text{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
-		ShapeText* m_core_text_shape = nullptr;	// 編集中の文字列図形
+		ShapeText* m_core_text_focused = nullptr;	// 編集中の文字列図形
 		bool m_core_text_comp = false;	// 入力変換フラグ. 変換中なら true, それ以外なら false.
 		uint32_t m_core_text_start = 0;	// 入力変換開始時の開始位置
 		uint32_t m_core_text_end = 0;	// 入力変換開始時の終了位置
@@ -507,6 +507,8 @@ namespace winrt::GraphPaper::implementation
 		void event_set_position(PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// ポップアップメニューを表示する.
+		void event_show_popup(void) noexcept;
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -967,10 +969,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の色, 太さ
 		//------------------------------
 
-		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		// 図形をデータライターに PDF として書き込む.
 		IAsyncOperation<winrt::hresult> export_as_pdf_async(const StorageFile& pdf_file) noexcept;
+		// 図形をデータライターに SVG として書き込む.
 		IAsyncOperation<winrt::hresult> export_as_svg_async(const StorageFile& svg_file) noexcept;
+		// 図形をデータライターにラスター画像として書き込む.
 		IAsyncOperation<winrt::hresult> export_as_raster_async(const StorageFile& image_file) noexcept;
 
 		//-------------------------------
@@ -1250,6 +1253,25 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (changed) {
 				//undo_menu_is_enabled();
+				main_draw();
+				status_bar_set_pos();
+			}
+		}
+
+		void reverse_arc_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
+		{
+			bool changed = false;
+			for (Shape* s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeArc)) {
+					continue;
+				}
+				if (!changed) {
+					changed = true;
+					undo_push_null();
+				}
+				m_undo_stack.push_back(new UndoValue<UNDO_T::ARC_DIR>(s));
+			}
+			if (changed) {
 				main_draw();
 				status_bar_set_pos();
 			}
