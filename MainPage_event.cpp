@@ -978,6 +978,10 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
+			else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
+				m_event_shape_pressed = nullptr;
+				m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
+			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				m_event_shape_pressed = nullptr;
 				m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
@@ -1026,17 +1030,40 @@ namespace winrt::GraphPaper::implementation
 		event_set_position(args);
 		// 状態が, 左ボタンが押された状態か判定する.
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
-			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
-			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
-			const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
-			if (t_stamp - m_event_time_pressed <= c_time) {
-				// クリックした状態に遷移する.
-				m_event_state = EVENT_STATE::CLICK;
-				event_set_cursor();
-				return;
+			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
+				// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
+				const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
+				const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+				if (t_stamp - m_event_time_pressed <= c_time) {
+					// クリックした状態に遷移する.
+					m_event_state = EVENT_STATE::CLICK;
+					event_set_cursor();
+					return;
+				}
 			}
 			// クリックの確定
-			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+			else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
+				//using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
+				//using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
+
+				wchar_t buf[512];
+				wchar_t buf_x[256];
+				wchar_t buf_y[256];
+				//DataPackage content{ DataPackage() };
+				conv_len_to_str<false>(m_len_unit, m_event_pos_pressed.x, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0, buf_x);
+				conv_len_to_str<false>(m_len_unit, m_event_pos_pressed.y, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0, buf_y);
+				swprintf_s(buf, L"%s %s", buf_x, buf_y);
+
+				//tb_map_pointer().BorderThickness(winrt::Windows::UI::Xaml::Thickness{ 0, 0, 0, 0 });
+				//tb_map_pointer().as<winrt::Windows::UI::Xaml::Controls::Control>().Margin(winrt::Windows::UI::Xaml::Thickness{ 0, 0, 0, 0 });
+				tb_map_pointer().Text(buf);
+				/*
+				content.RequestedOperation(DataPackageOperation::Copy);
+				content.SetText(buf);
+				Clipboard::SetContent(content);
+				*/
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				// 修飾キーが押されてないなら吸い上げ.
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::None) {
 					event_eyedropper_detect(m_event_shape_pressed, m_event_loc_pressed);
@@ -1048,23 +1075,28 @@ namespace winrt::GraphPaper::implementation
 					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
 						undo_push_null();
 						undo_push_set<UNDO_T::SHEET_COLOR>(&m_main_sheet, m_eyedropper_color);
+						main_draw();
 					}
 					else if (m_event_shape_pressed != nullptr) {
 						if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FILL_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							main_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FONT_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							main_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
 							undo_push_null();
 							undo_push_set<UNDO_T::STROKE_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							main_draw();
 						}
 					}
 				}
 			}
+			return;
 		}
 		// 状態が, クリック後に左ボタンが押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK_LBTN) {
@@ -1163,17 +1195,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 右ボタンを押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
-			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+			// ポップアップ (フライアウト) が表示されているならそれを解放する.
+			if (scp_main_panel().ContextFlyout() != nullptr) {
+				scp_main_panel().ContextFlyout().Hide();
+				scp_main_panel().ContextFlyout(nullptr);
 			}
-			else {
-				// ポップアップ (フライアウト) が表示されているならそれを解放する.
-				if (scp_main_panel().ContextFlyout() != nullptr) {
-					scp_main_panel().ContextFlyout().Hide();
-					scp_main_panel().ContextFlyout(nullptr);
-				}
-				// ポップアップメニューを表示する.
-				event_show_popup();
-			}
+			// ポップアップメニューを表示する.
+			event_show_popup();
 		}
 		// 状態が, 初期状態か判定する.
 		else if (m_event_state == EVENT_STATE::BEGIN) {
@@ -1197,6 +1225,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 			const CoreCursor& curs = m_eyedropper_filled ? CURS_EYEDROPPER2 : CURS_EYEDROPPER1;
 			Window::Current().CoreWindow().PointerCursor(curs);
+		}
+		else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
+			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 		}
 		// 作図ツールが選択ツール以外かつ状態が右ボタン押下でない.
 		else if (m_drawing_tool != DRAWING_TOOL::SELECT && m_event_state != EVENT_STATE::PRESS_RBTN) {

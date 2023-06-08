@@ -774,6 +774,9 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				rmfi_menu_eyedropper().IsChecked(true);
 			}
+			else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
+				rmfi_menu_pointer().IsChecked(true);
+			}
 
 			if (m_drawing_poly_opt.m_vertex_cnt == 2) {
 				rmfi_menu_drawing_poly_di().IsChecked(true);
@@ -1698,7 +1701,7 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
 				m_main_sheet.auxiliary_draw_elli(m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
+			else if (m_drawing_tool == DRAWING_TOOL::LINE || m_drawing_tool == DRAWING_TOOL::POINTER) {
 				m_main_sheet.auxiliary_draw_line(m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {

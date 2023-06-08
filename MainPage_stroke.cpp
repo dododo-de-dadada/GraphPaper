@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 	// 属性メニューの「矢じるしの寸法...」が選択された.
 	IAsyncAction MainPage::stroke_arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		constexpr auto MAX_VALUE = 512;
+		constexpr auto MAX_VALUE = ARROW_SIZE_MAX;
 		constexpr auto TICK_FREQ = 0.5;
 		const winrt::hstring str_arrow_width{	// 返しの幅
 			ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": "

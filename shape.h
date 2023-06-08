@@ -1466,9 +1466,9 @@ namespace winrt::GraphPaper::implementation
 			if (a_style == ARROW_STYLE::ARROW_NONE || a_style == ARROW_STYLE::ARROW_OPENED || a_style == ARROW_STYLE::ARROW_FILLED) {
 				m_arrow_style = a_style;
 			}
-			if (a_size.m_width >= 0.0f &&
-				a_size.m_length >= 0.0f &&
-				a_size.m_offset >= 0.0f) {
+			if (a_size.m_width >= 0.0f && a_size.m_width <= ARROW_SIZE_MAX &&
+				a_size.m_length >= 0.0f && a_size.m_length <= ARROW_SIZE_MAX &&
+				a_size.m_offset >= 0.0f && a_size.m_offset <= ARROW_SIZE_MAX) {
 				m_arrow_size = a_size;
 			}
 			if (a_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT ||
@@ -1560,7 +1560,84 @@ namespace winrt::GraphPaper::implementation
 		// 値を線の結合の形式に格納する.
 		bool set_stroke_join(const D2D1_LINE_JOIN& val) noexcept final override;
 	};
+	/*
+	struct ShapePointer : ShapeLine {
+		wchar_t* m_font_family = nullptr;	// 書体名
+		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
 
+		winrt::com_ptr<IDWriteTextFormat> m_dwrite_text_format{};	// 文字列フォーマット
+
+		HRESULT ShapePointer::create_text_format(void) noexcept
+		{
+			IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
+			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
+			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
+
+			const float font_size = m_font_size;
+			HRESULT hr = dwrite_factory->CreateTextFormat(
+				m_font_family,
+				static_cast<IDWriteFontCollection*>(nullptr),
+				DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
+				DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
+				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+				font_size,
+				locale_name,
+				m_dwrite_text_format.put()
+			);
+			if (hr == S_OK) {
+				hr = m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+			}
+			if (hr == S_OK) {
+				hr = m_dwrite_text_format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+			}
+			return hr;
+		}
+		// 図形を表示する.
+		virtual void draw(void) noexcept
+		{
+			ShapeLine::draw();
+			if (m_dwrite_text_format == nullptr) {
+				create_text_format();
+			}
+			const D2D_RECT_F rect{
+
+			};
+			wchar_t buf[1024];
+
+			swprintf_s(buf, L"%f %f", m_start.x)
+			m_d2d_target->DrawText()
+		}
+		// 書体の大きさを得る.
+		bool ShapePointer::get_font_size(float& val) const noexcept
+		{
+			val = m_font_size;
+			return true;
+		}
+
+		// 値を書体名に格納する.
+		bool ShapePointer::set_font_family(wchar_t* const val) noexcept
+		{
+			// 値が書体名と同じか判定する.
+			if (!equal(m_font_family, val)) {
+				m_font_family = val;
+				m_dwrite_text_format = nullptr;
+				return true;
+			}
+			return false;
+		}
+
+		// 値を書体の大きさに格納する.
+		bool ShapePointer::set_font_size(const float val) noexcept
+		{
+			if (m_font_size != val) {
+				m_font_size = val;
+				m_dwrite_text_format = nullptr;
+				return true;
+			}
+			return false;
+		}
+	};
+	*/
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------

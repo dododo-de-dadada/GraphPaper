@@ -26,51 +26,48 @@
             <!-- 右クリックのポップアップメニュー -->
 			<MenuFlyout x:Name="popup_menu">
 				<!-- 元に戻す -->
-				<MenuFlyoutItem x:Name="popup_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" Text="Undo"  >
-					<MenuFlyoutItem.KeyboardAccelerators>
+				<MenuFlyoutItem x:Name="popup_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z" Text="Undo"  >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- やり直し -->
-				<MenuFlyoutItem x:Name="popup_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" Text="Redo" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="popup_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" KeyboardAcceleratorTextOverride="Ctrl+Y" Text="Redo" >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator x:Name="popup_sepa_undo_xcvd"/>
 				<!-- 切り取り -->
-				<MenuFlyoutItem x:Name="popup_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" Text="Cut" >
-                    <MenuFlyoutItem.KeyboardAccelerators>
+				<MenuFlyoutItem x:Name="popup_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" KeyboardAcceleratorTextOverride="Ctrl+X" Text="Cut" >
+                    <!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" Invoked="cut_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
                 </MenuFlyoutItem>
 				<!-- コピー -->
-				<MenuFlyoutItem x:Name="popup_copy" x:Uid="menu_copy" Click="copy_click_async" Icon="Copy" Text="Copy">
-					<MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="C" Modifiers="Control" Invoked="copy_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+				<MenuFlyoutItem x:Name="popup_copy" x:Uid="menu_copy" Click="copy_click_async" KeyboardAcceleratorTextOverride="Ctrl+C" Icon="Copy" Text="Copy">
 				</MenuFlyoutItem>
 				<!-- 貼り付け -->
-				<MenuFlyoutItem x:Name="popup_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" Text="Paste" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+				<MenuFlyoutItem x:Name="popup_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" KeyboardAcceleratorTextOverride="Ctrl+V" Text="Paste" >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" Invoked="paste_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-                <MenuFlyoutItem x:Name="popup_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" Text="Delete">
-                    <MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="popup_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" KeyboardAcceleratorTextOverride="Del" Text="Delete">
+                    <!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" Invoked="delete_invoked" />
                         <KeyboardAccelerator Key="D" Modifiers="Control" Invoked="delete_invoked" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
                 </MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="popup_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" Text="Select All">
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="popup_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" KeyboardAcceleratorTextOverride="Ctrl+A" Text="Select All">
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- 並び替え -->
 				<MenuFlyoutSubItem x:Name="popup_order" x:Uid="menu_order" Text="Order">
@@ -78,57 +75,58 @@
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="popup_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click" Text="Bring to Front" >
-						<MenuFlyoutItem.KeyboardAccelerators>
+					<MenuFlyoutItem x:Name="popup_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click" KeyboardAcceleratorTextOverride="Ctrl+End" Text="Bring to Front" >
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>
-						</MenuFlyoutItem.KeyboardAccelerators>
+						</MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="popup_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click" Text="Bring Forward">
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="popup_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click" KeyboardAcceleratorTextOverride="Ctrl+PgDown" Text="Bring Forward">
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="popup_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" Text="Send Backward" >
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="popup_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" KeyboardAcceleratorTextOverride="Ctrl+PgUp" Text="Send Backward" >
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="popup_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" Text="Send to Back" >
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="popup_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" KeyboardAcceleratorTextOverride="Ctrl+Home" Text="Send to Back" >
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator/>
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="popup_group" x:Uid="menu_group" Click="group_click" Text="Group" >
+                <MenuFlyoutItem x:Name="popup_group" x:Uid="menu_group" Click="group_click" KeyboardAcceleratorTextOverride="Ctrl+G" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked" />
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="popup_ungroup" x:Uid="menu_ungroup" Click="ungroup_click"  Text="Ungroup" >
+                <MenuFlyoutItem x:Name="popup_ungroup" x:Uid="menu_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
+                    <!--
 					<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- ================ -->
                 <MenuFlyoutSeparator/>
                 <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
-                    <MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+                    <!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
                 </MenuFlyoutItem>
                 <!-- ================ -->
                 <MenuFlyoutSeparator/>
@@ -660,51 +658,53 @@
 			<!-- 編集メニュー -->
             <muxc:MenuBarItem x:Name="mbi_menu_edit" x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit" >
                 <!-- 元に戻す -->
-				<MenuFlyoutItem x:Name="menu_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z" Text="Undo" >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked"/>
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- やり直し -->
-				<MenuFlyoutItem x:Name="menu_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" KeyboardAcceleratorTextOverride="Ctrl+Y"  Text="Redo" >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 切り取り -->
-				<MenuFlyoutItem x:Name="menu_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_cut" x:Uid="menu_cut" Click="cut_click_async" Icon="Cut" KeyboardAcceleratorTextOverride="Ctrl+X" Text="Cut" >
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" Invoked="cut_invoked"/>
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- コピー -->
-				<MenuFlyoutItem x:Name="menu_copy" x:Uid="menu_copy" Click="copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy">
+                <MenuFlyoutItem x:Name="menu_copy" x:Uid="menu_copy" Click="copy_click_async" Icon="Copy" KeyboardAcceleratorTextOverride="Ctrl+C" Text="Copy">
+                    <!--
 					<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control" Invoked="copy_invoked"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
+                    -->
 				</MenuFlyoutItem>
 				<!-- 貼り付け -->
-				<MenuFlyoutItem x:Name="menu_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" IsEnabled="False" Text="Paste">
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_paste" x:Uid="menu_paste" Click="paste_click" Icon="Paste" KeyboardAcceleratorTextOverride="Ctrl+V" Text="Paste">
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" Invoked="paste_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- 削除 -->
-				<MenuFlyoutItem x:Name="menu_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" Text="Delete" >
-                    <MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_delete" x:Uid="menu_delete" Click="delete_click" Icon="Delete" KeyboardAcceleratorTextOverride="Del" Text="Delete" >
+                    <!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" />
                         <KeyboardAccelerator Key="D" Modifiers="Control" Invoked="delete_invoked"/>
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
                 </MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
-				<MenuFlyoutItem x:Name="menu_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All">
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="menu_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" KeyboardAcceleratorTextOverride="Ctrl+A" Text="Select All">
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- 並び替え -->
 				<MenuFlyoutSubItem x:Name="menu_order" x:Uid="menu_order" Text="Order">
@@ -712,57 +712,57 @@
 						<FontIcon Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
 					<!-- 最前面に移動 -->
-					<MenuFlyoutItem x:Name="menu_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click"  Text="Bring to Front">
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="menu_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click" KeyboardAcceleratorTextOverride="Ctrl+End" Text="Bring to Front">
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
-					<MenuFlyoutItem x:Name="menu_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click"  Text="Bring Forward">
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="menu_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click" KeyboardAcceleratorTextOverride="Ctrl+PgDown" Text="Bring Forward">
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
-					<MenuFlyoutItem x:Name="menu_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" Text="Send Backward" >
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="menu_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" KeyboardAcceleratorTextOverride="Ctrl+PgUp" Text="Send Backward" >
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
-					<MenuFlyoutItem x:Name="menu_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" Text="Send to Back" >
-						<MenuFlyoutItem.KeyboardAccelerators>
+                    <MenuFlyoutItem x:Name="menu_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" KeyboardAcceleratorTextOverride="Ctrl+Home" Text="Send to Back" >
+						<!--<MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>
-                        </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem.KeyboardAccelerators>-->
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- グループ化 -->
-				<MenuFlyoutItem x:Name="menu_group" x:Uid="menu_group" Click="group_click" Text="Group" >
+				<MenuFlyoutItem x:Name="menu_group" x:Uid="menu_group" Click="group_click" KeyboardAcceleratorTextOverride="Ctrl+G" Text="Group" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked"/>
-					</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
-				<MenuFlyoutItem x:Name="menu_ungroup" x:Uid="menu_ungroup" Click="ungroup_click" Text="Ungroup" >
+				<MenuFlyoutItem x:Name="menu_ungroup" x:Uid="menu_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
+					<!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
 				</MenuFlyoutItem>
                 <!-- ================ -->
                 <MenuFlyoutSeparator />
                 <!-- 文字列の検索/置換 -->
-                <MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
-                    <MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+                    <!--<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>
-                    </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem.KeyboardAccelerators>-->
                 </MenuFlyoutItem>
                 <!-- ================ -->
                 <MenuFlyoutSeparator />
@@ -878,6 +878,12 @@
 						<PathIcon Data="{StaticResource data_eyedropper}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                <!-- 点の抽出 -->
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_pointer" x:Uid="rmfi_menu_pointer" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Map Pointer" >
+                    <muxc:RadioMenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_map_pin}" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+                </muxc:RadioMenuFlyoutItem>
                 <!-- 多角形の作成 -->
                 <MenuFlyoutSubItem x:Uid="mfsi_menu_drawing_poly" Text="Polygon Type">
                     <MenuFlyoutSubItem.Icon>
@@ -1419,7 +1425,7 @@
 			</ListView>
 		</Grid>
         <!-- メインパネル -->
-		<RelativePanel Grid.Row="1" Grid.Column="0" >
+		<RelativePanel x:Name="main_relative_panel" Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
 				x:Name="scp_main_panel"
 				CompositionScaleChanged="main_panel_scale_changed"
@@ -1442,25 +1448,41 @@
 				されてしまう。つまり, メンバ変数にアクセスできない。
 				-->
 				<SwapChainPanel.KeyboardAccelerators>
-					<KeyboardAccelerator Invoked="kacc_escape_invoked" Key="Escape" />
-                    <KeyboardAccelerator Invoked="kacc_back_invoked" Key="Back" />
-                    <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete" />
-                    <KeyboardAccelerator Invoked="kacc_delete_shift_invoked" Key="Delete" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="kacc_down_invoked" Key="Down" />
-                    <KeyboardAccelerator Invoked="kacc_down_shift_invoked" Key="Down" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="kacc_enter_invoked" Key="Enter" />
-                    <KeyboardAccelerator Invoked="kacc_left_invoked" Key="Left" />
-                    <KeyboardAccelerator Invoked="kacc_left_shift_invoked" Key="Left" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="kacc_right_invoked" Key="Right" />
-                    <KeyboardAccelerator Invoked="kacc_right_shift_invoked" Key="Right" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="kacc_up_invoked" Key="Up" />
-                    <KeyboardAccelerator Invoked="kacc_up_shift_invoked" Key="Up" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_escape_invoked" Key="Escape"/>
+                    <KeyboardAccelerator Invoked="kacc_back_invoked" Key="Back"/>
+                    <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete"/>
+                    <KeyboardAccelerator Invoked="kacc_delete_shift_invoked" Key="Delete" Modifiers="Shift"/>
+                    <KeyboardAccelerator Invoked="kacc_down_invoked" Key="Down"/>
+                    <KeyboardAccelerator Invoked="kacc_down_shift_invoked" Key="Down" Modifiers="Shift"/>
+                    <KeyboardAccelerator Invoked="kacc_enter_invoked" Key="Enter"/>
+                    <KeyboardAccelerator Invoked="kacc_left_invoked" Key="Left"/>
+                    <KeyboardAccelerator Invoked="kacc_left_shift_invoked" Key="Left" Modifiers="Shift"/>
+                    <KeyboardAccelerator Invoked="kacc_right_invoked" Key="Right"/>
+                    <KeyboardAccelerator Invoked="kacc_right_shift_invoked" Key="Right" Modifiers="Shift"/>
+                    <KeyboardAccelerator Invoked="kacc_up_invoked" Key="Up"/>
+                    <KeyboardAccelerator Invoked="kacc_up_shift_invoked" Key="Up" Modifiers="Shift"/>
+                    <KeyboardAccelerator Invoked="copy_invoked" Key="C" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="paste_invoked" Key="V" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="delete_invoked" Key="Delete" />
+                    <KeyboardAccelerator Invoked="undo_invoked" Key="Z" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="redo_invoked" Key="Y" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="cut_invoked" Key="X" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="select_all_invoked" Key="A" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="bring_to_front_invoked" Key="End" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="bring_forward_invoked" Key="PageDown" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="send_backward_invoked" Key="PageUp" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="send_to_back_invoked" Key="Home" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="group_invoked" Key="G" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="ungroup_invoked" Key="U" Modifiers="Control"/>
+                    <KeyboardAccelerator Invoked="find_text_invoked" Key="F" Modifiers="Control"/>
                 </SwapChainPanel.KeyboardAccelerators>
 			</SwapChainPanel>
 			<ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 			<ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
 		</RelativePanel>
+        <!--
         <Canvas x:Name="c_canvas" Grid.Row="1" Grid.Column="0" Background="Transparent" IsHitTestVisible="False"/>
+        -->
         <!-- ステータスバー -->
 		<StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" PointerReleased="event_released" >
 			<!-- ステータスバーコンテキストメニュー -->
@@ -1488,6 +1510,7 @@
 					</PathIcon.RenderTransform>
 				</PathIcon>
 				<Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
+                <TextBox x:Name="tb_map_pointer" Width="Auto" Visibility="Collapsed" BorderThickness="0,0,0,0" Padding="0,0,0,0" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
 				<TextBlock x:Uid="tk_status_bar_unit" Text="Unit:"/>

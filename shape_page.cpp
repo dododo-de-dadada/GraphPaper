@@ -627,9 +627,9 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (a_size.m_width >= 0.0f && a_size.m_width <= 127.5f &&
-			a_size.m_length >= 0.0f && a_size.m_length <= 127.5f &&
-			a_size.m_offset >= 0.0f && a_size.m_offset <= 127.5f) {
+		if (a_size.m_width >= 0.0f && a_size.m_width <= ARROW_SIZE_MAX &&
+			a_size.m_length >= 0.0f && a_size.m_length <= ARROW_SIZE_MAX &&
+			a_size.m_offset >= 0.0f && a_size.m_offset <= ARROW_SIZE_MAX) {
 			m_arrow_size = a_size;
 		}
 		// –î‚¶‚é‚µ‚ÌŒ`Ž®

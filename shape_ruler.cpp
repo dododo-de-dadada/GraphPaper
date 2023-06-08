@@ -106,13 +106,12 @@ namespace winrt::GraphPaper::implementation
 
 	HRESULT ShapeRuler::create_text_format(void) noexcept
 	{
-		HRESULT hr = S_OK;
 		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		//const float font_size = min(m_font_size, m_grid_base + 1.0f);
+
 		const float font_size = m_font_size;
-		hr = dwrite_factory->CreateTextFormat(
+		HRESULT hr = dwrite_factory->CreateTextFormat(
 			m_font_family,
 			static_cast<IDWriteFontCollection*>(nullptr),
 			DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,

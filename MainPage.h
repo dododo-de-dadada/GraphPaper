@@ -134,7 +134,8 @@ namespace winrt::GraphPaper::implementation
 		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
-		EYEDROPPER	// スポイトツール
+		EYEDROPPER,	// スポイトツール
+		POINTER	// ポインターツール
 	};
 
 	//-------------------------------
@@ -1179,13 +1180,14 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction copy_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「コピー」のショートカットが押された.
+		// スワップチェーンパネルのショートカットが押された.
 		void copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
-			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
-				menu_copy().IsEnabled(true);
-				popup_copy().Visibility(Visibility::Visible);
-			}
+			copy_click_async(scp_main_panel(), nullptr);
+			//if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
+			//	menu_copy().IsEnabled(true);
+			//	popup_copy().Visibility(Visibility::Visible);
+			//}
 		}
 		// 編集メニューの「切り取り」が選択された.
 		IAsyncAction cut_click_async(IInspectable const&, RoutedEventArgs const&);

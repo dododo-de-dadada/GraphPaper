@@ -36,8 +36,39 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::copy_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		if (sender == tb_map_pointer()) {
+			__debugbreak();
+		}
+		if (sender == lv_summary_list()) {
+			__debugbreak();
+		}
+		if (sender == tx_find_text_what()) {
+			__debugbreak();
+		}
+		if (sender == tx_find_replace_with()) {
+			__debugbreak();
+		}
+		if (sender == nullptr) {
+			__debugbreak();
+		}
+		if (sender == scp_main_panel().KeyboardAccelerators()) {
+			__debugbreak();
+		}
+		if (sender == menu_copy()) {
+			__debugbreak();
+		}
+		if (sender == popup_copy()) {
+			__debugbreak();
+		}
+		if (sender == tb_map_pointer()) {
+			__debugbreak();
+		}
+		if (sender == scp_main_panel()) {
+			__debugbreak();
+		}
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+			tx_find_replace_with().FocusState() != FocusState::Unfocused
+			) {
 			co_return;
 		}
 		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納し, 中断する.
@@ -100,22 +131,22 @@ namespace winrt::GraphPaper::implementation
 			// メインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(Dispatcher());
 			// データパッケージを作成し, データパッケージにメモリストリームを格納する.
-			DataPackage dt_pack{ DataPackage() };
-			dt_pack.RequestedOperation(DataPackageOperation::Copy);
-			dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
+			DataPackage content{ DataPackage() };
+			content.RequestedOperation(DataPackageOperation::Copy);
+			content.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
 			// 文字列が得られたか判定する.
 			if (text_ptr != nullptr) {
 				// データパッケージにテキストを格納する.
-				dt_pack.SetText(text_ptr);
+				content.SetText(text_ptr);
 			}
 			// 画像が得られたか判定する.
 			if (img_ref != nullptr) {
 				// データパッケージに画像を格納する.
-				dt_pack.SetBitmap(img_ref);
+				content.SetBitmap(img_ref);
 			}
 			// クリップボードにデータパッケージを格納する.
-			Clipboard::SetContent(dt_pack);
-			dt_pack = nullptr;
+			Clipboard::SetContent(content);
+			content = nullptr;
 		}
 		// データライターを閉じる.
 		dt_writer.Close();

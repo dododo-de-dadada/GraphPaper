@@ -183,42 +183,52 @@ namespace winrt::GraphPaper::implementation
 			if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ellipse")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_polygon")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RULER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")));
@@ -230,6 +240,12 @@ namespace winrt::GraphPaper::implementation
 				};
 				r_eyedropper().Fill(winrt::Windows::UI::Xaml::Media::SolidColorBrush{ c });
 				r_eyedropper().Visibility(Visibility::Visible);
+				tb_map_pointer().Visibility(Visibility::Collapsed);
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_map_pin")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
+				tb_map_pointer().Visibility(Visibility::Visible);
 			}
 			else {
 #ifdef _DEBUG

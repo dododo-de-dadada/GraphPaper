@@ -58,6 +58,9 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_menu_eyedropper()) {
 			m_drawing_tool = DRAWING_TOOL::EYEDROPPER;
 		}
+		else if (sender == rmfi_menu_pointer()) {
+			m_drawing_tool = DRAWING_TOOL::POINTER;
+		}
 		else {
 			if (sender == rmfi_menu_drawing_poly_di()) {
 				m_drawing_poly_opt.m_vertex_cnt = 2;
