@@ -618,8 +618,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (exist_find) {
-				mfi_menu_find_text().IsEnabled(true);
-				mfi_popup_find_text().Visibility(Visibility::Visible);
+				find_text_click(mfi_menu_find_text(), nullptr);
 			}
 		}
 		// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -1184,10 +1183,6 @@ namespace winrt::GraphPaper::implementation
 		void copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			copy_click_async(scp_main_panel(), nullptr);
-			//if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
-			//	menu_copy().IsEnabled(true);
-			//	popup_copy().Visibility(Visibility::Visible);
-			//}
 		}
 		// 編集メニューの「切り取り」が選択された.
 		IAsyncAction cut_click_async(IInspectable const&, RoutedEventArgs const&);

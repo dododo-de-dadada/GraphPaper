@@ -600,12 +600,12 @@ namespace winrt::GraphPaper::implementation
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && !fore_selected));
+		const auto enable_forward = (runlength_cnt > 1 || (selected_cnt > 0 && !fore_selected));
 		// 背面に配置可能か判定する.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && !back_selected));
+		const auto enable_backward = (runlength_cnt > 1 || (selected_cnt > 0 && !back_selected));
 		const auto& dp_view = Clipboard::GetContent();
 		const bool exists_clipboard_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
 			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
@@ -672,15 +672,15 @@ namespace winrt::GraphPaper::implementation
 		popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
 
 		// レイアウトメニューの可否を設定する.
-		mfsi_popup_grid_show().IsEnabled(!exists_selected);
-		mfsi_popup_grid_len().IsEnabled(!exists_selected);
-		mfsi_popup_grid_emph().IsEnabled(!exists_selected);
-		mfi_popup_grid_color().IsEnabled(!exists_selected);
-		mfi_popup_sheet_size().IsEnabled(!exists_selected);
-		mfi_popup_sheet_color().IsEnabled(!exists_selected);
-		mfsi_popup_sheet_zoom().IsEnabled(!exists_selected);
-		mfsi_popup_background_pattern().IsEnabled(!exists_selected);
-		popup_layout().IsEnabled(!exists_selected);
+		//mfsi_popup_grid_show().IsEnabled(true);
+		//mfsi_popup_grid_len().IsEnabled(!exists_selected);
+		//mfsi_popup_grid_emph().IsEnabled(!exists_selected);
+		//mfi_popup_grid_color().IsEnabled(!exists_selected);
+		//mfi_popup_sheet_size().IsEnabled(!exists_selected);
+		//mfi_popup_sheet_color().IsEnabled(!exists_selected);
+		//mfsi_popup_sheet_zoom().IsEnabled(!exists_selected);
+		//mfsi_popup_background_pattern().IsEnabled(!exists_selected);
+		//popup_layout().IsEnabled(!exists_selected);
 
 		// ポップアップメニューを表示する.
 		scp_main_panel().ContextFlyout(popup_menu());
