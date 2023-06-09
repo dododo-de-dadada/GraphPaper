@@ -352,6 +352,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
 			rmfi_popup_stroke_cap_triangle().IsChecked(true);
 		}
+
 		if (m_main_sheet.m_arrow_style == ARROW_STYLE::ARROW_NONE) {
 			rmfi_popup_stroke_arrow_none().IsChecked(true);
 			mfi_popup_stroke_arrow_size().IsEnabled(false);
@@ -535,7 +536,6 @@ namespace winrt::GraphPaper::implementation
 		else {
 			rmfi_popup_background_white().IsChecked(true);
 		}
-
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数

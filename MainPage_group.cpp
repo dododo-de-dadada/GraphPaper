@@ -25,7 +25,6 @@ namespace winrt::GraphPaper::implementation
 #endif
 		undo_push_null();
 		unselect_shape_all();
-		undo_push_append(g);
 		for (const auto s : slist) {
 			// 図形の消去フラグが立っているか判定する.
 			if (s->is_deleted()) {
@@ -38,6 +37,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_remove(s);
 			undo_push_append(g, s);
 		}
+		undo_push_append(g);
 		undo_push_select(g);
 		main_draw();
 		// 一覧が表示されてるか判定する.
@@ -60,36 +60,34 @@ namespace winrt::GraphPaper::implementation
 		unselect_shape_all();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : group_list) {
+			auto g = static_cast<ShapeGroup*>(t);
 			uint32_t i = 0;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				i = summary_remove(t);
 			}
-			auto g = static_cast<ShapeGroup*>(t);
+			const auto at = slist_next(m_main_sheet.m_shape_list, g);
+			// まずリストからグループをはずす.
+			// この時点で, 子要素には削除フラグが立つ.
+			undo_push_remove(g);
 			while (!g->m_list_grouped.empty()) {
 				// グループ化された図形のリストから最初の図形を得る.
 				auto s = g->m_list_grouped.front();
-				// 図形の消去フラグが立っているか判定する.
-				if (s->is_deleted()) {
-					continue;
-				}
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_insert_at(s, i++);
 					summary_select(s);
 				}
-				// グループ図形から先頭の図形を取り去り,
-				// 図形リスト中のそのグループ図形の直前に,
 				// 取り去った図形を挿入する.
+				// グループ図形から先頭の図形を取り去る.
 				undo_push_remove(g, s);
-				undo_push_insert(s, g);
+				// 図形リスト中のそのグループ図形の直前に,
+				undo_push_insert(s, at);
 				undo_push_select(s);
 				//t = s;
 			}
-			undo_push_remove(g);
+			//undo_push_remove(g);
 		}
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 		main_draw();
 		status_bar_set_pos();
 	}

@@ -290,49 +290,29 @@ namespace winrt::GraphPaper::implementation
 				m_undo_select_cnt--;
 			}
 #ifdef _DEBUG
-			uint32_t cnt = 0;
-			for (auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && s->is_selected()) {
-					cnt++;
-				}
-			}
-			if (cnt != m_undo_select_cnt) {
-				__debugbreak();
-			}
+			debug_cnt();
 #endif
 		}
 		else if (u_type == typeid(UndoList)) {
-			// 削除した後, 挿入フラグが立つので選択された数は 1 減らす.
+			// 図形が削除された.
 			if (static_cast<UndoList*>(u)->m_insert) {
+				// 選択された数は 1 減らす.
 				if (u->m_shape->is_selected()) {
 					m_undo_select_cnt--;
 				}
+				m_undo_undeleted_cnt--;
 #ifdef _DEBUG
-				uint32_t cnt = 0;
-				for (auto s : m_main_sheet.m_shape_list) {
-					if (!s->is_deleted() && s->is_selected()) {
-						cnt++;
-					}
-				}
-				if (cnt != m_undo_select_cnt) {
-					__debugbreak();
-				}
+				debug_cnt();
 #endif
 			}
+			// 図形が追加された.
 			else {
 				if (u->m_shape->is_selected()) {
 					m_undo_select_cnt++;
 				}
+				m_undo_undeleted_cnt++;
 #ifdef _DEBUG
-				uint32_t cnt = 0;
-				for (auto s : m_main_sheet.m_shape_list) {
-					if (!s->is_deleted() && s->is_selected()) {
-						cnt++;
-					}
-				}
-				if (cnt != m_undo_select_cnt) {
-					__debugbreak();
-				}
+				debug_cnt();
 #endif
 			}
 		}
@@ -485,15 +465,7 @@ namespace winrt::GraphPaper::implementation
 					m_undo_select_cnt++;
 				}
 #ifdef _DEBUG
-		uint32_t cnt = 0;
-		for (auto s : m_main_sheet.m_shape_list) {
-			if (!s->is_deleted() && s->is_selected()) {
-				cnt++;
-			}
-		}
-		if (cnt != m_undo_select_cnt) {
-			__debugbreak();
-		}
+				debug_cnt();
 #endif
 				m_undo_stack.remove(u);
 				return;
@@ -508,15 +480,7 @@ namespace winrt::GraphPaper::implementation
 			m_undo_select_cnt--;
 		}
 #ifdef _DEBUG
-		uint32_t cnt = 0;
-		for (auto s : m_main_sheet.m_shape_list) {
-			if (!s->is_deleted() && s->is_selected()) {
-				cnt++;
-			}
-		}
-		if (cnt != m_undo_select_cnt) {
-			__debugbreak();
-		}
+		debug_cnt();
 #endif
 	}
 
@@ -535,7 +499,6 @@ namespace winrt::GraphPaper::implementation
 		// それ以外なら, 値を格納してその操作をスタックに積む.
 		m_undo_stack.push_back(new UndoValue<U>(s, val));
 	}
-
 	// 値を選択された図形に格納して, その操作をスタックに積む.
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
 	// U	操作の種類
@@ -547,6 +510,185 @@ namespace winrt::GraphPaper::implementation
 		T sheet_val;
 		if (UndoValue<U>::GET(&m_main_sheet, sheet_val) && !equal(sheet_val, val)) {
 			m_undo_stack.push_back(new UndoValue<U>(&m_main_sheet, val));
+			if constexpr (U == UNDO_T::DASH_STYLE) {
+				if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
+					rmfi_popup_stroke_dash_solid().IsChecked(true);
+					mfi_popup_stroke_dash_pat().IsEnabled(false);
+				}
+				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+					rmfi_popup_stroke_dash_dash().IsChecked(true);
+					mfi_popup_stroke_dash_pat().IsEnabled(true);
+				}
+				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+					rmfi_popup_stroke_dash_dot().IsChecked(true);
+					mfi_popup_stroke_dash_pat().IsEnabled(true);
+				}
+				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+					rmfi_popup_stroke_dash_dash_dot().IsChecked(true);
+					mfi_popup_stroke_dash_pat().IsEnabled(true);
+				}
+				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+					rmfi_popup_stroke_dash_dash_dot_dot().IsChecked(true);
+					mfi_popup_stroke_dash_pat().IsEnabled(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::STROKE_WIDTH) {
+				if (equal(val, 0.0f)) {
+					rmfi_popup_stroke_width_0px().IsChecked(true);
+				}
+				else if (equal(val, 1.0f)) {
+					rmfi_popup_stroke_width_1px().IsChecked(true);
+				}
+				else if (equal(val, 2.0f)) {
+					rmfi_popup_stroke_width_2px().IsChecked(true);
+				}
+				else if (equal(val, 3.0f)) {
+					rmfi_popup_stroke_width_3px().IsChecked(true);
+				}
+				else if (equal(val, 4.0f)) {
+					rmfi_popup_stroke_width_4px().IsChecked(true);
+				}
+				else if (equal(val, 8.0f)) {
+					rmfi_popup_stroke_width_8px().IsChecked(true);
+				}
+				else if (equal(val, 12.0f)) {
+					rmfi_popup_stroke_width_12px().IsChecked(true);
+				}
+				else if (equal(val, 16.0f)) {
+					rmfi_popup_stroke_width_16px().IsChecked(true);
+				}
+				else {
+					rmfi_popup_stroke_width_other().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::STROKE_CAP) {
+				if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+					rmfi_popup_stroke_cap_flat().IsChecked(true);
+				}
+				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+					rmfi_popup_stroke_cap_square().IsChecked(true);
+				}
+				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+					rmfi_popup_stroke_cap_round().IsChecked(true);
+				}
+				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+					rmfi_popup_stroke_cap_triangle().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::ARROW_STYLE) {
+				if (val == ARROW_STYLE::ARROW_NONE) {
+					rmfi_popup_stroke_arrow_none().IsChecked(true);
+					mfi_popup_stroke_arrow_size().IsEnabled(false);
+				}
+				else if (val == ARROW_STYLE::ARROW_OPENED) {
+					rmfi_popup_stroke_arrow_opened().IsChecked(true);
+					mfi_popup_stroke_arrow_size().IsEnabled(true);
+				}
+				else if (val == ARROW_STYLE::ARROW_FILLED) {
+					rmfi_popup_stroke_arrow_filled().IsChecked(true);
+					mfi_popup_stroke_arrow_size().IsEnabled(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::JOIN_STYLE) {
+				if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+					rmfi_popup_stroke_join_bevel().IsChecked(true);
+				}
+				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+					rmfi_popup_stroke_join_miter().IsChecked(true);
+				}
+				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+					rmfi_popup_stroke_join_miter_or_bevel().IsChecked(true);
+				}
+				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+					rmfi_popup_stroke_join_round().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::FONT_STRETCH) {
+				if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
+					rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
+					rmfi_popup_font_stretch_extra_condensed().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
+					rmfi_popup_font_stretch_condensed().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
+					rmfi_popup_font_stretch_semi_condensed().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
+					rmfi_popup_font_stretch_normal().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
+					rmfi_popup_font_stretch_semi_expanded().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
+					rmfi_popup_font_stretch_expanded().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
+					rmfi_popup_font_stretch_extra_expanded().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
+					rmfi_popup_font_stretch_ultra_expanded().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::FONT_STYLE) {
+				if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
+					rmfi_popup_font_style_italic().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL) {
+					rmfi_popup_font_style_normal().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
+					rmfi_popup_font_style_oblique().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::FONT_WEIGHT) {
+				if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
+					rmfi_popup_font_weight_thin().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
+					rmfi_popup_font_weight_extra_light().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
+					rmfi_popup_font_weight_light().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
+					rmfi_popup_font_weight_normal().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
+					rmfi_popup_font_weight_medium().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
+					rmfi_popup_font_weight_semi_bold().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
+					rmfi_popup_font_weight_bold().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
+					rmfi_popup_font_weight_extra_bold().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
+					rmfi_popup_font_weight_black().IsChecked(true);
+				}
+				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
+					rmfi_popup_font_weight_extra_black().IsChecked(true);
+				}
+			}
+			else if constexpr (U == UNDO_T::TEXT_ALIGN_T) {
+				if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING) {
+					rmfi_popup_text_align_left().IsChecked(true);
+				}
+				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
+					rmfi_popup_text_align_right().IsChecked(true);
+				}
+				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER) {
+					rmfi_popup_text_align_center().IsChecked(true);
+				}
+				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
+					rmfi_popup_text_align_just().IsChecked(true);
+				}
+			}
 		}
 		auto changed = false;	// 値が変わった図形があるか.
 		for (auto s : m_main_sheet.m_shape_list) {

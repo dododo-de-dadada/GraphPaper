@@ -567,6 +567,7 @@ namespace winrt::GraphPaper::implementation
 	// slist	図形リスト.
 	// s	図形.
 	// 戻り値	図形の次にあった図形. 図形がリスト末尾にあったときはヌルポインター.
+	/*
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept
 	{
 		auto it{ std::find(slist.begin(), slist.end(), s) };
@@ -579,6 +580,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<Shape*>(nullptr);
 	}
+	*/
 
 	// 選択された図形のリストを得る.
 	// T	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.

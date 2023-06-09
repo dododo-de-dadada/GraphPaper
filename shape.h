@@ -354,7 +354,7 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形リストを読み込む.
 	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
-	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
+	//Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.
 	template <typename T> void slist_get_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.

@@ -298,6 +298,27 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_redo_stack;	// やり直し操作スタック
 		UNDO_STACK m_undo_stack;	// 元に戻す操作スタック
 		uint32_t m_undo_select_cnt = 0;	// 選択された図形の数
+		uint32_t m_undo_undeleted_cnt = 0;	// 削除されていない図形の数
+#ifdef _DEBUG
+		void debug_cnt(void) {
+			uint32_t select_cnt = 0;
+			uint32_t undeleted_cnt = 0;
+			for (auto s : m_main_sheet.m_shape_list) {
+				if (!s->is_deleted()) {
+					undeleted_cnt++;
+				}
+				if (!s->is_deleted() && s->is_selected()) {
+					select_cnt++;
+				}
+			}
+			if (undeleted_cnt != m_undo_undeleted_cnt) {
+				__debugbreak();
+			}
+			if (select_cnt != m_undo_select_cnt) {
+				__debugbreak();
+			}
+		}
+#endif
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
@@ -1050,16 +1071,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected()) {
 				m_undo_select_cnt++;
 			}
+			if (!s->is_deleted()) {
+				m_undo_undeleted_cnt++;
+			}
 #ifdef _DEBUG
-			uint32_t cnt = 0;
-			for (auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && s->is_selected()) {
-					cnt++;
-				}
-			}
-			if (cnt != m_undo_select_cnt) {
-				__debugbreak();
-			}
+			debug_cnt();
 #endif
 		}
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
@@ -1094,16 +1110,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected()) {
 				m_undo_select_cnt++;
 			}
+			if (!s->is_deleted()) {
+				m_undo_undeleted_cnt++;
+			}
 #ifdef _DEBUG
-			uint32_t cnt = 0;
-			for (auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && s->is_selected()) {
-					cnt++;
-				}
-			}
-			if (cnt != m_undo_select_cnt) {
-				__debugbreak();
-			}
+			debug_cnt();
 #endif
 		}
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
@@ -1122,16 +1133,14 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected()) {
 				m_undo_select_cnt--;
 			}
-#ifdef _DEBUG
-			uint32_t cnt = 0;
-			for (auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && s->is_selected()) {
-					cnt++;
-				}
+			if (s->is_deleted()) {
+				m_undo_undeleted_cnt--;
 			}
-			if (cnt != m_undo_select_cnt) {
+#ifdef _DEBUG
+			if (!s->is_deleted()) {
 				__debugbreak();
 			}
+			debug_cnt();
 #endif
 		}
 		// 図形の選択を反転して, その操作をスタックに積む.

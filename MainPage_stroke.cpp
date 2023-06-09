@@ -819,7 +819,6 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_dash = undo_push_set<UNDO_T::DASH_STYLE>(new_dash);
 				const bool flag_cap = undo_push_set<UNDO_T::STROKE_CAP>(new_cap);
 				if (flag_patt || flag_width || flag_dash || flag_cap) {
-					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}

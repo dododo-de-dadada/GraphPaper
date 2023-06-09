@@ -374,7 +374,11 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		m_undo_select_cnt = 0;
+		m_undo_undeleted_cnt = 0;
 		for (const auto s : m_main_sheet.m_shape_list) {
+			if (!s->is_deleted()) {
+				m_undo_undeleted_cnt++;
+			}
 			if (!s->is_deleted() && s->is_selected()) {
 				m_undo_select_cnt++;
 			}
