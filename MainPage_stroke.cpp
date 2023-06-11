@@ -314,7 +314,6 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_cap = undo_push_set<UNDO_T::ARROW_CAP>(new_cap);
 				const bool flag_join = undo_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
-					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -485,7 +484,6 @@ namespace winrt::GraphPaper::implementation
 				const bool limit_changed = undo_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
 				const bool width_changed = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
-					//undo_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -860,8 +858,6 @@ namespace winrt::GraphPaper::implementation
 			mfi_menu_stroke_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-				//undo_menu_is_enabled();
-				////xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}

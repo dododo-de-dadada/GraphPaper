@@ -1348,18 +1348,49 @@ namespace winrt::GraphPaper::implementation
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (w_delta > 0 && m_main_scale < 16.f / 1.1f - FLT_MIN) {
 				m_main_scale *= 1.1f;
-				main_panel_size();
-				main_draw();
-				status_bar_set_pos();
-				status_bar_set_zoom();
 			}
 			else if (w_delta < 0 && m_main_scale > 0.25f * 1.1f + FLT_MIN) {
 				m_main_scale /= 1.1f;
-				main_panel_size();
-				main_draw();
-				status_bar_set_pos();
-				status_bar_set_zoom();
 			}
+			else {
+				return;
+			}
+			if (equal(m_main_scale, 1.0f)) {
+				rmfi_popup_sheet_zoom_100().IsChecked(true);
+				rmfi_menu_sheet_zoom_100().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 1.5f)) {
+				rmfi_popup_sheet_zoom_150().IsChecked(true);
+				rmfi_menu_sheet_zoom_150().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 2.0f)) {
+				rmfi_popup_sheet_zoom_200().IsChecked(true);
+				rmfi_menu_sheet_zoom_200().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 3.0f)) {
+				rmfi_popup_sheet_zoom_300().IsChecked(true);
+				rmfi_menu_sheet_zoom_300().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 4.0f)) {
+				rmfi_popup_sheet_zoom_400().IsChecked(true);
+				rmfi_menu_sheet_zoom_400().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 0.75f)) {
+				rmfi_popup_sheet_zoom_075().IsChecked(true);
+				rmfi_menu_sheet_zoom_075().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 0.5f)) {
+				rmfi_popup_sheet_zoom_050().IsChecked(true);
+				rmfi_menu_sheet_zoom_050().IsChecked(true);
+			}
+			else if (equal(m_main_scale, 0.25f)) {
+				rmfi_popup_sheet_zoom_025().IsChecked(true);
+				rmfi_menu_sheet_zoom_025().IsChecked(true);
+			}
+			main_panel_size();
+			main_draw();
+			status_bar_set_pos();
+			status_bar_set_zoom();
 		}
 		// シフトキーが押されてるか判定する.
 		else if ((mod & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {

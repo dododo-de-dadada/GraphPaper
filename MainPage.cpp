@@ -291,8 +291,164 @@ namespace winrt::GraphPaper::implementation
 		m_core_text.NotifyTextChanged(modified_ran, 0, new_ran);
 	}
 
+	void MainPage::menu_is_enable(void) noexcept
+	{
+		// 選択された図形がひとつ以上ある場合.
+		const auto exists_selected = (m_undo_select_cnt > 0);
+		// 選択された文字列がひとつ以上ある場合.
+		const auto exists_selected_text = (m_undo_selected_text > 0);
+		// 文字列がひとつ以上ある場合.
+		const auto exists_text = (text_cnt > 0);
+		// 選択された画像がひとつ以上ある場合.
+		const auto exists_selected_image = (m_undo_selected_image > 0);
+		// 選択された定規がひとつ以上ある場合.
+		const auto exists_selected_ruler = (m_undo_selected_ruler > 0);
+		// 選択された円弧がひとつ以上ある場合.
+		const auto exists_selected_arc = (m_undo_selected_arc > 0);
+		// 選択された開いた多角形がひとつ以上ある場合.
+		const auto exists_selected_poly_open = (m_undo_selected_polyline > 0);
+		// 選択された閉じた多角形がひとつ以上ある場合.
+		const auto exists_selected_poly_close = (m_undo_selected_polygon > 0);
+		// 選択されてない図形がひとつ以上ある場合, または選択されてない文字がひとつ以上ある場合.
+		const auto exists_unselected = (m_undo_select_cnt < m_undo_undeleted_cnt || core_text_len() - core_text_selected_len() > 0);
+		// 選択された図形がふたつ以上ある場合.
+		const auto exists_selected_2 = (m_undo_select_cnt > 1);
+		// 選択されたグループがひとつ以上ある場合.
+		const auto exists_selected_group = (m_undo_selected_group > 0);
+		// 選択された端のある図形がひとつ以上ある場合.
+		const auto exists_selected_cap = (m_undo_selected_exist_cap > 0);
+		// 前面に配置可能か判定する.
+		// 1. 複数のランレングスがある.
+		// 2. または, 少なくとも 1 つは選択された図形があり, 
+		//    かつ最前面の図形は選択されいない.
+		const auto enable_forward = (runlength_cnt > 1 || (m_undo_select_cnt > 0 && !fore_selected));
+		// 背面に配置可能か判定する.
+		// 1. 複数のランレングスがある.
+		// 2. または, 少なくとも 1 つは選択された図形があり, 
+		//    かつ最背面の図形は選択されいない.
+		const auto enable_backward = (runlength_cnt > 1 || (m_undo_select_cnt > 0 && !back_selected));
+		const auto& dp_view = Clipboard::GetContent();
+		const bool exists_clipboard_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
+			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
+		const bool exists_fill = m_undo_select_cnt > m_undo_selected_line + m_undo_selected_image + m_undo_selected_group;
+		const bool exists_stroke = m_undo_select_cnt > m_undo_selected_group + m_undo_selected_image + m_undo_selected_ruler;
+
+		// 元に戻すメニューの可否を設定する.
+		popup_undo().IsEnabled(m_undo_stack.size() > 0);
+		menu_undo().IsEnabled(m_undo_stack.size() > 0);
+		popup_redo().IsEnabled(m_redo_stack.size() > 0);
+		menu_redo().IsEnabled(m_redo_stack.size() > 0);
+
+		// カット＆ペーストメニューの可否を設定する.
+		popup_cut().IsEnabled(exists_selected);
+		menu_cut().IsEnabled(exists_selected);
+		popup_copy().IsEnabled(exists_selected);
+		menu_copy().IsEnabled(exists_selected);
+		popup_paste().IsEnabled(exists_clipboard_data);
+		menu_paste().IsEnabled(exists_clipboard_data);
+		popup_delete().IsEnabled(exists_selected);
+		menu_delete().IsEnabled(exists_selected);
+		popup_select_all().IsEnabled(exists_unselected);
+		menu_select_all().IsEnabled(exists_unselected);
+
+		// 並び替えメニューの可否を設定する.
+		popup_bring_forward().IsEnabled(enable_forward);
+		menu_bring_forward().IsEnabled(enable_forward);
+		popup_bring_to_front().IsEnabled(enable_forward);
+		menu_bring_to_front().IsEnabled(enable_forward);
+		popup_send_to_back().IsEnabled(enable_backward);
+		menu_send_to_back().IsEnabled(enable_backward);
+		popup_send_backward().IsEnabled(enable_backward);
+		menu_send_backward().IsEnabled(enable_backward);
+		popup_order().IsEnabled(enable_forward || enable_backward);
+		menu_order().IsEnabled(enable_forward || enable_backward);
+
+		// グループ操作メニューの可否を設定する.
+		popup_group().IsEnabled(exists_selected_2);
+		menu_group().IsEnabled(exists_selected_2);
+		popup_ungroup().IsEnabled(exists_selected_group);
+		menu_ungroup().IsEnabled(exists_selected_group);
+
+		// 図形編集メニューの可否を設定する.
+		popup_reverse_path().IsEnabled(exists_selected_cap);
+		menu_reverse_path().IsEnabled(exists_selected_cap);
+		popup_open_polygon().IsEnabled(exists_selected_poly_close);
+		menu_open_polygon().IsEnabled(exists_selected_poly_close);
+		popup_close_polyline().IsEnabled(exists_selected_poly_open);
+		mfi_menu_close_polyline().IsEnabled(exists_selected_poly_open);
+		mfi_popup_find_text().IsEnabled(exists_text);
+		mfi_menu_find_text().IsEnabled(exists_text);
+		mfi_popup_revert_image().IsEnabled(exists_selected_image);
+		mfi_menu_revert_image().IsEnabled(exists_selected_image);
+
+		// 線枠メニューの可否を設定する.
+		mfsi_popup_stroke_dash().IsEnabled(exists_stroke);
+		mfsi_menu_stroke_dash().IsEnabled(exists_stroke);
+		mfi_popup_stroke_dash_pat().IsEnabled(exists_stroke);
+		mfi_menu_stroke_dash_pat().IsEnabled(exists_stroke);
+		mfsi_popup_stroke_width().IsEnabled(exists_stroke);
+		//mfsi_stroke_width().IsEnabled(exists_stroke);
+		mfsi_popup_stroke_join().IsEnabled(exists_stroke);
+		mfsi_menu_stroke_join().IsEnabled(exists_stroke);
+		mfsi_popup_stroke_cap().IsEnabled(exists_selected_cap);
+		mfsi_menu_stroke_cap().IsEnabled(exists_selected_cap);
+		mfsi_popup_stroke_arrow().IsEnabled(exists_selected_cap);
+		mfsi_menu_stroke_arrow().IsEnabled(exists_selected_cap);
+		mfi_popup_stroke_arrow_size().IsEnabled(exists_selected_cap);
+		mfi_menu_stroke_arrow_size().IsEnabled(exists_selected_cap);
+		mfi_popup_stroke_color().IsEnabled(exists_stroke);
+		mfi_menu_stroke_color().IsEnabled(exists_stroke);
+		popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
+
+		// 塗りメニューの可否を設定する.
+		mfi_popup_fill_color().IsEnabled(exists_fill);
+		mfi_menu_fill_color().IsEnabled(exists_fill);
+		mfi_popup_image_opacity().IsEnabled(exists_selected_image);
+		mfi_menu_image_opacity().IsEnabled(exists_selected_image);
+		popup_fill().IsEnabled(exists_fill || exists_selected_image);
+
+		// 書体メニューの可否を設定する.
+		mfi_popup_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfi_menu_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfi_popup_font_size().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfi_menu_font_size().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfsi_popup_font_weight().IsEnabled(exists_selected_text || exists_selected_ruler);
+		//mfsi_menu_font_weight().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfsi_popup_font_stretch().IsEnabled(exists_selected_text || exists_selected_ruler);
+		//mfsi_menu_font_stretch().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfsi_popup_font_style().IsEnabled(exists_selected_text || exists_selected_ruler);
+		//mfsi_menu_font_style().IsEnabled(exists_selected_text || exists_selected_ruler);
+		mfsi_popup_text_align_horz().IsEnabled(exists_selected_text);
+		//mfsi_menu_text_align_horz().IsEnabled(exists_selected_text);
+		mfsi_popup_text_align_vert().IsEnabled(exists_selected_text);
+		mfi_popup_text_line_sp().IsEnabled(exists_selected_text);
+		//mfi_menu_text_line_sp().IsEnabled(exists_selected_text);
+		mfi_popup_text_pad().IsEnabled(exists_selected_text);
+		//mfi_menu_text_pad().IsEnabled(exists_selected_text);
+		mfsi_popup_text_wrap().IsEnabled(exists_selected_text);
+		//mfsi_menu_text_wrap().IsEnabled(exists_selected_text);
+		mfi_popup_font_color().IsEnabled(exists_selected_text);
+		//mfi_menu_font_color().IsEnabled(exists_selected_text);
+		popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
+
+		// レイアウトメニューの可否を設定する.
+		//mfsi_popup_grid_show().IsEnabled(true);
+		//mfsi_popup_grid_len().IsEnabled(!exists_selected);
+		//mfsi_popup_grid_emph().IsEnabled(!exists_selected);
+		//mfi_popup_grid_color().IsEnabled(!exists_selected);
+		//mfi_popup_sheet_size().IsEnabled(!exists_selected);
+		//mfi_popup_sheet_color().IsEnabled(!exists_selected);
+		//mfsi_popup_sheet_zoom().IsEnabled(!exists_selected);
+		//mfsi_popup_background_pattern().IsEnabled(!exists_selected);
+		//popup_layout().IsEnabled(!exists_selected);
+
+
+
+	}
+
 	void MainPage::event_show_popup(void) noexcept
 	{
+		/*
 		if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 			rmfi_popup_stroke_dash_solid().IsChecked(true);
 			mfi_popup_stroke_dash_pat().IsEnabled(false);
@@ -460,6 +616,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
 			rmfi_popup_text_align_just().IsChecked(true);
 		}
+
 		if (m_main_sheet.m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
 			rmfi_popup_text_align_top().IsChecked(true);
 		}
@@ -530,12 +687,14 @@ namespace winrt::GraphPaper::implementation
 		else {
 			tmfi_popup_background_show().IsChecked(false);
 		}
+
 		if (equal(m_background_color, COLOR_BLACK)) {
 			rmfi_popup_background_black().IsChecked(true);
 		}
 		else {
 			rmfi_popup_background_white().IsChecked(true);
 		}
+		*/
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -701,6 +860,7 @@ namespace winrt::GraphPaper::implementation
 
 		// ステータスバー右クリックのコンテキストメニューを設定する.
 		mf_popup_status().Opening([this](auto const&, auto const&) {
+			/*
 			if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 				tmfi_popup_status_bar_draw().IsChecked(true);
 			}
@@ -737,10 +897,12 @@ namespace winrt::GraphPaper::implementation
 			else {
 				tmfi_popup_status_bar_zoom().IsChecked(false);
 			}
+			*/
 		});
 
 		// 作図メニューにフォーカスが移る直前.
 		mbi_menu_drawing().GettingFocus([this](auto const&, auto const&) {
+			/*
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				rmfi_menu_selection_tool().IsChecked(true);
 			}
@@ -835,10 +997,12 @@ namespace winrt::GraphPaper::implementation
 			else {
 				tmfi_tool_poly_clockwise().IsChecked(false);
 			}
+			*/
 		});
 
 		// 属性メニューにフォーカスが移る直前.
 		mbi_menu_stroke().as<Control>().GettingFocus([this](auto const&, auto const&) {
+			/*
 			if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 				rmfi_menu_stroke_dash_solid().IsChecked(true);
 				mfi_menu_stroke_dash_pat().IsEnabled(false);
@@ -923,10 +1087,12 @@ namespace winrt::GraphPaper::implementation
 			else if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 				rmfi_menu_stroke_join_round().IsChecked(true);
 			}
+			*/
 		});
 
 		// 書体メニューにフォーカスが移る直前.
 		mbi_menu_font().as<Control>().GettingFocus([this](auto const&, auto const&) {
+			/*
 			if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
 				rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
 			}
@@ -1027,11 +1193,12 @@ namespace winrt::GraphPaper::implementation
 			else if (m_main_sheet.m_text_word_wrap == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER) {
 				rmfi_menu_text_wrap_char().IsChecked(true);
 			}
-
+			*/
 		});
 
 		// レイアウトメニューにフォーカスが移る直前.
 		mbi_menu_layout().as<Control>().GettingFocus([this](auto const&, auto const&) {
+			/*
 			if (m_main_sheet.m_grid_emph.m_gauge_1 == 0 && m_main_sheet.m_grid_emph.m_gauge_2 == 0) {
 				rmfi_menu_grid_emph_1().IsChecked(true);
 			}
@@ -1089,10 +1256,12 @@ namespace winrt::GraphPaper::implementation
 			else {
 				rmfi_menu_background_white().IsChecked(true);
 			}
+			*/
 		});
 
 		// その他メニューにフォーカスが移る直前.
 		mbi_menu_misc().as<Control>().GettingFocus([this](auto const&, auto const&) {
+			/*
 			if (m_len_unit == LEN_UNIT::PIXEL) {
 				rmfi_menu_len_unit_pixel().IsChecked(true);
 			}
@@ -1163,6 +1332,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				tmfi_menu_status_bar_zoom().IsChecked(false);
 			}
+			*/
 		});
 
 		// 編集メニューにフォーカスが移る直前.

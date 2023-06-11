@@ -284,10 +284,12 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSelect)) {
 			if (u->m_shape->is_selected()) {
-				m_undo_select_cnt++;
+				undo_selected_cnt<true>(u->m_shape);
+				//m_undo_select_cnt++;
 			}
 			else {
-				m_undo_select_cnt--;
+				undo_selected_cnt<false>(u->m_shape);
+				//m_undo_select_cnt--;
 			}
 #ifdef _DEBUG
 			debug_cnt();
@@ -298,7 +300,8 @@ namespace winrt::GraphPaper::implementation
 			if (static_cast<UndoList*>(u)->m_insert) {
 				// 選択された数は 1 減らす.
 				if (u->m_shape->is_selected()) {
-					m_undo_select_cnt--;
+					undo_selected_cnt<true>(u->m_shape);
+					//m_undo_select_cnt--;
 				}
 				m_undo_undeleted_cnt--;
 #ifdef _DEBUG
@@ -308,7 +311,8 @@ namespace winrt::GraphPaper::implementation
 			// 図形が追加された.
 			else {
 				if (u->m_shape->is_selected()) {
-					m_undo_select_cnt++;
+					undo_selected_cnt<true>(u->m_shape);
+					//m_undo_select_cnt++;
 				}
 				m_undo_undeleted_cnt++;
 #ifdef _DEBUG
@@ -444,6 +448,40 @@ namespace winrt::GraphPaper::implementation
 		//m_ustack_is_changed = true;
 	}
 
+	template<bool I> void MainPage::undo_selected_cnt(Shape* s)
+	{
+		if constexpr (I) m_undo_select_cnt++; else m_undo_select_cnt--;
+		if (s->exist_cap()) {
+			if constexpr (I) m_undo_selected_exist_cap++; else m_undo_selected_exist_cap--;
+		}
+		if (typeid(*s) == typeid(ShapeGroup)) {
+			if constexpr (I) m_undo_selected_group++; else m_undo_selected_group--;
+		}
+		else if (typeid(*s) == typeid(ShapeText)) {
+			if constexpr (I) m_undo_selected_text++; else m_undo_selected_text--;
+		}
+		else if (typeid(*s) == typeid(ShapeLine)) {
+			if constexpr (I) m_undo_selected_line++; else m_undo_selected_line--;
+		}
+		else if (typeid(*s) == typeid(ShapeImage)) {
+			if constexpr (I) m_undo_selected_image++; else m_undo_selected_image--;
+		}
+		else if (typeid(*s) == typeid(ShapeRuler)) {
+			if constexpr (I) m_undo_selected_ruler++; else m_undo_selected_ruler--;
+		}
+		else if (typeid(*s) == typeid(ShapeArc)) {
+			if constexpr (I) m_undo_selected_arc++; else m_undo_selected_arc--;
+		}
+		else if (typeid(*s) == typeid(ShapePoly)) {
+			if (s->exist_cap()) {
+				if constexpr (I) m_undo_selected_polyline++; else m_undo_selected_polyline--;
+			}
+			else {
+				if constexpr (I) m_undo_selected_polygon++; else m_undo_selected_polygon--;
+			}
+		}
+	}
+
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
 	void MainPage::undo_push_select(Shape* s)
@@ -458,11 +496,13 @@ namespace winrt::GraphPaper::implementation
 				// 以前の操作をスタックから取り除き, 終了する.
 				if (s->is_selected()) {
 					s->set_select(false);
-					m_undo_select_cnt--;
+					undo_selected_cnt<false>(s);
+					//m_undo_select_cnt--;
 				}
 				else {
 					s->set_select(true);
-					m_undo_select_cnt++;
+					undo_selected_cnt<true>(s);
+					//m_undo_select_cnt++;
 				}
 #ifdef _DEBUG
 				debug_cnt();
@@ -474,10 +514,12 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_undo_stack.push_back(new UndoSelect(s));
 		if (s->is_selected()) {
-			m_undo_select_cnt++;
+			undo_selected_cnt<true>(s);
+			//m_undo_select_cnt++;
 		}
 		else {
-			m_undo_select_cnt--;
+			undo_selected_cnt<false>(s);
+			//m_undo_select_cnt--;
 		}
 #ifdef _DEBUG
 		debug_cnt();
@@ -499,6 +541,306 @@ namespace winrt::GraphPaper::implementation
 		// それ以外なら, 値を格納してその操作をスタックに積む.
 		m_undo_stack.push_back(new UndoValue<U>(s, val));
 	}
+
+	template void MainPage::menu_is_checked<UNDO_T::NIL>(void);
+
+	template<UNDO_T U> void MainPage::menu_is_checked(void)
+	{
+		if constexpr (U == UNDO_T::DASH_STYLE || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
+				rmfi_popup_stroke_dash_solid().IsChecked(true);
+				rmfi_menu_stroke_dash_solid().IsChecked(true);
+				mfi_popup_stroke_dash_pat().IsEnabled(false);
+				mfi_menu_stroke_dash_pat().IsEnabled(false);
+			}
+			else if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+				rmfi_popup_stroke_dash_dash().IsChecked(true);
+				rmfi_menu_stroke_dash_dash().IsChecked(true);
+				mfi_popup_stroke_dash_pat().IsEnabled(true);
+				mfi_menu_stroke_dash_pat().IsEnabled(true);
+			}
+			else if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+				rmfi_popup_stroke_dash_dot().IsChecked(true);
+				rmfi_menu_stroke_dash_dot().IsChecked(true);
+				mfi_popup_stroke_dash_pat().IsEnabled(true);
+				mfi_menu_stroke_dash_pat().IsEnabled(true);
+			}
+			else if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+				rmfi_popup_stroke_dash_dash_dot().IsChecked(true);
+				rmfi_menu_stroke_dash_dash_dot().IsChecked(true);
+				mfi_popup_stroke_dash_pat().IsEnabled(true);
+				mfi_menu_stroke_dash_pat().IsEnabled(true);
+			}
+			else if (m_main_sheet.m_stroke_dash == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+				rmfi_popup_stroke_dash_dash_dot_dot().IsChecked(true);
+				rmfi_menu_stroke_dash_dash_dot_dot().IsChecked(true);
+				mfi_popup_stroke_dash_pat().IsEnabled(true);
+				mfi_menu_stroke_dash_pat().IsEnabled(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::STROKE_WIDTH || U == UNDO_T::NIL) {
+			if (equal(m_main_sheet.m_stroke_width, 0.0f)) {
+				rmfi_popup_stroke_width_0px().IsChecked(true);
+				rmfi_menu_stroke_width_0px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 1.0f)) {
+				rmfi_popup_stroke_width_1px().IsChecked(true);
+				rmfi_menu_stroke_width_1px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 2.0f)) {
+				rmfi_popup_stroke_width_2px().IsChecked(true);
+				rmfi_menu_stroke_width_2px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 3.0f)) {
+				rmfi_popup_stroke_width_3px().IsChecked(true);
+				rmfi_menu_stroke_width_3px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 4.0f)) {
+				rmfi_popup_stroke_width_4px().IsChecked(true);
+				rmfi_menu_stroke_width_4px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 8.0f)) {
+				rmfi_popup_stroke_width_8px().IsChecked(true);
+				rmfi_menu_stroke_width_8px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 12.0f)) {
+				rmfi_popup_stroke_width_12px().IsChecked(true);
+				rmfi_menu_stroke_width_12px().IsChecked(true);
+			}
+			else if (equal(m_main_sheet.m_stroke_width, 16.0f)) {
+				rmfi_popup_stroke_width_16px().IsChecked(true);
+				rmfi_menu_stroke_width_16px().IsChecked(true);
+			}
+			else {
+				rmfi_popup_stroke_width_other().IsChecked(true);
+				rmfi_menu_stroke_width_other().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::STROKE_CAP || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+				rmfi_popup_stroke_cap_flat().IsChecked(true);
+				rmfi_menu_stroke_cap_flat().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+				rmfi_popup_stroke_cap_square().IsChecked(true);
+				rmfi_menu_stroke_cap_square().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+				rmfi_popup_stroke_cap_round().IsChecked(true);
+				rmfi_menu_stroke_cap_round().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+				rmfi_popup_stroke_cap_triangle().IsChecked(true);
+				rmfi_menu_stroke_cap_triangle().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::ARROW_STYLE || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_arrow_style == ARROW_STYLE::ARROW_NONE) {
+				rmfi_popup_stroke_arrow_none().IsChecked(true);
+				rmfi_menu_stroke_arrow_none().IsChecked(true);
+				mfi_popup_stroke_arrow_size().IsEnabled(false);
+				mfi_menu_stroke_arrow_size().IsEnabled(false);
+			}
+			else if (m_main_sheet.m_arrow_style == ARROW_STYLE::ARROW_OPENED) {
+				rmfi_popup_stroke_arrow_opened().IsChecked(true);
+				rmfi_menu_stroke_arrow_opened().IsChecked(true);
+				mfi_popup_stroke_arrow_size().IsEnabled(true);
+				mfi_menu_stroke_arrow_size().IsEnabled(true);
+			}
+			else if (m_main_sheet.m_arrow_style == ARROW_STYLE::ARROW_FILLED) {
+				rmfi_popup_stroke_arrow_filled().IsChecked(true);
+				rmfi_menu_stroke_arrow_filled().IsChecked(true);
+				mfi_popup_stroke_arrow_size().IsEnabled(true);
+				mfi_menu_stroke_arrow_size().IsEnabled(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::JOIN_STYLE || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+				rmfi_popup_stroke_join_bevel().IsChecked(true);
+				rmfi_menu_stroke_join_bevel().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+				rmfi_popup_stroke_join_miter().IsChecked(true);
+				rmfi_menu_stroke_join_miter().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+				rmfi_popup_stroke_join_miter_or_bevel().IsChecked(true);
+				rmfi_menu_stroke_join_miter_or_bevel().IsChecked(true);
+			}
+			else if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+				rmfi_popup_stroke_join_round().IsChecked(true);
+				rmfi_menu_stroke_join_round().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::FONT_STRETCH || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
+				rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
+				rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
+				rmfi_popup_font_stretch_extra_condensed().IsChecked(true);
+				rmfi_menu_font_stretch_extra_condensed().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
+				rmfi_popup_font_stretch_condensed().IsChecked(true);
+				rmfi_menu_font_stretch_condensed().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
+				rmfi_popup_font_stretch_semi_condensed().IsChecked(true);
+				rmfi_menu_font_stretch_semi_condensed().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
+				rmfi_popup_font_stretch_normal().IsChecked(true);
+				rmfi_menu_font_stretch_normal().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
+				rmfi_popup_font_stretch_semi_expanded().IsChecked(true);
+				rmfi_menu_font_stretch_semi_expanded().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
+				rmfi_popup_font_stretch_expanded().IsChecked(true);
+				rmfi_menu_font_stretch_expanded().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
+				rmfi_popup_font_stretch_extra_expanded().IsChecked(true);
+				rmfi_menu_font_stretch_extra_expanded().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
+				rmfi_popup_font_stretch_ultra_expanded().IsChecked(true);
+				rmfi_menu_font_stretch_ultra_expanded().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::FONT_STYLE || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
+				rmfi_popup_font_style_italic().IsChecked(true);
+				rmfi_menu_font_style_italic().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL) {
+				rmfi_popup_font_style_normal().IsChecked(true);
+				rmfi_menu_font_style_normal().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
+				rmfi_popup_font_style_oblique().IsChecked(true);
+				rmfi_menu_font_style_oblique().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::FONT_WEIGHT || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
+				rmfi_popup_font_weight_thin().IsChecked(true);
+				rmfi_menu_font_weight_thin().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
+				rmfi_popup_font_weight_extra_light().IsChecked(true);
+				rmfi_menu_font_weight_extra_light().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
+				rmfi_popup_font_weight_light().IsChecked(true);
+				rmfi_menu_font_weight_light().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
+				rmfi_popup_font_weight_normal().IsChecked(true);
+				rmfi_menu_font_weight_normal().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
+				rmfi_popup_font_weight_medium().IsChecked(true);
+				rmfi_menu_font_weight_medium().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
+				rmfi_popup_font_weight_semi_bold().IsChecked(true);
+				rmfi_menu_font_weight_semi_bold().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
+				rmfi_popup_font_weight_bold().IsChecked(true);
+				rmfi_menu_font_weight_bold().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
+				rmfi_popup_font_weight_extra_bold().IsChecked(true);
+				rmfi_menu_font_weight_extra_bold().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
+				rmfi_popup_font_weight_black().IsChecked(true);
+				rmfi_menu_font_weight_black().IsChecked(true);
+			}
+			else if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
+				rmfi_popup_font_weight_extra_black().IsChecked(true);
+				rmfi_menu_font_weight_extra_black().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::TEXT_ALIGN_T || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING) {
+				rmfi_popup_text_align_left().IsChecked(true);
+				rmfi_menu_text_align_left().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
+				rmfi_popup_text_align_right().IsChecked(true);
+				rmfi_menu_text_align_right().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER) {
+				rmfi_popup_text_align_center().IsChecked(true);
+				rmfi_menu_text_align_center().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
+				rmfi_popup_text_align_just().IsChecked(true);
+				rmfi_menu_text_align_just().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::TEXT_ALIGN_P || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
+				rmfi_popup_text_align_top().IsChecked(true);
+				rmfi_menu_text_align_top().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR) {
+				rmfi_popup_text_align_bot().IsChecked(true);
+				rmfi_menu_text_align_bot().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER) {
+				rmfi_popup_text_align_mid().IsChecked(true);
+				rmfi_menu_text_align_mid().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::TEXT_WRAP || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_text_word_wrap == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP) {
+				rmfi_popup_text_wrap().IsChecked(true);
+				rmfi_menu_text_wrap().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_word_wrap == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_NO_WRAP) {
+				rmfi_popup_text_no_wrap().IsChecked(true);
+				rmfi_menu_text_no_wrap().IsChecked(true);
+			}
+			else if (m_main_sheet.m_text_word_wrap == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER) {
+				rmfi_popup_text_wrap_char().IsChecked(true);
+				rmfi_menu_text_wrap_char().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::GRID_EMPH || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_grid_emph.m_gauge_1 == 0 && m_main_sheet.m_grid_emph.m_gauge_2 == 0) {
+				rmfi_popup_grid_emph_1().IsChecked(true);
+				rmfi_menu_grid_emph_1().IsChecked(true);
+			}
+			else if (m_main_sheet.m_grid_emph.m_gauge_1 != 0 && m_main_sheet.m_grid_emph.m_gauge_2 == 0) {
+				rmfi_popup_grid_emph_2().IsChecked(true);
+				rmfi_menu_grid_emph_2().IsChecked(true);
+			}
+			else if (m_main_sheet.m_grid_emph.m_gauge_1 != 0 && m_main_sheet.m_grid_emph.m_gauge_2 != 0) {
+				rmfi_popup_grid_emph_3().IsChecked(true);
+				rmfi_menu_grid_emph_3().IsChecked(true);
+			}
+		}
+		else if constexpr (U == UNDO_T::GRID_SHOW || U == UNDO_T::NIL) {
+			if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
+				rmfi_popup_grid_show_back().IsChecked(true);
+				rmfi_menu_grid_show_back().IsChecked(true);
+			}
+			else if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
+				rmfi_popup_grid_show_front().IsChecked(true);
+				rmfi_menu_grid_show_front().IsChecked(true);
+			}
+			else if (m_main_sheet.m_grid_show == GRID_SHOW::HIDE) {
+				rmfi_popup_grid_show_hide().IsChecked(true);
+				rmfi_menu_grid_show_hide().IsChecked(true);
+			}
+		}
+	}
 	// 値を選択された図形に格納して, その操作をスタックに積む.
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
 	// U	操作の種類
@@ -510,185 +852,7 @@ namespace winrt::GraphPaper::implementation
 		T sheet_val;
 		if (UndoValue<U>::GET(&m_main_sheet, sheet_val) && !equal(sheet_val, val)) {
 			m_undo_stack.push_back(new UndoValue<U>(&m_main_sheet, val));
-			if constexpr (U == UNDO_T::DASH_STYLE) {
-				if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-					rmfi_popup_stroke_dash_solid().IsChecked(true);
-					mfi_popup_stroke_dash_pat().IsEnabled(false);
-				}
-				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
-					rmfi_popup_stroke_dash_dash().IsChecked(true);
-					mfi_popup_stroke_dash_pat().IsEnabled(true);
-				}
-				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-					rmfi_popup_stroke_dash_dot().IsChecked(true);
-					mfi_popup_stroke_dash_pat().IsEnabled(true);
-				}
-				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-					rmfi_popup_stroke_dash_dash_dot().IsChecked(true);
-					mfi_popup_stroke_dash_pat().IsEnabled(true);
-				}
-				else if (val == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-					rmfi_popup_stroke_dash_dash_dot_dot().IsChecked(true);
-					mfi_popup_stroke_dash_pat().IsEnabled(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::STROKE_WIDTH) {
-				if (equal(val, 0.0f)) {
-					rmfi_popup_stroke_width_0px().IsChecked(true);
-				}
-				else if (equal(val, 1.0f)) {
-					rmfi_popup_stroke_width_1px().IsChecked(true);
-				}
-				else if (equal(val, 2.0f)) {
-					rmfi_popup_stroke_width_2px().IsChecked(true);
-				}
-				else if (equal(val, 3.0f)) {
-					rmfi_popup_stroke_width_3px().IsChecked(true);
-				}
-				else if (equal(val, 4.0f)) {
-					rmfi_popup_stroke_width_4px().IsChecked(true);
-				}
-				else if (equal(val, 8.0f)) {
-					rmfi_popup_stroke_width_8px().IsChecked(true);
-				}
-				else if (equal(val, 12.0f)) {
-					rmfi_popup_stroke_width_12px().IsChecked(true);
-				}
-				else if (equal(val, 16.0f)) {
-					rmfi_popup_stroke_width_16px().IsChecked(true);
-				}
-				else {
-					rmfi_popup_stroke_width_other().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::STROKE_CAP) {
-				if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
-					rmfi_popup_stroke_cap_flat().IsChecked(true);
-				}
-				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-					rmfi_popup_stroke_cap_square().IsChecked(true);
-				}
-				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
-					rmfi_popup_stroke_cap_round().IsChecked(true);
-				}
-				else if (val == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-					rmfi_popup_stroke_cap_triangle().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::ARROW_STYLE) {
-				if (val == ARROW_STYLE::ARROW_NONE) {
-					rmfi_popup_stroke_arrow_none().IsChecked(true);
-					mfi_popup_stroke_arrow_size().IsEnabled(false);
-				}
-				else if (val == ARROW_STYLE::ARROW_OPENED) {
-					rmfi_popup_stroke_arrow_opened().IsChecked(true);
-					mfi_popup_stroke_arrow_size().IsEnabled(true);
-				}
-				else if (val == ARROW_STYLE::ARROW_FILLED) {
-					rmfi_popup_stroke_arrow_filled().IsChecked(true);
-					mfi_popup_stroke_arrow_size().IsEnabled(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::JOIN_STYLE) {
-				if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-					rmfi_popup_stroke_join_bevel().IsChecked(true);
-				}
-				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
-					rmfi_popup_stroke_join_miter().IsChecked(true);
-				}
-				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-					rmfi_popup_stroke_join_miter_or_bevel().IsChecked(true);
-				}
-				else if (val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					rmfi_popup_stroke_join_round().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::FONT_STRETCH) {
-				if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
-					rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED) {
-					rmfi_popup_font_stretch_extra_condensed().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED) {
-					rmfi_popup_font_stretch_condensed().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED) {
-					rmfi_popup_font_stretch_semi_condensed().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL) {
-					rmfi_popup_font_stretch_normal().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED) {
-					rmfi_popup_font_stretch_semi_expanded().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED) {
-					rmfi_popup_font_stretch_expanded().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED) {
-					rmfi_popup_font_stretch_extra_expanded().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
-					rmfi_popup_font_stretch_ultra_expanded().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::FONT_STYLE) {
-				if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
-					rmfi_popup_font_style_italic().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL) {
-					rmfi_popup_font_style_normal().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
-					rmfi_popup_font_style_oblique().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::FONT_WEIGHT) {
-				if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
-					rmfi_popup_font_weight_thin().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT) {
-					rmfi_popup_font_weight_extra_light().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT) {
-					rmfi_popup_font_weight_light().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL) {
-					rmfi_popup_font_weight_normal().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM) {
-					rmfi_popup_font_weight_medium().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_BOLD) {
-					rmfi_popup_font_weight_semi_bold().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD) {
-					rmfi_popup_font_weight_bold().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD) {
-					rmfi_popup_font_weight_extra_bold().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK) {
-					rmfi_popup_font_weight_black().IsChecked(true);
-				}
-				else if (val == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
-					rmfi_popup_font_weight_extra_black().IsChecked(true);
-				}
-			}
-			else if constexpr (U == UNDO_T::TEXT_ALIGN_T) {
-				if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING) {
-					rmfi_popup_text_align_left().IsChecked(true);
-				}
-				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
-					rmfi_popup_text_align_right().IsChecked(true);
-				}
-				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER) {
-					rmfi_popup_text_align_center().IsChecked(true);
-				}
-				else if (val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
-					rmfi_popup_text_align_just().IsChecked(true);
-				}
-			}
+			menu_is_checked<U>();
 		}
 		auto changed = false;	// 値が変わった図形があるか.
 		for (auto s : m_main_sheet.m_shape_list) {
