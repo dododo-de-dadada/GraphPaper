@@ -299,20 +299,22 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_undo_stack;	// 元に戻す操作スタック
 		uint32_t m_undo_select_cnt = 0;	// 選択された図形の数
 		uint32_t m_undo_undeleted_cnt = 0;	// 削除されていない図形の数
-		uint32_t m_undo_selected_group = 0;
-		uint32_t m_undo_selected_text = 0;
-		uint32_t m_undo_selected_line = 0;
-		uint32_t m_undo_selected_image = 0;
-		uint32_t m_undo_selected_ruler = 0;
-		uint32_t m_undo_selected_arc = 0;
-		uint32_t m_undo_selected_polyline = 0;
-		uint32_t m_undo_selected_polygon = 0;
-		uint32_t m_undo_selected_exist_cap = 0;
-		uint32_t m_undo_text = 0;
+		//uint32_t m_undo_undeleted_text = 0;
+		//uint32_t m_undo_selected_group = 0;
+		//uint32_t m_undo_selected_text = 0;
+		//uint32_t m_undo_selected_line = 0;
+		//uint32_t m_undo_selected_image = 0;
+		//uint32_t m_undo_selected_ruler = 0;
+		//uint32_t m_undo_selected_arc = 0;
+		//uint32_t m_undo_selected_polyline = 0;
+		//uint32_t m_undo_selected_polygon = 0;
+		//uint32_t m_undo_selected_exist_cap = 0;
+		//uint32_t m_undo_text = 0;
 #ifdef _DEBUG
 		void debug_cnt(void) {
 			uint32_t select_cnt = 0;
 			uint32_t undeleted_cnt = 0;
+			uint32_t undeleted_text = 0;
 			uint32_t select_group = 0;
 			uint32_t select_text = 0;
 			uint32_t select_line = 0;
@@ -327,6 +329,9 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				undeleted_cnt++;
+				if (typeid(*s) == typeid(ShapeText)) {
+					undeleted_text++;
+				}
 				if (!s->is_selected()) {
 					continue;
 				}
@@ -364,36 +369,39 @@ namespace winrt::GraphPaper::implementation
 			if (undeleted_cnt != m_undo_undeleted_cnt) {
 				__debugbreak();
 			}
-			if (select_cnt != m_undo_select_cnt) {
-				__debugbreak();
-			}
-			if (select_group != m_undo_selected_group) {
-				__debugbreak();
-			}
-			if (select_text != m_undo_selected_text) {
-				__debugbreak();
-			}
-			if (select_line != m_undo_selected_line) {
-				__debugbreak();
-			}
-			if (select_image != m_undo_selected_image) {
-				__debugbreak();
-			}
-			if (select_ruler != m_undo_selected_ruler) {
-				__debugbreak();
-			}
-			if (select_arc != m_undo_selected_arc) {
-				__debugbreak();
-			}
-			if (select_polyline != m_undo_selected_polyline) {
-				__debugbreak();
-			}
-			if (select_polygon != m_undo_selected_polygon) {
-				__debugbreak();
-			}
-			if (select_exist_cap != m_undo_selected_exist_cap) {
-				__debugbreak();
-			}
+			//if (undeleted_text != m_undo_undeleted_text) {
+			//	__debugbreak();
+			//}
+			//if (select_cnt != m_undo_select_cnt) {
+			//	__debugbreak();
+			//}
+			//if (select_group != m_undo_selected_group) {
+			//	__debugbreak();
+			//}
+			//if (select_text != m_undo_selected_text) {
+			//	__debugbreak();
+			//}
+			//if (select_line != m_undo_selected_line) {
+			//	__debugbreak();
+			//}
+			//if (select_image != m_undo_selected_image) {
+			//	__debugbreak();
+			//}
+			//if (select_ruler != m_undo_selected_ruler) {
+			//	__debugbreak();
+			//}
+			//if (select_arc != m_undo_selected_arc) {
+			//	__debugbreak();
+			//}
+			//if (select_polyline != m_undo_selected_polyline) {
+			//	__debugbreak();
+			//}
+			//if (select_polygon != m_undo_selected_polygon) {
+			//	__debugbreak();
+			//}
+			//if (select_exist_cap != m_undo_selected_exist_cap) {
+			//	__debugbreak();
+			//}
 		}
 #endif
 
@@ -606,8 +614,6 @@ namespace winrt::GraphPaper::implementation
 		void event_set_position(PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// ポップアップメニューを表示する.
-		void event_show_popup(void) noexcept;
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -1114,7 +1120,7 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 		void menu_is_enable(void) noexcept;
 
-		template<bool I> void undo_selected_cnt(Shape* s);
+		//template<bool I> void undo_selected_cnt(Shape* s);
 
 		template<UNDO_T U> void menu_is_checked(void);
 		// 編集メニューの「やり直し」が選択された.
@@ -1148,8 +1154,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_undo_stack.push_back(new UndoAppend(s));
 			if (s->is_selected()) {
-				undo_selected_cnt<true>(s);
-				//m_undo_select_cnt++;
+				//undo_selected_cnt<true>(s);
+				m_undo_select_cnt++;
 			}
 			if (!s->is_deleted()) {
 				m_undo_undeleted_cnt++;
@@ -1188,8 +1194,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_undo_stack.push_back(new UndoInsert(s, s_at));
 			if (s->is_selected()) {
-				undo_selected_cnt<true>(s);
-				//m_undo_select_cnt++;
+				//undo_selected_cnt<true>(s);
+				m_undo_select_cnt++;
 			}
 			if (!s->is_deleted()) {
 				m_undo_undeleted_cnt++;
@@ -1212,8 +1218,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_undo_stack.push_back(new UndoRemove(s));
 			if (s->is_selected()) {
-				undo_selected_cnt<false>(s);
-				//m_undo_select_cnt--;
+				//undo_selected_cnt<false>(s);
+				m_undo_select_cnt--;
 			}
 			if (s->is_deleted()) {
 				m_undo_undeleted_cnt--;

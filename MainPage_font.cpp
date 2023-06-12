@@ -178,8 +178,6 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_font_family(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-					//undo_menu_is_enabled();
-					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -252,8 +250,6 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_font_size(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-					//undo_menu_is_enabled();
-					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -278,7 +274,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
-			//undo_menu_is_enabled();
 			main_draw();
 		}
 		status_bar_set_pos();
@@ -406,8 +401,6 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_text_line_sp(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
-					//undo_menu_is_enabled();
-					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}
@@ -527,8 +520,6 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_text_pad(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
-					//undo_menu_is_enabled();
-					////xcvd_menu_is_enabled();
 					main_draw();
 				}
 			}

@@ -433,7 +433,6 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 編集メニュー項目の使用の可否を設定する.
-		//xcvd_menu_is_enabled();
 		main_draw();
 	}
 

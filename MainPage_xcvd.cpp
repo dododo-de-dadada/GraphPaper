@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
 	//------------------------------
-	IAsyncAction MainPage::copy_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	IAsyncAction MainPage::copy_click_async(IInspectable const& sender, RoutedEventArgs const& args)
 	{
 		if (sender == tb_map_pointer()) {
 			__debugbreak();
@@ -66,11 +66,13 @@ namespace winrt::GraphPaper::implementation
 		if (sender == scp_main_panel()) {
 			__debugbreak();
 		}
-		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-			tx_find_replace_with().FocusState() != FocusState::Unfocused
-			) {
+		if (args.OriginalSource() == menu_copy()) {
+			__debugbreak();
+		}
+		if (args.OriginalSource() != menu_copy() || args.OriginalSource() != menu_copy()) {
 			co_return;
 		}
+
 		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納し, 中断する.
 		if (m_core_text_focused != nullptr) {
 			const auto sele_text = core_text_substr();
@@ -155,7 +157,6 @@ namespace winrt::GraphPaper::implementation
 		// メモリストリームは閉じちゃダメ.
 		out_stream.Close();
 		out_stream = nullptr;
-		//xcvd_menu_is_enabled();
 		// スレッドコンテキストを復元する.
 		co_await context;
 
@@ -216,8 +217,6 @@ namespace winrt::GraphPaper::implementation
 					undo_push_remove(s);
 				}
 				m_mutex_draw.unlock();
-				//undo_menu_is_enabled();
-				//xcvd_menu_is_enabled();
 				main_bbox_update();
 				main_panel_size();
 				main_draw();
@@ -330,11 +329,8 @@ namespace winrt::GraphPaper::implementation
 			undo_push_select(s);
 			m_mutex_draw.unlock();
 		}
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 
 		co_await winrt::resume_foreground(Dispatcher());
-		//undo_menu_is_enabled();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);
@@ -342,6 +338,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		main_bbox_update(s);
 		main_panel_size();
+		menu_is_enable();
 		main_draw();
 
 		//スレッドコンテキストを復元する.
@@ -400,6 +397,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					m_mutex_draw.unlock();
 					main_panel_size();
+					menu_is_enable();
 					main_draw();
 					slist_pasted.clear();
 					ok = true;
@@ -466,16 +464,15 @@ namespace winrt::GraphPaper::implementation
 					undo_push_select(t);
 					m_mutex_draw.unlock();
 				}
-				//undo_menu_is_enabled();
 
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_append(t);
 					summary_select(t);
 				}
-				//xcvd_menu_is_enabled();
 				main_bbox_update(t);
 				main_panel_size();
+				menu_is_enable();
 				main_draw();
 			}
 		}

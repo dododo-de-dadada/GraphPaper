@@ -424,14 +424,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeArc(start, lineto, &m_main_sheet);
 		}
 		else if (d_tool == DRAWING_TOOL::TEXT) {
-			if (m_core_text_focused != nullptr) {
-				m_core_text.NotifyFocusLeave();
-				undo_push_text_unselect(m_core_text_focused);
-			}
 			s = new ShapeText(start, lineto, nullptr, &m_main_sheet);
-			m_core_text_focused = static_cast<ShapeText*>(s);
-			m_core_text_focused->create_text_layout();
-			m_core_text.NotifyFocusEnter();
 		}
 		else {
 			return;
@@ -444,10 +437,20 @@ namespace winrt::GraphPaper::implementation
 		unselect_shape_all();
 		undo_push_append(s);
 		undo_push_select(s);
+		if (d_tool == DRAWING_TOOL::TEXT) {
+			if (m_core_text_focused != nullptr) {
+				m_core_text.NotifyFocusLeave();
+				undo_push_text_unselect(m_core_text_focused);
+			}
+			m_core_text_focused = static_cast<ShapeText*>(s);
+			m_core_text_focused->create_text_layout();
+			m_core_text.NotifyFocusEnter();
+		}
 		main_bbox_update(s);
 		main_panel_size();
 		m_event_shape_pressed = s;
 		m_event_shape_last = s;
+		menu_is_enable();
 		main_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
@@ -563,7 +566,6 @@ namespace winrt::GraphPaper::implementation
 				rb.y = m_event_pos_pressed.y;
 			}
 			if (toggle_shape_inside(lt, rb)) {
-				//xcvd_menu_is_enabled();
 			}
 		}
 		// 修飾キーが押されてないか判定する.
@@ -587,7 +589,6 @@ namespace winrt::GraphPaper::implementation
 				rb.y = m_event_pos_pressed.y;
 			}
 			if (select_shape_inside(lt, rb)) {
-				//xcvd_menu_is_enabled();
 			}
 		}
 		Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
@@ -731,7 +732,6 @@ namespace winrt::GraphPaper::implementation
 						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
 					}
 				}
-				//xcvd_menu_is_enabled();
 				main_draw();
 			}
 		}
@@ -1002,6 +1002,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
 		}
 		if (changed) {
+			menu_is_enable();
 			main_draw();
 		}
 	}
@@ -1057,6 +1058,7 @@ namespace winrt::GraphPaper::implementation
 				//tb_map_pointer().BorderThickness(winrt::Windows::UI::Xaml::Thickness{ 0, 0, 0, 0 });
 				//tb_map_pointer().as<winrt::Windows::UI::Xaml::Controls::Control>().Margin(winrt::Windows::UI::Xaml::Thickness{ 0, 0, 0, 0 });
 				tb_map_pointer().Text(buf);
+				tb_map_pointer().SelectAll();
 				/*
 				content.RequestedOperation(DataPackageOperation::Copy);
 				content.SetText(buf);
@@ -1075,22 +1077,26 @@ namespace winrt::GraphPaper::implementation
 					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
 						undo_push_null();
 						undo_push_set<UNDO_T::SHEET_COLOR>(&m_main_sheet, m_eyedropper_color);
+						menu_is_enable();
 						main_draw();
 					}
 					else if (m_event_shape_pressed != nullptr) {
 						if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FILL_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							menu_is_enable();
 							main_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FONT_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							menu_is_enable();
 							main_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
 							undo_push_null();
 							undo_push_set<UNDO_T::STROKE_COLOR>(m_event_shape_pressed, m_eyedropper_color);
+							menu_is_enable();
 							main_draw();
 						}
 					}
@@ -1201,7 +1207,7 @@ namespace winrt::GraphPaper::implementation
 				scp_main_panel().ContextFlyout(nullptr);
 			}
 			// ポップアップメニューを表示する.
-			event_show_popup();
+			scp_main_panel().ContextFlyout(popup_menu());
 		}
 		// 状態が, 初期状態か判定する.
 		else if (m_event_state == EVENT_STATE::BEGIN) {
@@ -1213,6 +1219,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_state = EVENT_STATE::BEGIN;
 		//m_event_shape_pressed = nullptr;
 		//m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
+		menu_is_enable();
 		main_draw();
 	}
 

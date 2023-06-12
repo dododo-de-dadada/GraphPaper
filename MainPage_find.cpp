@@ -281,37 +281,8 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			status_bar_set_pos();
 		}
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 		main_draw();
 	}
-
-	// 文字列の選択範囲があれば置換し, 次を検索する.
-	// 選択範囲がなければ置換せず, 次を検索する.
-	// 一致したなら true, そうでなければ false を返す.
-	/*
-	bool MainPage::replace_text(void)
-	{
-		// 編集する図形がある.
-		if (m_core_text_focused != nullptr) {
-			//選択された文字範囲がある.
-			const ShapeSheet* t = &m_main_sheet;
-			const auto end = t->m_select_trail ? t->m_select_end + 1 : t->m_select_end;
-			const auto s = min(t->m_select_start, end);
-			const auto e = max(t->m_select_start, end);
-			if (s < e) {
-				// 置換して, 置換後の文字範囲を選択
-				undo_push_select(m_core_text_focused);
-				m_undo_stack.push_back(new UndoText2(m_core_text_focused, m_find_repl));
-				const auto repl_len = wchar_len(m_find_repl);
-				undo_push_text_select(m_core_text_focused, s + repl_len, s + repl_len, false);
-				m_core_text_focused->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
-			}
-		}
-		// 次の文字列を検索する.
-		return find_next();
-	}
-	*/
 
 	// 文字列の選択範囲があれば置換する.
 	bool MainPage::replace_text(void)
@@ -352,7 +323,6 @@ namespace winrt::GraphPaper::implementation
 			if (m_main_sheet.m_select_start != end) {
 				undo_push_null();
 				replace_text();
-				//undo_menu_is_enabled();
 			}
 		}
 		// 次の文字列を検索する.
@@ -360,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 		if (found) {
 			scroll_to(m_core_text_focused);
 		}
-		//xcvd_menu_is_enabled();
+		menu_is_enable();
 		main_draw();
 		if (!found) {
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
@@ -377,25 +347,20 @@ namespace winrt::GraphPaper::implementation
 			find_text_preserve();
 		}
 		else {
-			bool exist_text = false;
-			for (const auto s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted()) {
-					continue;
-				}
-				else if (typeid(*s) == typeid(ShapeText)) {
-					exist_text = true;
-					break;
-				}
-			}
-			if (!exist_text) {
-				return;
-			}
-			//if (m_core_text_focused != nullptr) {
-			//	m_core_text.NotifyFocusLeave();
-			//	undo_push_text_unselect(m_core_text_focused);
-			//	m_core_text_focused = nullptr;
-			//	//xcvd_menu_is_enabled();
+			//bool exist_text = false;
+			//for (const auto s : m_main_sheet.m_shape_list) {
+			//	if (s->is_deleted()) {
+			//		continue;
+			//	}
+			//	else if (typeid(*s) == typeid(ShapeText)) {
+			//		exist_text = true;
+			//		break;
+			//	}
 			//}
+			//if (exist_text) {
+			//	return;
+			//}
+
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
@@ -514,7 +479,6 @@ namespace winrt::GraphPaper::implementation
 		if (found) {
 			scroll_to(m_core_text_focused);
 		}
-		//xcvd_menu_is_enabled();
 		main_draw();
 		if (!found) {
 			// 「文字列は見つかりません」メッセージダイアログを表示する.

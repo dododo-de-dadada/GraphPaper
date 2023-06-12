@@ -80,7 +80,6 @@ namespace winrt::GraphPaper::implementation
 			//}
 			//else {
 				undo_push_text_select(m_core_text_focused, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 		}
@@ -100,7 +99,6 @@ namespace winrt::GraphPaper::implementation
 			//else {
 				const auto new_start = new_trail ? new_end + 1 : new_end;
 				undo_push_text_select(m_core_text_focused, new_start, new_end, new_trail);
-				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 		}
@@ -127,7 +125,6 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
 				undo_push_text_select(m_core_text_focused, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 			//else {
@@ -146,7 +143,6 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_core_text_focused->get_text_pos(new_car, new_trail);
 			//if (shift_key) {
 				undo_push_text_select(m_core_text_focused, start, new_end, new_trail);
-				//xcvd_menu_is_enabled();
 				main_draw();
 			//}
 			//else {
@@ -176,8 +172,6 @@ namespace winrt::GraphPaper::implementation
 		// ‰üs‚ð‘}“ü‚·‚é.
 		m_undo_stack.push_back(new UndoText2(m_core_text_focused, L"\r"));
 		undo_push_text_select(m_core_text_focused, s + 1, s + 1, false);
-		//undo_menu_is_enabled();
-		//xcvd_menu_is_enabled();
 		main_draw();
 
 		CoreTextRange modified_ran{
@@ -194,20 +188,24 @@ namespace winrt::GraphPaper::implementation
 	// Escape ‚ª‰Ÿ‚³‚ê‚½.
 	void MainPage::kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
+		rmfi_menu_selection_tool().IsChecked(true);
+		drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
+		/*
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 			unselect_shape_all();
 			main_draw();
 		}
 		else {
-			m_drawing_tool = DRAWING_TOOL::SELECT;
-			rmfi_menu_selection_tool().IsChecked(true);
+			drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
 		}
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
 		m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
+		tb_map_pointer().Text(L"");
+		*/
 	}
 
-	void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		if (m_core_text_focused == nullptr) {
 			return;
@@ -226,13 +224,11 @@ namespace winrt::GraphPaper::implementation
 		//else {
 		if (end == start && end > 0) {
 			undo_push_text_select(m_core_text_focused, end - 1, end - 1, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		else if (end != start) {
 			const auto new_end = min(start, end);
 			undo_push_text_select(m_core_text_focused, new_end, new_end, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -242,9 +238,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
 	}
 
-	void MainPage::kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		if (m_core_text_focused == nullptr || m_core_text_comp) {
 			return;
@@ -257,7 +254,6 @@ namespace winrt::GraphPaper::implementation
 		//if (shift_key) {
 		if (end > 0) {
 			undo_push_text_select(m_core_text_focused, start, end - 1, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -278,9 +274,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
 	}
 
-	void MainPage::kacc_right_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_right_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		if (m_core_text_focused == nullptr) {
 			return;
@@ -299,13 +296,11 @@ namespace winrt::GraphPaper::implementation
 		//else {
 		if (end == start && end < len) {
 			undo_push_text_select(m_core_text_focused, end + 1, end + 1, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		else if (end != start) {
 			const auto new_end = max(start, end);
 			undo_push_text_select(m_core_text_focused, new_end, new_end, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -315,9 +310,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
 	}
 
-	void MainPage::kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		if (m_core_text_focused == nullptr || m_core_text_comp) {
 			return;
@@ -330,7 +326,6 @@ namespace winrt::GraphPaper::implementation
 		//if (shift_key) {
 		if (end < len) {
 			undo_push_text_select(m_core_text_focused, start, end + 1, false);
-			//xcvd_menu_is_enabled();
 			main_draw();
 		}
 		//}
@@ -351,9 +346,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
 	}
 
-	void MainPage::kacc_up_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_up_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		if (m_core_text_focused == nullptr) {
 			return;
@@ -371,7 +367,6 @@ namespace winrt::GraphPaper::implementation
 			//}
 			//else {
 			undo_push_text_select(m_core_text_focused, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 		}
@@ -391,7 +386,6 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			const auto new_start = new_trail ? new_end + 1 : new_end;
 			undo_push_text_select(m_core_text_focused, new_start, new_end, new_trail);
-			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 		}
@@ -401,9 +395,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
 	}
 
-	void MainPage::kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	void MainPage::kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
 	{
 		// Š¿Žš•ÏŠ·’†‚Í•¶Žš—ñ‘I‘ð‚µ‚È‚¢.
 		if (m_core_text_focused == nullptr || m_core_text_comp) {
@@ -418,7 +413,6 @@ namespace winrt::GraphPaper::implementation
 			//const auto shift_key = ((key_state & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
 			//if (shift_key) {
 			undo_push_text_select(m_core_text_focused, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 			//else {
@@ -437,7 +431,6 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_core_text_focused->get_text_pos(new_car, new_trail);
 			//if (shift_key) {
 			undo_push_text_select(m_core_text_focused, start, new_end, new_trail);
-			//xcvd_menu_is_enabled();
 			main_draw();
 			//}
 			//else {
@@ -452,6 +445,8 @@ namespace winrt::GraphPaper::implementation
 			static_cast<int32_t>(min(new_start, new_end)), static_cast<int32_t>(max(new_start, new_end))
 		};
 		m_core_text.NotifySelectionChanged(new_ran);
+		args.Handled(true);
+
 	}
 	/*
 	*/

@@ -375,13 +375,17 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_undo_select_cnt = 0;
 		m_undo_undeleted_cnt = 0;
+		//m_undo_undeleted_text = 0;
 		for (const auto s : m_main_sheet.m_shape_list) {
 			if (!s->is_deleted()) {
 				m_undo_undeleted_cnt++;
+				//if (typeid(*s) == typeid(ShapeText)) {
+				//	m_undo_undeleted_text++;
+				//}
 			}
 			if (!s->is_deleted() && s->is_selected()) {
-				undo_selected_cnt<true>(s);
-				//m_undo_select_cnt++;
+				//undo_selected_cnt<true>(s);
+				m_undo_select_cnt++;
 			}
 		}
 		main_bbox_update();
@@ -802,6 +806,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				// かならずしも同じ位置が復元できるとは限らない.
 				sb_horz().Value(scroll_h);
 				sb_vert().Value(scroll_v);
+				menu_is_enable();
 				main_draw();
 			}
 		}
@@ -1279,6 +1284,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 		file_recent_add(nullptr);
 		file_finish_reading();
+		menu_is_enable();
 		main_draw();
 
 	}
@@ -1359,7 +1365,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				unselect_shape_all();
 				undo_push_append(s);
 				undo_push_select(s);
-				//undo_menu_is_enabled();
+				menu_is_enable();
 				m_mutex_draw.unlock();
 			}
 
@@ -1368,7 +1374,6 @@ m_snap_grid = dt_reader.ReadBoolean();
 				summary_append(s);
 				summary_select(s);
 			}
-			//xcvd_menu_is_enabled();
 			main_bbox_update(s);
 			main_panel_size();
 			main_draw();

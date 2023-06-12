@@ -284,24 +284,25 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSelect)) {
 			if (u->m_shape->is_selected()) {
-				undo_selected_cnt<true>(u->m_shape);
-				//m_undo_select_cnt++;
+				//undo_selected_cnt<true>(u->m_shape);
+				m_undo_select_cnt++;
 			}
 			else {
-				undo_selected_cnt<false>(u->m_shape);
-				//m_undo_select_cnt--;
+				//undo_selected_cnt<false>(u->m_shape);
+				m_undo_select_cnt--;
 			}
 #ifdef _DEBUG
 			debug_cnt();
 #endif
 		}
 		else if (u_type == typeid(UndoList)) {
+			const auto s = u->m_shape;
 			// 図形が削除された.
 			if (static_cast<UndoList*>(u)->m_insert) {
 				// 選択された数は 1 減らす.
-				if (u->m_shape->is_selected()) {
-					undo_selected_cnt<true>(u->m_shape);
-					//m_undo_select_cnt--;
+				if (s->is_selected()) {
+					//undo_selected_cnt<true>(s);
+					m_undo_select_cnt++;
 				}
 				m_undo_undeleted_cnt--;
 #ifdef _DEBUG
@@ -310,9 +311,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 図形が追加された.
 			else {
-				if (u->m_shape->is_selected()) {
-					undo_selected_cnt<true>(u->m_shape);
-					//m_undo_select_cnt++;
+				if (s->is_selected()) {
+					//undo_selected_cnt<true>(s);
+					m_undo_select_cnt++;
 				}
 				m_undo_undeleted_cnt++;
 #ifdef _DEBUG
@@ -448,39 +449,40 @@ namespace winrt::GraphPaper::implementation
 		//m_ustack_is_changed = true;
 	}
 
-	template<bool I> void MainPage::undo_selected_cnt(Shape* s)
-	{
-		if constexpr (I) m_undo_select_cnt++; else m_undo_select_cnt--;
-		if (s->exist_cap()) {
-			if constexpr (I) m_undo_selected_exist_cap++; else m_undo_selected_exist_cap--;
-		}
-		if (typeid(*s) == typeid(ShapeGroup)) {
-			if constexpr (I) m_undo_selected_group++; else m_undo_selected_group--;
-		}
-		else if (typeid(*s) == typeid(ShapeText)) {
-			if constexpr (I) m_undo_selected_text++; else m_undo_selected_text--;
-		}
-		else if (typeid(*s) == typeid(ShapeLine)) {
-			if constexpr (I) m_undo_selected_line++; else m_undo_selected_line--;
-		}
-		else if (typeid(*s) == typeid(ShapeImage)) {
-			if constexpr (I) m_undo_selected_image++; else m_undo_selected_image--;
-		}
-		else if (typeid(*s) == typeid(ShapeRuler)) {
-			if constexpr (I) m_undo_selected_ruler++; else m_undo_selected_ruler--;
-		}
-		else if (typeid(*s) == typeid(ShapeArc)) {
-			if constexpr (I) m_undo_selected_arc++; else m_undo_selected_arc--;
-		}
-		else if (typeid(*s) == typeid(ShapePoly)) {
-			if (s->exist_cap()) {
-				if constexpr (I) m_undo_selected_polyline++; else m_undo_selected_polyline--;
-			}
-			else {
-				if constexpr (I) m_undo_selected_polygon++; else m_undo_selected_polygon--;
-			}
-		}
-	}
+
+	//template<bool I> void MainPage::undo_selected_cnt(Shape* s)
+	//{
+	//	if constexpr (I) m_undo_select_cnt++; else m_undo_select_cnt--;
+	//	if (s->exist_cap()) {
+	//		if constexpr (I) m_undo_selected_exist_cap++; else m_undo_selected_exist_cap--;
+	//	}
+	//	if (typeid(*s) == typeid(ShapeGroup)) {
+	//		if constexpr (I) m_undo_selected_group++; else m_undo_selected_group--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapeText)) {
+	//		if constexpr (I) m_undo_selected_text++; else m_undo_selected_text--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapeLine)) {
+	//		if constexpr (I) m_undo_selected_line++; else m_undo_selected_line--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapeImage)) {
+	//		if constexpr (I) m_undo_selected_image++; else m_undo_selected_image--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapeRuler)) {
+	//		if constexpr (I) m_undo_selected_ruler++; else m_undo_selected_ruler--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapeArc)) {
+	//		if constexpr (I) m_undo_selected_arc++; else m_undo_selected_arc--;
+	//	}
+	//	else if (typeid(*s) == typeid(ShapePoly)) {
+	//		if (s->exist_cap()) {
+	//			if constexpr (I) m_undo_selected_polyline++; else m_undo_selected_polyline--;
+	//		}
+	//		else {
+	//			if constexpr (I) m_undo_selected_polygon++; else m_undo_selected_polygon--;
+	//		}
+	//	}
+	//}
 
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
@@ -496,13 +498,13 @@ namespace winrt::GraphPaper::implementation
 				// 以前の操作をスタックから取り除き, 終了する.
 				if (s->is_selected()) {
 					s->set_select(false);
-					undo_selected_cnt<false>(s);
-					//m_undo_select_cnt--;
+					//undo_selected_cnt<false>(s);
+					m_undo_select_cnt--;
 				}
 				else {
 					s->set_select(true);
-					undo_selected_cnt<true>(s);
-					//m_undo_select_cnt++;
+					//undo_selected_cnt<true>(s);
+					m_undo_select_cnt++;
 				}
 #ifdef _DEBUG
 				debug_cnt();
@@ -514,12 +516,12 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_undo_stack.push_back(new UndoSelect(s));
 		if (s->is_selected()) {
-			undo_selected_cnt<true>(s);
-			//m_undo_select_cnt++;
+			//undo_selected_cnt<true>(s);
+			m_undo_select_cnt++;
 		}
 		else {
-			undo_selected_cnt<false>(s);
-			//m_undo_select_cnt--;
+			//undo_selected_cnt<false>(s);
+			m_undo_select_cnt--;
 		}
 #ifdef _DEBUG
 		debug_cnt();

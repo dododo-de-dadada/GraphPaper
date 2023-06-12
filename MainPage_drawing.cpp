@@ -14,19 +14,22 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニュー項目が選択された.
 	void MainPage::drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		tb_map_pointer().Text(L"");
+
 		// 選択ツールが選択されている.
 		if (sender == rmfi_menu_selection_tool()) {
 			// XAML のキーボードアクセラレーターにエスケープキーが設定されている.
-			if (m_core_text_focused != nullptr) {
-				m_core_text.NotifyFocusLeave();
-				undo_push_text_unselect(m_core_text_focused);
-				m_core_text_focused = nullptr;
-				main_draw();
-			}
+			//if (m_core_text_focused != nullptr) {
+			//	m_core_text.NotifyFocusLeave();
+			//	undo_push_text_unselect(m_core_text_focused);
+			//	m_core_text_focused = nullptr;
+			//}
 			m_drawing_tool = DRAWING_TOOL::SELECT;
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
 			m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
+			unselect_shape_all();
+			main_draw();
 		}
 		else if (sender == rmfi_menu_drawing_rect()) {
 			m_drawing_tool = DRAWING_TOOL::RECT;

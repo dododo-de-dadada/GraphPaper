@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_core_text_focused != nullptr) {
 			undo_push_text_select(m_core_text_focused, 0, m_core_text_focused->get_text_len(), false);
-			//xcvd_menu_is_enabled();
+			menu_is_enable();
 			main_draw();
 		}
 		else {
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_select_all();
 			}
-			//xcvd_menu_is_enabled();
+			menu_is_enable();
 			main_draw();
 			status_bar_set_pos();
 		}
@@ -151,7 +151,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		//xcvd_menu_is_enabled();
 		main_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
@@ -257,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::unselect_shape_all(const bool t_range_only)
 	{
 		bool changed = false;
-		if (m_core_text_focused == nullptr) {
+		if (m_core_text_focused != nullptr) {
 			undo_push_text_unselect(m_core_text_focused);
 			m_core_text.NotifyFocusLeave();
 			m_core_text_focused = nullptr;
