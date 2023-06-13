@@ -11,6 +11,7 @@
 	<!-- x:Name はコードビハインドのためのオブジェクト. x:Uid はリソースの参照. -->
 	<Page.Resources>
 		<ResourceDictionary>
+     
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Dictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
@@ -148,7 +149,7 @@
 				<!-- 円弧の方向を反転 -->
 				<MenuFlyoutItem x:Name="popup_reverse_arc" x:Uid="menu_reverse_arc" Click="reverse_arc_click" Text="Reverse Arc Direction">
 					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_reverse_arc}" />
+                        <PathIcon Data="{StaticResource data_reverse_arc}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 多角形を開く -->
@@ -795,7 +796,7 @@
 				<!-- 円弧の方向を反転 -->
 				<MenuFlyoutItem x:Name="menu_reverse_arc" x:Uid="menu_reverse_arc" Click="reverse_arc_click" Text="Reverse Arc Direction">
 					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_reverse_arc}" />
+                        <PathIcon Data="{StaticResource data_reverse_arc}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 多角形を開く -->
@@ -1366,12 +1367,24 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_info}" />
 					</MenuFlyoutSubItem.Icon>
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Sheet Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" ></ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Glyph="{StaticResource glyph_unit}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Glyph="{StaticResource glyph_mouse}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_grid}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 点を方眼にくっつける -->
@@ -1516,50 +1529,76 @@
 			<StackPanel.ContextFlyout>
 				<MenuFlyout x:Name="mf_popup_status">
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Len Unit Name" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Text="Page Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Text="Scale" />
-				</MenuFlyout>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Glyph="{StaticResource glyph_unit}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <FontIcon Glyph="{StaticResource glyph_mouse}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
+                        <ToggleMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_grid}"/>
+                        </ToggleMenuFlyoutItem.Icon>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
+                </MenuFlyout>
 			</StackPanel.ContextFlyout>
 			<!-- ContextFlyout を処理するため event_released を設定 -->
-			<StackPanel
-				x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal" >
-				<TextBlock  Margin="0,0,0,0" Text="Draw:"/>
-				<PathIcon
-					x:Name="pi_tool_icon" Data="M0,0"
-					Height="16"  Width="16"
-					HorizontalAlignment="Center" VerticalAlignment="Center">
-					<PathIcon.RenderTransform>
-						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
-					</PathIcon.RenderTransform>
-				</PathIcon>
-				<Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
-                <TextBlock x:Name="tb_map_pointer" Width="Auto" IsTextSelectionEnabled="True" Visibility="Collapsed"  />
+			<StackPanel x:Name="status_bar_drawing_tool" Margin="0,0,12,0" Orientation="Horizontal" >
+				<!--<TextBlock  Margin="0,0,0,0" Text="Draw:"/>-->
+                <PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <PathIcon.RenderTransform>
+                        <ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
+                    </PathIcon.RenderTransform>
+                </PathIcon>
+                <TextBlock Text=":"/>
+                <Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
+                <TextBlock x:Name="tb_map_pointer" Width="Auto" IsTextSelectionEnabled="True" Text="- -" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_unit" Text="Unit:"/>
+                <FontIcon Glyph="{StaticResource glyph_unit}" FontSize="14"/>
+                <TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_unit" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_pos" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_pos_x" Text="X:" />
-				<TextBlock x:Name="tk_status_bar_pos_x" Margin="0,0,4,0" Text="0"/>
+                <FontIcon Glyph="{StaticResource glyph_mouse}" FontSize="14"/>
+                <TextBlock Text=":" />
+				<TextBlock x:Name="tk_status_bar_pos_x" Text="0"/>
+                <!--
 				<TextBlock x:Uid="tk_status_bar_pos_y" Text="Y:" />
 				<TextBlock x:Name="tk_status_bar_pos_y" Text="0"/>
+                -->
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_grid" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_grid" Text="Grid:"/>
+                <PathIcon Data="{StaticResource data_grid}" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <PathIcon.RenderTransform>
+                        <ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
+                    </PathIcon.RenderTransform>
+                </PathIcon>
+                <TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_grid" Text="0" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_sheet" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_sheet_w" Text="W:"/>
-				<TextBlock x:Name="tk_status_bar_sheet_w" Margin="0,0,4,0" Text="0"/>
-				<TextBlock x:Uid="tk_status_bar_sheet_h" Text="H:"/>
-				<TextBlock x:Name="tk_status_bar_sheet_h" Text="0"/>
+                <SymbolIcon Symbol="Page2" RenderTransformOrigin="0.5,0.5">
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+				<TextBlock Text=":"/>
+				<TextBlock x:Name="tk_status_bar_sheet" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_zoom" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_zoom" Text="Zoom:"/>
+                <SymbolIcon Symbol="ZoomIn" RenderTransformOrigin="0.5,0.5">
+                    <SymbolIcon.RenderTransform>
+                        <CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
+                    </SymbolIcon.RenderTransform>
+                </SymbolIcon>
+                <TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_zoom" Text="0"/>
 			</StackPanel>
 		</StackPanel>

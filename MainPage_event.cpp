@@ -20,6 +20,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSeparator;
 	using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Input::PointerUpdateKind;
+	using winrt::Windows::UI::Xaml::FocusState;
 
 	static auto const& CURS_IBEAM = CoreCursor(CoreCursorType::IBeam, 0);	// 文字列カーソル
 	static auto const& CURS_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
@@ -755,11 +756,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_event.unlock();
 
-		Focus(winrt::Windows::UI::Xaml::FocusState::Programmatic);
+		Focus(FocusState::Programmatic);
 
 		const SwapChainPanel& swap_chain_panel{
 			sender.as<SwapChainPanel>()
 		};
+
+		if (scp_main_panel().ContextFlyout() != nullptr) {
+			scp_main_panel().ContextFlyout().Hide();
+			scp_main_panel().ContextFlyout(nullptr);
+		}
 
 		// ポインターのキャプチャを始める.
 		swap_chain_panel.CapturePointer(args.Pointer());
@@ -812,10 +818,13 @@ namespace winrt::GraphPaper::implementation
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
 
-		if (scp_main_panel().ContextFlyout() != nullptr) {
-			scp_main_panel().ContextFlyout().Hide();
-			scp_main_panel().ContextFlyout(nullptr);
-		}
+		wchar_t buf[512];
+		wchar_t buf_x[256];
+		wchar_t buf_y[256];
+		conv_len_to_str<false>(m_len_unit, m_event_pos_pressed.x, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0, buf_x);
+		conv_len_to_str<false>(m_len_unit, m_event_pos_pressed.y, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0, buf_y);
+		swprintf_s(buf, L"%s %s", buf_x, buf_y);
+		tb_map_pointer().Text(buf);
 
 		// 押された図形があるなら, その属性をページに反映する
 		if (m_event_loc_pressed != LOC_TYPE::LOC_SHEET) {
@@ -1032,6 +1041,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 左ボタンが押された状態か判定する.
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
+
 				// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
 				const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 				const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
@@ -1070,7 +1080,7 @@ namespace winrt::GraphPaper::implementation
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::None) {
 					event_eyedropper_detect(m_event_shape_pressed, m_event_loc_pressed);
 					status_bar_set_draw();
-					return;
+					//return;
 				}
 				// 制御キー押下なら吐き出し.
 				else {
@@ -1101,8 +1111,8 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 				}
+				//return;
 			}
-			return;
 		}
 		// 状態が, クリック後に左ボタンが押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK_LBTN) {
@@ -1250,6 +1260,7 @@ namespace winrt::GraphPaper::implementation
 			Shape* s;
 			const auto loc = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, false, s);
 			if (loc == LOC_TYPE::LOC_SHEET) {
+				//Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
 			else if (m_undo_select_cnt > 1) {

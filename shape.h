@@ -1874,6 +1874,12 @@ namespace winrt::GraphPaper::implementation
 			m_d2d_fill_geom = nullptr;
 			return true;
 		}
+		// 始点を得る.
+		virtual bool get_pos_start(D2D1_POINT_2F& val) const noexcept final override
+		{
+			val = m_start;
+			return true;
+		}
 		// 指定した部位の点を得る.
 		virtual void get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 指定した部位の点に格納する.

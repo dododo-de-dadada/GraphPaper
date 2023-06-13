@@ -1362,7 +1362,15 @@ namespace winrt::GraphPaper::implementation
 					changed = true;
 					undo_push_null();
 				}
-				m_undo_stack.push_back(new UndoValue<UNDO_T::ARC_DIR>(s));
+				D2D1_SWEEP_DIRECTION sweep_dir;
+				s->get_arc_dir(sweep_dir);
+				if (sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+					sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
+				}
+				else {
+					sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;
+				}
+				m_undo_stack.push_back(new UndoValue<UNDO_T::ARC_DIR>(s, sweep_dir));
 			}
 			if (changed) {
 				main_draw();

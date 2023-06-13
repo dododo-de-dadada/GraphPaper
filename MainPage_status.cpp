@@ -158,12 +158,14 @@ namespace winrt::GraphPaper::implementation
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
+			wchar_t buf[64];
 			wchar_t buf_x[32];
 			wchar_t buf_y[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
-			tk_status_bar_pos_x().Text(buf_x);
-			tk_status_bar_pos_y().Text(buf_y);
+			swprintf_s(buf, L"%s %s", buf_x, buf_y);
+			tk_status_bar_pos_x().Text(buf);
+			//tk_status_bar_pos_y().Text(buf_y);
 			if (sp_status_bar_pos().Visibility() != Visibility::Visible) {
 				sp_status_bar_pos().Visibility(Visibility::Visible);
 			}
@@ -179,59 +181,69 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_bar_set_draw(void)
 	{
 		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
-			winrt::hstring data;
 			if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ellipse")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ellipse")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_polygon")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_polygon")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RECT) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RULER) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Visible);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				//tb_map_pointer().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")))));
 				winrt::Windows::UI::Color c{
 					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.a)),
 					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.r)),
@@ -240,12 +252,24 @@ namespace winrt::GraphPaper::implementation
 				};
 				r_eyedropper().Fill(winrt::Windows::UI::Xaml::Media::SolidColorBrush{ c });
 				r_eyedropper().Visibility(Visibility::Visible);
-				tb_map_pointer().Visibility(Visibility::Collapsed);
+				wchar_t r_buf[128];
+				wchar_t g_buf[128];
+				wchar_t b_buf[128];
+				wchar_t a_buf[128];
+				wchar_t c_buf[128];
+				conv_col_to_str(m_color_code, conv_color_comp(m_eyedropper_color.r), r_buf);
+				conv_col_to_str(m_color_code, conv_color_comp(m_eyedropper_color.g), g_buf);
+				conv_col_to_str(m_color_code, conv_color_comp(m_eyedropper_color.b), b_buf);
+				conv_col_to_str(m_color_code, conv_color_comp(m_eyedropper_color.a), a_buf);
+				swprintf_s(c_buf, m_color_code != COLOR_CODE::HEX ? L"%s,%s,%s,%s" : L"#%s%s%s%s", r_buf, g_buf, b_buf, a_buf);
+				tb_map_pointer().Text(c_buf);
+				//tb_map_pointer().Visibility(Visibility::Visible);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_map_pin")));
+				pi_tool_icon().Data(nullptr);
+				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_map_pin")))));
 				r_eyedropper().Visibility(Visibility::Collapsed);
-				tb_map_pointer().Visibility(Visibility::Visible);
+				//tb_map_pointer().Visibility(Visibility::Visible);
 			}
 			else {
 #ifdef _DEBUG
@@ -254,15 +278,13 @@ namespace winrt::GraphPaper::implementation
 
 				throw winrt::hresult_invalid_argument();
 			}
-			pi_tool_icon().Data(nullptr);
-			pi_tool_icon().Data(Summary::Geom(data));
-			if (sp_status_bar_draw().Visibility() != Visibility::Visible) {
-				sp_status_bar_draw().Visibility(Visibility::Visible);
+			if (status_bar_drawing_tool().Visibility() != Visibility::Visible) {
+				status_bar_drawing_tool().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_draw().Visibility() != Visibility::Collapsed) {
-				sp_status_bar_draw().Visibility(Visibility::Collapsed);
+			if (status_bar_drawing_tool().Visibility() != Visibility::Collapsed) {
+				status_bar_drawing_tool().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -292,13 +314,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (status_and(m_status_bar, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
-			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf);
-			tk_status_bar_sheet_w().Text(buf);
-			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
-				m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf);
-			tk_status_bar_sheet_h().Text(buf);
+			wchar_t buf_w[32];
+			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
+			//tk_status_bar_sheet_w().Text(buf_w);
+			wchar_t buf_h[32];
+			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf_h);
+			wchar_t buf[64];
+			swprintf_s(buf, L"%sÅ~%s", buf_w, buf_h);
+			tk_status_bar_sheet().Text(buf);
 			if (sp_status_bar_sheet().Visibility() != Visibility::Visible) {
 				sp_status_bar_sheet().Visibility(Visibility::Visible);
 			}

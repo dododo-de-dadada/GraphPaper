@@ -1033,7 +1033,7 @@ namespace winrt::GraphPaper::implementation
 			{ b_seg.point3.x - b_seg.point2.x, b_seg.point3.y - b_seg.point2.y }
 		};
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);
-		const auto loc = ShapeBezier::hit_test({ test_pt.x - m_start.x, test_pt.y - m_start.y }, b_pt, b_to, m_stroke_cap, true, ew);
+		const auto loc = ShapeBezier::hit_test({ test_pt.x - b_start.x, test_pt.y - b_start.y }, b_pt, b_to, m_stroke_cap, true, ew);
 		if (loc == LOC_TYPE::LOC_STROKE) {
 			return LOC_TYPE::LOC_STROKE;
 		}

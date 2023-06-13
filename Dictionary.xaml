@@ -3,10 +3,11 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
 	<!-- フォントアイコンのグリフ -->
-    <x:String x:Key="glyph_align_right">&#xE8E2;</x:String>
-    <x:String x:Key="glyph_align_center">&#xE8E3;</x:String>
-    <x:String x:Key="glyph_align_left">&#xE8E4;</x:String>
-    <x:String x:Key="glyph_update_restore">&#xE777;</x:String>
+    <x:String x:Key="glyph_mouse">&#xE962;</x:String>
+	<x:String x:Key="glyph_align_right">&#xE8E2;</x:String>
+	<x:String x:Key="glyph_align_center">&#xE8E3;</x:String>
+	<x:String x:Key="glyph_align_left">&#xE8E4;</x:String>
+	<x:String x:Key="glyph_update_restore">&#xE777;</x:String>
 	<x:String x:Key="glyph_info">&#xE946;</x:String>
 	<x:String x:Key="glyph_block">&#xF140;</x:String>
 	<x:String x:Key="glyph_order">&#xE8CB;</x:String>
@@ -30,29 +31,41 @@
 	<x:String x:Key="glyph_export">&#xEA52;</x:String>	<!-- ImportMirrored -->
 	<!-- 移動と描画のコマンド構文 -->
 	<!-- https://learn.microsoft.com/ja-jp/windows/uwp/xaml-platform/move-draw-commands-syntax -->
-    <x:String x:Key="data_map_pin">
-        M 7 4.95		A 2.5 2.5 0 1 1 8 4.95		L 8 7 L 12 7 L 15 16 L 0 16 L 3 7 L 7 7 Z		M 6 2.5		A 1.5 1.5 0 1 1 6 2.501 Z		M 3.729 8.000		L 7 8		L 7 11.5		A  0.5 0.5 0 1 0 8 11.5		L 8 8 L 11.242 8 L 13.625 15 L 1.5 15 Z
+    <x:String x:Key="data_grid">
+        M 0 0 L 16 0 L 16 16 L 0 16 ZM 1 1 h 4 v 4 h -4 ZM 6 1 h 4 v 4 h -4 ZM 11 1 h 4 v 4 h -4 ZM 1 6 h 4 v 4 h -4 ZM 6 6 h 4 v 4 h -4 ZM 11 6 h 4 v 4 h -4 ZM 1 11 h 4 v 4 h -4 ZM 6 11 h 4 v 4 h -4 ZM 11 11 h 4 v 4 h -4 Z
     </x:String>
-    <x:String x:Key="data_line_space">
-        M 0,2.5 L 2.5,0 L 5,2.5 L 4.375,3.125 L 3,1.75 L 3,7 L 2,7 L 2,1.75 L 0.625,3.125 Z
+	<x:String x:Key="data_map_pin">
+		M 7 4.95
+		A 2.5 2.5 0 1 1 8 4.95
+		L 8 7 L 12 7 L 15 16 L 0 16 L 3 7 L 7 7 Z
+		M 6 2.5
+		A 1.5 1.5 0 1 1 6 2.501 Z
+		M 3.729 8.000
+		L 7 8
+		L 7 11.5
+		A  0.5 0.5 0 1 0 8 11.5
+		L 8 8 L 11.242 8 L 13.625 15 L 1.5 15 Z
+	</x:String>
+	<x:String x:Key="data_line_space">
+		M 0,2.5 L 2.5,0 L 5,2.5 L 4.375,3.125 L 3,1.75 L 3,7 L 2,7 L 2,1.75 L 0.625,3.125 Z
 		M 0,13.5 L 0.625,12.875 L 2,14.25 L 2,9 L 3,9 L 3,14.25 L 4.375,12.875 L 5,13.5 L 2.5,16 Z
-        M 7,0 L 16,0 16,1 7,1 Z
+		M 7,0 L 16,0 16,1 7,1 Z
 		M 7,5 L 16,5 L 16,6 L 7,6 Z
 		M 7,10 L 16,10 L 16,11 L 7,11 Z
 		M 7,15 L 16,15 L 16,16 L 7,16 Z
-    </x:String>
-    <x:String x:Key="data_white">
-        M 0 0 L 16 0 L 16 16 L 0 16 Z
-        M 1 1 L 15 1 L 15 15 L 1 15 Z
-    </x:String>
-    <x:String x:Key="data_black">
-        M 0 0 L 16 0 L 16 16 L 0 16 Z
-    </x:String>
-    <x:String x:Key="data_checker_board">
-        M 0 0 L 16 0 L 16 16 L 0 16 Z
-        M 8 1 L 15 1 L 15 8 L 8 8 Z
-        M 1 8 L 8 8 L 8 15 L 1 15 Z
-    </x:String>
+	</x:String>
+	<x:String x:Key="data_white">
+		M 0 0 L 16 0 L 16 16 L 0 16 Z
+		M 1 1 L 15 1 L 15 15 L 1 15 Z
+	</x:String>
+	<x:String x:Key="data_black">
+		M 0 0 L 16 0 L 16 16 L 0 16 Z
+	</x:String>
+	<x:String x:Key="data_checker_board">
+		M 0 0 L 16 0 L 16 16 L 0 16 Z
+		M 8 1 L 15 1 L 15 8 L 8 8 Z
+		M 1 8 L 8 8 L 8 15 L 1 15 Z
+	</x:String>
 	<x:String x:Key="data_align_just">
 		M 0 1 L 16 1 L 16 2 L 0 2 Z
 		M 0 4 L 5 4 L 5 5 L 0 5 Z
@@ -61,9 +74,9 @@
 		M 0 10 L 8 10 L 8 11 L 0 11 Z
 		M 11 10 L 16 10 L 16 11 L 11 11 Z
 		M 0 13 L 16 13 L 16 14 L 0 14 Z
-    </x:String>
-    <!-- 曲線アイコンの描画コマンド -->
-    <x:String x:Key="data_image_opac">
+	</x:String>
+	<!-- 曲線アイコンの描画コマンド -->
+	<x:String x:Key="data_image_opac">
 		M 1.5 0 L 13.5 0 L 13.5 8 L 1.5 8 Z
 		M 2.5 1 L 12.5 1 L 12.5 7 L 11.5 7 L 6.5 2 L 5.5 2 L 2.5 5 Z
 		M 2.5 6.5 L 6 3 L 10 7 L 2.5 7 Z
@@ -71,8 +84,9 @@
 		M 0 9 L 15 9 L 15 15 L 0 15 Z
 		M 1 10 L 14 10 L 14 14 L 1 14 Z
 	</x:String>
-    <x:String x:Key="data_chain">
-        M 3,8
+    <!--
+	<x:String x:Key="data_chain">
+		M 3,8
 		A 2.828427 2.828427 0 0 1 6.096 7.395
 		L 5.236 8.244
 		A 1.732051 1.732051 0 0 0  3.751 8.753
@@ -103,8 +117,9 @@
 		L 7.393 6.115
 		A 2.828427 2.8284271 0 0 0 8 3
 		Z
-    </x:String>
-    <x:String x:Key="data_bezier">
+	</x:String>
+    -->
+	<x:String x:Key="data_bezier">
 		M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
 	</x:String>
 	<!-- 破線の形式アイコンの描画コマンド -->
@@ -239,9 +254,9 @@
 				M 0,11 L16,11 L16,14 L 0,14 Z
 	</x:String>
 	<!-- 線枠の太さ 1px の描画コマンド -->
-    <x:String x:Key="data_stroke_width_1px">
-        M 0, 0 L16, 0 L16,1 L 0,1 Z
-    </x:String>
+	<x:String x:Key="data_stroke_width_1px">
+		M 0, 0 L16, 0 L16,1 L 0,1 Z
+	</x:String>
 	<!-- 線枠の太さ 2px の描画コマンド -->
 	<x:String x:Key="data_popup_stroke_widthpx">
 		M 0, 0 L16, 0 L16,2 L 0,2 Z
@@ -254,19 +269,19 @@
 	<x:String x:Key="data_stroke_width_4px">
 		M 0, 0 L16, 0 L16,4 L 0,4 Z
 	</x:String>
-    <!-- 線枠の太さ 8px の描画コマンド -->
-    <x:String x:Key="data_stroke_width_8px">
-        M 0, 0 L16, 0 L16,8 L 0,8 Z
-    </x:String>
-    <!-- 線枠の太さ 12px の描画コマンド -->
-    <x:String x:Key="data_stroke_width_12px">
-        M 0, 0 L16, 0 L16,12 L 0,12 Z
-    </x:String>
-    <!-- 線枠の太さ 8px の描画コマンド -->
-    <x:String x:Key="data_stroke_width_16px">
-        M 0, 0 L16, 0 L16,16 L 0,16 Z
-    </x:String>
-    <!-- だ円アイコンの描画コマンド -->
+	<!-- 線枠の太さ 8px の描画コマンド -->
+	<x:String x:Key="data_stroke_width_8px">
+		M 0, 0 L16, 0 L16,8 L 0,8 Z
+	</x:String>
+	<!-- 線枠の太さ 12px の描画コマンド -->
+	<x:String x:Key="data_stroke_width_12px">
+		M 0, 0 L16, 0 L16,12 L 0,12 Z
+	</x:String>
+	<!-- 線枠の太さ 8px の描画コマンド -->
+	<x:String x:Key="data_stroke_width_16px">
+		M 0, 0 L16, 0 L16,16 L 0,16 Z
+	</x:String>
+	<!-- だ円アイコンの描画コマンド -->
 	<x:String x:Key="data_ellipse">
 		M8,2 A8,6 0 0 1 8,14 A8,6 0 0 1 8,2 Z
 		M8,3 A7,5 0 0 1 8,13 A7,5 0 0 1 8,3 Z
@@ -293,9 +308,9 @@
 		M0,8 L16,8 L16,9 L0,9 Z
 	</x:String>
 	<!-- 多角形アイコンの描画コマンド -->
-    <!--
-    <x:String x:Key="data_end_open">
-        M 8.314 2.234
+	<!--
+	<x:String x:Key="data_end_open">
+		M 8.314 2.234
 		L 16 8
 		L 8 14
 		L 0.588 8.444
@@ -304,9 +319,9 @@
 		L 14.043 8
 		L 7.598 3.187
 		Z
-    </x:String>
-    <x:String x:Key="data_end_closed">
-        M 8 2
+	</x:String>
+	<x:String x:Key="data_end_closed">
+		M 8 2
 		L 16 8
 		L 8 14
 		L 0 8
@@ -316,47 +331,50 @@
 		L 8 12.524
 		L 1.928 8
 		Z
-    </x:String>
-    -->
-    <!-- 三角形アイコンの描画コマンド -->
-    <!--
+	</x:String>
+	-->
+	<!-- 三角形アイコンの描画コマンド -->
+	<!--
 	<x:String x:Key="data_polygon2">
 		M 8 0
-        l-8 13.856406
-        l15.999999 0 Z
+		l-8 13.856406
+		l15.999999 0 Z
 		M 8 2
-        l-6.267949 10.856406
-        l12.535898 0.000000 Z
+		l-6.267949 10.856406
+		l12.535898 0.000000 Z
 	</x:String>
-    -->
+	-->
     <x:String x:Key="data_reverse_arc">
-        M 0.5 1.5
-		A 13.5 13.5 0 0 1 14.458 13.774
-		L 15.667 12.588
-		L 16.375 13.261
-		L 14 15.625
-		L 11.677 13.261
-		L 12.365 12.588
-		A 12.5 12.5 0 0 0 0.5 2.5 Z
-		M 0.36 5
-		L 2.708 2.661
-		L 3.397 3.365
-		L 2.191 4.57
-		A 10.5 10.5 0 0 1 11.5 15.5
-		L 10.5 15.5
-		A 9.5 9.5 0 0 0 2.317 5.588
-		L 3.381 6.652
-		L 2.692 7.341 Z
+        M 3.761 0.313		A 16.5 16.5 0 0 1 13.391 8.498		L 15.078 4.321 L 15.984 4.685		L 13.693 10.394 L 7.984 8.081		L 8.349 7.185 L 12.432 8.810		A 15.5 15.5 0 0 0 3.453 1.260 Z		M 0.067 5.740		L 5.765 3.438 L 6.140 4.354 L 1.943 6.042		A 16.5 16.5 0 0 1 10.146 15.634		L 9.224 15.990		A 15.5 15.5 0 0 0 1.625 6.968		L 3.286 11.063 L 2.359 11.427 Z
     </x:String>
-    <x:String x:Key="data_polygon">
-        M 8,1 L 15.837,14.520 L 0.185,14.520 Z
+    <!--
+    <x:String x:Key="data_reverse_arc">
+        M 0 0
+		A 16 16 0 0 1 3.493 0.388
+		L 3.842 0.065 L 4.411 0.634
+		A 16 16 0 0 1 15.402 11.638
+		L 15.932 12.155 L 15.635 12.478
+		A 16 16 0 0 1 16 16
+		L 15 16
+		A 15 15 0 0 0 14.755 13.306
+		L 12.000 16.126 L 8.041 12.207 L 8.727 11.521 L 11.431 14.186
+		A 11.5 11.5 0 0 0 1.824 4.575
+		L 4.476 7.266 L 3.790 7.977 L 0.133 4 L 2.648 1.255
+		A 15 15 0 0 0 0 1 Z
+		M 3.812 1.501
+		A 15 15 0 0 1 14.506 12.155
+		L 12.436 14.277
+		A 12.5 12.5 0 0 0 1.712 3.566 Z
+	</x:String>-->
+	<x:String x:Key="data_polygon">
+		M 8,1 L 15.837,14.520 L 0.185,14.520 Z
 		M 8,2.98 L 14.087,13.520 L 1.964,13.520 Z
-    </x:String>
-    <x:String x:Key="data_polyline">
-        M 8.438,1.785 L 15.837,14.520 L 1.067,14.520
+	</x:String>
+	<x:String x:Key="data_polyline">
+		M 8.438,1.785 L 15.837,14.520 L 1.067,14.520
 		L 1.067,13.520 L 14.087,13.520 L 7.584,2.212 Z
-    </x:String>
-    <!-- ひし型アイコンの描画コマンド -->
+	</x:String>
+	<!-- ひし型アイコンの描画コマンド -->
 	<x:String x:Key="data_quad">
 		M8,2 L16,8 L8,14 L0,8 Z
 				M8,3.33333 L14.66666,8 L8,12.66666 L1.33333,8 Z
@@ -394,7 +412,12 @@
 		M0,0 H1 V1 H2 V2 H3 V3 H4 V4 H5 V5 H6 V6 H7 V7 H8 V8 H9 V9 H10 V10 H11 V11 H7 V12 H8 V14 H9 V17 H6 V16 H5 V14 H4 V12 H3 V13 H2 V14 H1 V15 H0 Z
 				M1,2 H2 V3 H3 V4 H4 V5 H5 V6 H6 V7 H7 V8 H8 V9 H9 V10 H6 V12 H7 V14 H8 V16 H6 V14 H5 V12 H4 V11 H3 V12 H2 V13 H1 Z
 	</x:String>
-	<!-- 文字列アイコンの描画コマンド -->
+    <!--
+    <x:String x:Key="data_select">
+        M 6 0 L 7 0 L 7 6 L 13 6 L 13 7 L 7 7 L 7 13		L 6 13 L 6 7 L 0 7 L 0 6 L 6 6 Z
+    </x:String>
+    -->
+    <!-- 文字列アイコンの描画コマンド -->
 	<x:String x:Key="data_text">
 		M1.25 16.00 L7.25 1.00 L8.75 1.00 L14.75 16.00 L13.25 16.00 L11.75 12.25 L4.25 12.25 L2.75 16.00 Z
 				M4.75 11.00 L8.00 2.875 L11.25 11.00 Z

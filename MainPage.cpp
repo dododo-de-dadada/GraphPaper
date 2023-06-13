@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 色成分を文字列に変換する.
 	// col_code	色成分の記法
-	// col_comp	色成分の値
+	// col_comp	色成分の値 (0...255)
 	// text_len	文字列の最大長 ('\0' を含む長さ)
 	// text_buf	文字列の配列 [t_len]
 	void conv_col_to_str(const COLOR_CODE col_code, const double col_comp, const size_t text_len, wchar_t text_buf[]) noexcept
@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 色の基数が 16 進数か判定する.
 		else if (col_code == COLOR_CODE::HEX) {
-			swprintf_s(text_buf, text_len, L"x%02X", static_cast<uint32_t>(std::round(col_comp)));
+			swprintf_s(text_buf, text_len, L"%02x", static_cast<uint32_t>(std::round(col_comp)));
 		}
 		// 色の基数が実数か判定する.
 		else if (col_code == COLOR_CODE::REAL) {
