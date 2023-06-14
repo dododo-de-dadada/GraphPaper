@@ -222,7 +222,7 @@
     <ClCompile Include="MainPage_edit.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />
-    <ClCompile Include="MainPage_status.cpp" />
+    <ClCompile Include="MainPage_status_bar.cpp" />
     <ClCompile Include="MainPage_stroke.cpp" />
     <ClCompile Include="MainPage_summary.cpp" />
     <ClCompile Include="MainPage_find.cpp" />
