@@ -171,7 +171,8 @@ namespace winrt::GraphPaper::implementation
 	void slist_count(
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
-		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_ruler_cnt, uint32_t& selected_arc_cnt,
+		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_ruler_cnt,
+		uint32_t& selected_clockwise, uint32_t& selected_counter_clockwise,
 		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt,
 		bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept
@@ -186,7 +187,8 @@ namespace winrt::GraphPaper::implementation
 		selected_ruler_cnt = 0;	// 選択された定規の数
 		selected_poly_open_cnt = 0;	// 選択された開いた多角形の数
 		selected_poly_close_cnt = 0;	// 選択された閉じた多角形の数
-		selected_arc_cnt = 0;	// 選択された円弧図形の数
+		selected_clockwise = 0;	// 選択された円弧図形の数
+		selected_counter_clockwise = 0;	// 選択された円弧図形の数
 		selected_exist_cap_cnt = 0;	// 選択された端をもつ図形の数
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
@@ -240,7 +242,14 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 図形の型が画像か判定する.,
 				else if (tid == typeid(ShapeArc)) {
-					selected_arc_cnt++;
+					D2D1_SWEEP_DIRECTION dir;
+					s->get_arc_dir(dir);
+					if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE) {
+						selected_counter_clockwise++;
+					}
+					else {
+						selected_clockwise++;
+					}
 				}
 				// 図形の型がグループ図形か判定する.,
 				else if (tid == typeid(ShapeGroup)) {

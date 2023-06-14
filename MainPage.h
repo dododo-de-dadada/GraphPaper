@@ -284,6 +284,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
 		float m_main_scale = 1.0f;	// 用紙の拡大率
+		bool m_main_focus = false;
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
@@ -439,20 +440,51 @@ namespace winrt::GraphPaper::implementation
 		// メインの用紙図形の処理
 		//-------------------------------
 
-		// 文字列の長さを得る.
+		//-------------------------------
+		// MainPage_core_text.cpp
+		// 文字入力
+		//-------------------------------
+
+		// 入力中の文字列が押された.
+		template <bool SHIFT_KEY> void core_text_pressed(void) noexcept
+		{
+			if constexpr (SHIFT_KEY) {
+				bool trail;
+				const auto end = m_core_text_focused->get_text_pos(m_event_pos_curr, trail);
+				const auto start = m_main_sheet.m_select_start;
+				undo_push_text_select(m_core_text_focused, start, end, trail);
+				main_draw();
+			}
+		}
+		// 文字列入力のためのハンドラーを設定する.
+		void core_text_setup_handler(void) noexcept;
+		// 入力中の文字列の長さを得る.
 		uint32_t core_text_len(void) const noexcept;
-		// 文字列のキャレット位置を得る.
+		// 入力中の文字列のキャレット位置を得る.
 		uint32_t core_text_pos(void) const noexcept;
-		// 入力文字列の選択範囲の文字列を得る.
+		// 入力中の文字列の選択範囲の文字列を得る.
 		winrt::hstring core_text_substr(void) const noexcept;
-		// 文字列の選択範囲の長さを得る.
+		// 入力中の文字列の選択範囲の長さを得る.
 		uint32_t core_text_selected_len(void) const noexcept;
-		// 入力文字列の選択範囲の文字を削除する.
-		void core_text_delete(void) noexcept;
-		// 入力文字列の選択範囲に文字列を挿入する.
+		// 入力中の文字列の選択範囲の文字を削除する.
+		void core_text_delete_selection(void) noexcept;
+		// 入力中の文字列の選択範囲に文字列を挿入する.
 		void core_text_insert(const wchar_t* ins_text, const uint32_t ins_len) noexcept;
-		// 入力文字列から文字を削除する.
-		void core_text_del_c(const bool shift_key) noexcept;
+		// 文字列の入力中に削除キーが押された.
+		template <bool SHIFT_KEY> void core_text_delete_key(void) noexcept;
+		// 文字列の入力中に左矢じるしキーが押された.
+		template <bool SHIFT_KEY> void core_text_left_key(void) noexcept;
+		// 文字列の入力中に右矢じるしキーが押された.
+		template <bool SHIFT_KEY> void core_text_right_key(void) noexcept;
+		// 文字列の入力中に上矢じるしキーが押された.
+		template <bool SHIFT_KEY> void core_text_up_key(void) noexcept;
+		// 文字列の入力中に改行キーが押された.
+		void core_text_enter_key(void) noexcept;
+		// 文字列の入力中に下矢じるしキーが押された.
+		template <bool SHIFT_KEY> void core_text_down_key(void) noexcept;
+		// 文字列の入力中に後退キーが押された.
+		void MainPage::core_text_backspace_key(void) noexcept;
+
 		// 更新された図形をもとにメインの用紙の境界矩形を更新する.
 		void MainPage::main_bbox_update(const Shape* s) noexcept
 		{
@@ -507,6 +539,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「前面に移動」が選択された.
 		void bring_forward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「前面に移動」のショートカットが押された.
+		/*
 		void bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -520,9 +553,11 @@ namespace winrt::GraphPaper::implementation
 				popup_bring_forward().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「最前面に移動」が選択された.
 		void bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」のショートカットが押された.
+		/*
 		void bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -536,9 +571,11 @@ namespace winrt::GraphPaper::implementation
 				popup_bring_to_front().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「ひとつ背面に移動」が選択された.
 		void send_backward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「ひとつ背面に移動」のショートカットが押された.
+		/*
 		void send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -552,9 +589,11 @@ namespace winrt::GraphPaper::implementation
 				popup_send_backward().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「最背面に移動」が選択された.
 		void send_to_back_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最背面に移動」が選択された.
+		/*
 		void send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -568,7 +607,7 @@ namespace winrt::GraphPaper::implementation
 				popup_send_to_back().Visibility(Visibility::Visible);
 			}
 		}
-
+		*/
 		//-------------------------------
 		// MainPage_disp.cpp
 		// 表示デバイスのハンドラー
@@ -694,7 +733,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「文字列の編集」が選択された.
 		void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
 		IAsyncAction edit_text_async(ShapeText* s);
-		IAsyncAction edit_arc_async(ShapeArc* s);
+		//IAsyncAction edit_arc_async(ShapeArc* s);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -707,6 +746,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の検索/置換」のショートカットが押された.
+		/*
 		void find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			bool exist_find = false;
@@ -725,6 +765,7 @@ namespace winrt::GraphPaper::implementation
 				find_text_click(mfi_menu_find_text(), nullptr);
 			}
 		}
+		*/
 		// 文字列検索パネルの「閉じる」ボタンが押された.
 		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
@@ -763,88 +804,101 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「グループ化」が選択された.
 		void group_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「グループ化」のショートカットが押された.
-		void group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			if (m_undo_select_cnt > 0) {
-				menu_group().IsEnabled(true);
-				popup_group().Visibility(Visibility::Visible);
-			}
-		}
 		// 編集メニューの「グループの解除」が選択された.
 		void ungroup_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「グループの解除」が選択された.
-		void ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			for (const auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && s->is_selected() && typeid(*s) == typeid(ShapeGroup)) {
-					menu_ungroup().IsEnabled(true);
-					popup_ungroup().Visibility(Visibility::Visible);
-					break;
-				}
-			}
-		}
 
 		//-------------------------------
 		//　MainPage_kacc.cpp
 		//　キーアクセラレーターのハンドラー
 		//-------------------------------
 
-		void kacc_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_delete_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_down_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_down_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_enter_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_right_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_up_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		void kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void MainPage::kacc_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_backspace_key();
+			args.Handled(true);
+		}
 
-		//　Cntrol + PgDn が押された.
-		//void kacc_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + End が押された.
-		//void kacc_bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + C が押された.
-		//void kacc_copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + X が押された.
-		//void kacc_cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Delete が押された.
-		//void kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + E が押された.
-		//void kacc_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + F が押された.
-		//void kacc_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + G が押された.
-		//void kacc_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + N が押された.
-		//void kacc_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + O が押された.
-		//void kacc_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + V が押された.
-		//void kacc_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + Y が押された.
-		//void kacc_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + Shift + S が押された.
-		//void kacc_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + S が押された.
-		//void kacc_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + A が押された.
-		//void kacc_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + PgUp が押された.
-		//void kacc_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + Home が押された.
-		//void kacc_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + L が押された.
-		//void kacc_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + Z が押された.
-		//void kacc_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + U が押された.
-		//void kacc_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		//　Cntrol + 0 が押された.
-		//void kacc_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void MainPage::kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			if (m_core_text_focused == nullptr) {
+				delete_click(nullptr, nullptr);
+			}
+			else {
+				core_text_delete_key<false>();
+			}
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_delete_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			if (m_core_text_focused == nullptr) {
+				delete_click(nullptr, nullptr);
+			}
+			else {
+				core_text_delete_key<true>();
+			}
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_down_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_down_key<false>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_down_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_down_key<true>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_enter_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_enter_key();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+		{
+			rmfi_menu_selection_tool().IsChecked(true);
+			drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
+		}
+
+		void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_left_key<false>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_left_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_left_key<true>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_right_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_right_key<false>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_right_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_right_key<true>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_up_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_up_key<false>();
+			args.Handled(true);
+		}
+
+		void MainPage::kacc_up_shift_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
+		{
+			core_text_up_key<true>();
+			args.Handled(true);
+		}
 
 		//-----------------------------
 		// MainPage_image.cpp
@@ -914,6 +968,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「すべて選択」のショートカットが押された.
+		/*
 		void select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			bool exist_unselect = false;
@@ -931,6 +986,7 @@ namespace winrt::GraphPaper::implementation
 				popup_select_all().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -939,8 +995,6 @@ namespace winrt::GraphPaper::implementation
 		bool toggle_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
 		bool unselect_shape_all(const bool t_range_only = false);
-		//　Escape が押された.
-		void kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_layout.cpp
@@ -1126,6 +1180,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「やり直し」が選択された.
 		void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「やり直し」のショートカットが押された.
+		/*
 		void redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			if (!m_redo_stack.empty()) {
@@ -1133,9 +1188,11 @@ namespace winrt::GraphPaper::implementation
 				popup_redo().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「元に戻す」が選択された.
 		void undo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」のショートカットが押された.
+		/*
 		void undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			if (!m_undo_stack.empty()) {
@@ -1143,6 +1200,7 @@ namespace winrt::GraphPaper::implementation
 				popup_undo().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
 		// 操作を実行する.
@@ -1255,7 +1313,6 @@ namespace winrt::GraphPaper::implementation
 				if ((*u)->m_shape != s) {
 					continue;
 				}
-				ShapeText* t = static_cast<ShapeText*>(s);
 				m_main_sheet.m_select_start = start;
 				m_main_sheet.m_select_end = end;
 				m_main_sheet.m_select_trail = trail;
@@ -1274,16 +1331,40 @@ namespace winrt::GraphPaper::implementation
 		// 切り取りとコピー, 貼り付け, 削除
 		//-------------------------------
 
+		// ショートカットが押されたのが
+		// スワップチェーンパネルはそもそもフォーカスを獲得しないので, フォーカスがあるかどうかは判定できない.
+		// スワップチェーンパネル以外のフォーカスを獲得しうる UI 要素, たとえばテキストボックス
+		void ui_elem_getting_focus(IInspectable const&, RoutedEventArgs const&)
+		{
+			// テキストブロックがサポートするコマンドは以下の通り.
+			// Copy
+			// Cut
+			// Paste
+			// Select all
+			// Undo
+			m_main_focus = false;
+			status_bar_debug().Text(L"m_main_focus = false");
+		}
+
+		void ui_elem_lost_focus(IInspectable const&, RoutedEventArgs const&)
+		{
+			m_main_focus = true;
+			status_bar_debug().Text(L"m_main_focus = true");
+		}
+
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// スワップチェーンパネルのショートカットが押された.
+		/*
 		void copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			copy_click_async(scp_main_panel(), nullptr);
 		}
+		*/
 		// 編集メニューの「切り取り」が選択された.
 		IAsyncAction cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」のショートカットが押された.
+		/*
 		void cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
@@ -1291,9 +1372,11 @@ namespace winrt::GraphPaper::implementation
 				popup_cut().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「削除」が選択された.
 		void delete_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」のショートカットが押された.
+		/*
 		void delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0 || core_text_pos() < core_text_len()) {
@@ -1301,9 +1384,11 @@ namespace winrt::GraphPaper::implementation
 				popup_delete().Visibility(Visibility::Visible);
 			}
 		}
+		*/
 		// 編集メニューの「貼り付け」が選択された.
 		void paste_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「貼り付け」のショートカットが押された.
+		/*
 		void paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&) noexcept
 		{
 			// Clipboard::GetContent() は, 
@@ -1323,6 +1408,7 @@ namespace winrt::GraphPaper::implementation
 			menu_paste().IsEnabled(true);
 			popup_paste().Visibility(Visibility::Visible);
 		}
+		*/
 		// 画像を貼り付ける.
 		IAsyncAction xcvd_paste_image(void);
 		// 図形を貼り付ける.
@@ -1346,35 +1432,27 @@ namespace winrt::GraphPaper::implementation
 				m_undo_stack.push_back(new UndoReverse(s));
 			}
 			if (changed) {
+				menu_is_enable();
 				main_draw();
 				status_bar_set_pos();
 			}
 		}
 
-		void reverse_arc_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
+		void draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/)
 		{
-			bool changed = false;
-			for (Shape* s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeArc)) {
-					continue;
+			if (sender == menu_arc_counter() || sender == popup_draw_arc_ccw()) {
+				undo_push_null();
+				if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+					menu_is_enable();
+					main_draw();
 				}
-				if (!changed) {
-					changed = true;
-					undo_push_null();
-				}
-				D2D1_SWEEP_DIRECTION sweep_dir;
-				s->get_arc_dir(sweep_dir);
-				if (sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-					sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
-				}
-				else {
-					sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;
-				}
-				m_undo_stack.push_back(new UndoValue<UNDO_T::ARC_DIR>(s, sweep_dir));
 			}
-			if (changed) {
-				main_draw();
-				status_bar_set_pos();
+			else if (sender == menu_draw_arc_cw() || sender == popup_draw_arc_cw()) {
+				undo_push_null();
+				if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+					menu_is_enable();
+					main_draw();
+				}
 			}
 		}
 

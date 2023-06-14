@@ -150,8 +150,8 @@ namespace winrt::GraphPaper::implementation
 			t_box.x = fmax(t_box.x, m_dwrite_test_metrics[i].width);
 			t_box.y += m_dwrite_test_metrics[i].height;
 		}
-		// 枠に左右のパディングを加える.
-		const float sp = m_text_pad.width * 2.0f;	// 左右のパディング
+		// 枠に左右の内余白を加える.
+		const float sp = m_text_pad.width * 2.0f;	// 左右の内余白
 		pt_add(t_box, sp, sp, t_box);
 		if (g_len >= 1.0f) {
 			// 枠を方眼の大きさに切り上げる.

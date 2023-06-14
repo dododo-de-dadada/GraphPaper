@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニュー項目が選択された.
 	void MainPage::drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		tb_map_pointer().Text(L"");
+		tb_map_pointer().Text(L"- -");
 
 		// 選択ツールが選択されている.
 		if (sender == rmfi_menu_selection_tool()) {

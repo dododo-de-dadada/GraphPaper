@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "shape.h"
 //
-// 用紙の大きさは, 方眼の大きさに余白 (マージン) を足したもの.
+// 方眼が描かれる大きさは, 用紙の大きさから内余白を減じたもの.
 //
-//         margin_left         margin_right
+//         padding_left         padding_right
 //            |<->|               |<->|
 //        + - @-----------------------+ - +
-// margin_top |                       |   |
+// padding_top|                       |   |
 //        + - |   0---+---+---+---+   |   |
 //            |   |   |   |   |   |   |   |
 //            |   +---+---+---+---+   |   |
@@ -18,7 +18,7 @@
 //            |   +---+---+---+---+   |   |
 //            |   |   |   |   |   |   |   |
 //        + - |   +---+---+---+---+   |   |
-// margin_bot |                       |   |
+// padding_bot|                       |   |
 //        + - +-----------------------@ - +
 //            |<------sheet_w ------->|
 //    0 は, 原点
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (hr == S_OK) {
 			const FLOAT aw = m_aux_width;
-			// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+			// 用紙の倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 			D2D1_POINT_2F s;
 			D2D1_POINT_2F e;
 
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 				Shape::m_aux_style.put());
 		}
 		if (hr == S_OK) {
-			// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+			// 用紙の倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
@@ -284,15 +284,15 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeSheet::draw(void) noexcept
 	{
-		// ページの色でページを塗りつぶす.
-		D2D1_RECT_F p_rect{	// ページの矩形
-			-m_sheet_margin.left,
-			-m_sheet_margin.top,
-			-m_sheet_margin.left + m_sheet_size.width,
-			-m_sheet_margin.top + m_sheet_size.height
+		// 用紙の色で塗りつぶす.
+		D2D1_RECT_F sheet_rect{	// 用紙の矩形
+			-m_sheet_padding.left,
+			-m_sheet_padding.top,
+			-m_sheet_padding.left + m_sheet_size.width,
+			-m_sheet_padding.top + m_sheet_size.height
 		};
 		m_d2d_color_brush->SetColor(m_sheet_color);
-		m_d2d_target->FillRectangle(p_rect, m_d2d_color_brush.get());
+		m_d2d_target->FillRectangle(sheet_rect, m_d2d_color_brush.get());
 
 		if (m_grid_show == GRID_SHOW::FRONT || m_grid_show == GRID_SHOW::HIDE) {
 			for (auto t : m_shape_list) {
@@ -312,8 +312,8 @@ namespace winrt::GraphPaper::implementation
 			v_start.y = 0.0f;
 			h_start.x = 0.0f;
 
-			const double draw_w = m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right);	// 描画する幅
-			const double draw_h = m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom);	// 描画する高さ
+			const double draw_w = m_sheet_size.width - (m_sheet_padding.left + m_sheet_padding.right);	// 描画する幅
+			const double draw_h = m_sheet_size.height - (m_sheet_padding.top + m_sheet_padding.bottom);	// 描画する高さ
 			const double offs_x = m_grid_offset.x;
 			const double offs_y = m_grid_offset.y;
 			const auto emph_2 = m_grid_emph.m_gauge_2;
@@ -461,14 +461,14 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ページの色を得る.
+	// 用紙の色を得る.
 	bool ShapeSheet::get_sheet_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_sheet_color;
 		return true;
 	}
 
-	// ページの大きさを得る.
+	// 用紙の大きさを得る.
 	bool ShapeSheet::get_sheet_size(D2D1_SIZE_F& val) const noexcept
 	{
 		val = m_sheet_size;
@@ -586,40 +586,38 @@ namespace winrt::GraphPaper::implementation
 		if (g_show == GRID_SHOW::HIDE || g_show == GRID_SHOW::BACK || g_show == GRID_SHOW::FRONT) {
 			m_grid_show = g_show;
 		}
-		// 方眼に合わせる.
-		//m_snap_grid = dt_reader.ReadBoolean();
-		// ページの色
-		const D2D1_COLOR_F p_color{
+		// 用紙の色
+		const D2D1_COLOR_F sheet_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_color.r >= 0.0f && p_color.r <= 1.0f && p_color.g >= 0.0f && p_color.g <= 1.0f &&
-			p_color.b >= 0.0f && p_color.b <= 1.0f && p_color.a >= 0.0f && p_color.a <= 1.0f) {
-			m_sheet_color = p_color;
+		if (sheet_color.r >= 0.0f && sheet_color.r <= 1.0f && sheet_color.g >= 0.0f && sheet_color.g <= 1.0f &&
+			sheet_color.b >= 0.0f && sheet_color.b <= 1.0f && sheet_color.a >= 0.0f && sheet_color.a <= 1.0f) {
+			m_sheet_color = sheet_color;
 		}
-		// ページの大きさ
-		const D2D1_SIZE_F p_size{
+		// 用紙の大きさ
+		const D2D1_SIZE_F sheet_size{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_size.width >= 1.0f && p_size.width <= SHEET_SIZE_MAX &&
-			p_size.height >= 1.0f && p_size.height <= SHEET_SIZE_MAX) {
-			m_sheet_size = p_size;
+		if (sheet_size.width >= 1.0f && sheet_size.width <= SHEET_SIZE_MAX &&
+			sheet_size.height >= 1.0f && sheet_size.height <= SHEET_SIZE_MAX) {
+			m_sheet_size = sheet_size;
 		}
-		// ページの内余白
-		const D2D1_RECT_F p_mar{
+		// 用紙の内余白
+		const D2D1_RECT_F sheer_padding{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (p_mar.left >= 0.0f && p_mar.right >= 0.0f && 
-			p_mar.left + p_mar.right < m_sheet_size.width &&
-			p_mar.top >= 0.0f && p_mar.bottom >= 0.0f &&
-			p_mar.top + p_mar.bottom < m_sheet_size.height) {
-			m_sheet_margin = p_mar;
+		if (sheer_padding.left >= 0.0f && sheer_padding.right >= 0.0f &&
+			sheer_padding.left + sheer_padding.right < m_sheet_size.width &&
+			sheer_padding.top >= 0.0f && sheer_padding.bottom >= 0.0f &&
+			sheer_padding.top + sheer_padding.bottom < m_sheet_size.height) {
+			m_sheet_padding = sheer_padding;
 		}
 		// 矢じるしの寸法
 		const ARROW_SIZE a_size{
@@ -1157,7 +1155,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_stroke_join_limit(m_stroke_join_limit);
 			s->get_stroke_join(m_stroke_join);
 			s->get_sheet_color(m_sheet_color);
-			s->get_sheet_margin(m_sheet_margin);
+			s->get_sheet_padding(m_sheet_padding);
 			s->get_stroke_cap(m_stroke_cap);
 			s->get_stroke_color(m_stroke_color);
 			s->get_stroke_width(m_stroke_width);
@@ -1187,21 +1185,21 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		// 方眼に合わせる
 		//dt_writer.WriteBoolean(m_snap_grid);
-		// ページの色
+		// 用紙の色
 		dt_writer.WriteSingle(m_sheet_color.r);
 		dt_writer.WriteSingle(m_sheet_color.g);
 		dt_writer.WriteSingle(m_sheet_color.b);
 		dt_writer.WriteSingle(m_sheet_color.a);
-		// ページの拡大率
+		// 用紙の拡大率
 		//dt_writer.WriteSingle(m_sheet_scale);
-		// ページの大きさ
+		// 用紙の大きさ
 		dt_writer.WriteSingle(m_sheet_size.width);
 		dt_writer.WriteSingle(m_sheet_size.height);
-		// ページの内余白
-		dt_writer.WriteSingle(m_sheet_margin.left);
-		dt_writer.WriteSingle(m_sheet_margin.top);
-		dt_writer.WriteSingle(m_sheet_margin.right);
-		dt_writer.WriteSingle(m_sheet_margin.bottom);
+		// 用紙の内余白
+		dt_writer.WriteSingle(m_sheet_padding.left);
+		dt_writer.WriteSingle(m_sheet_padding.top);
+		dt_writer.WriteSingle(m_sheet_padding.right);
+		dt_writer.WriteSingle(m_sheet_padding.bottom);
 		// 矢じるしの大きさ
 		dt_writer.WriteSingle(m_arrow_size.m_width);
 		dt_writer.WriteSingle(m_arrow_size.m_length);

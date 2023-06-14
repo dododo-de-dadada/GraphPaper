@@ -459,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_grid_show(GRID_SHOW::BACK);
 			m_main_sheet.set_sheet_color(COLOR_WHITE);
 			m_main_sheet.set_sheet_size(SHEET_SIZE_DEFVAL);
-			m_main_sheet.set_sheet_margin(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_main_sheet.set_sheet_padding(D2D1_RECT_F{ 0.0f, 0.0f, 0.0f, 0.0f });
 			m_main_sheet.set_stroke_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_sheet.set_stroke_color(COLOR_BLACK);
 			//m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
@@ -515,14 +515,14 @@ namespace winrt::GraphPaper::implementation
 		tx_sheet_size_width().Text(buf);
 		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.height, dpi, g_len, buf);
 		tx_sheet_size_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.left, dpi, g_len, buf);
-		tx_sheet_margin_left().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.top, dpi, g_len, buf);
-		tx_sheet_margin_top().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.right, dpi, g_len, buf);
-		tx_sheet_margin_right().Text(buf);
-		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_margin.bottom, dpi, g_len, buf);
-		tx_sheet_margin_bottom().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_padding.left, dpi, g_len, buf);
+		tx_sheet_padding_left().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_padding.top, dpi, g_len, buf);
+		tx_sheet_padding_top().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_padding.right, dpi, g_len, buf);
+		tx_sheet_padding_right().Text(buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_padding.bottom, dpi, g_len, buf);
+		tx_sheet_padding_bottom().Text(buf);
 
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -552,27 +552,27 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			float new_left;
-			if (swscanf_s(tx_sheet_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+			if (swscanf_s(tx_sheet_padding_left().Text().c_str(), L"%f", &new_left) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_left/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_left/Header");
 				co_return;
 			}
 			float new_top;
-			if (swscanf_s(tx_sheet_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+			if (swscanf_s(tx_sheet_padding_top().Text().c_str(), L"%f", &new_top) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_top/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_top/Header");
 				co_return;
 			}
 			float new_right;
-			if (swscanf_s(tx_sheet_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+			if (swscanf_s(tx_sheet_padding_right().Text().c_str(), L"%f", &new_right) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_right/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_right/Header");
 				co_return;
 			}
 			float new_bottom;
-			if (swscanf_s(tx_sheet_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+			if (swscanf_s(tx_sheet_padding_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_bottom/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_bottom/Header");
 				co_return;
 			}
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
@@ -601,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 			};
 
 			const bool flag_size = !equal(p_size, m_main_sheet.m_sheet_size);
-			const bool flag_mar = !equal(p_mar, m_main_sheet.m_sheet_margin);
+			const bool flag_mar = !equal(p_mar, m_main_sheet.m_sheet_padding);
 			if (flag_size || flag_mar) {
 				undo_push_null();
 				if (flag_size) {
@@ -642,27 +642,27 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			float new_left;
-			if (swscanf_s(tx_sheet_margin_left().Text().c_str(), L"%f", &new_left) != 1) {
+			if (swscanf_s(tx_sheet_padding_left().Text().c_str(), L"%f", &new_left) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_left/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_left/Header");
 				co_return;
 			}
 			float new_top;
-			if (swscanf_s(tx_sheet_margin_top().Text().c_str(), L"%f", &new_top) != 1) {
+			if (swscanf_s(tx_sheet_padding_top().Text().c_str(), L"%f", &new_top) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_top/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_top/Header");
 				co_return;
 			}
 			float new_right;
-			if (swscanf_s(tx_sheet_margin_right().Text().c_str(), L"%f", &new_right) != 1) {
+			if (swscanf_s(tx_sheet_padding_right().Text().c_str(), L"%f", &new_right) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_right/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_right/Header");
 				co_return;
 			}
 			float new_bottom;
-			if (swscanf_s(tx_sheet_margin_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
+			if (swscanf_s(tx_sheet_padding_bottom().Text().c_str(), L"%f", &new_bottom) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_margin_bottom/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_padding_bottom/Header");
 				co_return;
 			}
 			// 長さの値をピクセル単位の値に変換する.
@@ -715,7 +715,7 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の大きさ, 余白, いずれかが異なる.
 			// あるいは矩形が移動したなら
 			const bool size_changed = !equal(p_size, m_main_sheet.m_sheet_size);
-			const bool mar_chanfed = !equal(p_mar, m_main_sheet.m_sheet_margin);
+			const bool mar_chanfed = !equal(p_mar, m_main_sheet.m_sheet_padding);
 			if (size_changed || mar_chanfed || dx > 0.0f || dy > 0.0f) {
 				undo_push_null();
 				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
@@ -749,10 +749,10 @@ namespace winrt::GraphPaper::implementation
 		const auto g_len = m_main_sheet.m_grid_base + 1.0;
 		double w = tx_sheet_size_width().Value();
 		double h = tx_sheet_size_height().Value();
-		double l = tx_sheet_margin_left().Value();
-		double t = tx_sheet_margin_top().Value();
-		double r = tx_sheet_margin_right().Value();
-		double b = tx_sheet_margin_bottom().Value();
+		double l = tx_sheet_padding_left().Value();
+		double t = tx_sheet_padding_top().Value();
+		double r = tx_sheet_padding_right().Value();
+		double b = tx_sheet_padding_bottom().Value();
 		LEN_UNIT u;
 		if (cbi_len_unit_grid().IsSelected()) {
 			u = LEN_UNIT::GRID;
@@ -847,29 +847,29 @@ namespace winrt::GraphPaper::implementation
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_sheet_size_height().Text(buf);
 			}
-			if (swscanf_s(tx_sheet_margin_left().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_padding_left().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_sheet_margin_left().Text(buf);
+				tx_sheet_padding_left().Text(buf);
 			}
-			if (swscanf_s(tx_sheet_margin_top().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_padding_top().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_sheet_margin_top().Text(buf);
+				tx_sheet_padding_top().Text(buf);
 			}
-			if (swscanf_s(tx_sheet_margin_right().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_padding_right().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_sheet_margin_right().Text(buf);
+				tx_sheet_padding_right().Text(buf);
 			}
-			if (swscanf_s(tx_sheet_margin_bottom().Text().data(), L"%lf", &val)) {
+			if (swscanf_s(tx_sheet_padding_bottom().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
 				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
-				tx_sheet_margin_bottom().Text(buf);
+				tx_sheet_padding_bottom().Text(buf);
 			}
 		}
 	}

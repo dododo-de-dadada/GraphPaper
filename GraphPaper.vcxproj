@@ -207,6 +207,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MainPage_color.cpp" />
+    <ClCompile Include="MainPage_core_text.cpp" />
     <ClCompile Include="MainPage_kacc.cpp" />
     <ClCompile Include="MainPage_layout.cpp" />
     <ClCompile Include="MainPage_order.cpp" />

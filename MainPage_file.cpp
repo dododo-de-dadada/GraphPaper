@@ -422,12 +422,12 @@ namespace winrt::GraphPaper::implementation
 			tmfi_menu_status_bar_sheet().IsChecked(false);
 		}
 		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
-			tmfi_popup_status_bar_pos().IsChecked(true);
-			tmfi_menu_status_bar_pos().IsChecked(true);
+			tmfi_popup_status_bar_pointer().IsChecked(true);
+			tmfi_menu_status_bar_pointer().IsChecked(true);
 		}
 		else {
-			tmfi_popup_status_bar_pos().IsChecked(false);
-			tmfi_menu_status_bar_pos().IsChecked(false);
+			tmfi_popup_status_bar_pointer().IsChecked(false);
+			tmfi_menu_status_bar_pointer().IsChecked(false);
 		}
 		if (status_and(m_status_bar, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
 			tmfi_popup_status_bar_unit().IsChecked(true);
@@ -594,10 +594,10 @@ namespace winrt::GraphPaper::implementation
 			tmfi_menu_status_bar_sheet().IsChecked(false);
 		}
 		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
-			tmfi_menu_status_bar_pos().IsChecked(true);
+			tmfi_menu_status_bar_pointer().IsChecked(true);
 		}
 		else {
-			tmfi_menu_status_bar_pos().IsChecked(false);
+			tmfi_menu_status_bar_pointer().IsChecked(false);
 		}
 		if (status_and(m_status_bar, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
 			tmfi_menu_status_bar_unit().IsChecked(true);
@@ -1125,7 +1125,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			m_main_sheet.write(dt_writer);
 			if constexpr (SUSPEND) {
 				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
-				// 現在のスクロールバーの値 (ページ座標) を保存する. 
+				// 現在のスクロールバーの値 (用紙座標) を保存する. 
 				dt_writer.WriteSingle(static_cast<float>(sb_horz().Value()));
 				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形も含めて書き込む.
@@ -1135,7 +1135,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			}
 			else if constexpr (!SETTING_ONLY) {
 				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
-				// 現在のスクロールバーの値 (ページ座標) を保存する. 
+				// 現在のスクロールバーの値 (用紙座標) を保存する. 
 				dt_writer.WriteSingle(static_cast<float>(sb_horz().Value()));
 				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形は省いて書き込む.

@@ -131,6 +131,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	/*
 	IAsyncAction MainPage::edit_arc_async(ShapeArc* t)
 	{
 		const auto str_arc_start{
@@ -376,36 +377,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_radio_btns().Visibility(Visibility::Collapsed);
 		m_mutex_event.unlock();
 		slist_clear(m_dialog_sheet.m_shape_list);
-	}
-	/*
-	void MainPage::meth_arc_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		ShapeArc* t;	// ï“èWÇ∑ÇÈâ~å ê}å`
-		if (m_event_shape_last != nullptr &&
-			typeid(*m_event_shape_last) == typeid(ShapeArc)) {
-			t = static_cast<ShapeArc*>(m_event_shape_last);
-		}
-		else {
-			// ëIëÇ≥ÇÍÇΩê}å`ÇÃÇ§Çøç≈ëOñ Ç…Ç†ÇÈâ~å ê}å`ÇìæÇÈ.
-			t = nullptr;
-			for (auto it = m_main_sheet.m_shape_list.rbegin();
-				it != m_main_sheet.m_shape_list.rend(); it++) {
-				Shape* s = *it;
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (!s->is_selected()) {
-					continue;
-				}
-				if (typeid(*s) == typeid(ShapeArc)) {
-					t = static_cast<ShapeArc*>(s);
-					break;
-				}
-			}
-		}
-		if (t != nullptr) {
-		}
-		status_bar_set_pos();
 	}
 	*/
 }

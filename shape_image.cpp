@@ -328,15 +328,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画素の色を得る.
-	// p	ページ座標での位置
+	// pt	用紙座標での点
 	// val	画素の色
 	// 戻り値	色を得られたなら true, そうでなければ false.
-	bool ShapeImage::get_pixcel(const D2D1_POINT_2F p, D2D1_COLOR_F& val) const noexcept
+	bool ShapeImage::get_pixcel(const D2D1_POINT_2F pt, D2D1_COLOR_F& val) const noexcept
 	{
-		// ページ座標での位置を, 元画像での位置に変換する.
-		const double fx = round(m_clip.left + (p.x - m_start.x) * (m_clip.right - m_clip.left) / m_view.width);
-		const double fy = round(m_clip.top + (p.y - m_start.y) * (m_clip.bottom - m_clip.top) / m_view.height);
-		// 変換された位置が, 画像に収まるなら,
+		// 用紙座標での点を, 元画像での点に変換する.
+		const double fx = round(m_clip.left + (pt.x - m_start.x) * (m_clip.right - m_clip.left) / m_view.width);
+		const double fy = round(m_clip.top + (pt.y - m_start.y) * (m_clip.bottom - m_clip.top) / m_view.height);
+		// 変換された点が, 画像に収まるなら,
 		if (fx >= 0.0 && fx <= m_orig.width && fy >= 0.0 && fy <= m_orig.height) {
 			// 生データでの画素あたりの添え字に変換.
 			const size_t i = m_orig.width * static_cast<size_t>(fy) + static_cast<size_t>(fx);

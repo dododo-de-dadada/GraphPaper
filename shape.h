@@ -332,8 +332,9 @@ namespace winrt::GraphPaper::implementation
 	void slist_count(
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, 
-		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_rulur_cnt, uint32_t& selected_arc_cnt,
-		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt, bool& fore_selected,
+		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_rulur_cnt, 
+		uint32_t& selected_clockwise, uint32_t& selected_counter_clockwise,
+		uint32_t& selected_polyline, uint32_t& selected_polygon, uint32_t& selected_exist_cap_cnt, bool& fore_selected,
 		bool& back_selected, bool& prev_selected) noexcept;
 	// 図形を種類別に数える.
 	void slist_count(const SHAPE_LIST& slist, uint32_t& selected_cnt, uint32_t& runlength_cnt, bool& fore_selected, bool& back_selected) noexcept;
@@ -462,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の色を得る.
 		virtual bool get_sheet_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// 用紙の余白を得る.
-		virtual bool get_sheet_margin(D2D1_RECT_F&/*val*/) const noexcept { return false; }
+		virtual bool get_sheet_padding(D2D1_RECT_F&/*val*/) const noexcept { return false; }
 		// 用紙の大きさを得る.
 		virtual bool get_sheet_size(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 端の形式を得る.
@@ -486,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool ctrl_key = false) const noexcept { return LOC_TYPE::LOC_SHEET; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool/*ctrl_key = false*/) const noexcept { return LOC_TYPE::LOC_SHEET; }
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -566,7 +567,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を用紙の色に格納する.
 		virtual bool set_sheet_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// 用紙の余白に格納する.
-		virtual bool set_sheet_margin(const D2D1_RECT_F&/*val*/) noexcept { return false; }
+		virtual bool set_sheet_padding(const D2D1_RECT_F&/*val*/) noexcept { return false; }
 		// 値を用紙の大きさに格納する.
 		virtual bool set_sheet_size(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を選択されてるか判定に格納する.
@@ -798,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙
 		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色
 		D2D1_SIZE_F	m_sheet_size{ SHEET_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
-		D2D1_RECT_F m_sheet_margin{ 0.0f, 0.0f, 0.0f, 0.0f };	// 用紙の内余白
+		D2D1_RECT_F m_sheet_padding{ 0.0f, 0.0f, 0.0f, 0.0f };	// 用紙の内余白
 
 		// 図形リストの最後の図形を得る.
 		Shape* slist_back() const noexcept
@@ -886,9 +887,9 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の大きさを得る.
 		virtual bool get_sheet_size(D2D1_SIZE_F& val) const noexcept final override;
 		// 用紙の余白を得る.
-		virtual bool get_sheet_margin(D2D1_RECT_F& val) const noexcept final override
+		virtual bool get_sheet_padding(D2D1_RECT_F& val) const noexcept final override
 		{
-			val = m_sheet_margin;
+			val = m_sheet_padding;
 			return true;
 		}
 		// 線枠の色を得る.
@@ -963,10 +964,10 @@ namespace winrt::GraphPaper::implementation
 		// 値を用紙の色に格納する.
 		virtual bool set_sheet_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を用紙の余白に格納する.
-		virtual bool set_sheet_margin(const D2D1_RECT_F& val) noexcept final override
+		virtual bool set_sheet_padding(const D2D1_RECT_F& val) noexcept final override
 		{
-			if (!equal(m_sheet_margin, val)) {
-				m_sheet_margin = val;
+			if (!equal(m_sheet_padding, val)) {
+				m_sheet_padding = val;
 				return true;
 			}
 			return false;

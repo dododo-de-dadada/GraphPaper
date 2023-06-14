@@ -703,12 +703,12 @@ namespace winrt::GraphPaper::implementation
 	// 方眼を表示する.
 	void ShapeSheet::export_svg(const DataWriter& dt_writer) noexcept
 	{
-		//const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (用紙から余白を除いた分)
-		//	m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right),
-		//	m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom)
+		//const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (用紙から内余白を除いた分)
+		//	m_sheet_size.width - (m_sheet_padding.left + m_sheet_padding.right),
+		//	m_sheet_size.height - (m_sheet_padding.top + m_sheet_padding.bottom)
 		//};
-		const auto draw_w = m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right);
-		const auto draw_h = m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom);
+		const auto draw_w = m_sheet_size.width - (m_sheet_padding.left + m_sheet_padding.right);
+		const auto draw_h = m_sheet_size.height - (m_sheet_padding.top + m_sheet_padding.bottom);
 		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置

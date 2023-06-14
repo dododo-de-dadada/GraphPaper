@@ -11,7 +11,6 @@
 	<!-- x:Name はコードビハインドのためのオブジェクト. x:Uid はリソースの参照. -->
 	<Page.Resources>
 		<ResourceDictionary>
-     
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Dictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
@@ -64,17 +63,17 @@
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<!--<KeyboardAccelerator Key="Delete" Invoked="delete_invoked" />
 						<KeyboardAccelerator Key="D" Modifiers="Control" Invoked="delete_invoked" />-->
-                        <KeyboardAccelerator Key="Delete" />
-                        <KeyboardAccelerator Key="D" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
+						<KeyboardAccelerator Key="Delete" />
+						<KeyboardAccelerator Key="D" Modifiers="Control" />
+					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- すべて選択 -->
 				<MenuFlyoutItem x:Name="popup_select_all" x:Uid="menu_select_all" Click="select_all_click" Icon="SelectAll" KeyboardAcceleratorTextOverride="Ctrl+A" Text="Select All">
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked" />-->
-                        <KeyboardAccelerator Key="A" Modifiers="Control" />
+						<!--<KeyboardAccelerator Key="A" Modifiers="Control" Invoked="select_all_invoked" />-->
+						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- 並び替え -->
@@ -85,29 +84,29 @@
 					<!-- 最前面に移動 -->
 					<MenuFlyoutItem x:Name="popup_bring_to_front" x:Uid="menu_bring_to_front" Click="bring_to_front_click" KeyboardAcceleratorTextOverride="Ctrl+End" Text="Bring to Front" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-                            <!--<KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>-->
-                            <KeyboardAccelerator Key="End" Modifiers="Control"/>
+							<!--<KeyboardAccelerator Key="End" Modifiers="Control" Invoked="bring_to_front_invoked"/>-->
+							<KeyboardAccelerator Key="End" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ前面に移動 -->
 					<MenuFlyoutItem x:Name="popup_bring_forward" x:Uid="menu_bring_forward" Click="bring_forward_click" KeyboardAcceleratorTextOverride="Ctrl+PgDown" Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
-                            <!--<KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>-->
-                            <KeyboardAccelerator Key="PageDown" Modifiers="Control"/>
+							<!--<KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="bring_forward_invoked"/>-->
+							<KeyboardAccelerator Key="PageDown" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!--  ひとつ背面に移動 -->
 					<MenuFlyoutItem x:Name="popup_send_backward" x:Uid="menu_send_backward" Click="send_backward_click" KeyboardAcceleratorTextOverride="Ctrl+PgUp" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-                            <!--<KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>-->
-                            <KeyboardAccelerator Key="PageUp" Modifiers="Control"/>
+							<!--<KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="send_backward_invoked"/>-->
+							<KeyboardAccelerator Key="PageUp" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<!-- 最背面に移動 -->
 					<MenuFlyoutItem x:Name="popup_send_to_back" x:Uid="menu_send_to_back" Click="send_to_back_click" KeyboardAcceleratorTextOverride="Ctrl+Home" Text="Send to Back" >
 						<MenuFlyoutItem.KeyboardAccelerators>
-                            <!--<KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>-->
-                            <KeyboardAccelerator Key="Home" Modifiers="Control"/>
+							<!--<KeyboardAccelerator Key="Home" Modifiers="Control" Invoked="send_to_back_invoked"/>-->
+							<KeyboardAccelerator Key="Home" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
@@ -119,8 +118,8 @@
 						<PathIcon Data="{StaticResource data_group}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked" />-->
-                        <KeyboardAccelerator Key="G" Modifiers="Control" />
+						<!--<KeyboardAccelerator Key="G" Modifiers="Control" Invoked="group_invoked" />-->
+						<KeyboardAccelerator Key="G" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- グループを解除 -->
@@ -129,8 +128,8 @@
 						<PathIcon Data="{StaticResource data_ungroup}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked" />-->
-                        <KeyboardAccelerator Key="U" Modifiers="Control" />
+						<!--<KeyboardAccelerator Key="U" Modifiers="Control" Invoked="ungroup_invoked" />-->
+						<KeyboardAccelerator Key="U" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
@@ -138,18 +137,24 @@
 				<!-- 文字列の検索/置換 -->
 				<MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
-                        <KeyboardAccelerator Key="F" Modifiers="Control"/>
+						<!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
+						<KeyboardAccelerator Key="F" Modifiers="Control"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator/>
 				<!-- パスの方向を反転 -->
 				<MenuFlyoutItem x:Name="popup_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
-				<!-- 円弧の方向を反転 -->
-				<MenuFlyoutItem x:Name="popup_reverse_arc" x:Uid="menu_reverse_arc" Click="reverse_arc_click" Text="Reverse Arc Direction">
+				<!-- 反時計周りに円弧を描く -->
+				<MenuFlyoutItem x:Name="popup_draw_arc_ccw" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
 					<MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_reverse_arc}" />
+						<PathIcon Data="{StaticResource data_arc_ccw}" />
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
+				<!-- 時計周りに円弧を描く -->
+				<MenuFlyoutItem x:Name="popup_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
+					<MenuFlyoutItem.Icon>
+						<PathIcon Data="{StaticResource data_arc_ccw}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 多角形を開く -->
@@ -674,15 +679,15 @@
 				<!-- 元に戻す -->
 				<MenuFlyoutItem x:Name="menu_undo" x:Uid="menu_undo" Click="undo_click" Icon="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z" Text="Undo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked"/>-->
-                        <KeyboardAccelerator Key="Z" Modifiers="Control"/>
+						<!--<KeyboardAccelerator Key="Z" Modifiers="Control" Invoked="undo_invoked"/>-->
+						<KeyboardAccelerator Key="Z" Modifiers="Control"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- やり直し -->
 				<MenuFlyoutItem x:Name="menu_redo" x:Uid="menu_redo" Click="redo_click" Icon="Redo" KeyboardAcceleratorTextOverride="Ctrl+Y"  Text="Redo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
-                        <!--<KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked"/>-->
-                        <KeyboardAccelerator Key="Y" Modifiers="Control" />
+						<!--<KeyboardAccelerator Key="Y" Modifiers="Control" Invoked="redo_invoked"/>-->
+						<KeyboardAccelerator Key="Y" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
@@ -793,10 +798,16 @@
 				<MenuFlyoutSeparator />
 				<!-- パスの方向を反転 -->
 				<MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
-				<!-- 円弧の方向を反転 -->
-				<MenuFlyoutItem x:Name="menu_reverse_arc" x:Uid="menu_reverse_arc" Click="reverse_arc_click" Text="Reverse Arc Direction">
+				<!-- 反時計周りに円弧を描く -->
+				<MenuFlyoutItem x:Name="menu_arc_counter" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
 					<MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_reverse_arc}" />
+						<PathIcon Data="{StaticResource data_arc_ccw}" />
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
+				<!-- 時計周りに円弧を描く -->
+				<MenuFlyoutItem x:Name="menu_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
+					<MenuFlyoutItem.Icon>
+						<PathIcon Data="{StaticResource data_arc_clockwise}" />
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 多角形を開く -->
@@ -1367,24 +1378,24 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_info}" />
 					</MenuFlyoutSubItem.Icon>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" ></ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <FontIcon Glyph="{StaticResource glyph_unit}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <FontIcon Glyph="{StaticResource glyph_mouse}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_grid}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" ></ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
+						<ToggleMenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_unit}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_pointer" x:Uid="tmfi_menu_status_bar_pointer" Click="status_bar_click" Text="Cursor Position" >
+						<ToggleMenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_mouse}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
+						<ToggleMenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_grid}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_menu_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 点を方眼にくっつける -->
@@ -1414,7 +1425,7 @@
 						<Setter Property="Margin" Value="0,4" />
 					</Style>
 				</StackPanel.Resources>
-				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" Header="Find what" TextChanged="find_text_what_changed" />
+				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what"  GettingFocus="ui_elem_getting_focus" Header="Find what" LostFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
 				<TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" />
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
@@ -1433,13 +1444,7 @@
 			</Grid.RowDefinitions>
 			<Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Grid.Row="2" Click="summary_close_click" Content="Close" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
 			<Button Background="{ThemeResource ButtonBackgroundThemeBrush}" Click="summary_close_click" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
-			<ListView
-				x:Name="lv_summary_list" Grid.Row="1"
-				IsItemClickEnabled="True"
-				ItemClick="summary_item_click" 
-				ItemContainerTransitions="{x:Null}"
-				Loaded="summary_loaded"
-				SelectionChanged="summary_selection_changed" SelectionMode="Extended" Transitions="{x:Null}" Width="144">
+			<ListView x:Name="lv_summary_list" GettingFocus="ui_elem_getting_focus" Grid.Row="1" IsItemClickEnabled="True" ItemClick="summary_item_click" ItemContainerTransitions="{x:Null}" Loaded="summary_loaded" LostFocus="ui_elem_lost_focus" SelectionChanged="summary_selection_changed" SelectionMode="Extended" Transitions="{x:Null}" Width="144">
 				<!--<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<!--<ListView x:Name="lv_summary_list" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>
@@ -1474,7 +1479,7 @@
 				PointerReleased="event_released" PointerWheelChanged="event_wheel_changed"
 				RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True"
 				RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
- 				SizeChanged="main_panel_size_changed">
+				SizeChanged="main_panel_size_changed">
 				<!--
 				通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
 				そうすると SwapChainPanel をクリックしたあとアクセラレーターが機能しなくなる.
@@ -1485,7 +1490,7 @@
 				されてしまう。つまり, メンバ変数にアクセスできない。
 				-->
 				<SwapChainPanel.KeyboardAccelerators>
-                    <KeyboardAccelerator Invoked="kacc_escape_invoked" Key="Escape"/>
+					<KeyboardAccelerator Invoked="kacc_escape_invoked" Key="Escape"/>
 					<KeyboardAccelerator Invoked="kacc_back_invoked" Key="Back"/>
 					<KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete"/>
 					<KeyboardAccelerator Invoked="kacc_delete_shift_invoked" Key="Delete" Modifiers="Shift"/>
@@ -1529,86 +1534,79 @@
 			<StackPanel.ContextFlyout>
 				<MenuFlyout x:Name="mf_popup_status">
 					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_draw" x:Uid="tmfi_menu_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <FontIcon Glyph="{StaticResource glyph_unit}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pos" x:Uid="tmfi_menu_status_bar_pos" Click="status_bar_click" Text="Cursor Position" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <FontIcon Glyph="{StaticResource glyph_mouse}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
-                        <ToggleMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_grid}"/>
-                        </ToggleMenuFlyoutItem.Icon>
-                    </ToggleMenuFlyoutItem>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
-                </MenuFlyout>
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_unit" x:Uid="tmfi_menu_status_bar_unit" Click="status_bar_click" Text="Length Unit" >
+						<ToggleMenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_unit}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_pointer" x:Uid="tmfi_menu_status_bar_pointer" Click="status_bar_click" Text="Cursor Position" >
+						<ToggleMenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_mouse}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_grid" x:Uid="tmfi_menu_status_bar_grid" Click="status_bar_click" Text="Grid Size" >
+						<ToggleMenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_grid}"/>
+						</ToggleMenuFlyoutItem.Icon>
+					</ToggleMenuFlyoutItem>
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_sheet" x:Uid="tmfi_menu_status_bar_sheet" Click="status_bar_click" Icon="Page2" Text="Sheet Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_popup_status_bar_zoom" x:Uid="tmfi_menu_status_bar_zoom" Click="status_bar_click" Icon="ZoomIn" Text="Sheet Scale" />
+				</MenuFlyout>
 			</StackPanel.ContextFlyout>
 			<!-- ContextFlyout を処理するため event_released を設定 -->
 			<StackPanel x:Name="status_bar_drawing_tool" Margin="0,0,12,0" Orientation="Horizontal" >
-				<!--<TextBlock  Margin="0,0,0,0" Text="Draw:"/>-->
-                <PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <PathIcon.RenderTransform>
-                        <ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
-                    </PathIcon.RenderTransform>
-                </PathIcon>
-                <TextBlock Text=":"/>
-                <Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
-                <TextBlock x:Name="tb_map_pointer" Width="Auto" IsTextSelectionEnabled="True" Text="- -" />
+				<PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<PathIcon.RenderTransform>
+						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
+					</PathIcon.RenderTransform>
+				</PathIcon>
+				<TextBlock Text=":"/>
+				<Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
+				<TextBlock x:Name="tb_map_pointer" Width="Auto" IsTextSelectionEnabled="True" Text="- -" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
-                <FontIcon Glyph="{StaticResource glyph_unit}" FontSize="14"/>
-                <TextBlock Text=":"/>
+				<FontIcon Glyph="{StaticResource glyph_unit}" FontSize="14"/>
+				<TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_unit" Text="0"/>
 			</StackPanel>
-			<StackPanel x:Name="sp_status_bar_pos" Margin="0,0,12,0" Orientation="Horizontal">
-                <FontIcon Glyph="{StaticResource glyph_mouse}" FontSize="14"/>
-                <TextBlock Text=":" />
-				<TextBlock x:Name="tk_status_bar_pos_x" Text="0"/>
-                <!--
-				<TextBlock x:Uid="tk_status_bar_pos_y" Text="Y:" />
-				<TextBlock x:Name="tk_status_bar_pos_y" Text="0"/>
-                -->
+			<StackPanel x:Name="sp_status_bar_pointer" Margin="0,0,12,0" Orientation="Horizontal">
+				<FontIcon Glyph="{StaticResource glyph_mouse}" FontSize="14"/>
+				<TextBlock Text=":" />
+				<TextBlock x:Name="tk_status_bar_pointer" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_grid" Margin="0,0,12,0" Orientation="Horizontal">
-                <PathIcon Data="{StaticResource data_grid}" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <PathIcon.RenderTransform>
-                        <ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
-                    </PathIcon.RenderTransform>
-                </PathIcon>
-                <TextBlock Text=":"/>
+				<PathIcon Data="{StaticResource data_grid}" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<PathIcon.RenderTransform>
+						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
+					</PathIcon.RenderTransform>
+				</PathIcon>
+				<TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_grid" Text="0" />
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_sheet" Margin="0,0,12,0" Orientation="Horizontal">
-                <SymbolIcon Symbol="Page2" RenderTransformOrigin="0.5,0.5">
-                    <SymbolIcon.RenderTransform>
-                        <CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
-                    </SymbolIcon.RenderTransform>
-                </SymbolIcon>
+				<SymbolIcon Symbol="Page2" RenderTransformOrigin="0.5,0.5">
+					<SymbolIcon.RenderTransform>
+						<CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
+					</SymbolIcon.RenderTransform>
+				</SymbolIcon>
 				<TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_sheet" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_zoom" Margin="0,0,12,0" Orientation="Horizontal">
-                <SymbolIcon Symbol="ZoomIn" RenderTransformOrigin="0.5,0.5">
-                    <SymbolIcon.RenderTransform>
-                        <CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
-                    </SymbolIcon.RenderTransform>
-                </SymbolIcon>
-                <TextBlock Text=":"/>
+				<SymbolIcon Symbol="ZoomIn" RenderTransformOrigin="0.5,0.5">
+					<SymbolIcon.RenderTransform>
+						<CompositeTransform ScaleX="0.75" ScaleY="0.75"/>
+					</SymbolIcon.RenderTransform>
+				</SymbolIcon>
+				<TextBlock Text=":"/>
 				<TextBlock x:Name="tk_status_bar_zoom" Text="0"/>
 			</StackPanel>
+			<TextBlock x:Name="status_bar_debug" />
 		</StackPanel>
 		<!-- 文字列入力ダイアログ -->
 		<ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
 			<StackPanel>
-				<TextBox
-					x:Name="tx_edit_text" AcceptsReturn="True" Height="128"
-					HorizontalAlignment="Stretch" PlaceholderText="Text"
-					ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+				<TextBox x:Name="tx_edit_text" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
 				<CheckBox x:Name="ck_fit_text_frame" x:Uid="ck_fit_text_frame" Content="Fit Frame Size to Text" Margin="4,4" />
 			</StackPanel>
 		</ContentDialog>
@@ -1671,16 +1669,16 @@
 					x:Name="tx_sheet_size_height" x:Uid="tx_sheet_size_height" Grid.Column="2" Grid.Row="0"
 					Header="Height" Margin="4,0,0,12" ToolTipService.ToolTip="Must be between 1-32768" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_sheet_margin_top" x:Uid="tx_sheet_margin_top" Grid.Column="1" Grid.Row="1"
+					x:Name="tx_sheet_padding_top" x:Uid="tx_sheet_padding_top" Grid.Column="1" Grid.Row="1"
 					Header="Top Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than sheet height" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_sheet_margin_left" x:Uid="tx_sheet_margin_left" Grid.Column="0" Grid.Row="2"
+					x:Name="tx_sheet_padding_left" x:Uid="tx_sheet_padding_left" Grid.Column="0" Grid.Row="2"
 					Header="Left Padding" Margin="0,0,4,12" ToolTipService.ToolTip="Must be less than sheet width" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_sheet_margin_right" x:Uid="tx_sheet_margin_right" Grid.Column="2" Grid.Row="2"
+					x:Name="tx_sheet_padding_right" x:Uid="tx_sheet_padding_right" Grid.Column="2" Grid.Row="2"
 					Header="Right Padding" Margin="4,0,0,12" ToolTipService.ToolTip="Must be less than sheet width" ValueChanged="sheet_size_value_changed" />
 				<muxc:NumberBox
-					x:Name="tx_sheet_margin_bottom" x:Uid="tx_sheet_margin_bottom" Grid.Column="1" Grid.Row="3"
+					x:Name="tx_sheet_padding_bottom" x:Uid="tx_sheet_padding_bottom" Grid.Column="1" Grid.Row="3"
 					Header="Bottom Padding" Margin="0,0,0,12" ToolTipService.ToolTip="Must be less than sheet height" ValueChanged="sheet_size_value_changed" />
 				<ComboBox
 					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit"
@@ -1717,12 +1715,7 @@
 					SizeChanged="dialog_panel_size_changed" Width="170"
 					/>
 				<!-- Height を指定するこれ大事 -->
-				<ListView
-					x:Name="lv_dialog_list" RelativePanel.Below="scp_dialog_panel" 
-					RelativePanel.AlignLeftWithPanel="True"
-					RelativePanel.AlignRightWithPanel="True"
-					RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256"
-					Loaded="dialog_list_loaded" />
+				<ListView x:Name="lv_dialog_list" Loaded="dialog_list_loaded" RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
 				<Slider
 					x:Name="dialog_slider_0" x:Uid = "dialog_slider_0"
 					IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0"
@@ -1777,6 +1770,6 @@
 			</RelativePanel>
 		</ContentDialog>
 		<!-- 印刷のための透明なキャンバス -->
-		<Canvas x:Name="PrintCanvas" Opacity="0" />
+		<!--<Canvas x:Name="PrintCanvas" Opacity="0" />-->
 	</Grid>
 </Page>

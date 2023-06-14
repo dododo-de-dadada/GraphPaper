@@ -74,6 +74,9 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		*/
+		if (!m_main_focus) {
+			co_return;
+		}
 
 		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納する.
 		winrt::hstring selected_text{};
@@ -167,15 +170,14 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::cut_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
-			return;
+		if (!m_main_focus) {
+			co_return;
 		}
 
 		co_await copy_click_async(nullptr, nullptr);
 
 		if (m_core_text_focused != nullptr) {
-			core_text_delete();
+			core_text_delete_selection();
 		}
 		else {
 			delete_click(nullptr, nullptr);
@@ -187,16 +189,19 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 文字列検索パネルのテキストボックスにフォーカスがあれば中断する.
-		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+		if (!m_main_focus) {
 			return;
 		}
 		// XAML のキーボードアクセラレーターに削除キーは指定されていて,
 		// CoreWWindow の KeyDow でなく, このハンドラーで処理される.
 		if (m_core_text_focused != nullptr) {
 			const auto shift_key = ((CoreWindow::GetForCurrentThread().GetKeyState(VirtualKey::Shift) & CoreVirtualKeyStates::Down) == CoreVirtualKeyStates::Down);
-			core_text_del_c(shift_key);
+			if (shift_key) {
+				core_text_delete_key<true>();
+			}
+			else {
+				core_text_delete_key<false>();
+			}
 		}
 		else {
 			// 選択された図形の数がゼロか判定する.
@@ -218,6 +223,7 @@ namespace winrt::GraphPaper::implementation
 				m_mutex_draw.unlock();
 				main_bbox_update();
 				main_panel_size();
+				menu_is_enable();
 				main_draw();
 				selected_list.clear();
 			}
@@ -230,6 +236,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (!m_main_focus) {
+			return;
+		}
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
 			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
 			return;
@@ -435,12 +444,10 @@ namespace winrt::GraphPaper::implementation
 				// パネルの大きさで文字列図形を作成する,.
 				const float scale = m_main_scale;
 				//const float scale = m_main_sheet.m_sheet_scale;
-				const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
-				const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
-				const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale,
-					m_main_sheet.m_sheet_size.width); // ページの表示されている幅
-				const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale,
-					m_main_sheet.m_sheet_size.height); // ページの表示されている高さ
+				const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// 用紙の表示されている左位置
+				const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// 用紙の表示されている上位置
+				const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale, m_main_sheet.m_sheet_size.width); // 用紙の表示されている幅
+				const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale, m_main_sheet.m_sheet_size.height); // 用紙の表示されている高さ
 				const float lt_x = m_main_bbox_lt.x;
 				const float lt_y = m_main_bbox_lt.y;
 				ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_sheet);

@@ -66,6 +66,7 @@
     <ClCompile Include="MainPage_layout.cpp" />
     <ClCompile Include="MainPage_color.cpp" />
     <ClCompile Include="MainPage_kacc.cpp" />
+    <ClCompile Include="MainPage_core_text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

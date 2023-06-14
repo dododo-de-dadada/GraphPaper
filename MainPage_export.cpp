@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 		try {
 			wchar_t buf[1024];	// PDF
 
-			// ページの幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
+			// 用紙の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
 			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// ポイントに変換された幅
 			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// ポイントに変換された高さ
@@ -1001,8 +1001,8 @@ namespace winrt::GraphPaper::implementation
 					conv_color_comp(m_main_sheet.m_sheet_color.g),
 					conv_color_comp(m_main_sheet.m_sheet_color.b),
 					m_main_sheet.m_sheet_color.a,
-					m_main_sheet.m_sheet_margin.left,
-					m_main_sheet.m_sheet_margin.top
+					m_main_sheet.m_sheet_padding.left,
+					m_main_sheet.m_sheet_padding.top
 				);
 				dt_writer.WriteString(buf);
 			}

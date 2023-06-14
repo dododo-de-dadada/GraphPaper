@@ -205,6 +205,9 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (!m_main_focus) {
+			return;
+		}
 		// 最初が空操作ならそれらを取りのぞく.
 		while (m_redo_stack.size() > 0 && m_redo_stack.back() == nullptr) {
 			m_redo_stack.pop_back();
@@ -246,6 +249,9 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (!m_main_focus) {
+			return;
+		}
 		// 最初が空操作ならそれらを取りのぞく.
 		while (m_undo_stack.size() > 0 && m_undo_stack.back() == nullptr) {
 			m_undo_stack.pop_back();
@@ -354,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_grid_show(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::SHEET_SIZE>)) {
-			// ページの大きさをステータスバーに格納する.
+			// 用紙の大きさをステータスバーに格納する.
 			status_bar_set_sheet();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {

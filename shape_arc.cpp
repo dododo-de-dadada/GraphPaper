@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧が含まれる象限を, 時計周りで得る.
 	// 戻り値	象限の番号 (1,2,3,4). 終点ベクトルがゼロベクトルなら 0.
-	// ページの Y 軸は下向きだが, 向かって右上を第 1 象限とする.
+	// 用紙の Y 軸は下向きだが, 向かって右上を第 1 象限とする.
 	// px, py	円弧の始点から終点への位置ベクトル
 	// c, s	円弧の傾きのコサインとサイン (傾きは, 時計周りが正)
 	inline static int arc_quadrant_number(const double px, const double py, const double c, const double s) noexcept

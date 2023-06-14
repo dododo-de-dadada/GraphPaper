@@ -295,7 +295,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_join(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
 		m_d2d_stroke_style(nullptr)
 	{
-		// 値が無効なら, ページの属性の値を図形に格納する.
+		// 値が無効なら, 用紙の属性の値を図形に格納する.
 		//if ((m_stroke_cap.m_start != D2D1_CAP_STYLE_FLAT &&
 		//	m_stroke_cap.m_start != D2D1_CAP_STYLE_ROUND &&
 		//	m_stroke_cap.m_start != D2D1_CAP_STYLE_SQUARE &&

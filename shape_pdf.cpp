@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_CAP_STYLE cap,	// 矢じるしの返しの形式
 		const D2D1_LINE_JOIN join,	// 矢じるしの先端の形式
 		const float join_limit,	// 尖り制限値
-		const D2D1_SIZE_F page_size,	// ページの大きさ
+		const D2D1_SIZE_F sheet_size,	// 用紙の大きさ
 		const D2D1_POINT_2F barb[],	// 矢じりの返しの点
 		const D2D1_POINT_2F tip,	// 矢じりの先端の点
 		DataWriter const& dt_writer	// データライター
@@ -53,11 +53,11 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 		}
 		const double b0x = barb[0].x;
-		const double b0y = -static_cast<double>(barb[0].y) + static_cast<double>(page_size.height);
+		const double b0y = -static_cast<double>(barb[0].y) + static_cast<double>(sheet_size.height);
 		const double tx = tip.x;
-		const double ty = -static_cast<double>(tip.y) + static_cast<double>(page_size.height);
+		const double ty = -static_cast<double>(tip.y) + static_cast<double>(sheet_size.height);
 		const double b1x = barb[1].x;
-		const double b1y = -static_cast<double>(barb[1].y) + static_cast<double>(page_size.height);
+		const double b1y = -static_cast<double>(barb[1].y) + static_cast<double>(sheet_size.height);
 		swprintf_s(buf,
 			L"%f %f m %f %f l %f %f l\n",
 			b0x, b0y,
@@ -1063,13 +1063,13 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];	// PDF
 		size_t len = 0;
 
-		// PDF はアルファに対応してないので, 背景色と混ぜて, ページを塗りつぶす.
+		// PDF はアルファに対応してないので, 背景色と混ぜて, 用紙を塗りつぶす.
 		const double page_a = m_sheet_color.a;
 		const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
 		const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
 		const double page_b = page_a * m_sheet_color.b + (1.0 - page_a) * background.b;
 		// re = 方形, f = 内部を塗りつぶす.
-		// cm = 変換行列 (ページの中では内余白の分平行移動)
+		// cm = 変換行列 (用紙の中では内余白の分平行移動)
 		swprintf_s(buf,
 			L"%f %f %f rg\n"
 			L"0 0 %f %f re\n"
@@ -1080,8 +1080,8 @@ namespace winrt::GraphPaper::implementation
 			min(max(page_b, 0.0), 1.0),
 			m_sheet_size.width,
 			m_sheet_size.height,
-			m_sheet_margin.left,
-			-m_sheet_margin.top
+			m_sheet_padding.left,
+			-m_sheet_padding.top
 		);
 		len += dt_writer.WriteString(buf);
 
@@ -1099,7 +1099,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_grid_show == GRID_SHOW::FRONT || m_grid_show == GRID_SHOW::BACK) {
 			const float grid_base = m_grid_base;
-			// PDF はアルファに対応してないので, 背景色, ページ色と混ぜる.
+			// PDF はアルファに対応してないので, 背景色, 用紙色と混ぜる.
 			const double page_a = m_sheet_color.a;
 			const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
 			const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
@@ -1110,9 +1110,9 @@ namespace winrt::GraphPaper::implementation
 			const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * page_b;
 			const GRID_EMPH grid_emph = m_grid_emph;
 			const D2D1_POINT_2F grid_offset = m_grid_offset;
-			// ページの大きさから内余白の大きさを除く.
-			const auto grid_w = m_sheet_size.width - (m_sheet_margin.left + m_sheet_margin.right);	// 方眼を描く領域の大きさ
-			const auto grid_h = m_sheet_size.height - (m_sheet_margin.top + m_sheet_margin.bottom);	// 方眼を描く領域の大きさ
+			// 用紙の大きさから内余白の大きさを除く.
+			const auto grid_w = m_sheet_size.width - (m_sheet_padding.left + m_sheet_padding.right);	// 方眼を描く領域の大きさ
+			const auto grid_h = m_sheet_size.height - (m_sheet_padding.top + m_sheet_padding.bottom);	// 方眼を描く領域の大きさ
 
 			const FLOAT stroke_w = 1.0;	// 方眼の太さ
 			D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置

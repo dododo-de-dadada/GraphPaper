@@ -75,10 +75,10 @@ namespace winrt::GraphPaper::implementation
 		const float offset = static_cast<FLOAT>(std::fmod(m_dialog_sheet.m_sheet_size.width * 0.5, m_dialog_sheet.m_grid_base + 1.0));
 		m_dialog_sheet.m_grid_offset.x = offset;
 		m_dialog_sheet.m_grid_offset.y = offset;
-		m_dialog_sheet.m_sheet_margin.left = 0.0f;
-		m_dialog_sheet.m_sheet_margin.top = 0.0f;
-		m_dialog_sheet.m_sheet_margin.right = 0.0f;
-		m_dialog_sheet.m_sheet_margin.bottom = 0.0f;
+		m_dialog_sheet.m_sheet_padding.left = 0.0f;
+		m_dialog_sheet.m_sheet_padding.top = 0.0f;
+		m_dialog_sheet.m_sheet_padding.right = 0.0f;
+		m_dialog_sheet.m_sheet_padding.bottom = 0.0f;
 		m_dialog_sheet.draw();
 		winrt::check_hresult(
 			m_dialog_d2d.m_d2d_context->EndDraw()

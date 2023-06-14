@@ -6,7 +6,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	//SHAPE_LIST* Undo::undo_slist = nullptr;	// 操作が参照する図形リスト
-	ShapeSheet* Undo::undo_sheet = nullptr;	// 操作が参照するページ
+	ShapeSheet* Undo::undo_sheet = nullptr;	// 操作が参照する用紙
 
 	// 指定した部位の点を得る.
 	static D2D1_POINT_2F undo_get_pos_loc(const Shape* s, const uint32_t loc) noexcept;
@@ -407,7 +407,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_T::SHEET_PAD>::SET(Shape* const s, const D2D1_RECT_F& val) noexcept
 	{
-		s->set_sheet_margin(val);
+		s->set_sheet_padding(val);
 	}
 	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const D2D1_FIGURE_END& val) noexcept
 	{
@@ -591,7 +591,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::SHEET_PAD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
 	{
-		return s->get_sheet_margin(val);
+		return s->get_sheet_padding(val);
 	}
 
 	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, D2D1_FIGURE_END& val) noexcept

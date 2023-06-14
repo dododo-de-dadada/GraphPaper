@@ -49,10 +49,10 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「ステータスバー」が選択された.
 	void MainPage::status_bar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == tmfi_menu_status_bar_pos()) {
-			const bool is_checked = tmfi_menu_status_bar_pos().IsChecked();
+		if (sender == tmfi_menu_status_bar_pointer()) {
+			const bool is_checked = tmfi_menu_status_bar_pointer().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
-			tmfi_popup_status_bar_pos().IsChecked(is_checked);
+			tmfi_popup_status_bar_pointer().IsChecked(is_checked);
 		}
 		else if (sender == tmfi_menu_status_bar_grid()) {
 			const bool is_checked = tmfi_menu_status_bar_grid().IsChecked();
@@ -84,10 +84,10 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_unit().IsChecked(is_checked);
 			status_bar_set_unit();
 		}
-		else if (sender == tmfi_popup_status_bar_pos()) {
-			const bool is_checked = tmfi_popup_status_bar_pos().IsChecked();
+		else if (sender == tmfi_popup_status_bar_pointer()) {
+			const bool is_checked = tmfi_popup_status_bar_pointer().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
-			tmfi_menu_status_bar_pos().IsChecked(is_checked);
+			tmfi_menu_status_bar_pointer().IsChecked(is_checked);
 		}
 		else if (sender == tmfi_popup_status_bar_grid()) {
 			const bool is_checked = tmfi_popup_status_bar_grid().IsChecked();
@@ -164,15 +164,15 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
 			swprintf_s(buf, L"%s %s", buf_x, buf_y);
-			tk_status_bar_pos_x().Text(buf);
-			//tk_status_bar_pos_y().Text(buf_y);
-			if (sp_status_bar_pos().Visibility() != Visibility::Visible) {
-				sp_status_bar_pos().Visibility(Visibility::Visible);
+			tk_status_bar_pointer().Text(buf);
+			//tk_status_bar_pointer_y().Text(buf_y);
+			if (sp_status_bar_pointer().Visibility() != Visibility::Visible) {
+				sp_status_bar_pointer().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_pos().Visibility() != Visibility::Collapsed) {
-				sp_status_bar_pos().Visibility(Visibility::Collapsed);
+			if (sp_status_bar_pointer().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_pointer().Visibility(Visibility::Collapsed);
 			}
 		}
 	}

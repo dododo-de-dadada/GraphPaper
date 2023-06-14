@@ -38,6 +38,9 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (!m_main_focus) {
+			return;
+		}
 		if (m_core_text_focused != nullptr) {
 			undo_push_text_select(m_core_text_focused, 0, m_core_text_focused->get_text_len(), false);
 			menu_is_enable();
@@ -274,7 +277,7 @@ namespace winrt::GraphPaper::implementation
 			if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			const ShapeText* t = static_cast<ShapeText*>(s);
+			//const ShapeText* t = static_cast<ShapeText*>(s);
 			if (m_main_sheet.m_select_start != 0 ||
 				m_main_sheet.m_select_end != 0 ||
 				m_main_sheet.m_select_trail != false) {
