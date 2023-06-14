@@ -1425,8 +1425,13 @@
 						<Setter Property="Margin" Value="0,4" />
 					</Style>
 				</StackPanel.Resources>
-				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what"  GettingFocus="ui_elem_getting_focus" Header="Find what" LostFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
-				<TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" />
+                <!-- 
+                GettingFocus と LostFocus では, ある UI 要素が LostFocus
+                を呼び出す前に, 別の要素が GettingFocus を呼び出してしまう.
+                GotFocus と LosingFocus ではそのような重なりがないようだ.
+                -->
+				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" GotFocus="ui_elem_getting_focus" Header="Find what" LosingFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
+                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" GotFocus="ui_elem_getting_focus" Header="Replace width" LosingFocus="ui_elem_lost_focus"/>
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
 				<Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />

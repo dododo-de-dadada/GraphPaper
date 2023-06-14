@@ -1346,8 +1346,11 @@ namespace winrt::GraphPaper::implementation
 			status_bar_debug().Text(L"m_main_focus = false");
 		}
 
-		void ui_elem_lost_focus(IInspectable const&, RoutedEventArgs const&)
+		void ui_elem_lost_focus(IInspectable const& sender, RoutedEventArgs const&)
 		{
+			if (sender == lv_summary_list()) {
+			//	__debugbreak();
+			}
 			m_main_focus = true;
 			status_bar_debug().Text(L"m_main_focus = true");
 		}
