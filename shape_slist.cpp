@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t& selected_clockwise, uint32_t& selected_counter_clockwise,
 		uint32_t& selected_poly_open_cnt, uint32_t& selected_poly_close_cnt, uint32_t& selected_exist_cap_cnt,
 		bool& fore_selected,
-		bool& back_selected, bool& prev_selected) noexcept
+		bool& back_selected/*, bool& prev_selected*/) noexcept
 	{
 		undeleted_cnt = 0;	// 消去フラグがない図形の数
 		selected_cnt = 0;	// 選択された図形の数
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
 		back_selected = false;	// 最背面の図形の選択フラグ
-		prev_selected = false;	// ひとつ背面の図形の選択フラグ
+		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
 
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : slist) {

@@ -36,87 +36,50 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::copy_click_async(IInspectable const& sender, RoutedEventArgs const& args)
 	{
-		if (sender == tb_map_pointer()) {
-			__debugbreak();
-		}
-		if (sender == lv_summary_list()) {
-			__debugbreak();
-		}
-		if (sender == tx_find_text_what()) {
-			__debugbreak();
-		}
-		if (sender == tx_find_replace_with()) {
-			__debugbreak();
-		}
-		if (sender == nullptr) {
-			__debugbreak();
-		}
-		if (sender == scp_main_panel().KeyboardAccelerators()) {
-			__debugbreak();
-		}
-		if (sender == menu_copy()) {
-			__debugbreak();
-		}
-		if (sender == popup_copy()) {
-			__debugbreak();
-		}
-		if (sender == tb_map_pointer()) {
-			__debugbreak();
-		}
-		if (sender == scp_main_panel()) {
-			__debugbreak();
-		}
-		/*
-		if (args.OriginalSource() == menu_copy()) {
-			__debugbreak();
-		}
-		if (args.OriginalSource() != menu_copy() || args.OriginalSource() != menu_copy()) {
-			co_return;
-		}
-		*/
-		if (!m_main_focus) {
+		if (! m_main_sheet_focused) {
 			co_return;
 		}
 
-		// 編集中の文字列があって, 選択範囲があるなら, 部分文字列をクリップボードに格納する.
-		winrt::hstring selected_text{};
-		if (m_core_text_focused != nullptr && !(selected_text = core_text_substr()).empty()) {
+		// 編集中の文字列があって, 選択範囲があるなら, 選択範囲の文字列をクリップボードに格納する.
+		if (m_core_text_focused != nullptr && core_text_selected_len() > 0) {
+			winrt::hstring selected_text{ core_text_substr() };
 			DataPackage dt_pack{ DataPackage() };
 			dt_pack.RequestedOperation(DataPackageOperation::Copy);
 			dt_pack.SetText(selected_text);
 			Clipboard::SetContent(dt_pack);
 		}
+		// そうでなければ, 図形の内容の文字列や画像, そして選択された図形をクリップボードに格納す
 		else {
-			// 部分文字列が得られなかったなら, 図形の内容の文字列や画像, そして選択された図形をクリップボードに格納す
 			winrt::apartment_context context;
+
 			// 選択された図形のリストを得る.
 			SHAPE_LIST selected_list;
 			slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
-			// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
+
+			// リストから降順に, 最初に見つかった文字列とビットマップを得る.
 			wchar_t* text_ptr = nullptr;
-			RandomAccessStreamReference img_ref = nullptr;
+			RandomAccessStreamReference image_ref = nullptr;
 			for (auto it = selected_list.rbegin(); it != selected_list.rend(); it++) {
+				// 最初に見つかった文字列をポインターに格納する.
 				if (text_ptr == nullptr) {
-					// 文字列をポインターに格納する.
 					(*it)->get_text_content(text_ptr);
 				}
-				if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
-					// ビットマップをストリームに格納し, その参照を得る.
-					InMemoryRandomAccessStream img_stream{
+				// 最初に見つかったビットマップをメモリランダムアクセスストリームに格納し, その参照を得る.
+				if (image_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
+					InMemoryRandomAccessStream image_stream{
 						InMemoryRandomAccessStream()
 					};
-					const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
-						BitmapEncoder::BmpEncoderId(), img_stream);
-					if (ret && img_stream.Size() > 0) {
-						img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
+					if (co_await static_cast<ShapeImage*>(*it)->copy<false>(BitmapEncoder::BmpEncoderId(), image_stream) && image_stream.Size() > 0) {
+						image_ref = RandomAccessStreamReference::CreateFromStream(image_stream);
 					}
 				}
-				if (text_ptr != nullptr && img_ref != nullptr) {
-					// 文字列と画像図形, 両方とも見つかったなら中断する.
+				// 文字列とビットマップ, 両方が見つかったら, それ以上は必要ないので中断する.
+				if (text_ptr != nullptr && image_ref != nullptr) {
 					break;
 				}
 			}
-			// メモリストリームを作成して, そのデータライターを得る.
+
+			// メモリストリームを作成して, そのデータライターを作成する.
 			InMemoryRandomAccessStream mem_stream{
 				InMemoryRandomAccessStream()
 			};
@@ -124,41 +87,54 @@ namespace winrt::GraphPaper::implementation
 				mem_stream.GetOutputStreamAt(0)
 			};
 			DataWriter dt_writer{ DataWriter(out_stream) };
+
 			// データライターに選択された図形のリストを書き込む.
 			constexpr bool REDUCED = true;
 			slist_write<REDUCED>(selected_list, /*--->*/dt_writer);
+
 			// 選択された図形のリストを破棄する.
 			selected_list.clear();
+
 			// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
-			uint32_t n_byte{ co_await dt_writer.StoreAsync() };
+			uint32_t n_byte{
+				co_await dt_writer.StoreAsync()
+			};
 			if (n_byte > 0) {
+
 				// メインページの UI スレッドに変える.
 				co_await winrt::resume_foreground(Dispatcher());
+
 				// データパッケージを作成し, データパッケージにメモリストリームを格納する.
-				DataPackage content{ DataPackage() };
+				DataPackage content{
+					DataPackage()
+				};
 				content.RequestedOperation(DataPackageOperation::Copy);
 				content.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
-				// 文字列が得られたか判定する.
+
+				// 文字列があるならデータパッケージにテキストを格納する.
 				if (text_ptr != nullptr) {
-					// データパッケージにテキストを格納する.
 					content.SetText(text_ptr);
 				}
-				// 画像が得られたか判定する.
-				if (img_ref != nullptr) {
-					// データパッケージに画像を格納する.
-					content.SetBitmap(img_ref);
+
+				// ビットマップがあるならデータパッケージにテキストを格納する.
+				if (image_ref != nullptr) {
+					content.SetBitmap(image_ref);
 				}
+
 				// クリップボードにデータパッケージを格納する.
 				Clipboard::SetContent(content);
 				content = nullptr;
 			}
+
 			// データライターを閉じる.
 			dt_writer.Close();
 			dt_writer = nullptr;
+
 			// 出力ストリームを閉じる.
 			// メモリストリームは閉じちゃダメ.
 			out_stream.Close();
 			out_stream = nullptr;
+
 			// スレッドコンテキストを復元する.
 			co_await context;
 		}
@@ -170,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::cut_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			co_return;
 		}
 
@@ -189,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			return;
 		}
 		// XAML のキーボードアクセラレーターに削除キーは指定されていて,
@@ -236,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			return;
 		}
 		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||

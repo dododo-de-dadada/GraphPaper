@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t& text_cnt, uint32_t& selected_line_cnt, uint32_t& selected_image_cnt, uint32_t& selected_rulur_cnt, 
 		uint32_t& selected_clockwise, uint32_t& selected_counter_clockwise,
 		uint32_t& selected_polyline, uint32_t& selected_polygon, uint32_t& selected_exist_cap_cnt, bool& fore_selected,
-		bool& back_selected, bool& prev_selected) noexcept;
+		bool& back_selected/*, bool& prev_selected*/) noexcept;
 	// }Œ`‚ğí—Ş•Ê‚É”‚¦‚é.
 	void slist_count(const SHAPE_LIST& slist, uint32_t& selected_cnt, uint32_t& runlength_cnt, bool& fore_selected, bool& back_selected) noexcept;
 	// æ“ª‚©‚ç}Œ`‚Ü‚Å”‚¦‚é.

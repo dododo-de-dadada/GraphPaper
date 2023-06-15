@@ -39,10 +39,13 @@ namespace winrt::GraphPaper::implementation
 		m_core_text.InputPaneDisplayPolicy(CoreTextInputPaneDisplayPolicy::Manual);
 		m_core_text.InputScope(CoreTextInputScope::Text);
 		m_core_text.TextRequested([this](auto const&, auto const& args) {
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" TextRequested");
+#endif
 			if (m_core_text_focused == nullptr) {
 				return;
 			}
-			//__debugbreak();
 			CoreTextTextRequest req{ args.Request() };
 			const CoreTextRange ran{ req.Range() };
 			const auto end = static_cast<uint32_t>(ran.EndCaretPosition);
@@ -54,10 +57,13 @@ namespace winrt::GraphPaper::implementation
 			req.Text(sub_text);
 			});
 		m_core_text.SelectionRequested([this](auto const&, auto const& args) {
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" SelectionRequested");
+#endif
 			if (m_core_text_focused == nullptr) {
 				return;
 			}
-			//__debugbreak();
 			CoreTextSelectionRequest req{ args.Request() };
 			const ShapeText* t = m_core_text_focused;
 			const auto len = t->get_text_len();
@@ -69,6 +75,10 @@ namespace winrt::GraphPaper::implementation
 			req.Selection(ran);
 			});
 		m_core_text.FocusRemoved([this](auto const&, auto const& args) {
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" FocusRemoved");
+#endif
 			if (m_core_text_focused == nullptr) {
 				return;
 			}
@@ -81,6 +91,10 @@ namespace winrt::GraphPaper::implementation
 			});
 		// 文字が入力される
 		m_core_text.TextUpdating([this](auto const&, auto const& args) {
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" TextUpdating");
+#endif
 			//__debugbreak();
 			CoreTextRange ran{ args.Range() };
 			const winrt::hstring ins_text{ args.Text() };
@@ -88,17 +102,30 @@ namespace winrt::GraphPaper::implementation
 			});
 		// 変換中, キャレットが移動した
 		m_core_text.SelectionUpdating([this](auto const&, auto const& args) {
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" SelectionUpdating");
+#endif
 			CoreTextRange ran{ args.Selection() };
 			undo_push_text_select(m_core_text_focused, ran.StartCaretPosition, ran.EndCaretPosition, false);
 			main_draw();
 			});
 		// 変換候補が表示される直前に呼ばれ, たぶん変換候補の書体などを設定するやつ.
+#ifdef _DEBUG
+		m_core_text.FormatUpdating([this](auto const&, auto const&) {
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" FormatUpdating");
+#else
 		m_core_text.FormatUpdating([](auto const&, auto const&) {
+#endif
 			//__debugbreak();
 			});
 		// 変換候補を表示するための矩形を設定する.
 		m_core_text.LayoutRequested([this](auto const&, auto const& args) {
-			// __debugbreak();
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" LayoutRequested");
+#endif
 			if (m_core_text_focused == nullptr) {
 				return;
 			}
@@ -168,7 +195,10 @@ namespace winrt::GraphPaper::implementation
 		// 入力変換フラグが立ってないときはその時点の選択範囲を置き換え,
 		// 入力変換フラグが立っているならあらかじめ保存した選択範囲で置き換える.
 		m_core_text.CompositionStarted([this](auto const&, auto const& args) {
-			//__debugbreak();
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" CompositionStarted");
+#endif
 			m_core_text_comp = true;
 			m_core_text_start = m_main_sheet.m_select_start;
 			m_core_text_end = m_main_sheet.m_select_end;
@@ -183,7 +213,10 @@ namespace winrt::GraphPaper::implementation
 		// LayoutRequested で設定したコンテキスト矩形以外でマウスボタンを使った (押下のあと離した後に呼び出される) 場合.
 		// NotifyFocusLeave が呼び出された場合.
 		m_core_text.CompositionCompleted([this](auto const&, auto const& args) {
-			//__debugbreak();				
+#ifdef _DEBUG
+			winrt::hstring debug_text{ status_bar_debug().Text().size() > 32 ? status_bar_debug().Text().data() + status_bar_debug().Text().size() - 16 : status_bar_debug().Text().data() };
+			status_bar_debug().Text(debug_text + L" CompositionCompleted");
+#endif
 			// 入力変換フラグを下ろす.
 			m_core_text_comp = false;
 			});

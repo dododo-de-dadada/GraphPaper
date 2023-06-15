@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			return;
 		}
 		if (m_core_text_focused != nullptr) {

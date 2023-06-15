@@ -184,9 +184,9 @@ namespace winrt::GraphPaper::implementation
 		uint32_t selected_polyline = 0;	// 選択された開いた多角形図形の数
 		uint32_t selected_polygon = 0;	// 選択された閉じた多角形図形の数
 		uint32_t selected_exist_cap = 0;	// 選択された端をもつ図形の数
-		bool fore_selected = false;	// 最前面の図形の選択フラグ
-		bool back_selected = false;	// 最背面の図形の選択フラグ
-		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
+		bool fore_selected = false;	// 最前面にある図形の選択フラグ
+		bool back_selected = false;	// 最背面にある図形の選択フラグ
+		//bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
 		slist_count(
 			m_main_sheet.m_shape_list,
 			undeleted_cnt,
@@ -204,8 +204,8 @@ namespace winrt::GraphPaper::implementation
 			selected_polygon,
 			selected_exist_cap,
 			fore_selected,
-			back_selected,
-			prev_selected
+			back_selected//,
+			//prev_selected
 		);
 		// 選択された図形がひとつ以上ある場合.
 		const auto exists_selected = (m_undo_select_cnt > 0);
@@ -222,9 +222,9 @@ namespace winrt::GraphPaper::implementation
 		// 選択された円弧がひとつ以上ある場合.
 		const auto exists_selected_clockwise = (selected_clockwise > 0);
 		// 選択された開いた多角形がひとつ以上ある場合.
-		const auto exists_selected_poly_open = (selected_polyline > 0);
+		const auto exists_selected_polyline = (selected_polyline > 0);
 		// 選択された閉じた多角形がひとつ以上ある場合.
-		const auto exists_selected_poly_close = (selected_polygon > 0);
+		const auto exists_selected_polygon = (selected_polygon > 0);
 		// 選択されてない図形がひとつ以上ある場合, または選択されてない文字がひとつ以上ある場合.
 		const auto exists_unselected = (m_undo_select_cnt < m_undo_undeleted_cnt || core_text_len() - core_text_selected_len() > 0);
 		// 選択された図形がふたつ以上ある場合.
@@ -292,14 +292,16 @@ namespace winrt::GraphPaper::implementation
 		menu_draw_arc_cw().IsEnabled(exists_selected_counter_clockwise);
 		popup_draw_arc_ccw().IsEnabled(exists_selected_clockwise);
 		menu_arc_counter().IsEnabled(exists_selected_clockwise);
-		popup_open_polygon().IsEnabled(exists_selected_poly_close);
-		menu_open_polygon().IsEnabled(exists_selected_poly_close);
-		popup_close_polyline().IsEnabled(exists_selected_poly_open);
-		mfi_menu_close_polyline().IsEnabled(exists_selected_poly_open);
-		mfi_popup_find_text().IsEnabled(exists_text);
-		mfi_menu_find_text().IsEnabled(exists_text);
-		mfi_popup_revert_image().IsEnabled(exists_selected_image);
-		mfi_menu_revert_image().IsEnabled(exists_selected_image);
+		popup_open_polygon().IsEnabled(exists_selected_polygon);
+		menu_open_polygon().IsEnabled(exists_selected_polygon);
+		popup_close_polyline().IsEnabled(exists_selected_polyline);
+		menu_close_polyline().IsEnabled(exists_selected_polyline);
+		popup_find_text().IsEnabled(exists_text);
+		menu_find_text().IsEnabled(exists_text);
+		popup_revert_image().IsEnabled(exists_selected_image);
+		menu_revert_image().IsEnabled(exists_selected_image);
+		popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
+		menu_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 
 		// 線枠メニューの可否を設定する.
 		//mfsi_popup_stroke_dash().IsEnabled(exists_stroke);
@@ -519,8 +521,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif // _DEBUG
-		m_main_focus = true;
-		status_bar_debug().Text(L"m_main_focus = true");
+		m_main_sheet_focused = true;
+		status_bar_debug().Text(L"m_main_sheet_focused = true");
 		m_main_d2d.SetSwapChainPanel(scp_main_panel());
 		main_draw();
 	}
@@ -654,21 +656,20 @@ namespace winrt::GraphPaper::implementation
 			m_core_text_focused->draw_selection(m_main_sheet.m_select_start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
 
 			const int row = m_core_text_focused->get_text_row(m_main_sheet.m_select_end);
-			//const int row = m_core_text_focused->get_text_row(m_core_text_end);
+			const float hight = m_core_text_focused->m_font_size;
 			D2D1_POINT_2F car;	// キャレットの点
 			m_core_text_focused->get_text_caret(m_main_sheet.m_select_end, row, m_main_sheet.m_select_trail, car);
-			//m_core_text_focused->get_text_caret(m_core_text_end, row, m_core_text_trail, car);
 			D2D1_POINT_2F p{
 				car.x - 0.5f, car.y
 			};
 			D2D1_POINT_2F q{
-				car.x - 0.5f, car.y + m_core_text_focused->m_font_size
+				car.x - 0.5f, car.y + hight
 			};
 			D2D1_POINT_2F r{
 				car.x, car.y
 			};
 			D2D1_POINT_2F s{
-				car.x, car.y + m_core_text_focused->m_font_size
+				car.x, car.y + hight
 			};
 			m_main_sheet.m_d2d_color_brush->SetColor(COLOR_WHITE);
 			m_main_d2d.m_d2d_context->DrawLine(p, q, m_main_sheet.m_d2d_color_brush.get(), 2.0f);
@@ -692,4 +693,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_draw.unlock();
 	}
+}
+
+
+void winrt::GraphPaper::implementation::MainPage::menu_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args)
+{
+		if (m_core_text_focused != nullptr && m_core_text_comp) {
+			m_core_text.NotifyFocusLeave();
+		}
 }

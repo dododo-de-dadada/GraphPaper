@@ -135,59 +135,59 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator/>
 				<!-- 文字列の検索/置換 -->
-				<MenuFlyoutItem x:Name="mfi_popup_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+				<MenuFlyoutItem x:Name="popup_find_text" x:Uid="menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
 						<KeyboardAccelerator Key="F" Modifiers="Control"/>
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<!-- ================ -->
-				<MenuFlyoutSeparator/>
-				<!-- パスの方向を反転 -->
-				<MenuFlyoutItem x:Name="popup_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
-				<!-- 反時計周りに円弧を描く -->
-				<MenuFlyoutItem x:Name="popup_draw_arc_ccw" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_arc_ccw}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 時計周りに円弧を描く -->
-				<MenuFlyoutItem x:Name="popup_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_arc_ccw}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 多角形を開く -->
-				<MenuFlyoutItem x:Name="popup_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_polyline}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 折れ線を閉じる -->
-				<MenuFlyoutItem x:Name="popup_close_polyline" x:Uid="mfi_menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_polygon}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 画像を原画像に戻す -->
-				<MenuFlyoutItem x:Name="mfi_popup_revert_image" x:Uid="mfi_menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_update_restore}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 文字列の編集 -->
-				<!--
-				<MenuFlyoutItem x:Name="mfi_popup_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_ibeam}"/>
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="E" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				-->
-				<!-- ================ -->
-				<MenuFlyoutSeparator/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutSubItem x:Name="popup_edit_shape" x:Uid="menu_edit_shape" Text="Edit Shape">
+					<!-- パスの方向を反転 -->
+					<MenuFlyoutItem x:Name="popup_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
+					<!-- 反時計周りに円弧を描く -->
+					<MenuFlyoutItem x:Name="popup_draw_arc_ccw" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
+						<MenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_arc_ccw}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<!-- 時計周りに円弧を描く -->
+					<MenuFlyoutItem x:Name="popup_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
+						<MenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_arc_clockwise}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<!-- 多角形を開く -->
+					<MenuFlyoutItem x:Name="popup_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+						<MenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_polyline}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<!-- 折れ線を閉じる -->
+					<MenuFlyoutItem x:Name="popup_close_polyline" x:Uid="menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
+						<MenuFlyoutItem.Icon>
+							<PathIcon Data="{StaticResource data_polygon}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<!-- 画像を原画像に戻す -->
+					<MenuFlyoutItem x:Name="popup_revert_image" x:Uid="menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_update_restore}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<!-- 文字列の編集 -->
+					<!--
+					<MenuFlyoutItem x:Name="mfi_popup_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_ibeam}"/>
+						</MenuFlyoutItem.Icon>
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="E" Modifiers="Control" />
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					-->
+                </MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Name="popup_stroke" Text="Stroke">
 					<!-- 破線の形式 -->
 					<MenuFlyoutSubItem x:Name="mfsi_popup_stroke_dash" x:Uid="mfsi_menu_stroke_dash" Text="Style">
@@ -584,11 +584,11 @@
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 		<!-- メニューバー -->
-		<muxc:MenuBar x:Name="mb_menu" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
+        <muxc:MenuBar x:Name="mb_menu" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" GettingFocus="menu_getting_focus" Height="Auto">
 			<!-- ファイルメニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
+			<muxc:MenuBarItem x:Uid="menu_file" AccessKey="F" Title="File" >
 				<!-- 新規 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_new" Click="file_new_click_async" Icon="Page2" Text="New"  >
+				<MenuFlyoutItem x:Uid="menu_new" Click="file_new_click_async" Icon="Page2" Text="New"  >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="N" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -788,7 +788,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 文字列の検索/置換 -->
-				<MenuFlyoutItem x:Name="mfi_menu_find_text" x:Uid="mfi_menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+				<MenuFlyoutItem x:Name="menu_find_text" x:Uid="menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
 						<KeyboardAccelerator Key="F" Modifiers="Control"/>
@@ -796,50 +796,54 @@
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
-				<!-- パスの方向を反転 -->
-				<MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
-				<!-- 反時計周りに円弧を描く -->
-				<MenuFlyoutItem x:Name="menu_arc_counter" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_arc_ccw}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 時計周りに円弧を描く -->
-				<MenuFlyoutItem x:Name="menu_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_arc_clockwise}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 多角形を開く -->
-				<MenuFlyoutItem x:Name="menu_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_polyline}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 折れ線を閉じる -->
-				<MenuFlyoutItem x:Name="mfi_menu_close_polyline" x:Uid="mfi_menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_polygon}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 画像を原画像に戻す -->
-				<MenuFlyoutItem x:Name="mfi_menu_revert_image" x:Uid="mfi_menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_update_restore}" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<!-- 文字列の編集 -->
-				<!--
-				<MenuFlyoutItem x:Name="mfi_menu_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon Glyph="{StaticResource glyph_ibeam}"/>
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="E" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
+                <!-- 図形の編集 -->
+                <MenuFlyoutSubItem x:Name="menu_edit_shape" x:Uid="menu_edit_shape" Text="Edit Shape">
+
+                    <!-- パスの方向を反転 -->
+                    <MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
+                    <!-- 反時計周りに円弧を描く -->
+                    <MenuFlyoutItem x:Name="menu_arc_counter" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
+                        <MenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_arc_ccw}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <!-- 時計周りに円弧を描く -->
+                    <MenuFlyoutItem x:Name="menu_draw_arc_cw" x:Uid="menu_draw_arc_cw" Click="draw_arc_direction_click" Text="Draw Arc Clockwise">
+                        <MenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_arc_clockwise}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <!-- 多角形を開く -->
+                    <MenuFlyoutItem x:Name="menu_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+                        <MenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_polyline}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <!-- 折れ線を閉じる -->
+                    <MenuFlyoutItem x:Name="menu_close_polyline" x:Uid="menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
+                        <MenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_polygon}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <!-- 画像を原画像に戻す -->
+                    <MenuFlyoutItem x:Name="menu_revert_image" x:Uid="menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="{StaticResource glyph_update_restore}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <!-- 文字列の編集 -->
+                    <!--
+					<MenuFlyoutItem x:Name="mfi_menu_edit_text" x:Uid="mfi_menu_edit_text" Click="meth_text_edit_click" Text="Edit Text" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon Glyph="{StaticResource glyph_ibeam}"/>
+						</MenuFlyoutItem.Icon>
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="E" Modifiers="Control" />
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
 				-->
-			</muxc:MenuBarItem>
+                </MenuFlyoutSubItem>
+            </muxc:MenuBarItem>
 			<!-- 作図メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_menu_drawing" x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
 				<!-- 選択ツール -->
@@ -1425,13 +1429,9 @@
 						<Setter Property="Margin" Value="0,4" />
 					</Style>
 				</StackPanel.Resources>
-                <!-- 
-                GettingFocus と LostFocus では, ある UI 要素が LostFocus
-                を呼び出す前に, 別の要素が GettingFocus を呼び出してしまう.
-                GotFocus と LosingFocus ではそのような重なりがないようだ.
-                -->
-				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" GotFocus="ui_elem_getting_focus" Header="Find what" LosingFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
-                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" GotFocus="ui_elem_getting_focus" Header="Replace width" LosingFocus="ui_elem_lost_focus"/>
+                <!-- GettingFocus と LosingFocus は同期的 -->
+				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" GettingFocus="ui_elem_getting_focus" Header="Find what" LosingFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
+                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" GettingFocus="ui_elem_getting_focus" Header="Replace width" LosingFocus="ui_elem_lost_focus"/>
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
 				<Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />

@@ -301,7 +301,7 @@
 	<value>Edit</value>
 	<comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_file.Title" xml:space="preserve">
+  <data name="menu_file.Title" xml:space="preserve">
 	<value>File</value>
 	<comment>MenuBarItem</comment>
   </data>
@@ -381,7 +381,7 @@
 	<value>Open...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_find_text.Text" xml:space="preserve">
+  <data name="menu_find_text.Text" xml:space="preserve">
 	<value>Find/Replace Text...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -425,7 +425,7 @@
 	<value>Group</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_new.Text" xml:space="preserve">
+  <data name="menu_new.Text" xml:space="preserve">
 	<value>New</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -1194,7 +1194,7 @@
 	<value>Image Opacity...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_revert_image.Text" xml:space="preserve">
+  <data name="menu_revert_image.Text" xml:space="preserve">
 	<value>Revert Image to Original</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -1262,7 +1262,7 @@
 	<value>Open Polygon</value>
 	<comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_menu_close_polyline.Text" xml:space="preserve">
+  <data name="menu_close_polyline.Text" xml:space="preserve">
 	<value>Close Polyline</value>
 	<comment>MenuFlyoutSubItem</comment>
   </data>

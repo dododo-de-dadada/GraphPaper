@@ -76,6 +76,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Visibility;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+	using winrt::Windows::UI::Xaml::UIElement;
+	using winrt::Windows::UI::Xaml::Input::GettingFocusEventArgs;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -284,7 +286,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
 		float m_main_scale = 1.0f;	// 用紙の拡大率
-		bool m_main_focus = false;
+		bool m_main_sheet_focused = false;	// 用紙のフォーカスフラグ (UI 要素によるキーボードアクセラレターをより分けるために使用されるフラグ)
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
@@ -538,76 +540,13 @@ namespace winrt::GraphPaper::implementation
 		template<typename T> void order_swap(void);
 		// 編集メニューの「前面に移動」が選択された.
 		void bring_forward_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「前面に移動」のショートカットが押された.
-		/*
-		void bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			uint32_t selected_cnt = 0;	// 選択された図形の数
-			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
-			bool fore_selected = false;	// 最前面の図形の選択フラグ
-			bool back_selected = false;	// 最背面の図形の選択フラグ
-			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
-			const auto enable_forward = (runlength_cnt > 1 || (selected_cnt > 0 && !fore_selected));
-			if (enable_forward) {
-				menu_bring_forward().IsEnabled(true);
-				popup_bring_forward().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 編集メニューの「最前面に移動」が選択された.
 		void bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「最前面に移動」のショートカットが押された.
-		/*
-		void bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			uint32_t selected_cnt = 0;	// 選択された図形の数
-			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
-			bool fore_selected = false;	// 最前面の図形の選択フラグ
-			bool back_selected = false;	// 最背面の図形の選択フラグ
-			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
-			const auto enable_forward = (runlength_cnt > 1 || (selected_cnt > 0 && !fore_selected));
-			if (enable_forward) {
-				menu_bring_to_front().IsEnabled(true);
-				popup_bring_to_front().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 編集メニューの「ひとつ背面に移動」が選択された.
 		void send_backward_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「ひとつ背面に移動」のショートカットが押された.
-		/*
-		void send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			uint32_t selected_cnt = 0;	// 選択された図形の数
-			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
-			bool fore_selected = false;	// 最前面の図形の選択フラグ
-			bool back_selected = false;	// 最背面の図形の選択フラグ
-			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
-			const auto enable_backward = (runlength_cnt > 1 || (selected_cnt > 0 && !back_selected));
-			if (enable_backward) {
-				menu_send_backward().IsEnabled(true);
-				popup_send_backward().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 編集メニューの「最背面に移動」が選択された.
 		void send_to_back_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「最背面に移動」が選択された.
-		/*
-		void send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			uint32_t selected_cnt = 0;	// 選択された図形の数
-			uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
-			bool fore_selected = false;	// 最前面の図形の選択フラグ
-			bool back_selected = false;	// 最背面の図形の選択フラグ
-			slist_count(m_main_sheet.m_shape_list, selected_cnt, runlength_cnt, fore_selected, back_selected);
-			const auto enable_backward = (runlength_cnt > 1 || (selected_cnt > 0 && !back_selected));
-			if (enable_backward) {
-				menu_send_to_back().IsEnabled(true);
-				popup_send_to_back().Visibility(Visibility::Visible);
-			}
-		}
-		*/
+
 		//-------------------------------
 		// MainPage_disp.cpp
 		// 表示デバイスのハンドラー
@@ -762,7 +701,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (exist_find) {
-				find_text_click(mfi_menu_find_text(), nullptr);
+				find_text_click(menu_find_text(), nullptr);
 			}
 		}
 		*/
@@ -1331,10 +1270,10 @@ namespace winrt::GraphPaper::implementation
 		// 切り取りとコピー, 貼り付け, 削除
 		//-------------------------------
 
-		// ショートカットが押されたのが
-		// スワップチェーンパネルはそもそもフォーカスを獲得しないので, フォーカスがあるかどうかは判定できない.
-		// スワップチェーンパネル以外のフォーカスを獲得しうる UI 要素, たとえばテキストボックス
-		void ui_elem_getting_focus(IInspectable const&, RoutedEventArgs const&)
+		// UI 要素がフォーカスを得る.
+		// スワップチェーンパネル以外の UI 要素, たとえばテキストボックスがフォーカスを獲得するときに呼び出されて,
+		// 用紙のフォーカスフラグを下す. 
+		void ui_elem_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args)
 		{
 			// テキストブロックがサポートするコマンドは以下の通り.
 			// Copy
@@ -1342,8 +1281,8 @@ namespace winrt::GraphPaper::implementation
 			// Paste
 			// Select all
 			// Undo
-			m_main_focus = false;
-			status_bar_debug().Text(L"m_main_focus = false");
+			m_main_sheet_focused = false;
+			status_bar_debug().Text(L"m_main_sheet_focused = false");
 		}
 
 		void ui_elem_lost_focus(IInspectable const& sender, RoutedEventArgs const&)
@@ -1351,8 +1290,8 @@ namespace winrt::GraphPaper::implementation
 			if (sender == lv_summary_list()) {
 			//	__debugbreak();
 			}
-			m_main_focus = true;
-			status_bar_debug().Text(L"m_main_focus = true");
+			m_main_sheet_focused = true;
+			status_bar_debug().Text(L"m_main_sheet_focused = true");
 		}
 
 		// 編集メニューの「コピー」が選択された.
@@ -1500,8 +1439,7 @@ namespace winrt::GraphPaper::implementation
 			PrintCanvas().UpdateLayout();
 			*/
 		}
-		void rmfi_menu_drawing_poly_PointerEntered(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const& e);
-		void rmfi_menu_drawing_poly_PointerExited(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs const& e);
+		void menu_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args);
 };
 	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
 	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);

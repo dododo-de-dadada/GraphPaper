@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			return;
 		}
 		// 最初が空操作ならそれらを取りのぞく.
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (!m_main_focus) {
+		if (!m_main_sheet_focused) {
 			return;
 		}
 		// 最初が空操作ならそれらを取りのぞく.

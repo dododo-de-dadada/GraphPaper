@@ -397,34 +397,34 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto)
 	{
-		const auto d_tool = m_drawing_tool;
+		const auto drawing_tool = m_drawing_tool;
 		Shape* s;
-		if (d_tool == DRAWING_TOOL::RECT) {
+		if (drawing_tool == DRAWING_TOOL::RECT) {
 			s = new ShapeRect(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::RRECT) {
+		else if (drawing_tool == DRAWING_TOOL::RRECT) {
 			s = new ShapeRRect(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::POLY) {
+		else if (drawing_tool == DRAWING_TOOL::POLY) {
 			const auto poly_opt = m_drawing_poly_opt;
 			s = new ShapePoly(start, lineto, &m_main_sheet, poly_opt);
 		}
-		else if (d_tool == DRAWING_TOOL::ELLIPSE) {
+		else if (drawing_tool == DRAWING_TOOL::ELLIPSE) {
 			s = new ShapeEllipse(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::LINE) {
+		else if (drawing_tool == DRAWING_TOOL::LINE) {
 			s = new ShapeLine(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::BEZIER) {
+		else if (drawing_tool == DRAWING_TOOL::BEZIER) {
 			s = new ShapeBezier(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::RULER) {
+		else if (drawing_tool == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::ARC) {
+		else if (drawing_tool == DRAWING_TOOL::ARC) {
 			s = new ShapeArc(start, lineto, &m_main_sheet);
 		}
-		else if (d_tool == DRAWING_TOOL::TEXT) {
+		else if (drawing_tool == DRAWING_TOOL::TEXT) {
 			s = new ShapeText(start, lineto, nullptr, &m_main_sheet);
 		}
 		else {
@@ -438,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 		unselect_shape_all();
 		undo_push_append(s);
 		undo_push_select(s);
-		if (d_tool == DRAWING_TOOL::TEXT) {
+		if (drawing_tool == DRAWING_TOOL::TEXT) {
 			if (m_core_text_focused != nullptr) {
 				m_core_text.NotifyFocusLeave();
 				undo_push_text_unselect(m_core_text_focused);

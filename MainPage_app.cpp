@@ -67,6 +67,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			app_data_item = nullptr;
 		}
+
 		// スレッドコンテキストを復元する.
 		co_await context;
 	}
@@ -118,13 +119,12 @@ namespace winrt::GraphPaper::implementation
 				StorageFile app_data_file{
 					co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(APP_DATA_FILE, CreationCollisionOption::ReplaceExisting) 
 				};
-				// ファイルが作成できたなら, 
+				// ファイルが作成できたなら, アプリケーションデータを書き込む.
 				if (app_data_file != nullptr) {
-					// アプリケーションデータを書き込む.
 					co_await file_write_gpf_async<true, false>(app_data_file);
 					app_data_file = nullptr;
 				}
-				// ファイルが作成できないなら,
+				// ファイルが作成できないなら, エラーメッセージを表示する.
 				else {
 					message_show(ICON_ALERT, L"str_err_save", {});
 				}

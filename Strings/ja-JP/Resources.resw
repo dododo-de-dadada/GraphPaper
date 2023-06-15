@@ -301,7 +301,7 @@
 	<value>編集(E)</value>
 	<comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_file.Title" xml:space="preserve">
+  <data name="menu_file.Title" xml:space="preserve">
 	<value>ファイル(F)</value>
 	<comment>MenuBarItem</comment>
   </data>
@@ -381,7 +381,7 @@
 	<value>塗りつぶし色...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_find_text.Text" xml:space="preserve">
+  <data name="menu_find_text.Text" xml:space="preserve">
 	<value>文字列の検索と置換...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -425,7 +425,7 @@
 	<value>グループ化</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_new.Text" xml:space="preserve">
+  <data name="menu_new.Text" xml:space="preserve">
 	<value>新規</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -1186,7 +1186,7 @@
 	<value>画像の不透明度...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_revert_image.Text" xml:space="preserve">
+  <data name="menu_revert_image.Text" xml:space="preserve">
 	<value>画像を原画像に戻す</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
@@ -1250,7 +1250,7 @@
 	<value>多角形を開く</value>
 	<comment>MenuFlyoutSubItem</comment>
   </data>
-	<data name="mfi_menu_close_polyline.Text" xml:space="preserve">
+	<data name="menu_close_polyline.Text" xml:space="preserve">
 	<value>折れ線を閉じる</value>
 	<comment>MenuFlyoutSubItem</comment>
   </data>

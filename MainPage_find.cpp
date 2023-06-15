@@ -253,13 +253,7 @@ namespace winrt::GraphPaper::implementation
 		if (find_len == 0) {
 			return;
 		}
-
-		// 得られた図形のキャレットを先頭に戻して検索する.
 		undo_push_null();
-		if (m_core_text_focused != nullptr) {
-			undo_push_text_select(m_core_text_focused, 0, 0, false);
-			m_core_text_focused = nullptr;
-		}
 		if (find_next()) {
 			do {
 				replace_text();
@@ -312,8 +306,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::replace_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
+
+		// 検索文字列が空, または検索文字列と置換文字列が同じなら中断する.
 		const auto find_len = wchar_len(m_find_text);
-		if (find_len == 0 || wcscmp(m_find_text, m_find_repl) == 0) {
+		if (find_len == 0 || wcscmp(m_find_text, m_find_repl == nullptr ? L"" : m_find_repl) == 0) {
 			return;
 		}
 
@@ -325,14 +321,17 @@ namespace winrt::GraphPaper::implementation
 				replace_text();
 			}
 		}
+
 		// 次の文字列を検索する.
 		const bool found = find_next();
+
+
 		if (found) {
 			scroll_to(m_core_text_focused);
+			menu_is_enable();
+			main_draw();
 		}
-		menu_is_enable();
-		main_draw();
-		if (!found) {
+		else {
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			status_bar_set_pos();
 		}
@@ -385,6 +384,11 @@ namespace winrt::GraphPaper::implementation
 	// 文字列を検索する.
 	bool MainPage::find_next(void)
 	{
+		// 入力中の文字列があれば,
+		if (m_core_text_focused != nullptr && m_core_text_comp) {
+			m_core_text.NotifyFocusLeave();
+		}
+
 		const auto find_len = wchar_len(m_find_text);
 		// 最後面から最前面の各文字列図形について.
 		for (auto it = m_main_sheet.m_shape_list.begin(); it != m_main_sheet.m_shape_list.end(); it++) {
