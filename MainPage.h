@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の編集, 検索と置換
 		bool m_fit_text_frame = false;	// 枠を文字列に合わせる
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
-		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
+		wchar_t* m_repl_text = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別
 		bool m_find_text_wrap = false;	// 回り込み検索
 
@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_main_sheet_focused = false;	// 用紙のフォーカスフラグ (UI 要素によるキーボードアクセラレターをより分けるために使用されるフラグ)
 
 		// 背景パターン
-		winrt::com_ptr<IWICFormatConverter> m_wic_background{ nullptr };	// 背景の画像ブラシ
+		winrt::com_ptr<IWICFormatConverter> m_background_wic{ nullptr };	// 背景の画像ブラシ
 		bool m_background_show = false;	// 背景の市松模様を表示
 		D2D1_COLOR_F m_background_color{ COLOR_WHITE };	// 背景の色
 
@@ -302,19 +302,13 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_undo_stack;	// 元に戻す操作スタック
 		uint32_t m_undo_select_cnt = 0;	// 選択された図形の数
 		uint32_t m_undo_undeleted_cnt = 0;	// 削除されていない図形の数
-		//uint32_t m_undo_undeleted_text = 0;
-		//uint32_t m_undo_selected_group = 0;
-		//uint32_t m_undo_selected_text = 0;
-		//uint32_t m_undo_selected_line = 0;
-		//uint32_t m_undo_selected_image = 0;
-		//uint32_t m_undo_selected_ruler = 0;
-		//uint32_t m_undo_selected_arc = 0;
-		//uint32_t m_undo_selected_polyline = 0;
-		//uint32_t m_undo_selected_polygon = 0;
-		//uint32_t m_undo_selected_exist_cap = 0;
-		//uint32_t m_undo_text = 0;
+
 #ifdef _DEBUG
 		void debug_cnt(void) {
+			wchar_t debug_buf[64];
+			swprintf_s(debug_buf, L"%zu", m_undo_stack.size());
+			status_bar_debug().Text(debug_buf);
+
 			uint32_t select_cnt = 0;
 			uint32_t undeleted_cnt = 0;
 			uint32_t undeleted_text = 0;
@@ -436,13 +430,6 @@ namespace winrt::GraphPaper::implementation
 		//IPrintDocumentSource m_print_source;
 
 		//-------------------------------
-		// MainPage.cpp
-		// メインページの作成, 
-		// メインのスワップチェーンパネルのハンドラー
-		// メインの用紙図形の処理
-		//-------------------------------
-
-		//-------------------------------
 		// MainPage_core_text.cpp
 		// 文字入力
 		//-------------------------------
@@ -455,7 +442,7 @@ namespace winrt::GraphPaper::implementation
 				const auto end = m_core_text_focused->get_text_pos(m_event_pos_curr, trail);
 				const auto start = m_main_sheet.m_select_start;
 				undo_push_text_select(m_core_text_focused, start, end, trail);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		// 文字列入力のためのハンドラーを設定する.
@@ -487,6 +474,13 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の入力中に後退キーが押された.
 		void MainPage::core_text_backspace_key(void) noexcept;
 
+		//-------------------------------
+		// MainPage.cpp
+		// メインページの作成, 
+		// メインのスワップチェーンパネルのハンドラー
+		// メインの用紙図形の処理
+		//-------------------------------
+
 		// 更新された図形をもとにメインの用紙の境界矩形を更新する.
 		void MainPage::main_bbox_update(const Shape* s) noexcept
 		{
@@ -504,8 +498,8 @@ namespace winrt::GraphPaper::implementation
 		void main_panel_scale_changed(IInspectable const& sender, IInspectable const&);
 		// メインのスワップチェーンパネルの大きさを設定する.
 		void main_panel_size(void);
-		// メインの用紙図形を表示する.
-		void main_draw(void);
+		// メイン用紙を表示する.
+		void main_sheet_draw(void);
 		// メッセージダイアログを表示する.
 		void message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc);
 		// ウィンドウの閉じるボタンが押された.
@@ -592,6 +586,8 @@ namespace winrt::GraphPaper::implementation
 		void event_set_position(PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// 文字列編集ダイアログを表示する.
+		IAsyncAction event_edit_text_async(void);
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -623,18 +619,18 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ストレージファイルを非同期に読む.
 		template <bool RESUME, bool SETTING_ONLY> IAsyncOperation<winrt::hresult> file_read_gpf_async(StorageFile s_file) noexcept;
-		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
-		IAsyncAction file_recent_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 最近使ったファイルにストレージファイルを追加する.
-		void file_recent_add(StorageFile const& s_file);
-		// 最近使ったファイルのトークンからストレージファイルを得る.
-		IAsyncOperation<StorageFile> file_recent_token_async(const winrt::hstring token);
-		// 最近使ったファイルのメニュー項目を更新する.
-		void file_recent_menu_update(void);
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING> IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
 		// ファイルメニューの「他の形式としてエクスポートする」が選択された
 		IAsyncAction file_export_as_click_async(IInspectable const&, RoutedEventArgs const&);
+		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
+		IAsyncAction recent_file_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 最近使ったファイルにストレージファイルを追加する.
+		void recent_file_add(StorageFile const& s_file);
+		// 最近使ったファイルのトークンからストレージファイルを得る.
+		IAsyncOperation<StorageFile> recent_file_token_async(const winrt::hstring token);
+		// 最近使ったファイルのメニュー項目を更新する.
+		void recent_file_menu_update(void);
 
 		//-------------------------------
 		// MainPage_color.cpp
@@ -665,13 +661,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「円弧の傾きの編集」が選択された.
 		//void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「多角形を開く」が選択された.
-		void open_polygon_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「折れ線を閉じる」が選択された.
-		void close_polyline_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
-		void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
-		IAsyncAction edit_text_async(ShapeText* s);
+		//void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
+		//IAsyncAction edit_text_async(ShapeText* s);
 		//IAsyncAction edit_arc_async(ShapeArc* s);
 
 		//-------------------------------
@@ -1117,7 +1109,12 @@ namespace winrt::GraphPaper::implementation
 
 		template<UNDO_T U> void menu_is_checked(void);
 		// 編集メニューの「やり直し」が選択された.
-		void redo_click(IInspectable const&, RoutedEventArgs const&);
+		//void redo_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「やり直し」が選択された.
+		void redo_click(IInspectable const&, RoutedEventArgs const&)
+		{
+			undo_exec(m_redo_stack, m_undo_stack);
+		}
 		// 編集メニューの「やり直し」のショートカットが押された.
 		/*
 		void redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
@@ -1129,7 +1126,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		*/
 		// 編集メニューの「元に戻す」が選択された.
-		void undo_click(IInspectable const&, RoutedEventArgs const&);
+		//void undo_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「元に戻す」が選択された.
+		void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
+		{
+			undo_exec(m_undo_stack, m_redo_stack);
+		}
 		// 編集メニューの「元に戻す」のショートカットが押された.
 		/*
 		void undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
@@ -1140,10 +1142,11 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		*/
+		void undo_exec(UNDO_STACK& undo_stack, UNDO_STACK& redo_stack);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
 		// 操作を実行する.
-		void undo_exec(Undo* u);
+		//void undo_exec(Undo* u);
 		// 無効な操作をポップする.
 		bool undo_pop_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
@@ -1151,7 +1154,6 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_undo_stack.push_back(new UndoAppend(s));
 			if (s->is_selected()) {
-				//undo_selected_cnt<true>(s);
 				m_undo_select_cnt++;
 			}
 			if (!s->is_deleted()) {
@@ -1201,8 +1203,8 @@ namespace winrt::GraphPaper::implementation
 			debug_cnt();
 #endif
 		}
-		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F to, const bool any_shape = false);
+		// 図形の位置をスタックに保存してから差分だけ移動する.
+		template <bool ANY> void undo_push_move(const D2D1_POINT_2F to);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.
@@ -1273,7 +1275,7 @@ namespace winrt::GraphPaper::implementation
 		// UI 要素がフォーカスを得る.
 		// スワップチェーンパネル以外の UI 要素, たとえばテキストボックスがフォーカスを獲得するときに呼び出されて,
 		// 用紙のフォーカスフラグを下す. 
-		void ui_elem_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args)
+		void ui_elem_getting_focus(UIElement const&, GettingFocusEventArgs const&)
 		{
 			// テキストブロックがサポートするコマンドは以下の通り.
 			// Copy
@@ -1285,72 +1287,20 @@ namespace winrt::GraphPaper::implementation
 			status_bar_debug().Text(L"m_main_sheet_focused = false");
 		}
 
-		void ui_elem_lost_focus(IInspectable const& sender, RoutedEventArgs const&)
+		void ui_elem_lost_focus(IInspectable const&, RoutedEventArgs const&)
 		{
-			if (sender == lv_summary_list()) {
-			//	__debugbreak();
-			}
 			m_main_sheet_focused = true;
 			status_bar_debug().Text(L"m_main_sheet_focused = true");
 		}
 
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction copy_click_async(IInspectable const&, RoutedEventArgs const&);
-		// スワップチェーンパネルのショートカットが押された.
-		/*
-		void copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			copy_click_async(scp_main_panel(), nullptr);
-		}
-		*/
 		// 編集メニューの「切り取り」が選択された.
 		IAsyncAction cut_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「切り取り」のショートカットが押された.
-		/*
-		void cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0) {
-				menu_cut().IsEnabled(true);
-				popup_cut().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 編集メニューの「削除」が選択された.
 		void delete_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「削除」のショートカットが押された.
-		/*
-		void delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			if (m_undo_select_cnt > 0 || core_text_selected_len() > 0 || core_text_pos() < core_text_len()) {
-				menu_delete().IsEnabled(true);
-				popup_delete().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 編集メニューの「貼り付け」が選択された.
 		void paste_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「貼り付け」のショートカットが押された.
-		/*
-		void paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&) noexcept
-		{
-			// Clipboard::GetContent() は, 
-			// WinRT originate error 0x80040904
-			// を引き起こすので, try ... catch 文が必要.
-			try {
-				const auto& dp_view = Clipboard::GetContent();
-				if (!dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) &&
-					!dp_view.Contains(StandardDataFormats::Text()) &&
-					!dp_view.Contains(StandardDataFormats::Bitmap())) {
-					throw winrt::hresult_error();
-				}
-			}
-			catch (winrt::hresult_error const&) {
-				return;
-			}
-			menu_paste().IsEnabled(true);
-			popup_paste().Visibility(Visibility::Visible);
-		}
-		*/
 		// 画像を貼り付ける.
 		IAsyncAction xcvd_paste_image(void);
 		// 図形を貼り付ける.
@@ -1359,7 +1309,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_text(void);
 		// 貼り付ける点を得る
 		void xcvd_paste_pos(D2D1_POINT_2F& paste_pt, const D2D1_POINT_2F src_pt) const noexcept;
-
+		// 「パスの方向を反転」がクリックされた.
 		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{
 			bool changed = false;
@@ -1375,28 +1325,13 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (changed) {
 				menu_is_enable();
-				main_draw();
+				main_sheet_draw();
 				status_bar_set_pos();
 			}
 		}
-
-		void draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/)
-		{
-			if (sender == menu_arc_counter() || sender == popup_draw_arc_ccw()) {
-				undo_push_null();
-				if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
-					menu_is_enable();
-					main_draw();
-				}
-			}
-			else if (sender == menu_draw_arc_cw() || sender == popup_draw_arc_cw()) {
-				undo_push_null();
-				if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
-					menu_is_enable();
-					main_draw();
-				}
-			}
-		}
+		// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された
+		void draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/);
+		void open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&);
 
 		void Page_Loaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{

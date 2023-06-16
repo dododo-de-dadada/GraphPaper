@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed = nullptr;
 			m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
 			unselect_shape_all();
-			main_draw();
+			main_sheet_draw();
 		}
 		else if (sender == rmfi_menu_drawing_rect()) {
 			m_drawing_tool = DRAWING_TOOL::RECT;

@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Slider;
 	using winrt::Windows::UI::Xaml::Visibility;
 
+	/*
 	IAsyncAction MainPage::edit_text_async(ShapeText* s)
 	{
 		static winrt::event_token primary_token;
@@ -31,11 +32,12 @@ namespace winrt::GraphPaper::implementation
 				undo_push_position(s, LOC_TYPE::LOC_SE);
 				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
+	*/
 
 	// 操作メニューの「画像を原画像に戻す」が選択された.
 	void MainPage::revert_image_click(IInspectable const&, RoutedEventArgs const&) noexcept
@@ -54,11 +56,12 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeImage*>(s)->revert();
 		}
 		main_panel_size();
-		main_draw();
+		main_sheet_draw();
 		status_bar_set_pos();
 	}
 
 	// 編集メニューの「文字列の編集」が選択された.
+	/*
 	void MainPage::meth_text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = static_cast<ShapeText*>(nullptr);	// 編集する文字列図形
@@ -88,46 +91,50 @@ namespace winrt::GraphPaper::implementation
 			edit_text_async(s);
 		}
 	}
+	*/
 
-	void MainPage::open_polygon_click(IInspectable const&, RoutedEventArgs const&)
+	// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された
+	void MainPage::draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/)
 	{
-		bool changed = false;
-		for (Shape* s : m_main_sheet.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected()) {
-				continue;
-			}
-			D2D1_FIGURE_END end;
-			if (s->get_poly_end(end) && end != D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
-				if (!changed) {
-					undo_push_null();
-					changed = true;
-				}
-				undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		if (sender == menu_arc_counter() || sender == popup_draw_arc_ccw()) {
+			undo_push_null();
+			if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+				menu_is_enable();
+				main_sheet_draw();
 			}
 		}
-		if (changed) {
-			main_draw();
+		else if (sender == menu_draw_arc_cw() || sender == popup_draw_arc_cw()) {
+			undo_push_null();
+			if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+				menu_is_enable();
+				main_sheet_draw();
+			}
 		}
 	}
 
-	void MainPage::close_polyline_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		const D2D1_FIGURE_END END = (sender == menu_open_polygon() || sender == popup_open_polygon() ? D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN : D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
 		bool changed = false;
 		for (Shape* s : m_main_sheet.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected()) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			if (!s->is_selected()) {
 				continue;
 			}
 			D2D1_FIGURE_END end;
-			if (s->get_poly_end(end) && end != D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
+			if (s->get_poly_end(end) && end != END) {
 				if (!changed) {
 					undo_push_null();
 					changed = true;
 				}
-				undo_push_set<UNDO_T::POLY_END>(s, D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
+				undo_push_set<UNDO_T::POLY_END>(s, END);
 			}
 		}
 		if (changed) {
-			main_draw();
+			menu_is_enable();
+			main_sheet_draw();
 		}
 	}
 
@@ -351,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_T::ARC_END>(new_val);
 				s->get_arc_rot(new_val);
 				undo_push_set<UNDO_T::ARC_ROT>(new_val);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		slist_clear(m_dialog_sheet.m_shape_list);

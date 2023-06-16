@@ -452,7 +452,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_pressed = s;
 		m_event_shape_last = s;
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);
@@ -634,7 +634,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 矩形選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RECT) {
-			main_draw();
+			main_sheet_draw();
 		}
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
@@ -644,7 +644,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			slist_move_selected(m_main_sheet.m_shape_list, p);
 			m_event_pos_prev = m_event_pos_curr;
-			main_draw();
+			main_sheet_draw();
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
@@ -652,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 			const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 			m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
 			m_event_pos_prev = m_event_pos_curr;
-			main_draw();
+			main_sheet_draw();
 		}
 		// 状態が, 文字列を選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_TEXT) {
@@ -691,8 +691,8 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_null();
-					undo_push_move(p);
-					main_draw();
+					undo_push_move<false>(p);
+					main_sheet_draw();
 				}
 				// 押された図形の部位が文字列なら, 文字列の選択をしている状態に遷移する.
 				else if (m_drawing_tool == DRAWING_TOOL::SELECT && m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
@@ -711,7 +711,7 @@ namespace winrt::GraphPaper::implementation
 							undo_push_text_unselect(m_core_text_focused);
 							m_core_text_focused = nullptr;
 						}
-						main_draw();
+						main_sheet_draw();
 					}
 					// 押された図形が編集中の文字列の場合.
 					else if (m_core_text_focused != nullptr && m_core_text_focused == m_event_shape_pressed) {
@@ -728,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 						undo_push_position(m_event_shape_pressed, m_event_loc_pressed);
 						const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 						m_event_shape_pressed->set_pos_loc(m_event_pos_curr, m_event_loc_pressed, 0.0f, keep_aspect);
-						main_draw();
+						main_sheet_draw();
 					}
 				}
 			}
@@ -1005,8 +1005,32 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (changed) {
 			menu_is_enable();
-			main_draw();
+			main_sheet_draw();
 		}
+	}
+
+	// 文字列編集ダイアログを表示する.
+	IAsyncAction MainPage::event_edit_text_async(void)
+	{
+		ShapeText* s = static_cast<ShapeText*>(m_event_shape_pressed);
+		m_mutex_event.lock();
+		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
+		tx_edit_text().SelectAll();
+		ck_fit_text_frame().IsChecked(m_fit_text_frame);
+		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
+			const auto len = tx_edit_text().Text().size();
+			undo_push_null();
+			undo_push_text_select(s, len, len, false);
+			undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
+			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
+			if (m_fit_text_frame) {
+				undo_push_position(s, LOC_TYPE::LOC_SE);
+				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+			}
+			main_sheet_draw();
+		}
+		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	//------------------------------
@@ -1081,26 +1105,26 @@ namespace winrt::GraphPaper::implementation
 						undo_push_null();
 						undo_push_set<UNDO_T::SHEET_COLOR>(&m_main_sheet, m_eyedropper_color);
 						menu_is_enable();
-						main_draw();
+						main_sheet_draw();
 					}
 					else if (m_event_shape_pressed != nullptr) {
 						if (m_event_loc_pressed == LOC_TYPE::LOC_FILL) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FILL_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
-							main_draw();
+							main_sheet_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FONT_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
-							main_draw();
+							main_sheet_draw();
 						}
 						else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE) {
 							undo_push_null();
 							undo_push_set<UNDO_T::STROKE_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
-							main_draw();
+							main_sheet_draw();
 						}
 					}
 				}
@@ -1120,8 +1144,9 @@ namespace winrt::GraphPaper::implementation
 					m_core_text_focused = nullptr;
 				}
 				// ダブルクリックの確定.
+				// 文字列編集ダイアログを呼び出す.
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
-					edit_text_async(static_cast<ShapeText*>(m_event_shape_pressed));
+					event_edit_text_async();
 				}
 				//else if (typeid(*m_event_shape_pressed) == typeid(ShapeArc)) {
 					//edit_arc_async(static_cast<ShapeArc*>(m_event_shape_pressed));
@@ -1220,7 +1245,7 @@ namespace winrt::GraphPaper::implementation
 		//m_event_shape_pressed = nullptr;
 		//m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 	}
 
 	//------------------------------
@@ -1396,7 +1421,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_sheet_zoom_025().IsChecked(true);
 			}
 			main_panel_size();
-			main_draw();
+			main_sheet_draw();
 			status_bar_set_pos();
 			status_bar_set_zoom();
 		}
@@ -1405,7 +1430,7 @@ namespace winrt::GraphPaper::implementation
 			// 横スクロール.
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, m_main_scale)) {
-				main_draw();
+				main_sheet_draw();
 				status_bar_set_pos();
 			}
 		}
@@ -1414,7 +1439,7 @@ namespace winrt::GraphPaper::implementation
 			// 縦スクロール.
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_vert(), w_delta, m_main_scale)) {
-				main_draw();
+				main_sheet_draw();
 				status_bar_set_pos();
 			}
 		}

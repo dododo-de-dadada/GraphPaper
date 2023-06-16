@@ -350,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 					m_color_code = COLOR_CODE::PCT;
 				}
 				if (color_ustack_set<U>(*this, new_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Items().Clear();
-		main_draw();
+		main_sheet_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -502,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				undo_push_null();
 				if (undo_push_set<UNDO_T::IMAGE_OPAC>(new_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -510,7 +510,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Items().Clear();
-		main_draw();
+		main_sheet_draw();
 		m_mutex_event.unlock();
 	}
 

@@ -28,7 +28,7 @@ file_import_image_click_async
 
 file_new_click_async
 	+---file_confirm_dialog
-	+---file_recent_add
+	+---recent_file_add
 	+---file_finish_reading
 
 file_open_click_async
@@ -37,35 +37,35 @@ file_open_click_async
 	+---file_read_gpf_async
 
 file_read_gpf_async
-	+---file_recent_add
+	+---recent_file_add
 	+---file_finish_reading
 
-file_recent_add
-	+---file_recent_menu_update
+recent_file_add
+	+---recent_file_menu_update
 
-file_recent_click_async
+recent_file_click_async
 	+---file_confirm_dialog
-	+---file_recent_token_async
+	+---recent_file_token_async
 	+---wait_cursor_show
 
-file_recent_token_async
-	+---file_recent_menu_update
+recent_file_token_async
+	+---recent_file_menu_update
 
-file_recent_menu_update
+recent_file_menu_update
 
 file_save_as_click_async
-	+---file_recent_token_async
+	+---recent_file_token_async
 	+---wait_cursor_show
 	+---file_write_gpf_async
 
 file_save_click_async
-	+---file_recent_token_async
+	+---recent_file_token_async
 	+---file_save_as_click_async
 	+---wait_cursor_show
 	+---file_write_gpf_async
 
 file_write_gpf_async
-	+---file_recent_add
+	+---recent_file_add
 
 */
 namespace winrt::GraphPaper::implementation
@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 最近使ったファイルのトークンからストレージファイルを得る.
 		StorageFile recent_file{
-			co_await file_recent_token_async(m_file_token_mru)
+			co_await recent_file_token_async(m_file_token_mru)
 		};
 		// ストレージファイルを得たなら,
 		if (recent_file != nullptr) {
@@ -725,8 +725,8 @@ namespace winrt::GraphPaper::implementation
 			const size_t find_repl_len = dt_reader.ReadUInt32();	// 文字数
 			uint8_t* find_repl_data = new uint8_t[2 * (find_repl_len + 1)];
 			dt_reader.ReadBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
-			m_find_repl = reinterpret_cast<wchar_t*>(find_repl_data);
-			m_find_repl[find_repl_len] = L'\0';
+			m_repl_text = reinterpret_cast<wchar_t*>(find_repl_data);
+			m_repl_text[find_repl_len] = L'\0';
 			const uint16_t f_bit = dt_reader.ReadUInt16();
 			m_fit_text_frame = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);
@@ -795,11 +795,11 @@ m_snap_grid = dt_reader.ReadBoolean();
 			else {
 				message_show(ICON_ALERT, L"str_err_read", s_file.Path());
 			}
-			main_draw();
+			main_sheet_draw();
 		}
 		else {
 			if constexpr (!RESUME && !SETTING_ONLY) {
-				file_recent_add(s_file);
+				recent_file_add(s_file);
 				file_finish_reading();
 				// 値をスクロールバーに格納する.
 				// ファイルを開いたとき, ウィンドウの大きさが異なる場合もあるので,
@@ -807,7 +807,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 				sb_horz().Value(scroll_h);
 				sb_vert().Value(scroll_v);
 				menu_is_enable();
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		// 結果を返し終了する.
@@ -824,7 +824,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 	// 最近使ったファイルメニューとウィンドウタイトルも更新される.
 	// ストレージファイルがヌルの場合, ウィンドウタイトルに無題が格納される.
 	//-------------------------------
-	void MainPage::file_recent_add(StorageFile const& s_file)
+	void MainPage::recent_file_add(StorageFile const& s_file)
 	{
 		if (s_file != nullptr) {
 			m_file_token_mru = StorageApplicationPermissions::MostRecentlyUsedList().Add(
@@ -835,29 +835,29 @@ m_snap_grid = dt_reader.ReadBoolean();
 			const auto untitle = ResourceLoader::GetForCurrentView().GetString(L"str_untitled");
 			ApplicationView::GetForCurrentView().Title(untitle);
 		}
-		file_recent_menu_update();
+		recent_file_menu_update();
 	}
 
 	//-------------------------------
 	// ファイルメニューの「最近使ったファイル」のサブ項目が選択された.
 	//-------------------------------
-	IAsyncAction MainPage::file_recent_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	IAsyncAction MainPage::recent_file_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		uint32_t n;
+		uint32_t recent_num;
 		if (sender == mfi_file_recent_1()) {
-			n = 0;
+			recent_num = 0;
 		}
 		else if (sender == mfi_file_recent_2()) {
-			n = 1;
+			recent_num = 1;
 		}
 		else if (sender == mfi_file_recent_3()) {
-			n = 2;
+			recent_num = 2;
 		}
 		else if (sender == mfi_file_recent_4()) {
-			n = 3;
+			recent_num = 3;
 		}
 		else if (sender == mfi_file_recent_5()) {
-			n = 4;
+			recent_num = 4;
 		}
 		else {
 			co_return;
@@ -869,14 +869,14 @@ m_snap_grid = dt_reader.ReadBoolean();
 			auto const& mru_entries = mru_list.Entries();
 			// ファイルの番号が最近使ったファイルの数以上か判定する.
 			// 数以上なら
-			if (n >= mru_entries.Size()) {
+			if (recent_num >= mru_entries.Size()) {
 				// 最近使ったファイルのエラーを表示する.
-				message_show(ICON_ALERT, L"str_err_recent", to_hstring(n + 1));
+				message_show(ICON_ALERT, L"str_err_recent", to_hstring(recent_num + 1));
 				co_return;
 			}
 			// 最近使ったリストから i 番目の要素を得る.
 			AccessListEntry item[1];
-			mru_entries.GetMany(n, item);
+			mru_entries.GetMany(recent_num, item);
 
 			// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
 			if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
@@ -885,7 +885,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 
 			// 最近使ったファイルのトークンからストレージファイルを得る.
 			StorageFile s_file{
-				co_await file_recent_token_async(item[0].Token) 
+				co_await recent_file_token_async(item[0].Token) 
 			};
 			// ストレージファイルが空でないか判定する.
 			// 空でないなら
@@ -912,14 +912,14 @@ m_snap_grid = dt_reader.ReadBoolean();
 	// token	ファイルのトークン
 	// 戻り値	ストレージファイル
 	//-------------------------------
-	IAsyncOperation<StorageFile> MainPage::file_recent_token_async(const winrt::hstring token)
+	IAsyncOperation<StorageFile> MainPage::recent_file_token_async(const winrt::hstring token)
 	{
 		// ストレージファイルにヌルを格納する.
 		StorageFile recent_file = nullptr;	// ストレージファイル
 		try {
 			// トークンが空でないか判定する.
 			// 空でないなら,
-			if (!token.empty()) {
+			if (! token.empty()) {
 				// 最近使ったファイルのリストを得る.
 				// リストにトークンが含まれているか判定する.
 				// 含まれているなら,
@@ -934,7 +934,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 		}
 		// 取得できても出来なくても最近使ったリストの順番は入れ替わるので,
 		// 最近使ったファイルメニューを更新する.
-		file_recent_menu_update();
+		recent_file_menu_update();
 		// ストレージファイルを返す.
 		co_return recent_file;
 	}
@@ -942,7 +942,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 	//-------------------------------
 	// 最近使ったファイルメニューを更新する.
 	//-------------------------------
-	void MainPage::file_recent_menu_update(void)
+	void MainPage::recent_file_menu_update(void)
 	{
 		// 最近使ったファイルのアクセスリストを得る.
 		auto const& mru_entries{
@@ -962,8 +962,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 	//-------------------------------
 	// 名前を付けてファイルに非同期に保存する.
 	//-------------------------------
-	IAsyncAction MainPage::file_save_as_click_async(
-		IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_mutex_event.lock();
 
@@ -989,7 +988,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 		else {
 			// 最近使ったファイルのトークンからストレージファイルを得る.
 			StorageFile recent_file{
-				co_await file_recent_token_async(m_file_token_mru)
+				co_await recent_file_token_async(m_file_token_mru)
 			};
 			// ストレージファイルを得たなら,
 			if (recent_file != nullptr) {
@@ -1027,12 +1026,11 @@ m_snap_grid = dt_reader.ReadBoolean();
 	//-------------------------------
 	// ファイルメニューの「上書き保存」が選択された
 	//-------------------------------
-	IAsyncAction MainPage::file_save_click_async(
-		IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		// 最近使ったファイルのトークンからストレージファイルを得る.
 		StorageFile recent_file{
-			co_await file_recent_token_async(m_file_token_mru)
+			co_await recent_file_token_async(m_file_token_mru)
 		};
 		// ストレージファイルがない場合,
 		if (recent_file == nullptr) {
@@ -1090,9 +1088,9 @@ m_snap_grid = dt_reader.ReadBoolean();
 			const auto find_text_data = reinterpret_cast<const uint8_t*>(m_find_text);
 			dt_writer.WriteBytes(array_view(find_text_data, find_text_data + 2 * static_cast<size_t>(find_text_len)));
 			// 置換文字列
-			const uint32_t find_repl_len = wchar_len(m_find_repl);
+			const uint32_t find_repl_len = wchar_len(m_repl_text);
 			dt_writer.WriteUInt32(find_repl_len);
-			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);
+			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_repl_text);
 			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * static_cast<size_t>(find_repl_len)));
 			uint16_t f_bit = 0;
 			if (m_fit_text_frame) {
@@ -1182,7 +1180,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 					message_show(ICON_DEBUG, DEBUG_MSG, {});
 				}
 #endif
-				main_draw();
+				main_sheet_draw();
 			}
 			else if constexpr (SETTING_ONLY) {
 				message_show(ICON_ALERT, L"str_err_save", s_file.Path());
@@ -1197,7 +1195,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			if constexpr (!SUSPEND && !SETTING_ONLY) {
 				// ストレージファイルを最近使ったファイルに登録する.
 				// ここでエラーが出る.
-				file_recent_add(s_file);
+				recent_file_add(s_file);
 				// false をスタックが更新されたか判定に格納する.
 				//m_ustack_is_changed = false;
 			}
@@ -1282,10 +1280,10 @@ m_snap_grid = dt_reader.ReadBoolean();
 			};
 		}
 
-		file_recent_add(nullptr);
+		recent_file_add(nullptr);
 		file_finish_reading();
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 
 	}
 
@@ -1376,7 +1374,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			}
 			main_bbox_update(s);
 			main_panel_size();
-			main_draw();
+			main_sheet_draw();
 
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);

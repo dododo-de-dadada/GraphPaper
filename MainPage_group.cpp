@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_append(g);
 		undo_push_select(g);
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 		if (summary_is_visible()) {
 			summary_append(g);
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			//undo_push_remove(g);
 		}
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 		status_bar_set_pos();
 	}
 

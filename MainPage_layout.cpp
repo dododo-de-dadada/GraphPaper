@@ -30,23 +30,24 @@ namespace winrt::GraphPaper::implementation
 			hr = ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put());
 		}
 		// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
-		UINT f_cnt;
+		UINT frame_cnt = 0;
 		if (hr == S_OK) {
-			hr = wic_decoder->GetFrameCount(&f_cnt);
+			hr = wic_decoder->GetFrameCount(&frame_cnt);
 		}
 		// 最後のフレームを得る.
 		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
 		if (hr == S_OK) {
-			hr = wic_decoder->GetFrame(f_cnt - 1, wic_frame.put());
+			hr = wic_decoder->GetFrame(frame_cnt - 1, wic_frame.put());
 		}
+		// WIC デコーダーを破棄する.
 		wic_decoder = nullptr;
 		// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
 		if (hr == S_OK) {
-			hr = ShapeImage::wic_factory->CreateFormatConverter(m_wic_background.put());
+			hr = ShapeImage::wic_factory->CreateFormatConverter(m_background_wic.put());
 		}
 		// WIC フォーマットコンバーターに, 得たフレームを格納する.
 		if (hr == S_OK) {
-			hr = m_wic_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom);
+			hr = m_background_wic->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom);
 		}
 		wic_frame = nullptr;
 	}
@@ -55,22 +56,22 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == tmfi_menu_background_show() || sender == tmfi_popup_background_show()) {
-			const auto toggle = sender.as<ToggleMenuFlyoutItem>();
-			if (m_background_show != toggle.IsChecked()) {
-				m_background_show = toggle.IsChecked();
-				main_draw();
+			const auto checked = sender.as<ToggleMenuFlyoutItem>().IsChecked();
+			if (m_background_show != checked) {
+				m_background_show = checked;
+				main_sheet_draw();
 			}
 		}
 		else if (sender == rmfi_menu_background_white() || sender == rmfi_popup_background_white()) {
 			if (!equal(m_background_color, COLOR_WHITE)) {
 				m_background_color = COLOR_WHITE;
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else if (sender == rmfi_menu_background_black() || sender == rmfi_popup_background_black()) {
 			if (!equal(m_background_color, COLOR_BLACK)) {
 				m_background_color = COLOR_BLACK;
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 	}
@@ -97,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(static_cast<const GRID_EMPH>(g_emph), val)) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_sheet, val);
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -243,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.get_grid_base(dialog_val);
 				if (!equal(sheet_val, dialog_val)) {
 					undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, dialog_val);
-					main_draw();
+					main_sheet_draw();
 				}
 
 			}
@@ -258,13 +259,13 @@ namespace winrt::GraphPaper::implementation
 	// レイアウトメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		float g_base;
-		m_main_sheet.get_grid_base(g_base);
-		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
-		if (val >= 1.0f) {
+		float grid_base;
+		m_main_sheet.get_grid_base(grid_base);
+		const float new_base = (grid_base + 1.0f) * 0.5f - 1.0f;
+		if (new_base >= 1.0f) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, val);
-			main_draw();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, new_base);
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -272,13 +273,13 @@ namespace winrt::GraphPaper::implementation
 	// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		float g_base;
-		m_main_sheet.get_grid_base(g_base);
-		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (val <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
+		float grid_base;
+		m_main_sheet.get_grid_base(grid_base);
+		const float new_base = (grid_base + 1.0f) * 2.0f - 1.0f;
+		if (new_base <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
 			undo_push_null();
-			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, val);
-			main_draw();
+			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, new_base);
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -303,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_main_sheet.m_grid_show != new_val) {
 			undo_push_null();
 			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_sheet, new_val);
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -336,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// レイアウトを既定値に戻す.
 		layout_init();
-		main_draw();
+		main_sheet_draw();
 		status_bar_set_pos();
 	}
 
@@ -612,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				main_bbox_update();
 				main_panel_size();
-				main_draw();
+				main_sheet_draw();
 				status_bar_set_pos();
 				status_bar_set_grid();
 				status_bar_set_sheet();
@@ -720,8 +721,8 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				// 矩形が移動したなら, 図形が矩形に収まるよう, 図形も移動させる.
 				if (dx > 0.0f || dy > 0.0f) {
-					constexpr auto ANY_SHAPE = true;
-					undo_push_move({ dx, dy }, ANY_SHAPE);
+					constexpr auto ANY = true;
+					undo_push_move<ANY>({ dx, dy });
 				}
 				// 用紙の大きさが異なるなら, 更新する.
 				if (size_changed) {
@@ -733,7 +734,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				main_bbox_update();
 				main_panel_size();
-				main_draw();
+				main_sheet_draw();
 				status_bar_set_grid();
 				status_bar_set_sheet();
 			}
@@ -908,7 +909,7 @@ namespace winrt::GraphPaper::implementation
 		if (scale != m_main_scale) {
 			m_main_scale = scale;
 			main_panel_size();
-			main_draw();
+			main_sheet_draw();
 			status_bar_set_zoom();
 		}
 		status_bar_set_pos();

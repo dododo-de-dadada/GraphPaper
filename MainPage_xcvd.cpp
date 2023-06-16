@@ -200,7 +200,7 @@ namespace winrt::GraphPaper::implementation
 				main_bbox_update();
 				main_panel_size();
 				menu_is_enable();
-				main_draw();
+				main_sheet_draw();
 				selected_list.clear();
 			}
 			status_bar_set_pos();
@@ -323,7 +323,7 @@ namespace winrt::GraphPaper::implementation
 		main_bbox_update(s);
 		main_panel_size();
 		menu_is_enable();
-		main_draw();
+		main_sheet_draw();
 
 		//スレッドコンテキストを復元する.
 		co_await context;
@@ -382,7 +382,7 @@ namespace winrt::GraphPaper::implementation
 					m_mutex_draw.unlock();
 					main_panel_size();
 					menu_is_enable();
-					main_draw();
+					main_sheet_draw();
 					slist_pasted.clear();
 					ok = true;
 				}
@@ -455,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 				main_bbox_update(t);
 				main_panel_size();
 				menu_is_enable();
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else {

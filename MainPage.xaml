@@ -159,13 +159,13 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<!-- 多角形を開く -->
-					<MenuFlyoutItem x:Name="popup_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+                    <MenuFlyoutItem x:Name="popup_open_polygon" x:Uid="menu_open_polygon" Click="open_or_close_poly_end_click" Text="Open Polygon">
 						<MenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_polyline}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<!-- 折れ線を閉じる -->
-					<MenuFlyoutItem x:Name="popup_close_polyline" x:Uid="menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
+                    <MenuFlyoutItem x:Name="popup_close_polyline" x:Uid="menu_close_polyline" Click="open_or_close_poly_end_click" Text="Close Polyline">
 						<MenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_polygon}" />
 						</MenuFlyoutItem.Icon>
@@ -636,27 +636,27 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_recent}" />
 					</MenuFlyoutSubItem.Icon>
-					<MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" >
+					<MenuFlyoutItem x:Name="mfi_file_recent_1" Click="recent_file_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_dial1}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" >
+					<MenuFlyoutItem x:Name="mfi_file_recent_2" Click="recent_file_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_dial2}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" >
+					<MenuFlyoutItem x:Name="mfi_file_recent_3" Click="recent_file_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_dial3}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" >
+					<MenuFlyoutItem x:Name="mfi_file_recent_4" Click="recent_file_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_dial4}" />
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" >
+					<MenuFlyoutItem x:Name="mfi_file_recent_5" Click="recent_file_click_async" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_dial5}" />
 						</MenuFlyoutItem.Icon>
@@ -814,13 +814,13 @@
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <!-- 多角形を開く -->
-                    <MenuFlyoutItem x:Name="menu_open_polygon" x:Uid="menu_open_polygon" Click="open_polygon_click" Text="Open Polygon">
+                    <MenuFlyoutItem x:Name="menu_open_polygon" x:Uid="menu_open_polygon" Click="open_or_close_poly_end_click" Text="Open Polygon">
                         <MenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_polyline}" />
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <!-- 折れ線を閉じる -->
-                    <MenuFlyoutItem x:Name="menu_close_polyline" x:Uid="menu_close_polyline" Click="close_polyline_click" Text="Close Polyline">
+                    <MenuFlyoutItem x:Name="menu_close_polyline" x:Uid="menu_close_polyline" Click="open_or_close_poly_end_click" Text="Close Polyline">
                         <MenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_polygon}" />
                         </MenuFlyoutItem.Icon>

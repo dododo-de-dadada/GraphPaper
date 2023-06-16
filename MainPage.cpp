@@ -167,7 +167,6 @@ namespace winrt::GraphPaper::implementation
 		return std::round(2.0 * ret) * 0.5;
 	}
 
-
 	void MainPage::menu_is_enable(void) noexcept
 	{
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
@@ -268,6 +267,8 @@ namespace winrt::GraphPaper::implementation
 		menu_select_all().IsEnabled(exists_unselected);
 
 		// 並び替えメニューの可否を設定する.
+		popup_order().IsEnabled(enable_forward || enable_backward);
+		menu_order().IsEnabled(enable_forward || enable_backward);
 		popup_bring_forward().IsEnabled(enable_forward);
 		menu_bring_forward().IsEnabled(enable_forward);
 		popup_bring_to_front().IsEnabled(enable_forward);
@@ -276,8 +277,6 @@ namespace winrt::GraphPaper::implementation
 		menu_send_to_back().IsEnabled(enable_backward);
 		popup_send_backward().IsEnabled(enable_backward);
 		menu_send_backward().IsEnabled(enable_backward);
-		popup_order().IsEnabled(enable_forward || enable_backward);
-		menu_order().IsEnabled(enable_forward || enable_backward);
 
 		// グループ操作メニューの可否を設定する.
 		popup_group().IsEnabled(exists_selected_2);
@@ -286,6 +285,8 @@ namespace winrt::GraphPaper::implementation
 		menu_ungroup().IsEnabled(exists_selected_group);
 
 		// 図形編集メニューの可否を設定する.
+		popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
+		menu_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 		popup_reverse_path().IsEnabled(exists_selected_cap);
 		menu_reverse_path().IsEnabled(exists_selected_cap);
 		popup_draw_arc_cw().IsEnabled(exists_selected_counter_clockwise);
@@ -300,10 +301,9 @@ namespace winrt::GraphPaper::implementation
 		menu_find_text().IsEnabled(exists_text);
 		popup_revert_image().IsEnabled(exists_selected_image);
 		menu_revert_image().IsEnabled(exists_selected_image);
-		popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
-		menu_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 
 		// 線枠メニューの可否を設定する.
+		popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
 		//mfsi_popup_stroke_dash().IsEnabled(exists_stroke);
 		//mfsi_menu_stroke_dash().IsEnabled(exists_stroke);
 		mfi_popup_stroke_dash_pat().IsEnabled(m_main_sheet.m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
@@ -320,16 +320,16 @@ namespace winrt::GraphPaper::implementation
 		mfi_menu_stroke_arrow_size().IsEnabled(m_main_sheet.m_arrow_style != ARROW_STYLE::ARROW_NONE);
 		//mfi_popup_stroke_color().IsEnabled(exists_stroke);
 		//mfi_menu_stroke_color().IsEnabled(exists_stroke);
-		popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
 
 		// 塗りメニューの可否を設定する.
+		popup_fill().IsEnabled(exists_fill || exists_selected_image);
 		mfi_popup_fill_color().IsEnabled(exists_fill);
 		//mfi_menu_fill_color().IsEnabled(exists_fill);
 		mfi_popup_image_opacity().IsEnabled(exists_selected_image);
 		//mfi_menu_image_opacity().IsEnabled(exists_selected_image);
-		popup_fill().IsEnabled(exists_fill || exists_selected_image);
 
 		// 書体メニューの可否を設定する.
+		popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfi_popup_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
 		//mfi_menu_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfi_popup_font_size().IsEnabled(exists_selected_text || exists_selected_ruler);
@@ -352,7 +352,6 @@ namespace winrt::GraphPaper::implementation
 		//mfsi_menu_text_wrap().IsEnabled(exists_selected_text);
 		mfi_popup_font_color().IsEnabled(exists_selected_text);
 		//mfi_menu_font_color().IsEnabled(exists_selected_text);
-		popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
 
 		// レイアウトメニューの可否を設定する.
 		//mfsi_popup_grid_show().IsEnabled(true);
@@ -524,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_sheet_focused = true;
 		status_bar_debug().Text(L"m_main_sheet_focused = true");
 		m_main_d2d.SetSwapChainPanel(scp_main_panel());
-		main_draw();
+		main_sheet_draw();
 	}
 
 	//------------------------------
@@ -542,7 +541,7 @@ namespace winrt::GraphPaper::implementation
 		scroll_set(w, h);
 		if (scp_main_panel().IsLoaded()) {
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -588,7 +587,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// メインの用紙を表示する.
-	void MainPage::main_draw(void)
+	void MainPage::main_sheet_draw(void)
 	{
 		if (!scp_main_panel().IsLoaded()) {
 			return;
@@ -599,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 描画前に必要な変数を格納する.
-		m_main_sheet.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_wic_background.get(), m_main_scale);
+		m_main_sheet.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background_wic.get(), m_main_scale);
 
 		// 描画環境を保存, 描画を開始する.
 		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());

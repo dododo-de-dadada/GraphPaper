@@ -202,9 +202,153 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	void MainPage::undo_exec(UNDO_STACK& undo_stack, UNDO_STACK& redo_stack)
+	{
+		if (!m_main_sheet_focused) {
+			return;
+		}
+
+		// 最初が空操作ならそれらを取りのぞく.
+		while (undo_stack.size() > 0 && undo_stack.back() == nullptr) {
+			undo_stack.pop_back();
+		}
+
+		bool pushed = false;
+		Undo* u;
+		while (undo_stack.size() > 0 && (u = undo_stack.back()) != nullptr) {
+			summary_reflect(u);
+			u->exec();
+			auto const& u_type = typeid(*u);
+			if (u_type == typeid(UndoSelect)) {
+				if (u->m_shape->is_selected()) {
+					//undo_selected_cnt<true>(u->m_shape);
+					m_undo_select_cnt++;
+				}
+				else {
+					//undo_selected_cnt<false>(u->m_shape);
+					m_undo_select_cnt--;
+				}
+#ifdef _DEBUG
+				debug_cnt();
+#endif
+			}
+			else if (u_type == typeid(UndoList)) {
+				const auto s = u->m_shape;
+				// 図形が削除された.
+				if (static_cast<UndoList*>(u)->m_insert) {
+					// 選択された数は 1 減らす.
+					if (s->is_selected()) {
+						//undo_selected_cnt<true>(s);
+						m_undo_select_cnt++;
+					}
+					m_undo_undeleted_cnt--;
+#ifdef _DEBUG
+					debug_cnt();
+#endif
+				}
+				// 図形が追加された.
+				else {
+					if (s->is_selected()) {
+						//undo_selected_cnt<true>(s);
+						m_undo_select_cnt++;
+					}
+					m_undo_undeleted_cnt++;
+#ifdef _DEBUG
+					debug_cnt();
+#endif
+				}
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::ARROW_STYLE>)) {
+				ARROW_STYLE val;
+				m_main_sheet.get_arrow_style(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::FONT_STYLE>)) {
+				// 書体メニューの「字体」に印をつける.
+				DWRITE_FONT_STYLE val;
+				m_main_sheet.get_font_style(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::FONT_WEIGHT>)) {
+				// 書体メニューの「字体」に印をつける.
+				DWRITE_FONT_WEIGHT val;
+				m_main_sheet.get_font_weight(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::FONT_STRETCH>)) {
+				// 書体メニューの「字体」に印をつける.
+				DWRITE_FONT_STRETCH val;
+				m_main_sheet.get_font_stretch(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
+				// 方眼の大きさをステータスバーに格納する.
+				status_bar_set_grid();
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::GRID_EMPH>)) {
+				// レイアウトメニューの「方眼の強調」に印をつける.
+				GRID_EMPH val;
+				m_main_sheet.get_grid_emph(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::GRID_SHOW>)) {
+				GRID_SHOW val;
+				m_main_sheet.get_grid_show(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::SHEET_SIZE>)) {
+				// 用紙の大きさをステータスバーに格納する.
+				status_bar_set_sheet();
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {
+				D2D1_CAP_STYLE val;
+				m_main_sheet.get_stroke_cap(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::DASH_STYLE>)) {
+				D2D1_DASH_STYLE val;
+				m_main_sheet.get_stroke_dash(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::JOIN_STYLE>)) {
+				D2D1_LINE_JOIN val;
+				m_main_sheet.get_stroke_join(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::STROKE_WIDTH>)) {
+				float val;
+				m_main_sheet.get_stroke_width(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_T>)) {
+				DWRITE_TEXT_ALIGNMENT val;
+				m_main_sheet.get_text_align_horz(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::TEXT_ALIGN_P>)) {
+				DWRITE_PARAGRAPH_ALIGNMENT val;
+				m_main_sheet.get_text_align_vert(val);
+			}
+			else if (u_type == typeid(UndoValue<UNDO_T::TEXT_WRAP>)) {
+				DWRITE_WORD_WRAPPING val;
+				m_main_sheet.get_text_wrap(val);
+			}
+			undo_stack.pop_back();
+			if (!pushed) {
+				if (redo_stack.size() > 0) {
+					redo_stack.push_back(nullptr);
+				}
+				pushed = true;
+			}
+			redo_stack.push_back(u);
+		}
+		if (pushed) {
+			main_bbox_update();
+			main_panel_size();
+			menu_is_enable();
+			main_sheet_draw();
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_update();
+			}
+		}
+		status_bar_set_pos();
+	}
+
 	// 編集メニューの「やり直し」が選択された.
+		/*
 	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		undo_exec(m_redo_stack, m_undo_stack);
 		if (!m_main_sheet_focused) {
 			return;
 		}
@@ -229,7 +373,8 @@ namespace winrt::GraphPaper::implementation
 		if (pushed) {
 			main_bbox_update();
 			main_panel_size();
-			main_draw();
+			menu_is_enable();
+			main_sheet_draw();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_update();
@@ -237,6 +382,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		status_bar_set_pos();
 	}
+		*/
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::undo_clear(void)
@@ -246,16 +392,21 @@ namespace winrt::GraphPaper::implementation
 		undo_clear_stack(m_undo_stack);
 	}
 
+
+
 	// 編集メニューの「元に戻す」が選択された.
+		/*
 	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (!m_main_sheet_focused) {
 			return;
 		}
+
 		// 最初が空操作ならそれらを取りのぞく.
 		while (m_undo_stack.size() > 0 && m_undo_stack.back() == nullptr) {
 			m_undo_stack.pop_back();
 		}
+
 		bool pushed = false;
 		Undo* u;
 		while (m_undo_stack.size() > 0 && (u = m_undo_stack.back()) != nullptr) {
@@ -273,7 +424,8 @@ namespace winrt::GraphPaper::implementation
 		if (pushed) {
 			main_bbox_update();
 			main_panel_size();
-			main_draw();
+			menu_is_enable();
+			main_sheet_draw();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_update();
@@ -281,9 +433,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		status_bar_set_pos();
 	}
+		*/
 
 	// 操作を実行する.
 	// u	操作
+	/*
 	void MainPage::undo_exec(Undo* u)
 	{
 		u->exec();
@@ -392,6 +546,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_text_wrap(val);
 		}
 	}
+	*/
 
 	// 無効な操作をポップする.
 	// 戻り値	操作がひとつ以上ポップされたなら true
@@ -410,19 +565,26 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
+	// 図形の位置をスタックに保存してから差分だけ移動する.
+	// ANY	true なら全ての図形, false なら選択された図形
 	// to	移動先へのベクトル
-	// any_shape	図形すべての場合 true, 選択された図形のみの場合 false
-	void MainPage::undo_push_move(const D2D1_POINT_2F to, const bool any_shape)
+	template <bool ANY> void MainPage::undo_push_move(const D2D1_POINT_2F to)
 	{
 		for (auto s : m_main_sheet.m_shape_list) {
-			if (s->is_deleted() || (!any_shape && !s->is_selected())) {
+			if (s->is_deleted()) {
 				continue;
+			}
+			if constexpr (!ANY) {
+				if (!s->is_selected()) {
+					continue;
+				}
 			}
 			undo_push_set<UNDO_T::MOVE>(s);
 			s->move(to);
 		}
 	}
+	template void MainPage::undo_push_move<true>(const D2D1_POINT_2F to);
+	template void MainPage::undo_push_move<false>(const D2D1_POINT_2F to);
 
 	// 一連の操作の区切としてヌル操作をスタックに積む.
 	// やり直し操作スタックは消去される.

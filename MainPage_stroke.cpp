@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		if (a_style != static_cast<ARROW_STYLE>(-1)) {
 			undo_push_null();
 			if (undo_push_set<UNDO_T::ARROW_STYLE>(a_style)) {
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		status_bar_set_pos();
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_cap = undo_push_set<UNDO_T::ARROW_CAP>(new_cap);
 				const bool flag_join = undo_push_set<UNDO_T::ARROW_JOIN>(new_join);
 				if (flag_size || flag_style || flag_cap || flag_join) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -367,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 				const bool limit_changed = undo_push_set<UNDO_T::JOIN_LIMIT>(new_limit);
 				const bool width_changed = undo_push_set<UNDO_T::STROKE_WIDTH>(new_width);
 				if (limit_changed || width_changed) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -817,7 +817,7 @@ namespace winrt::GraphPaper::implementation
 				const bool flag_dash = undo_push_set<UNDO_T::DASH_STYLE>(new_dash);
 				const bool flag_cap = undo_push_set<UNDO_T::STROKE_CAP>(new_cap);
 				if (flag_patt || flag_width || flag_dash || flag_cap) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -858,7 +858,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_menu_stroke_dash_pat().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 			undo_push_null();
 			if (undo_push_set<UNDO_T::DASH_STYLE>(d_style)) {
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		status_bar_set_pos();
@@ -886,7 +886,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -925,7 +925,7 @@ namespace winrt::GraphPaper::implementation
 		if (s_width >= 0.0f) {
 			undo_push_null();
 			if (undo_push_set<UNDO_T::STROKE_WIDTH>(s_width)) {
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		status_bar_set_pos();
@@ -994,7 +994,7 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_stroke_width(new_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::STROKE_WIDTH>(new_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}

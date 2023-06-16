@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_text_unselect(m_core_text_focused);
 			m_core_text_focused = nullptr;
 			m_core_text_comp = false;
-			main_draw();
+			main_sheet_draw();
 			});
 		// 文字が入力される
 		m_core_text.TextUpdating([this](auto const&, auto const& args) {
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 			CoreTextRange ran{ args.Selection() };
 			undo_push_text_select(m_core_text_focused, ran.StartCaretPosition, ran.EndCaretPosition, false);
-			main_draw();
+			main_sheet_draw();
 			});
 		// 変換候補が表示される直前に呼ばれ, たぶん変換候補の書体などを設定するやつ.
 #ifdef _DEBUG
@@ -277,7 +277,7 @@ namespace winrt::GraphPaper::implementation
 		if (end != start) {
 			undo_push_null();
 			m_undo_stack.push_back(new UndoText2(m_core_text_focused, nullptr));
-			main_draw();
+			main_sheet_draw();
 		}
 	}
 
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_undo_stack.push_back(new UndoText2(m_core_text_focused, ins_text));
 			undo_push_text_select(m_core_text_focused, s + ins_len, s + ins_len, false);
-			main_draw();
+			main_sheet_draw();
 		}
 	}
 
@@ -326,11 +326,11 @@ namespace winrt::GraphPaper::implementation
 		if (end != start && row == 0) {
 			if constexpr (SHIFT_KEY) {
 				undo_push_text_select(m_core_text_focused, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 			else {
 				undo_push_text_select(m_core_text_focused, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else if (row != 0) {
@@ -342,12 +342,12 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_core_text_focused->get_text_pos(new_car, new_trail);
 			if constexpr (SHIFT_KEY) {
 				undo_push_text_select(m_core_text_focused, start, new_end, new_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 			else {
 				const auto new_start = new_trail ? new_end + 1 : new_end;
 				undo_push_text_select(m_core_text_focused, new_start, new_end, new_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		const auto new_start = m_main_sheet.m_select_start;
@@ -374,18 +374,18 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (SHIFT_KEY) {
 			if (end < len) {
 				undo_push_text_select(m_core_text_focused, start, end + 1, false);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else {
 			if (end == start && end < len) {
 				undo_push_text_select(m_core_text_focused, end + 1, end + 1, false);
-				main_draw();
+				main_sheet_draw();
 			}
 			else if (end != start) {
 				const auto new_end = max(start, end);
 				undo_push_text_select(m_core_text_focused, new_end, new_end, false);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		const auto new_start = m_main_sheet.m_select_start;
@@ -409,13 +409,13 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			undo_push_text_select(m_core_text_focused, end - 1, end, false);
 			m_undo_stack.push_back(new UndoText2(m_core_text_focused, nullptr));
-			main_draw();
+			main_sheet_draw();
 		}
 		// 選択範囲があるなら
 		else if (end != start) {
 			undo_push_null();
 			m_undo_stack.push_back(new UndoText2(m_core_text_focused, nullptr));
-			main_draw();
+			main_sheet_draw();
 		}
 		CoreTextRange modified_ran{
 			static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
@@ -444,18 +444,18 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (SHIFT_KEY) {
 			if (end > 0) {
 				undo_push_text_select(m_core_text_focused, start, end - 1, false);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else {
 			if (end == start && end > 0) {
 				undo_push_text_select(m_core_text_focused, end - 1, end - 1, false);
-				main_draw();
+				main_sheet_draw();
 			}
 			else if (end != start) {
 				const auto new_end = min(start, end);
 				undo_push_text_select(m_core_text_focused, new_end, new_end, false);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		const auto new_start = m_main_sheet.m_select_start;
@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 		// 改行を挿入する.
 		m_undo_stack.push_back(new UndoText2(m_core_text_focused, L"\r"));
 		undo_push_text_select(m_core_text_focused, s + 1, s + 1, false);
-		main_draw();
+		main_sheet_draw();
 
 		CoreTextRange modified_ran{
 			static_cast<int32_t>(min(start, end)), static_cast<int32_t>(max(start, end))
@@ -505,14 +505,14 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				undo_push_text_select(m_core_text_focused, end, end + 1, false);
 				m_undo_stack.push_back(new UndoText2(m_core_text_focused, nullptr));
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		// 選択範囲があるなら選択範囲の文字列を削除する.
 		else if (end != start) {
 			undo_push_null();
 			m_undo_stack.push_back(new UndoText2(m_core_text_focused, nullptr));
-			main_draw();
+			main_sheet_draw();
 		}
 		CoreTextRange modified_ran{
 			static_cast<const int32_t>(start), static_cast<const int32_t>(end)
@@ -542,11 +542,11 @@ namespace winrt::GraphPaper::implementation
 		if (end != start && row == last) {
 			if constexpr (SHIFT_KEY) {
 				undo_push_text_select(m_core_text_focused, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 			else {
 				undo_push_text_select(m_core_text_focused, end, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		else if (row != last) {
@@ -558,12 +558,12 @@ namespace winrt::GraphPaper::implementation
 			const auto new_end = m_core_text_focused->get_text_pos(new_car, new_trail);
 			if constexpr (SHIFT_KEY) {
 				undo_push_text_select(m_core_text_focused, start, new_end, new_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 			else {
 				const auto new_start = new_trail ? new_end + 1 : new_end;
 				undo_push_text_select(m_core_text_focused, new_start, new_end, new_trail);
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		const auto new_start = m_main_sheet.m_select_start;

@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_font_family(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_FAMILY>(samp_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
 		//UnloadObject(cd_dialog_prop());
-		main_draw();
+		main_sheet_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -250,13 +250,13 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_font_size(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::FONT_SIZE>(samp_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
 		slist_clear(m_dialog_sheet.m_shape_list);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
-		main_draw();
+		main_sheet_draw();
 		m_mutex_event.unlock();
 	}
 
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -297,7 +297,7 @@ namespace winrt::GraphPaper::implementation
 		if (val != static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(-1)) {
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_P>(val)) {
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		status_bar_set_pos();
@@ -322,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 		if (val != static_cast<DWRITE_TEXT_ALIGNMENT>(-1)) {
 			undo_push_null();
 			if (undo_push_set<UNDO_T::TEXT_ALIGN_T>(val)) {
-				main_draw();
+				main_sheet_draw();
 			}
 		}
 		status_bar_set_pos();
@@ -401,7 +401,7 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_text_line_sp(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
@@ -424,7 +424,7 @@ namespace winrt::GraphPaper::implementation
 			changed = undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_CHARACTER);
 		}
 		if (changed) {
-			main_draw();
+			main_sheet_draw();
 		}
 		status_bar_set_pos();
 	}
@@ -520,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 				m_dialog_sheet.slist_back()->get_text_pad(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
-					main_draw();
+					main_sheet_draw();
 				}
 			}
 		}
