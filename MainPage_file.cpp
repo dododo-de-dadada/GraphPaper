@@ -390,14 +390,14 @@ namespace winrt::GraphPaper::implementation
 		}
 		main_bbox_update();
 		main_panel_size();
-		status_bar_set_pos();
-		status_bar_set_draw();
-		status_bar_set_grid();
-		status_bar_set_sheet();
-		status_bar_set_zoom();
-		status_bar_set_unit();
+		status_bar_set_pointer();
+		status_bar_set_drawing_tool();
+		status_bar_set_grid_len();
+		status_bar_set_sheet_size();
+		status_bar_set_sheet_zoom();
+		status_bar_set_len_unit();
 		menu_is_checked<UNDO_T::NIL>();
-		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 			tmfi_popup_status_bar_draw().IsChecked(true);
 			tmfi_menu_status_bar_draw().IsChecked(true);
 		}
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_draw().IsChecked(false);
 			tmfi_menu_status_bar_draw().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
 			tmfi_popup_status_bar_grid().IsChecked(true);
 			tmfi_menu_status_bar_grid().IsChecked(true);
 		}
@@ -413,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_grid().IsChecked(false);
 			tmfi_menu_status_bar_grid().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
 			tmfi_popup_status_bar_sheet().IsChecked(true);
 			tmfi_menu_status_bar_sheet().IsChecked(true);
 		}
@@ -421,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_sheet().IsChecked(false);
 			tmfi_menu_status_bar_sheet().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::POS) == STATUS_BAR::POS) {
 			tmfi_popup_status_bar_pointer().IsChecked(true);
 			tmfi_menu_status_bar_pointer().IsChecked(true);
 		}
@@ -429,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_pointer().IsChecked(false);
 			tmfi_menu_status_bar_pointer().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
 			tmfi_popup_status_bar_unit().IsChecked(true);
 			tmfi_menu_status_bar_unit().IsChecked(true);
 		}
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 			tmfi_popup_status_bar_unit().IsChecked(false);
 			tmfi_menu_status_bar_unit().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
 			tmfi_popup_status_bar_zoom().IsChecked(true);
 			tmfi_menu_status_bar_zoom().IsChecked(true);
 		}
@@ -575,37 +575,37 @@ namespace winrt::GraphPaper::implementation
 			tmfi_menu_snap_grid().IsChecked(false);
 		}
 
-		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 			tmfi_menu_status_bar_draw().IsChecked(true);
 		}
 		else {
 			tmfi_menu_status_bar_draw().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
 			tmfi_menu_status_bar_grid().IsChecked(true);
 		}
 		else {
 			tmfi_menu_status_bar_grid().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
 			tmfi_menu_status_bar_sheet().IsChecked(true);
 		}
 		else {
 			tmfi_menu_status_bar_sheet().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::POS) == STATUS_BAR::POS) {
 			tmfi_menu_status_bar_pointer().IsChecked(true);
 		}
 		else {
 			tmfi_menu_status_bar_pointer().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
 			tmfi_menu_status_bar_unit().IsChecked(true);
 		}
 		else {
 			tmfi_menu_status_bar_unit().IsChecked(false);
 		}
-		if (status_and(m_status_bar, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
 			tmfi_menu_status_bar_zoom().IsChecked(true);
 		}
 		else {
@@ -721,16 +721,13 @@ namespace winrt::GraphPaper::implementation
 			m_find_text = reinterpret_cast<wchar_t*>(find_text_data);
 			m_find_text[find_text_len] = L'\0';
 
-			// メインページの置換文字列を読み込む.
+			// 置換文字列を読み込む.
 			const size_t find_repl_len = dt_reader.ReadUInt32();	// 文字数
 			uint8_t* find_repl_data = new uint8_t[2 * (find_repl_len + 1)];
 			dt_reader.ReadBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
 			m_repl_text = reinterpret_cast<wchar_t*>(find_repl_data);
 			m_repl_text[find_repl_len] = L'\0';
-			const uint16_t f_bit = dt_reader.ReadUInt16();
-			m_fit_text_frame = ((f_bit & 1) != 0);
-			m_find_text_case = ((f_bit & 2) != 0);
-			m_find_text_wrap = ((f_bit & 4) != 0);
+
 
 			// 背景パターン
 			m_background_show = dt_reader.ReadBoolean();
@@ -743,11 +740,10 @@ namespace winrt::GraphPaper::implementation
 			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-m_main_scale = dt_reader.ReadSingle();
-m_snap_grid = dt_reader.ReadBoolean();
+			m_main_scale = dt_reader.ReadSingle();
+			m_snap_grid = dt_reader.ReadBoolean();
 			m_snap_point = dt_reader.ReadSingle();
-			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
-			//m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
+			m_status_bar_flag = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			const bool s_atom = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
@@ -1092,17 +1088,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			dt_writer.WriteUInt32(find_repl_len);
 			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_repl_text);
 			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * static_cast<size_t>(find_repl_len)));
-			uint16_t f_bit = 0;
-			if (m_fit_text_frame) {
-				f_bit |= 1;
-			}
-			if (m_find_text_case) {
-				f_bit |= 2;
-			}
-			if (m_find_text_wrap) {
-				f_bit |= 4;
-			}
-			dt_writer.WriteUInt16(f_bit);
+
 			// 背景パターン
 			dt_writer.WriteBoolean(m_background_show);
 			dt_writer.WriteSingle(m_background_color.r);
@@ -1115,7 +1101,7 @@ m_snap_grid = dt_reader.ReadBoolean();
 			dt_writer.WriteSingle(m_main_scale);
 			dt_writer.WriteBoolean(m_snap_grid);
 			dt_writer.WriteSingle(m_snap_point);
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar_flag));
 			//dt_writer.WriteBoolean(m_image_keep_aspect);
 
 			dt_writer.WriteBoolean(summary_is_visible());
@@ -1360,9 +1346,10 @@ m_snap_grid = dt_reader.ReadBoolean();
 			{
 				m_mutex_draw.lock();
 				undo_push_null();
-				unselect_shape_all();
 				undo_push_append(s);
-				undo_push_select(s);
+				select_shape(s);
+				//unselect_all_shape();
+				//undo_push_toggle(s);
 				menu_is_enable();
 				m_mutex_draw.unlock();
 			}

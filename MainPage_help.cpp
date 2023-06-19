@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 		cd_dialog_prop().DefaultButton(def_text);
 		tb_version().Visibility(Visibility::Collapsed);
 		slist_clear(m_dialog_sheet.m_shape_list);
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		m_mutex_event.unlock();
 	}
 
@@ -86,11 +86,11 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = new_val;
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		if (old_unit != new_val) {
-			status_bar_set_grid();
-			status_bar_set_sheet();
-			status_bar_set_unit();
+			status_bar_set_grid_len();
+			status_bar_set_sheet_size();
+			status_bar_set_len_unit();
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::snap_grid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_snap_grid = tmfi_menu_snap_grid().IsChecked();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// ヘルプメニューの「頂点をくっつける...」が選択された.

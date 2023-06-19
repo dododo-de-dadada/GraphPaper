@@ -138,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 			// スレッドコンテキストを復元する.
 			co_await context;
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	//------------------------------
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 				selected_list.clear();
 			}
-			status_bar_set_pos();
+			status_bar_set_pointer();
 		}
 	}
 
@@ -243,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const&) {
 			message_show(ICON_ALERT, L"str_err_paste", L"");
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	//------------------------------
@@ -251,8 +251,6 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::xcvd_paste_image(void)
 	{
-		unselect_shape_all();
-
 		// resume_background する前に UI 要素から値を得る.
 		const float win_w = static_cast<float>(scp_main_panel().ActualWidth());
 		const float win_h = static_cast<float>(scp_main_panel().ActualHeight());
@@ -310,7 +308,9 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.lock();
 			undo_push_null();
 			undo_push_append(s);
-			undo_push_select(s);
+			select_shape(s);
+			//unselect_all_shape();
+			//undo_push_toggle(s);
 			m_mutex_draw.unlock();
 		}
 
@@ -369,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 					m_mutex_draw.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
 					undo_push_null();
-					unselect_shape_all();
+					unselect_all_shape();
 					// 得られたリストの各図形について以下を繰り返す.
 					for (auto s : slist_pasted) {
 						// 一覧が表示されてるか判定する.
@@ -414,9 +414,6 @@ namespace winrt::GraphPaper::implementation
 			// 文字列検索パネルのテキストボックスにフォーカスが無ければ文字列図形としてはりつける.
 			else {
 
-				undo_push_null();
-				unselect_shape_all();
-
 				// パネルの大きさで文字列図形を作成する,.
 				const float scale = m_main_scale;
 				//const float scale = m_main_sheet.m_sheet_scale;
@@ -424,8 +421,8 @@ namespace winrt::GraphPaper::implementation
 				const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// 用紙の表示されている上位置
 				const float win_w = min(static_cast<float>(scp_main_panel().ActualWidth()) / scale, m_main_sheet.m_sheet_size.width); // 用紙の表示されている幅
 				const float win_h = min(static_cast<float>(scp_main_panel().ActualHeight()) / scale, m_main_sheet.m_sheet_size.height); // 用紙の表示されている高さ
-				const float lt_x = m_main_bbox_lt.x;
-				const float lt_y = m_main_bbox_lt.y;
+				//const float lt_x = m_main_bbox_lt.x;
+				//const float lt_y = m_main_bbox_lt.y;
 				ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_sheet);
 #if (_DEBUG)
 				debug_leak_cnt++;
@@ -435,15 +432,16 @@ namespace winrt::GraphPaper::implementation
 				t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 				// パネルの中央になるよう左上位置を求める.
 				D2D1_POINT_2F lt{
-					static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_lineto.x * 0.5),
-					static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_lineto.y * 0.5)
+					static_cast<FLOAT>(m_main_bbox_lt.x + (win_x + win_w * 0.5) - t->m_lineto.x * 0.5),
+					static_cast<FLOAT>(m_main_bbox_lt.y + (win_y + win_h * 0.5) - t->m_lineto.y * 0.5)
 				};
 				xcvd_get_paste_pos(lt, /*<---*/lt, m_main_sheet.m_shape_list, g_len, m_snap_point / scale);
 				t->set_pos_start(lt);
 				{
 					m_mutex_draw.lock();
+					undo_push_null();
 					undo_push_append(t);
-					undo_push_select(t);
+					select_shape(t);
 					m_mutex_draw.unlock();
 				}
 

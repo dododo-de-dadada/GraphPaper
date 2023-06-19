@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
 			m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
-			unselect_shape_all();
+			unselect_all_shape();
 			main_sheet_draw();
 		}
 		else if (sender == rmfi_menu_drawing_rect()) {
@@ -117,8 +117,8 @@ namespace winrt::GraphPaper::implementation
 			m_drawing_tool = DRAWING_TOOL::POLY;
 			rmfi_menu_drawing_poly().IsChecked(true);
 		}
-		status_bar_set_draw();
-		status_bar_set_pos();
+		status_bar_set_drawing_tool();
+		status_bar_set_pointer();
 		event_set_cursor();
 	}
 

@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 				delete u;
 			}
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-			status_bar_set_pos();
+			status_bar_set_pointer();
 		}
 		main_sheet_draw();
 	}
@@ -290,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 			const auto e = max(m_main_sheet.m_select_start, end);
 			if (s < e) {
 				if (!m_core_text_focused->is_selected()) {
-					undo_push_select(m_core_text_focused);
+					undo_push_toggle(m_core_text_focused);
 				}
 				m_undo_stack.push_back(new UndoText2(m_core_text_focused, m_repl_text));
 				const auto repl_len = wchar_len(m_repl_text);
@@ -333,7 +333,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-			status_bar_set_pos();
+			status_bar_set_pointer();
 		}
 	}
 
@@ -370,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 			ck_find_text_wrap().IsChecked(m_find_text_wrap);
 			sp_find_text_panel().Visibility(Visibility::Visible);
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -378,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		find_text_preserve();
 		sp_find_text_panel().Visibility(Visibility::Collapsed);
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 文字列を検索する.
@@ -414,12 +414,12 @@ namespace winrt::GraphPaper::implementation
 				const auto text_len = t->get_text_len();
 				const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, text_len);
 				for (uint32_t i = end; i + find_len <= text_len; i++) {
-					const int cmp = m_find_text_case ?
-						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
+					const int cmp = m_find_text_case ? wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
-						unselect_shape_all();
 						m_core_text_focused = static_cast<ShapeText*>(*it);
-						undo_push_select(m_core_text_focused);
+						select_shape(m_core_text_focused);
+						//unselect_all_shape();
+						//undo_push_toggle(m_core_text_focused);
 						undo_push_text_select(m_core_text_focused, i, i + find_len, false);
 						return true;
 					}
@@ -442,9 +442,10 @@ namespace winrt::GraphPaper::implementation
 					const int cmp = m_find_text_case ?
 						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
-						unselect_shape_all();
 						m_core_text_focused = static_cast<ShapeText*>(*it);
-						undo_push_select(m_core_text_focused);
+						select_shape(m_core_text_focused);
+						//unselect_all_shape();
+						//undo_push_toggle(m_core_text_focused);
 						undo_push_text_select(m_core_text_focused, i, i + find_len, false);
 						return true;
 					}
@@ -459,9 +460,10 @@ namespace winrt::GraphPaper::implementation
 					wcsncmp(t->m_text + i, m_find_text, find_len) :
 					_wcsnicmp(t->m_text + i, m_find_text, find_len);
 				if (cmp == 0) {
-					unselect_shape_all();
 					m_core_text_focused = static_cast<ShapeText*>(*it);
-					undo_push_select(m_core_text_focused);
+					select_shape(m_core_text_focused);
+					//unselect_all_shape();
+					//undo_push_toggle(m_core_text_focused);
 					undo_push_text_select(m_core_text_focused, i, i + find_len, false);
 					return true;
 				}
@@ -487,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 		if (!found) {
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-			status_bar_set_pos();
+			status_bar_set_pointer();
 		}
 	}
 

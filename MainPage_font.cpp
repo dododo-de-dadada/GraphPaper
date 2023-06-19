@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 		if (f_stretch != static_cast<DWRITE_FONT_STRETCH>(-1) && undo_push_set<UNDO_T::FONT_STRETCH>(f_stretch)) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	void MainPage::font_weight_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 		if (f_weight != static_cast<DWRITE_FONT_WEIGHT>(-1) && undo_push_set<UNDO_T::FONT_WEIGHT>(f_weight)) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	//---------------------------------
@@ -276,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 		if (f_style != static_cast<DWRITE_FONT_STYLE>(-1) && undo_push_set<UNDO_T::FONT_STYLE>(f_style)) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
@@ -325,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.
@@ -426,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 		if (changed) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 書体メニューの「余白...」が選択された.

@@ -392,6 +392,12 @@ namespace winrt::GraphPaper::implementation
 		void begin_draw(ID2D1RenderTarget* const target, const bool located, IWICFormatConverter* const background, const double scale) noexcept;
 		// 図形を表示する.
 		virtual void draw(void) noexcept = 0;
+		// 線の端があるか判定する.
+		virtual bool exist_cap(void) const noexcept { return false; }
+		// 線の連結があるか判定する.
+		virtual bool exist_join(void) const noexcept { return false; }
+		// 塗りがあるか判定する.
+		virtual bool exist_fill(void) const noexcept { return false; }
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t export_pdf(const D2D1_SIZE_F/*sheet_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
@@ -494,10 +500,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
-		// 線の端があるか判定する.
-		virtual bool exist_cap(void) const noexcept { return false; }
-		// 線の連結があるか判定する.
-		virtual bool exist_join(void) const noexcept { return false; }
 		// 図形を移動する.
 		virtual	bool move(const D2D1_POINT_2F/*to*/) noexcept { return false; }
 		// 線の方向を反転する.
@@ -658,6 +660,8 @@ namespace winrt::GraphPaper::implementation
 
 		int m_pdf_image_cnt = 0;	// 画像オブジェクトの計数 (PDF として出力するときのみ使用)
 
+		// 塗りがあるか判定する.
+		virtual bool exist_fill(void) const noexcept final override { return true; }
 		// 図形を破棄する.
 		ShapeImage::~ShapeImage(void)
 		{
@@ -1146,6 +1150,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_lineto{ 0.0f, 0.0f };	// 対角点へのベクトル
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };		// 塗りつぶし色
 
+		// 塗りがあるか判定する.
+		virtual bool exist_fill(void) const noexcept final override { return true; }
 		//------------------------------
 		// shape_rect.cpp
 		//------------------------------
@@ -1649,6 +1655,8 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
+		// 塗りがあるか判定する.
+		virtual bool exist_fill(void) const noexcept final override { return true; }
 		// 線の方向を反転する.
 		virtual bool reverse_path(void) noexcept override
 		{

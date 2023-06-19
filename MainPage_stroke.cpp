@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「矢じるしの寸法...」が選択された.
@@ -340,7 +340,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_combo_box_0().Items().Clear();
 		dialog_combo_box_1().Visibility(Visibility::Collapsed);
 		dialog_combo_box_1().Items().Clear();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		m_mutex_event.unlock();
 	}
 
@@ -369,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 		if (undo_push_set<UNDO_T::STROKE_CAP>(new_val)) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「線の結合の形式」>「尖り制限」が選択された.
@@ -830,7 +830,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_combo_box_0().Items().Clear();
 		dialog_combo_box_1().Visibility(Visibility::Collapsed);
 		dialog_combo_box_1().Items().Clear();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		slist_clear(m_dialog_sheet.m_shape_list);
 		m_mutex_event.unlock();
 	}
@@ -861,7 +861,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「結合の形式」のサブ項目が選択された.
@@ -888,7 +888,7 @@ namespace winrt::GraphPaper::implementation
 		if (undo_push_set<UNDO_T::JOIN_STYLE>(new_val)) {
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「太さ」のサブ項目が選択された.
@@ -928,7 +928,7 @@ namespace winrt::GraphPaper::implementation
 				main_sheet_draw();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「線枠の太さ」>「その他」が選択された.

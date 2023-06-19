@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 				UnloadObject(gd_summary_panel());
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 図形の一覧の添え字の位置に図形を挿入する.
@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			gd_summary_panel().Visibility(Visibility::Visible);
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 図形の一覧がロードされた.
@@ -411,7 +411,7 @@ namespace winrt::GraphPaper::implementation
 			e.RemovedItems().GetMany(i, item);
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && s->is_selected()) {
-				undo_push_select(s);
+				undo_push_toggle(s);
 			}
 		}
 
@@ -422,7 +422,7 @@ namespace winrt::GraphPaper::implementation
 			e.AddedItems().GetMany(i, item);
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && !s->is_selected()) {
-				undo_push_select(t = s);
+				undo_push_toggle(t = s);
 			}
 		}
 
@@ -449,12 +449,24 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の一覧の項目を全て選択解除する.
-	void MainPage::summary_unselect_shape_all(void)
+	void MainPage::summary_unselect_all_shape(void)
 	{
 		// 一覧が表示されてるか判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
 			lv_summary_list().SelectedIndex(static_cast<uint32_t>(-1));
+			m_summary_atomic.store(true, std::memory_order_release);
+		}
+	}
+
+	// 図形の一覧の項目を全て選択解除する.
+	void MainPage::summary_select_shape(Shape * const s)
+	{
+		// 一覧が表示されてるか判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary_list().SelectedIndex(static_cast<uint32_t>(-1));
+			summary_select_at(lv_summary_list(), summary_distance(lv_summary_list().Items(), s));
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
 	}

@@ -51,79 +51,79 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (sender == tmfi_menu_status_bar_pointer()) {
 			const bool is_checked = tmfi_menu_status_bar_pointer().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::POS) : status_and(m_status_bar_flag, status_not(STATUS_BAR::POS));
 			tmfi_popup_status_bar_pointer().IsChecked(is_checked);
 		}
 		else if (sender == tmfi_menu_status_bar_grid()) {
 			const bool is_checked = tmfi_menu_status_bar_grid().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::GRID) : status_and(m_status_bar_flag, status_not(STATUS_BAR::GRID));
 			tmfi_popup_status_bar_grid().IsChecked(is_checked);
-			status_bar_set_grid();
+			status_bar_set_grid_len();
 		}
 		else if (sender == tmfi_menu_status_bar_sheet()) {
 			const bool is_checked = tmfi_menu_status_bar_sheet().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::SHEET) : status_and(m_status_bar, status_not(STATUS_BAR::SHEET));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::SHEET) : status_and(m_status_bar_flag, status_not(STATUS_BAR::SHEET));
 			tmfi_popup_status_bar_sheet().IsChecked(is_checked);
-			status_bar_set_sheet();
+			status_bar_set_sheet_size();
 		}
 		else if (sender == tmfi_menu_status_bar_zoom()) {
 			const bool is_checked = tmfi_menu_status_bar_zoom().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::ZOOM) : status_and(m_status_bar_flag, status_not(STATUS_BAR::ZOOM));
 			tmfi_popup_status_bar_zoom().IsChecked(is_checked);
-			status_bar_set_zoom();
+			status_bar_set_sheet_zoom();
 		}
 		else if (sender == tmfi_menu_status_bar_draw()) {
 			const bool is_checked = tmfi_menu_status_bar_draw().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::DRAW) : status_and(m_status_bar_flag, status_not(STATUS_BAR::DRAW));
 			tmfi_popup_status_bar_draw().IsChecked(is_checked);
-			status_bar_set_draw();
+			status_bar_set_drawing_tool();
 		}
 		else if (sender == tmfi_menu_status_bar_unit()) {
 			const bool is_checked = tmfi_menu_status_bar_unit().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::UNIT) : status_and(m_status_bar_flag, status_not(STATUS_BAR::UNIT));
 			tmfi_popup_status_bar_unit().IsChecked(is_checked);
-			status_bar_set_unit();
+			status_bar_set_len_unit();
 		}
 		else if (sender == tmfi_popup_status_bar_pointer()) {
 			const bool is_checked = tmfi_popup_status_bar_pointer().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::POS) : status_and(m_status_bar_flag, status_not(STATUS_BAR::POS));
 			tmfi_menu_status_bar_pointer().IsChecked(is_checked);
 		}
 		else if (sender == tmfi_popup_status_bar_grid()) {
 			const bool is_checked = tmfi_popup_status_bar_grid().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::GRID) : status_and(m_status_bar, status_not(STATUS_BAR::GRID));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::GRID) : status_and(m_status_bar_flag, status_not(STATUS_BAR::GRID));
 			tmfi_menu_status_bar_grid().IsChecked(is_checked);
-			status_bar_set_grid();
+			status_bar_set_grid_len();
 		}
 		else if (sender == tmfi_popup_status_bar_sheet()) {
 			const bool is_checked = tmfi_popup_status_bar_sheet().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::SHEET) : status_and(m_status_bar, status_not(STATUS_BAR::SHEET));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::SHEET) : status_and(m_status_bar_flag, status_not(STATUS_BAR::SHEET));
 			tmfi_menu_status_bar_sheet().IsChecked(is_checked);
-			status_bar_set_sheet();
+			status_bar_set_sheet_size();
 		}
 		else if (sender == tmfi_popup_status_bar_zoom()) {
 			const bool is_checked = tmfi_popup_status_bar_zoom().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::ZOOM) : status_and(m_status_bar, status_not(STATUS_BAR::ZOOM));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::ZOOM) : status_and(m_status_bar_flag, status_not(STATUS_BAR::ZOOM));
 			tmfi_menu_status_bar_zoom().IsChecked(is_checked);
-			status_bar_set_zoom();
+			status_bar_set_sheet_zoom();
 		}
 		else if (sender == tmfi_popup_status_bar_draw()) {
 			const bool is_checked = tmfi_popup_status_bar_draw().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::DRAW) : status_and(m_status_bar, status_not(STATUS_BAR::DRAW));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::DRAW) : status_and(m_status_bar_flag, status_not(STATUS_BAR::DRAW));
 			tmfi_menu_status_bar_draw().IsChecked(is_checked);
-			status_bar_set_draw();
+			status_bar_set_drawing_tool();
 		}
 		else if (sender == tmfi_popup_status_bar_unit()) {
 			const bool is_checked = tmfi_popup_status_bar_unit().IsChecked();
-			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::UNIT) : status_and(m_status_bar, status_not(STATUS_BAR::UNIT));
+			m_status_bar_flag = is_checked ? status_or(m_status_bar_flag, STATUS_BAR::UNIT) : status_and(m_status_bar_flag, status_not(STATUS_BAR::UNIT));
 			tmfi_menu_status_bar_unit().IsChecked(is_checked);
-			status_bar_set_unit();
+			status_bar_set_len_unit();
 		}
 		else {
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		if (m_status_bar == static_cast<STATUS_BAR>(0)) {
+		if (m_status_bar_flag == static_cast<STATUS_BAR>(0)) {
 			if (sp_status_bar_panel().Visibility() == Visibility::Visible) {
 				sp_status_bar_panel().Visibility(Visibility::Collapsed);
 			}
@@ -133,13 +133,13 @@ namespace winrt::GraphPaper::implementation
 				sp_status_bar_panel().Visibility(Visibility::Visible);
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// ポインターの位置をステータスバーに格納する.
-	void MainPage::status_bar_set_pos(void)
+	void MainPage::status_bar_set_pointer(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::POS) == STATUS_BAR::POS) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::POS) == STATUS_BAR::POS) {
 			const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 			const auto wb = CoreWindow::GetForCurrentThread().Bounds();
 			const auto tr = scp_main_panel().TransformToVisual(nullptr);
@@ -178,9 +178,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 作図ツールをステータスバーに格納する.
-	void MainPage::status_bar_set_draw(void)
+	void MainPage::status_bar_set_drawing_tool(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 			if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
 				pi_tool_icon().Data(nullptr);
 				pi_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")))));
@@ -290,9 +290,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼の大きさをステータスバーに格納する.
-	void MainPage::status_bar_set_grid(void)
+	void MainPage::status_bar_set_grid_len(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
@@ -310,9 +310,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 用紙の大きさをステータスバーに格納する.
-	void MainPage::status_bar_set_sheet(void)
+	void MainPage::status_bar_set_sheet_size(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::SHEET) == STATUS_BAR::SHEET) {
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf_w[32];
 			conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
@@ -334,9 +334,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 単位をステータスバーに格納する.
-	void MainPage::status_bar_set_unit(void)
+	void MainPage::status_bar_set_len_unit(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::UNIT) == STATUS_BAR::UNIT) {
 			if (m_len_unit == LEN_UNIT::GRID) {
 				tk_status_bar_unit().Text(L"grid");
 			}
@@ -364,9 +364,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 拡大率をステータスバーに格納する.
-	void MainPage::status_bar_set_zoom(void)
+	void MainPage::status_bar_set_sheet_zoom(void)
 	{
-		if (status_and(m_status_bar, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
+		if (status_and(m_status_bar_flag, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
 			constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
 			wchar_t buf[32];
 			swprintf_s(buf, 31, FMT_ZOOM, m_main_scale * 100.0);

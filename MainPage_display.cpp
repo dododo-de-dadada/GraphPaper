@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 表示デバイスの DPI が変わった
@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 			main_sheet_draw();
 		}
 		m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 表示デバイスの向きが変わった
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 }

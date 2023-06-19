@@ -74,19 +74,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 長さを文字列に変換する.
-	// B	単位付加フラグ
+	// U	単位フラグ (true なら単位を付ける, false なら値のみ)
 	// len_unit	長さの単位
 	// len	ピクセル単位の長さ
 	// dpi	DPI
 	// grid_len	方眼の大きさ
 	// text_len	文字列の最大長 ('\0' を含む長さ)
 	// text_buf	文字列の配列
-	template <bool B>
+	template <bool U>
 	void conv_len_to_str(const LEN_UNIT len_unit, const double len, const double dpi, const double grid_len, const uint32_t text_len, wchar_t* text_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
-			if constexpr (B) {
+			if constexpr (U) {
 				swprintf_s(text_buf, text_len, FMT_PIXEL_UNIT, len);
 			}
 			else {
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 長さの単位がインチか判定する.
 		else if (len_unit == LEN_UNIT::INCH) {
-			if constexpr (B) {
+			if constexpr (U) {
 				swprintf_s(text_buf, text_len, FMT_INCH_UNIT, len / dpi);
 			}
 			else {
@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 長さの単位がミリメートルか判定する.
 		else if (len_unit == LEN_UNIT::MILLI) {
-			if constexpr (B) {
+			if constexpr (U) {
 				swprintf_s(text_buf, text_len, FMT_MILLI_UNIT, len * MM_PER_INCH / dpi);
 			}
 			else {
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 長さの単位がポイントか判定する.
 		else if (len_unit == LEN_UNIT::POINT) {
-			if constexpr (B) {
+			if constexpr (U) {
 				swprintf_s(text_buf, text_len, FMT_POINT_UNIT, len * PT_PER_INCH / dpi);
 			}
 			else {
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 長さの単位が方眼か判定する.
 		else if (len_unit == LEN_UNIT::GRID) {
-			if constexpr (B) {
+			if constexpr (U) {
 				swprintf_s(text_buf, text_len, FMT_GRID_UNIT, len / grid_len);
 			}
 			else {
@@ -243,8 +243,7 @@ namespace winrt::GraphPaper::implementation
 		//    かつ最背面の図形は選択されいない.
 		const auto enable_backward = (runlength_cnt > 1 || (m_undo_select_cnt > 0 && !back_selected));
 		const auto& dp_view = Clipboard::GetContent();
-		const bool exists_clipboard_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
-			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
+		const bool exists_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) || dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 		const bool exists_fill = m_undo_select_cnt > selected_line + selected_image + selected_group;
 		const bool exists_stroke = m_undo_select_cnt > selected_group + selected_image + selected_ruler;
 
@@ -259,8 +258,8 @@ namespace winrt::GraphPaper::implementation
 		menu_cut().IsEnabled(exists_selected);
 		popup_copy().IsEnabled(exists_selected);
 		menu_copy().IsEnabled(exists_selected);
-		popup_paste().IsEnabled(exists_clipboard_data);
-		menu_paste().IsEnabled(exists_clipboard_data);
+		popup_paste().IsEnabled(exists_data);
+		menu_paste().IsEnabled(exists_data);
 		popup_delete().IsEnabled(exists_selected);
 		menu_delete().IsEnabled(exists_selected);
 		popup_select_all().IsEnabled(exists_unselected);
@@ -285,14 +284,21 @@ namespace winrt::GraphPaper::implementation
 		menu_ungroup().IsEnabled(exists_selected_group);
 
 		// 図形編集メニューの可否を設定する.
-		popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
+		//popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
+		if (m_event_shape_pressed != nullptr && m_event_loc_pressed != LOC_TYPE::LOC_SHEET && 
+			(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image)) {
+			popup_edit_shape().Visibility(Visibility::Visible);
+		}
+		else {
+			popup_edit_shape().Visibility(Visibility::Collapsed);
+		}
 		menu_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 		popup_reverse_path().IsEnabled(exists_selected_cap);
 		menu_reverse_path().IsEnabled(exists_selected_cap);
 		popup_draw_arc_cw().IsEnabled(exists_selected_counter_clockwise);
 		menu_draw_arc_cw().IsEnabled(exists_selected_counter_clockwise);
 		popup_draw_arc_ccw().IsEnabled(exists_selected_clockwise);
-		menu_arc_counter().IsEnabled(exists_selected_clockwise);
+		menu_draw_arc_ccw().IsEnabled(exists_selected_clockwise);
 		popup_open_polygon().IsEnabled(exists_selected_polygon);
 		menu_open_polygon().IsEnabled(exists_selected_polygon);
 		popup_close_polyline().IsEnabled(exists_selected_polyline);
@@ -303,66 +309,58 @@ namespace winrt::GraphPaper::implementation
 		menu_revert_image().IsEnabled(exists_selected_image);
 
 		// 線枠メニューの可否を設定する.
-		popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
-		//mfsi_popup_stroke_dash().IsEnabled(exists_stroke);
-		//mfsi_menu_stroke_dash().IsEnabled(exists_stroke);
+		//popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
+		if (m_event_shape_pressed != nullptr && (m_event_shape_pressed->exist_cap() || m_event_shape_pressed->exist_join())) {
+			popup_stroke().Visibility(Visibility::Visible);
+		}
+		else {
+			popup_stroke().Visibility(Visibility::Collapsed);
+		}
 		mfi_popup_stroke_dash_pat().IsEnabled(m_main_sheet.m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 		mfi_menu_stroke_dash_pat().IsEnabled(m_main_sheet.m_stroke_dash != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		//mfsi_popup_stroke_width().IsEnabled(exists_stroke);
-		//mfsi_stroke_width().IsEnabled(exists_stroke);
-		//mfsi_popup_stroke_join().IsEnabled(exists_stroke);
-		//mfsi_menu_stroke_join().IsEnabled(exists_stroke);
-		//mfsi_popup_stroke_cap().IsEnabled(exists_selected_cap);
-		//mfsi_menu_stroke_cap().IsEnabled(exists_selected_cap);
-		//mfsi_popup_stroke_arrow().IsEnabled(exists_selected_cap);
-		//mfsi_menu_stroke_arrow().IsEnabled(exists_selected_cap);
 		mfi_popup_stroke_arrow_size().IsEnabled(m_main_sheet.m_arrow_style != ARROW_STYLE::ARROW_NONE);
 		mfi_menu_stroke_arrow_size().IsEnabled(m_main_sheet.m_arrow_style != ARROW_STYLE::ARROW_NONE);
-		//mfi_popup_stroke_color().IsEnabled(exists_stroke);
-		//mfi_menu_stroke_color().IsEnabled(exists_stroke);
 
 		// 塗りメニューの可否を設定する.
-		popup_fill().IsEnabled(exists_fill || exists_selected_image);
+		//popup_fill().IsEnabled(exists_fill || exists_selected_image);
+		if (m_event_shape_pressed != nullptr && m_event_shape_pressed->exist_fill()) {
+			popup_fill().Visibility(Visibility::Visible);
+		}
+		else {
+			popup_fill().Visibility(Visibility::Collapsed);
+		}
 		mfi_popup_fill_color().IsEnabled(exists_fill);
-		//mfi_menu_fill_color().IsEnabled(exists_fill);
 		mfi_popup_image_opacity().IsEnabled(exists_selected_image);
-		//mfi_menu_image_opacity().IsEnabled(exists_selected_image);
 
 		// 書体メニューの可否を設定する.
-		popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
+		
+		//popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
+		if (m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
+			popup_font().Visibility(Visibility::Visible);
+		}
+		else {
+			popup_font().Visibility(Visibility::Collapsed);
+		}
 		mfi_popup_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
-		//mfi_menu_font_family().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfi_popup_font_size().IsEnabled(exists_selected_text || exists_selected_ruler);
-		//mfi_menu_font_size().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfsi_popup_font_weight().IsEnabled(exists_selected_text || exists_selected_ruler);
-		//mfsi_menu_font_weight().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfsi_popup_font_stretch().IsEnabled(exists_selected_text || exists_selected_ruler);
-		//mfsi_menu_font_stretch().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfsi_popup_font_style().IsEnabled(exists_selected_text || exists_selected_ruler);
-		//mfsi_menu_font_style().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfsi_popup_text_align_horz().IsEnabled(exists_selected_text);
-		//mfsi_menu_text_align_horz().IsEnabled(exists_selected_text);
 		mfsi_popup_text_align_vert().IsEnabled(exists_selected_text);
-		//mfsi_menu_text_align_vert().IsEnabled(exists_selected_text);
 		mfi_popup_text_line_sp().IsEnabled(exists_selected_text);
-		//mfi_menu_text_line_sp().IsEnabled(exists_selected_text);
 		mfi_popup_text_pad().IsEnabled(exists_selected_text);
-		//mfi_menu_text_pad().IsEnabled(exists_selected_text);
 		mfsi_popup_text_wrap().IsEnabled(exists_selected_text);
-		//mfsi_menu_text_wrap().IsEnabled(exists_selected_text);
 		mfi_popup_font_color().IsEnabled(exists_selected_text);
-		//mfi_menu_font_color().IsEnabled(exists_selected_text);
 
 		// レイアウトメニューの可否を設定する.
-		//mfsi_popup_grid_show().IsEnabled(true);
-		//mfsi_popup_grid_len().IsEnabled(!exists_selected);
-		//mfsi_popup_grid_emph().IsEnabled(!exists_selected);
-		//mfi_popup_grid_color().IsEnabled(!exists_selected);
-		//mfi_popup_sheet_size().IsEnabled(!exists_selected);
-		//mfi_popup_sheet_color().IsEnabled(!exists_selected);
-		//mfsi_popup_sheet_zoom().IsEnabled(!exists_selected);
-		//mfsi_popup_background_pattern().IsEnabled(!exists_selected);
-		popup_layout().IsEnabled(!exists_selected);
+		//popup_layout().IsEnabled(!exists_selected);
+		if (m_event_shape_pressed == nullptr || m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
+			popup_layout().Visibility(Visibility::Visible);
+		}
+		else {
+			popup_layout().Visibility(Visibility::Collapsed);
+		}
 	}
 
 	//-------------------------------
@@ -543,7 +541,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	//------------------------------

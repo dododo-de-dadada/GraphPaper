@@ -169,18 +169,18 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_NAME_NOT_APPEND = false;	// 単位名を付加しない
 
 	// ピクセル長さをある単位の文字列に変換する.
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template <bool U> void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// ピクセル長さをある単位の文字列に変換する.
-	template <bool B, size_t Z> inline void conv_len_to_str(
-		const LEN_UNIT len_unit,	// 長さの単位
-		const double val,	// 値 (ピクセル)
-		const double dpi,	// DPI
-		const double g_len,	// 方眼の大きさ
-		wchar_t(&t_buf)[Z]	// 文字列を格納するバッファ
-	) noexcept
+	// U	単位フラグ (true なら単位名を付ける, false なら値のみ)
+	// len_unit	長さの単位
+	// val	値 (ピクセル)
+	// dpi	DPI
+	// g_len	方眼の大きさ
+	// t_buf[Z]	文字列を格納するバッファ
+	template <bool U, size_t Z> inline void conv_len_to_str(const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,	wchar_t(&t_buf)[Z]) noexcept
 	{
-		conv_len_to_str<B>(len_unit, val, dpi, g_len, Z, t_buf);
+		conv_len_to_str<U>(len_unit, val, dpi, g_len, Z, t_buf);
 	}
 
 	// ある長さをピクセル単位の長さに変換する.
@@ -238,14 +238,13 @@ namespace winrt::GraphPaper::implementation
 		std::mutex m_mutex_exit;	// 終了を延長するための排他制御
 		std::mutex m_mutex_event;	// イベント処理させないための排他制御
 
-		// 文字列の編集, 検索と置換
-		bool m_fit_text_frame = false;	// 枠を文字列に合わせる
+		// 文字列の検索と置換
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_repl_text = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別
 		bool m_find_text_wrap = false;	// 回り込み検索
 
-		// テキスト編集
+		// 文字列の編集
 		// trail = false    trail = true
 		//   start  end        start end
 		//     |     |           |   |
@@ -267,18 +266,16 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
 		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_SHEET;	// ポインターが押された部位
-		//uint32_t m_event_loc_r_pressed = LOC_TYPE::LOC_SHEET;	// 右ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
-		//Shape* m_event_shape_r_pressed = nullptr;	// 右ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
-		bool m_eyedropper_filled = false;	// 抽出されたか判定
-		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 
 		// 作図ツール
 		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
 		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の作成方法
+		bool m_eyedropper_filled = false;	// 抽出されたか判定
+		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 
 		// メイン用紙
 		ShapeSheet m_main_sheet;	// 用紙
@@ -407,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の記法
 		bool m_snap_grid = true;	// 点を方眼にくっつける.
 		float m_snap_point = SNAP_INTERVAL_DEF_VAL;	// 点と点をくっつける間隔
-		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
+		STATUS_BAR m_status_bar_flag = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 		//winrt::guid m_enc_id = BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
 
 		// スレッド
@@ -472,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の入力中に下矢じるしキーが押された.
 		template <bool SHIFT_KEY> void core_text_down_key(void) noexcept;
 		// 文字列の入力中に後退キーが押された.
-		void MainPage::core_text_backspace_key(void) noexcept;
+		void core_text_backspace_key(void) noexcept;
 
 		//-------------------------------
 		// MainPage.cpp
@@ -839,7 +836,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作メニューの「画像の縦横比を維持」が選択された.
 		//void image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 操作メニューの「原画像に戻す」が選択された.
-		void revert_image_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		void revert_image_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 
 		//-----------------------------
 		// MainPage_help.cpp
@@ -919,13 +916,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		*/
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
-		bool select_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
+		bool select_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
-		bool select_shape_range(Shape* const s_from, Shape* const s_to);
+		bool select_range_shape(Shape* const s_from, Shape* const s_to);
 		// 矩形に含まれる図形の選択を反転する.
-		bool toggle_shape_inside(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
+		bool toggle_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
-		bool unselect_shape_all(const bool t_range_only = false);
+		bool unselect_all_shape(void);
+		//bool unselect_all_shape(const bool t_range_only = false);
+		// 図形を選択して, それ以外の図形の選択をはずす.
+		bool select_shape(Shape* const s);
 
 		//-------------------------------
 		// MainPage_layout.cpp
@@ -969,17 +969,17 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「ステータスバー」が選択された.
 		void status_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// ポインターの位置をステータスバーに格納する.
-		void status_bar_set_pos(void);
+		void status_bar_set_pointer(void);
 		// 作図ツールをステータスバーに格納する.
-		void status_bar_set_draw(void);
+		void status_bar_set_drawing_tool(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void status_bar_set_grid(void);
+		void status_bar_set_grid_len(void);
 		// 用紙の大きさをステータスバーに格納する.
-		void status_bar_set_sheet(void);
+		void status_bar_set_sheet_size(void);
 		// 単位をステータスバーに格納する.
-		void status_bar_set_unit(void);
+		void status_bar_set_len_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void status_bar_set_zoom(void);
+		void status_bar_set_sheet_zoom(void);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -1049,7 +1049,9 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の図形を選択解除する.
 		void summary_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.
-		void summary_unselect_shape_all(void);
+		void summary_unselect_all_shape(void);
+		// 一覧の項目を全て選択解除する.
+		void summary_select_shape(Shape* const s);
 		// 一覧の表示を更新する.
 		void summary_update(void);
 
@@ -1231,7 +1233,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		}
 		// 図形の選択を反転して, その操作をスタックに積む.
-		void undo_push_select(Shape* const s);
+		void undo_push_toggle(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
 		template <UNDO_T U, typename T> void undo_push_set(Shape* const s, T const& val);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
@@ -1326,7 +1328,7 @@ namespace winrt::GraphPaper::implementation
 			if (changed) {
 				menu_is_enable();
 				main_sheet_draw();
-				status_bar_set_pos();
+				status_bar_set_pointer();
 			}
 		}
 		// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された

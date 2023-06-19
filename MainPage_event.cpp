@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			event_set_position(args);
 			event_set_cursor();
-			status_bar_set_pos();
+			status_bar_set_pointer();
 		}
 	}
 
@@ -435,9 +435,10 @@ namespace winrt::GraphPaper::implementation
 #endif
 		event_reduce_slist(m_main_sheet.m_shape_list, m_undo_stack, m_redo_stack);
 		undo_push_null();
-		unselect_shape_all();
 		undo_push_append(s);
-		undo_push_select(s);
+		select_shape(s);
+		//unselect_all_shape();
+		//undo_push_toggle(s);
 		if (drawing_tool == DRAWING_TOOL::TEXT) {
 			if (m_core_text_focused != nullptr) {
 				m_core_text.NotifyFocusLeave();
@@ -458,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 			summary_append(s);
 			summary_select(s);
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	//------------------------------
@@ -566,7 +567,7 @@ namespace winrt::GraphPaper::implementation
 				lt.y = m_event_pos_curr.y;
 				rb.y = m_event_pos_pressed.y;
 			}
-			if (toggle_shape_inside(lt, rb)) {
+			if (toggle_inside_shape(lt, rb)) {
 			}
 		}
 		// 修飾キーが押されてないか判定する.
@@ -589,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 				lt.y = m_event_pos_curr.y;
 				rb.y = m_event_pos_pressed.y;
 			}
-			if (select_shape_inside(lt, rb)) {
+			if (select_inside_shape(lt, rb)) {
 			}
 		}
 		Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
@@ -613,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 
 		event_set_position(args);
-		status_bar_set_pos();
+		status_bar_set_pointer();
 
 		// 状態が, 初期状態か判定する.
 		if (m_event_state == EVENT_STATE::BEGIN) {
@@ -833,16 +834,19 @@ namespace winrt::GraphPaper::implementation
 					// ただし, 押された図形の部位が, 枠線や塗り以外の部位だったならば, 変形を行なうため, 選択された状態を変えない.
 					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
 					}
-					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE ||
-						m_event_loc_pressed == LOC_TYPE::LOC_FILL ||
-						m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
-						if (!m_event_shape_pressed->is_selected()) {
+					else if (m_event_loc_pressed == LOC_TYPE::LOC_STROKE || m_event_loc_pressed == LOC_TYPE::LOC_FILL || m_event_loc_pressed == LOC_TYPE::LOC_TEXT) {
+						undo_push_toggle(m_event_shape_pressed);
+						if (m_event_shape_pressed->is_selected()) {
 							m_main_sheet.set_attr_to(m_event_shape_pressed);
 							m_event_shape_last = m_event_shape_pressed;
 						}
-						undo_push_select(m_event_shape_pressed);
 						if (summary_is_visible()) {
-							summary_select(m_event_shape_pressed);
+							if (m_event_shape_pressed->is_selected()) {
+								summary_select(m_event_shape_pressed);
+							}
+							else {
+								summary_unselect(m_event_shape_pressed);
+							}
 						}
 						changed = true;
 					}
@@ -886,7 +890,7 @@ namespace winrt::GraphPaper::implementation
 						if (m_event_shape_last == nullptr) {
 							m_event_shape_last = m_event_shape_pressed;
 						}
-						if (select_shape_range(m_event_shape_last, m_event_shape_pressed)) {
+						if (select_range_shape(m_event_shape_last, m_event_shape_pressed)) {
 							changed = true;
 						}
 					}
@@ -931,7 +935,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
 					// 押された図形がない.
 					if (m_event_loc_pressed == LOC_TYPE::LOC_SHEET || m_event_shape_pressed == nullptr) {
-						if (unselect_shape_all()) {
+						if (unselect_all_shape()) {
 							m_event_shape_last = nullptr;
 							changed = true;
 						}
@@ -940,8 +944,9 @@ namespace winrt::GraphPaper::implementation
 					else if (!m_event_shape_pressed->is_selected()) {
 						m_main_sheet.set_attr_to(m_event_shape_pressed);
 						m_event_shape_last = m_event_shape_pressed;
-						unselect_shape_all();
-						undo_push_select(m_event_shape_pressed);
+						select_shape(m_event_shape_pressed);
+						//unselect_all_shape();
+						//undo_push_toggle(m_event_shape_pressed);
 						if (summary_is_visible()) {
 							summary_select(m_event_shape_pressed);
 						}
@@ -1002,6 +1007,18 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 			m_event_shape_pressed = nullptr;
 			m_event_loc_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, false, m_event_shape_pressed);
+			if (m_event_shape_pressed != nullptr && !m_event_shape_pressed->is_selected()) {
+				m_event_shape_last = m_event_shape_pressed;
+				select_shape(m_event_shape_pressed);
+				changed = true;
+			}
+			//if (unselect_all_shape()) {
+			//	changed = true;
+			//}
+			//if (m_event_shape_pressed != nullptr) {
+			//	undo_push_toggle(m_event_shape_pressed);
+			//	changed = true;
+			//}
 		}
 		if (changed) {
 			menu_is_enable();
@@ -1016,20 +1033,19 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.lock();
 		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit_text().SelectAll();
-		ck_fit_text_frame().IsChecked(m_fit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			const auto len = tx_edit_text().Text().size();
 			undo_push_null();
 			undo_push_text_select(s, len, len, false);
 			undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
-			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
-			if (m_fit_text_frame) {
+			const bool fit_frame = ck_fit_text_frame().IsChecked().GetBoolean();
+			if (fit_frame) {
 				undo_push_position(s, LOC_TYPE::LOC_SE);
 				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		m_mutex_event.unlock();
 	}
 
@@ -1096,7 +1112,7 @@ namespace winrt::GraphPaper::implementation
 				// 修飾キーが押されてないなら吸い上げ.
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::None) {
 					event_eyedropper_detect(m_event_shape_pressed, m_event_loc_pressed);
-					status_bar_set_draw();
+					status_bar_set_drawing_tool();
 					//return;
 				}
 				// 制御キー押下なら吐き出し.
@@ -1220,7 +1236,7 @@ namespace winrt::GraphPaper::implementation
 					event_finish_creating(m_event_pos_pressed, p);
 				}
 				else {
-					unselect_shape_all();
+					unselect_all_shape();
 				}
 			}
 		}
@@ -1422,8 +1438,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			main_panel_size();
 			main_sheet_draw();
-			status_bar_set_pos();
-			status_bar_set_zoom();
+			status_bar_set_pointer();
+			status_bar_set_sheet_zoom();
 		}
 		// シフトキーが押されてるか判定する.
 		else if ((mod & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
@@ -1431,7 +1447,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_horz(), w_delta, m_main_scale)) {
 				main_sheet_draw();
-				status_bar_set_pos();
+				status_bar_set_pointer();
 			}
 		}
 		// 何も押されてないか判定する.
@@ -1440,7 +1456,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t w_delta = args.GetCurrentPoint(scp_main_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_vert(), w_delta, m_main_scale)) {
 				main_sheet_draw();
-				status_bar_set_pos();
+				status_bar_set_pointer();
 			}
 		}
 	}

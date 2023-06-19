@@ -24,7 +24,6 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		undo_push_null();
-		unselect_shape_all();
 		for (const auto s : slist) {
 			// 図形の消去フラグが立っているか判定する.
 			if (s->is_deleted()) {
@@ -38,14 +37,16 @@ namespace winrt::GraphPaper::implementation
 			undo_push_append(g, s);
 		}
 		undo_push_append(g);
-		undo_push_select(g);
+		select_shape(g);
+		//unselect_all_shape();
+		//undo_push_toggle(g);
 		menu_is_enable();
 		main_sheet_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(g);
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 編集メニューの「グループの解除」が選択された.
@@ -58,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_null();
-		unselect_shape_all();
+		unselect_all_shape();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : group_list) {
 			auto g = static_cast<ShapeGroup*>(t);
@@ -84,14 +85,14 @@ namespace winrt::GraphPaper::implementation
 				undo_push_remove(g, s);
 				// 図形リスト中のそのグループ図形の直前に,
 				undo_push_insert(s, at);
-				undo_push_select(s);
+				undo_push_toggle(s);
 				//t = s;
 			}
 			//undo_push_remove(g);
 		}
 		menu_is_enable();
 		main_sheet_draw();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 }

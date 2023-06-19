@@ -279,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
 				// 方眼の大きさをステータスバーに格納する.
-				status_bar_set_grid();
+				status_bar_set_grid_len();
 			}
 			else if (u_type == typeid(UndoValue<UNDO_T::GRID_EMPH>)) {
 				// レイアウトメニューの「方眼の強調」に印をつける.
@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (u_type == typeid(UndoValue<UNDO_T::SHEET_SIZE>)) {
 				// 用紙の大きさをステータスバーに格納する.
-				status_bar_set_sheet();
+				status_bar_set_sheet_size();
 			}
 			else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {
 				D2D1_CAP_STYLE val;
@@ -341,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 				summary_update();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 編集メニューの「やり直し」が選択された.
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 				summary_update();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 		*/
 
@@ -431,7 +431,7 @@ namespace winrt::GraphPaper::implementation
 				summary_update();
 			}
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 		*/
 
@@ -502,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
-			status_bar_set_grid();
+			status_bar_set_grid_len();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::GRID_EMPH>)) {
 			// レイアウトメニューの「方眼の強調」に印をつける.
@@ -515,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
-			status_bar_set_sheet();
+			status_bar_set_sheet_size();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_T::STROKE_CAP>)) {
 			D2D1_CAP_STYLE val;
@@ -654,12 +654,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
-	void MainPage::undo_push_select(Shape* s)
+	void MainPage::undo_push_toggle(Shape* s)
 	{
 		const auto it_end = m_undo_stack.rend();
 		Undo* u;
-		for (auto it = m_undo_stack.rbegin();
-			it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
+		for (auto it = m_undo_stack.rbegin(); it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
 			if (u->shape() == s) {
 				// 操作の図形が指定された図形と一致した場合,
 				// 操作スタックを介せずに図形の選択を反転させ, 

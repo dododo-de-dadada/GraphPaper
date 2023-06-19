@@ -12,91 +12,31 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Slider;
 	using winrt::Windows::UI::Xaml::Visibility;
 
-	/*
-	IAsyncAction MainPage::edit_text_async(ShapeText* s)
-	{
-		static winrt::event_token primary_token;
-		static winrt::event_token closed_token;
-
-		m_mutex_event.lock();
-		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
-		tx_edit_text().SelectAll();
-		ck_fit_text_frame().IsChecked(m_fit_text_frame);
-		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-			const auto len = tx_edit_text().Text().size();
-			undo_push_null();
-			undo_push_text_select(s, len, len, false);
-			undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
-			m_fit_text_frame = ck_fit_text_frame().IsChecked().GetBoolean();
-			if (m_fit_text_frame) {
-				undo_push_position(s, LOC_TYPE::LOC_SE);
-				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
-			}
-			main_sheet_draw();
-		}
-		status_bar_set_pos();
-		m_mutex_event.unlock();
-	}
-	*/
-
 	// 操作メニューの「画像を原画像に戻す」が選択された.
-	void MainPage::revert_image_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	void MainPage::revert_image_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		bool push_null = true;
+		bool push_null = false;
 		for (Shape* const s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
 			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-			if (push_null) {
+			if (!push_null) {
 				undo_push_null();
-				push_null = false;
+				push_null = true;
 			}
 			undo_push_image(s);
 			static_cast<ShapeImage*>(s)->revert();
 		}
 		main_panel_size();
 		main_sheet_draw();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
-
-	// 編集メニューの「文字列の編集」が選択された.
-	/*
-	void MainPage::meth_text_edit_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		ShapeText* s = static_cast<ShapeText*>(nullptr);	// 編集する文字列図形
-		if (m_event_shape_last != nullptr && typeid(*m_event_shape_last) == typeid(ShapeText)) {
-			// 前回ポインターが押されたのが文字列図形ならその図形.
-			s = static_cast<ShapeText*>(m_event_shape_last);
-		}
-		else {
-			// 選択された図形のうち最前面にある文字列図形を得る.
-			for (auto it = m_main_sheet.m_shape_list.rbegin(); 
-				it != m_main_sheet.m_shape_list.rend(); it++) {
-				auto t = *it;
-				if (t->is_deleted()) {
-					continue;
-				}
-				if (!t->is_selected()) {
-					continue;
-				}
-				if (typeid(*t) == typeid(ShapeText)) {
-					s = static_cast<ShapeText*>(t);
-					break;
-				}
-			}
-		}
-
-		if (s != nullptr) {
-			edit_text_async(s);
-		}
-	}
-	*/
 
 	// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された
 	void MainPage::draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/)
 	{
-		if (sender == menu_arc_counter() || sender == popup_draw_arc_ccw()) {
+		if (sender == menu_draw_arc_ccw() || sender == popup_draw_arc_ccw()) {
 			undo_push_null();
 			if (undo_push_set<UNDO_T::ARC_DIR>(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 				menu_is_enable();
@@ -115,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		const D2D1_FIGURE_END END = (sender == menu_open_polygon() || sender == popup_open_polygon() ? D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN : D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
-		bool changed = false;
+		bool push_null = false;
 		for (Shape* s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -125,14 +65,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			D2D1_FIGURE_END end;
 			if (s->get_poly_end(end) && end != END) {
-				if (!changed) {
+				if (!push_null) {
 					undo_push_null();
-					changed = true;
+					push_null = true;
 				}
 				undo_push_set<UNDO_T::POLY_END>(s, END);
 			}
 		}
-		if (changed) {
+		if (push_null) {
 			menu_is_enable();
 			main_sheet_draw();
 		}

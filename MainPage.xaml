@@ -171,7 +171,7 @@
 						</MenuFlyoutItem.Icon>
 					</MenuFlyoutItem>
 					<!-- 画像を原画像に戻す -->
-					<MenuFlyoutItem x:Name="popup_revert_image" x:Uid="menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
+					<MenuFlyoutItem x:Name="popup_revert_image" x:Uid="menu_revert_image" Click="revert_image_to_original_click" Text="Revert Image to Original" >
 						<MenuFlyoutItem.Icon>
 							<FontIcon Glyph="{StaticResource glyph_update_restore}" />
 						</MenuFlyoutItem.Icon>
@@ -802,7 +802,7 @@
                     <!-- パスの方向を反転 -->
                     <MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
                     <!-- 反時計周りに円弧を描く -->
-                    <MenuFlyoutItem x:Name="menu_arc_counter" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
+                    <MenuFlyoutItem x:Name="menu_draw_arc_ccw" x:Uid="menu_draw_arc_ccw" Click="draw_arc_direction_click" Text="Draw Arc Counter Clockwise">
                         <MenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_arc_ccw}" />
                         </MenuFlyoutItem.Icon>
@@ -826,7 +826,7 @@
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <!-- 画像を原画像に戻す -->
-                    <MenuFlyoutItem x:Name="menu_revert_image" x:Uid="menu_revert_image" Click="revert_image_click" Text="Revert Image to Original" >
+                    <MenuFlyoutItem x:Name="menu_revert_image" x:Uid="menu_revert_image" Click="revert_image_to_original_click" Text="Revert Image to Original" >
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="{StaticResource glyph_update_restore}" />
                         </MenuFlyoutItem.Icon>

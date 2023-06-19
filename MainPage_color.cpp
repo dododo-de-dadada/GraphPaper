@@ -391,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 			return;
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 属性メニューの「画像の不透明度...」が選択された.

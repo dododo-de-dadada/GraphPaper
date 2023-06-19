@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		order_swap<BRING_FORWARD>();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 			menu_is_enable();
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 選択された図形を次の図形と入れ替える.
@@ -128,7 +128,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		order_swap<SEND_BACKWARD>();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 			menu_is_enable();
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 }

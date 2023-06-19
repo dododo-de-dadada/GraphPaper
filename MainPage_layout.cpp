@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_T::GRID_EMPH>(&m_main_sheet, val);
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_combo_box_0().Items().Clear();
 		dialog_combo_box_0().Visibility(Visibility::Collapsed);
-		status_bar_set_pos();
+		status_bar_set_pointer();
 		m_mutex_event.unlock();
 	}
 
@@ -267,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, new_base);
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_T::GRID_BASE>(&m_main_sheet, new_base);
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// レイアウトメニューの「方眼の表示」>「最背面」が選択された.
@@ -306,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_T::GRID_SHOW>(&m_main_sheet, new_val);
 			main_sheet_draw();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// レイアウトメニューの「レイアウトを既定値に戻す」が選択された.
@@ -338,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトを既定値に戻す.
 		layout_init();
 		main_sheet_draw();
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// レイアウトメニューの「 レイアウトを保存」が選択された
@@ -480,7 +480,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_scale = 1.0f;
 		m_snap_grid = true;
 		m_snap_point = SNAP_INTERVAL_DEF_VAL;
-		m_status_bar = STATUS_BAR_DEF_VAL;
+		m_status_bar_flag = STATUS_BAR_DEF_VAL;
 		m_background_show = false;
 		m_background_color = COLOR_WHITE;
 
@@ -614,10 +614,10 @@ namespace winrt::GraphPaper::implementation
 				main_bbox_update();
 				main_panel_size();
 				main_sheet_draw();
-				status_bar_set_pos();
-				status_bar_set_grid();
-				status_bar_set_sheet();
-				status_bar_set_unit();
+				status_bar_set_pointer();
+				status_bar_set_grid_len();
+				status_bar_set_sheet_size();
+				status_bar_set_len_unit();
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
@@ -735,12 +735,12 @@ namespace winrt::GraphPaper::implementation
 				main_bbox_update();
 				main_panel_size();
 				main_sheet_draw();
-				status_bar_set_grid();
-				status_bar_set_sheet();
+				status_bar_set_grid_len();
+				status_bar_set_sheet_size();
 			}
-			status_bar_set_unit();
+			status_bar_set_len_unit();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 
 	// 用紙の大きさダイアログのテキストボックスの値が変更された.
@@ -910,8 +910,8 @@ namespace winrt::GraphPaper::implementation
 			m_main_scale = scale;
 			main_panel_size();
 			main_sheet_draw();
-			status_bar_set_zoom();
+			status_bar_set_sheet_zoom();
 		}
-		status_bar_set_pos();
+		status_bar_set_pointer();
 	}
 }
