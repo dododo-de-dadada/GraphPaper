@@ -650,12 +650,12 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (m_core_text_focused != nullptr && !m_core_text_focused->is_deleted() && m_core_text_focused->is_selected()) {
-			m_core_text_focused->draw_selection(m_main_sheet.m_select_start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
+			m_core_text_focused->draw_selection(m_main_sheet.m_core_text_range.m_start, m_main_sheet.m_core_text_range.m_end, m_main_sheet.m_core_text_range.m_trail);
 
-			const int row = m_core_text_focused->get_text_row(m_main_sheet.m_select_end);
+			const int row = m_core_text_focused->get_text_row(m_main_sheet.m_core_text_range.m_end);
 			const float hight = m_core_text_focused->m_font_size;
 			D2D1_POINT_2F car;	// キャレットの点
-			m_core_text_focused->get_text_caret(m_main_sheet.m_select_end, row, m_main_sheet.m_select_trail, car);
+			m_core_text_focused->get_text_caret(m_main_sheet.m_core_text_range.m_end, row, m_main_sheet.m_core_text_range.m_trail, car);
 			D2D1_POINT_2F p{
 				car.x - 0.5f, car.y
 			};

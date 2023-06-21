@@ -197,6 +197,13 @@ namespace winrt::GraphPaper::implementation
 	};
 	constexpr POLY_OPTION POLY_OPTION_DEFVAL{ 3, true, true, true, true };	// 多角形の作成方法の既定値
 
+	// 文字列の範囲
+	struct CORE_TEXT_RANGE {
+		uint32_t m_start;
+		uint32_t m_end;
+		bool m_trail;
+	};
+
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
@@ -276,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 	// 寸法が同じか判定する.
 	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
 	// 文字範囲が同じか判定する.
-	//inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
+	inline bool equal(const CORE_TEXT_RANGE& a, const CORE_TEXT_RANGE& b) noexcept;
 	// 方眼の強調が同じか判定する.
 	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
 	// 破線の配置が同じか判定する.
@@ -490,6 +497,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_pad(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字列の折り返しを得る.
 		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING&/*val*/) const noexcept { return false; }
+		// 文字列の範囲を得る.
+		virtual bool get_core_text_range(CORE_TEXT_RANGE&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
@@ -592,6 +601,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_pad(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字列の折り返しに格納する.
 		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING/*val*/) noexcept { return false; }
+		// 値を文字列の範囲に格納する.
+		virtual bool set_core_text_range(const CORE_TEXT_RANGE&/*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const&/*dt_writer*/) const {}
 	};
@@ -786,9 +797,10 @@ namespace winrt::GraphPaper::implementation
 // a b|c d e|f g     a b|c d e|f g
 //    +-----+           +-----+
 // 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		uint32_t m_select_start = 0;	// 選択範囲の開始位置
-		uint32_t m_select_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
-		bool m_select_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
+		CORE_TEXT_RANGE m_core_text_range{ 0, 0, false };
+		//uint32_t m_core_text_range.m_start = 0;	// 選択範囲の開始位置
+		//uint32_t m_core_text_range.m_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
+		//bool m_core_text_range.m_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
@@ -809,6 +821,21 @@ namespace winrt::GraphPaper::implementation
 		Shape* slist_back() const noexcept
 		{
 			return m_shape_list.back();
+		}
+		// 文字列の範囲を得る.
+		virtual bool get_core_text_range(CORE_TEXT_RANGE& val) const noexcept final override
+		{
+			val = m_core_text_range;
+			return true;
+		}
+		// 値を文字列の範囲に格納する.
+		virtual bool set_core_text_range(const CORE_TEXT_RANGE& val) noexcept final override
+		{
+			if (!equal(m_core_text_range, val)) {
+				m_core_text_range = val;
+				return true;
+			}
+			return false;
 		}
 
 		//------------------------------
@@ -1955,9 +1982,9 @@ namespace winrt::GraphPaper::implementation
 		// a b|c d e|f g     a b|c d e|f g
 		//    +-----+           +-----+
 		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		//uint32_t m_select_start = 0;	// 選択範囲の開始位置
-		//uint32_t m_select_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
-		//bool m_select_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
+		//uint32_t m_core_text_range.m_start = 0;	// 選択範囲の開始位置
+		//uint32_t m_core_text_range.m_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
+		//bool m_core_text_range.m_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
 
 		DWRITE_FONT_METRICS m_dwrite_font_metrics{};	// 書体の計量
 		UINT32 m_dwrite_line_cnt = 0;	// 行数
@@ -2426,6 +2453,12 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept
 	{
 		return conv_color_comp(a) == conv_color_comp(b);
+	}
+
+	// 文字範囲が同じか判定する.
+	inline bool equal(const CORE_TEXT_RANGE& a, const CORE_TEXT_RANGE& b) noexcept
+	{
+		return a.m_end == b.m_end || a.m_start == b.m_start || a.m_trail == b.m_trail;
 	}
 
 	// 矢じりの返しの点を求める.

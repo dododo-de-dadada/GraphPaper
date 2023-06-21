@@ -182,6 +182,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_T::TEXT_SELECT:
 			u = new UndoTextSelect(dt_reader);
 			break;
+		case UNDO_T::CORE_TEXT_RANGE:
+			u = new UndoValue<UNDO_T::CORE_TEXT_RANGE>(dt_reader);
+			break;
 		default:
 			throw winrt::hresult_invalid_argument();
 			break;

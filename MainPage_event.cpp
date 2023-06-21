@@ -913,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 							}
 							bool trail;
 							const auto end = m_core_text_focused->get_text_pos(m_event_pos_curr, trail);
-							const auto start = m_main_sheet.m_select_start;
+							const auto start = m_main_sheet.m_core_text_range.m_start;
 							undo_push_text_select(m_core_text_focused, start, end, trail);
 							m_core_text.NotifyFocusEnter();
 						}

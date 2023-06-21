@@ -534,11 +534,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (hr == S_OK) {
 			// 属性値の変更がなくても, 選択された文字範囲が変更されたなら,
-			//const auto end = m_select_trail ? m_select_end + 1 : m_select_end;
-			//const auto s = min(m_select_start, end);
-			//const auto e = max(m_select_start, end);
+			//const auto end = m_core_text_range.m_trail ? m_core_text_range.m_end + 1 : m_core_text_range.m_end;
+			//const auto s = min(m_core_text_range.m_start, end);
+			//const auto e = max(m_core_text_range.m_start, end);
 			//if (m_dwrite_selected_cnt == 0) {
-			//	if (m_select_start != end) {
+			//	if (m_core_text_range.m_start != end) {
 			//		updated = true;
 			//	}
 			//}

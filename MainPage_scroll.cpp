@@ -119,13 +119,13 @@ namespace winrt::GraphPaper::implementation
 		// 表示される図形が編集対象の図形なら, 文字列の選択範囲を判定される矩形に格納する.
 		if (static_cast<const ShapeText*>(s) == m_core_text_focused) {
 			const ShapeText* t = m_core_text_focused;
-			const auto end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
-			if (m_main_sheet.m_select_start != end) {
+			const auto end = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
+			if (m_main_sheet.m_core_text_range.m_start != end) {
 				// 文字列の選択範囲のキャレット点を得て, これを判定する矩形に格納する.
 				D2D1_POINT_2F car_start;
 				D2D1_POINT_2F car_end;
-				t->get_text_caret(m_main_sheet.m_select_start, t->get_text_row(m_main_sheet.m_select_start), false, car_start);
-				t->get_text_caret(m_main_sheet.m_select_end, t->get_text_row(m_main_sheet.m_select_end), m_main_sheet.m_select_trail, car_end);
+				t->get_text_caret(m_main_sheet.m_core_text_range.m_start, t->get_text_row(m_main_sheet.m_core_text_range.m_start), false, car_start);
+				t->get_text_caret(m_main_sheet.m_core_text_range.m_end, t->get_text_row(m_main_sheet.m_core_text_range.m_end), m_main_sheet.m_core_text_range.m_trail, car_end);
 				test_lt.x = min(car_start.x, car_end.x);
 				test_lt.y = min(car_start.y, car_end.y);
 				test_rb.x = max(car_start.x, car_end.x);

@@ -256,9 +256,9 @@ namespace winrt::GraphPaper::implementation
 		CoreTextEditContext m_core_text{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
 		ShapeText* m_core_text_focused = nullptr;	// 編集中の文字列図形
 		bool m_core_text_comp = false;	// 入力変換フラグ. 変換中なら true, それ以外なら false.
-		uint32_t m_core_text_start = 0;	// 入力変換開始時の開始位置
-		uint32_t m_core_text_end = 0;	// 入力変換開始時の終了位置
-		bool m_core_text_trail = false;	// 入力変換開始時のキャレット前後判定
+		uint32_t m_core_text_comp_start = 0;	// 入力変換開始時の開始位置
+		//uint32_t m_core_text_end = 0;	// 入力変換開始時の終了位置
+		//bool m_core_text_trail = false;	// 入力変換開始時のキャレット前後判定
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (SHIFT_KEY) {
 				bool trail;
 				const auto end = m_core_text_focused->get_text_pos(m_event_pos_curr, trail);
-				const auto start = m_main_sheet.m_select_start;
+				const auto start = m_main_sheet.m_core_text_range.m_start;
 				undo_push_text_select(m_core_text_focused, start, end, trail);
 				main_sheet_draw();
 			}
@@ -1243,8 +1243,8 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の選択範囲を解除する. キャレット位置は変わらない.
 		void undo_push_text_unselect(ShapeText* s)
 		{
-			const auto start = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
-			undo_push_text_select(s, start, m_main_sheet.m_select_end, m_main_sheet.m_select_trail);
+			const auto start = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
+			undo_push_text_select(s, start, m_main_sheet.m_core_text_range.m_end, m_main_sheet.m_core_text_range.m_trail);
 		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
 		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
@@ -1256,12 +1256,13 @@ namespace winrt::GraphPaper::implementation
 				if ((*u)->m_shape != s) {
 					continue;
 				}
-				m_main_sheet.m_select_start = start;
-				m_main_sheet.m_select_end = end;
-				m_main_sheet.m_select_trail = trail;
+				m_main_sheet.m_core_text_range.m_start = start;
+				m_main_sheet.m_core_text_range.m_end = end;
+				m_main_sheet.m_core_text_range.m_trail = trail;
 				return;
 			}
 			// そうでなければ, スタックに操作を積む.
+			//m_undo_stack.push_back(new UndoTextSelect(s, start, end, trail));
 			m_undo_stack.push_back(new UndoTextSelect(s, start, end, trail));
 		}
 		// データリーダーから操作スタックを読み込む.

@@ -789,8 +789,8 @@
 	<value>Dot Length</value>
 	<comment>String</comment>
   </data>
-  <data name="str_info_image_found" xml:space="preserve">
-	<value>The file save picker opens for each image.</value>
+  <data name="str_info_not_found" xml:space="preserve">
+	<value>String not found.</value>
 	<comment>String</comment>
   </data>
   <data name="str_err_load" xml:space="preserve">

@@ -41,26 +41,23 @@ namespace winrt::GraphPaper::implementation
 			main_sheet_draw();
 		}
 		else {
-			bool done = false;
+			bool changed = false;
 			for (auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted() || s->is_selected()) {
 					continue;
 				}
-				if (!done) {
-					done = true;
-				}
+				changed = true;
 				undo_push_toggle(s);
 			}
-			if (!done) {
-				return;
+			if (changed) {
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
+					summary_select_all();
+				}
+				menu_is_enable();
+				main_sheet_draw();
+				status_bar_set_pointer();
 			}
-			// 一覧が表示されてるか判定する.
-			if (summary_is_visible()) {
-				summary_select_all();
-			}
-			menu_is_enable();
-			main_sheet_draw();
-			status_bar_set_pointer();
 		}
 	}
 
@@ -69,7 +66,12 @@ namespace winrt::GraphPaper::implementation
 	// rb	範囲の右下点
 	bool MainPage::select_inside_shape(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb)
 	{
-		bool change = false;
+		auto changed = false;
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+			m_core_text_focused = nullptr;
+			changed = true;
+		}
 		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -81,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 					if (summary_is_visible()) {
 						summary_select(s);
 					}
-					change = true;
+					changed = true;
 				}
 			}
 			else if (s->is_selected()) {
@@ -90,10 +92,10 @@ namespace winrt::GraphPaper::implementation
 				if (summary_is_visible()) {
 					summary_unselect(s);
 				}
-				change = true;
+				changed = true;
 			}
 		}
-		return change;
+		return changed;
 	}
 
 	// 指定した範囲の図形を選択, 範囲外の図形の選択を外す.
@@ -102,11 +104,16 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	選択が変更された true
 	bool MainPage::select_range_shape(Shape* const s_from, Shape* const s_to)
 	{
-		constexpr int BEGIN = 0;
+		auto changed = false;
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+			m_core_text_focused = nullptr;
+			changed = true;
+		}
+		constexpr int BEGIN = 0;	// 初期状態
 		constexpr int NEXT = 1;
 		constexpr int END = 2;
-		auto done = false;
-		auto st = BEGIN;
+		auto st = BEGIN;	// 状態
 		auto s_end = static_cast<Shape*>(nullptr);
 		auto i = 0u;
 		for (auto s : m_main_sheet.m_shape_list) {
@@ -132,9 +139,7 @@ namespace winrt::GraphPaper::implementation
 					if (summary_is_visible()) {
 						summary_unselect(s);
 					}
-					if (!done) {
-						done = true;
-					}
+					changed = true;
 				}
 				break;
 				}
@@ -146,9 +151,7 @@ namespace winrt::GraphPaper::implementation
 					if (summary_is_visible()) {
 						summary_select(s);
 					}
-					if (!done) {
-						done = true;
-					}
+					changed = true;
 				}
 				if (s == s_end) {
 					st = END;
@@ -157,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			i++;
 		}
-		return done;
+		return changed;
 	}
 
 	// 矩形に含まれる図形の選択を反転する.
@@ -165,7 +168,12 @@ namespace winrt::GraphPaper::implementation
 	// right_bot	矩形の右下点
 	bool MainPage::toggle_inside_shape(const D2D1_POINT_2F left_top, const D2D1_POINT_2F right_bot)
 	{
-		bool done = false;
+		bool changed = false;
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+			m_core_text_focused = nullptr;
+			changed = true;
+		}
 		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_inside(left_top, right_bot)) {
 				continue;
@@ -180,11 +188,9 @@ namespace winrt::GraphPaper::implementation
 					summary_unselect(s);
 				}
 			}
-			if (!done) {
-				done = true;
-			}
+			changed = true;
 		}
-		return done;
+		return changed;
 	}
 
 	// 図形の選択をすべて解除する.
@@ -217,9 +223,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool changed = false;
 		if (m_core_text_focused != nullptr) {
-			undo_push_text_unselect(m_core_text_focused);
 			m_core_text.NotifyFocusLeave();
-			m_core_text_focused = nullptr;
 			changed = true;
 		}
 		for (auto t : m_main_sheet.m_shape_list) {
@@ -242,6 +246,9 @@ namespace winrt::GraphPaper::implementation
 		// 一覧が表示されてるか判定する.
 		if (changed && summary_is_visible()) {
 			summary_select_shape(s);
+		}
+		if (s != nullptr && s == m_core_text_focused) {
+			m_core_text.NotifyFocusEnter();
 		}
 		return changed;
 	}

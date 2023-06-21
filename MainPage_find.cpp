@@ -253,11 +253,17 @@ namespace winrt::GraphPaper::implementation
 		if (find_len == 0) {
 			return;
 		}
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+		}
 		undo_push_null();
 		if (find_next()) {
 			do {
 				replace_text();
 			} while (find_next());
+			if (m_core_text_focused != nullptr) {
+				m_core_text.NotifyFocusEnter();
+			}
 		}
 		else {
 			while (m_undo_stack.size() > 0) {
@@ -285,9 +291,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_core_text_focused != nullptr) {
 			//選択された文字範囲がある.
 			const auto len = m_core_text_focused->get_text_len();
-			const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, len);
-			const auto s = min(m_main_sheet.m_select_start, end);
-			const auto e = max(m_main_sheet.m_select_start, end);
+			const auto end = min(m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end, len);
+			const auto s = min(m_main_sheet.m_core_text_range.m_start, end);
+			const auto e = max(m_main_sheet.m_core_text_range.m_start, end);
 			if (s < e) {
 				if (!m_core_text_focused->is_selected()) {
 					undo_push_toggle(m_core_text_focused);
@@ -313,10 +319,14 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+		}
+
 		// 選択範囲があれば置換する.
 		if (m_core_text_focused != nullptr) {
-			const auto end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
-			if (m_main_sheet.m_select_start != end) {
+			const auto end = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
+			if (m_main_sheet.m_core_text_range.m_start != end) {
 				undo_push_null();
 				replace_text();
 			}
@@ -384,11 +394,6 @@ namespace winrt::GraphPaper::implementation
 	// 文字列を検索する.
 	bool MainPage::find_next(void)
 	{
-		// 入力中の文字列があれば,
-		if (m_core_text_focused != nullptr && m_core_text_comp) {
-			m_core_text.NotifyFocusLeave();
-		}
-
 		const auto find_len = wchar_len(m_find_text);
 		// 最後面から最前面の各文字列図形について.
 		for (auto it = m_main_sheet.m_shape_list.begin(); it != m_main_sheet.m_shape_list.end(); it++) {
@@ -412,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 図形のキャレットよりうしろに一致する文字列があるか調べる.
 				const auto text_len = t->get_text_len();
-				const auto end = min(m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end, text_len);
+				const auto end = min(m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end, text_len);
 				for (uint32_t i = end; i + find_len <= text_len; i++) {
 					const int cmp = m_find_text_case ? wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
@@ -453,8 +458,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 検索を始めた図形 s について, 図形 s のキャレットより前に一致する文字列があるか調べる.
 			const ShapeText* t = static_cast<const ShapeText*>(s);
-			const auto end = m_main_sheet.m_select_trail ? m_main_sheet.m_select_end + 1 : m_main_sheet.m_select_end;
-			const auto e = min(m_main_sheet.m_select_start, end);
+			const auto end = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
+			const auto e = min(m_main_sheet.m_core_text_range.m_start, end);
 			for (uint32_t i = 0; i + find_len <= e; i++) {
 				const int cmp = m_find_text_case ?
 					wcsncmp(t->m_text + i, m_find_text, find_len) :
@@ -481,9 +486,16 @@ namespace winrt::GraphPaper::implementation
 		if (find_len == 0) {
 			return;
 		}
+		// 入力中の文字列があれば,
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusLeave();
+		}
 		const bool found = find_next();
 		if (found) {
 			scroll_to(m_core_text_focused);
+			if (m_core_text_focused != nullptr) {
+				m_core_text.NotifyFocusEnter();
+			}
 		}
 		main_sheet_draw();
 		if (!found) {
@@ -500,10 +512,12 @@ namespace winrt::GraphPaper::implementation
 			delete[] m_find_text;
 		}
 		m_find_text = find_wchar_cpy(tx_find_text_what().Text().c_str());
+
 		if (m_repl_text != nullptr) {
 			delete[] m_repl_text;
 		}
 		m_repl_text = find_wchar_cpy(tx_find_replace_with().Text().c_str());
+
 		m_find_text_case = ck_find_text_case().IsChecked().GetBoolean();
 		m_find_text_wrap = ck_find_text_wrap().IsChecked().GetBoolean();
 	}

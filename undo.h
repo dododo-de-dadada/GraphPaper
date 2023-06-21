@@ -65,8 +65,8 @@ namespace winrt::GraphPaper::implementation
 		TEXT_LINE_SP,	// 行間の操作
 		TEXT_PAD,	// 文字列の余白の操作
 		TEXT_WRAP,	// 文字列の折り返しの操作
-		//TEXT_RANGE,	// 文字列選択の範囲の操作
-		TEXT_SELECT	// 文字列選択の範囲の操作
+		TEXT_SELECT,	// 文字列選択の範囲の操作
+		CORE_TEXT_RANGE	// 文字列選択の範囲の操作
 	};
 
 	// 操作スタック
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_T::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_T::TEXT_PAD> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_T::TEXT_WRAP> { using type = DWRITE_WORD_WRAPPING; };
-	//template <> struct U_TYPE<UNDO_T::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
+	template <> struct U_TYPE<UNDO_T::CORE_TEXT_RANGE> { using type = CORE_TEXT_RANGE; };
 
 	constexpr auto UNDO_SHAPE_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 	constexpr auto UNDO_SHAPE_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
@@ -122,7 +122,6 @@ namespace winrt::GraphPaper::implementation
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
-		//static SHAPE_LIST* undo_slist;	// 参照する図形リスト
 		static ShapeSheet* undo_sheet;	// 参照する用紙
 
 		Shape* m_shape;	// 操作する図形
@@ -136,9 +135,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 操作が参照するための図形リストと表示図形を格納する.
-		static void begin(/*SHAPE_LIST* slist,*/ ShapeSheet* page) noexcept
+		static void begin(ShapeSheet* page) noexcept
 		{
-			//undo_slist = slist;
 			undo_sheet = page;
 		}
 		// 操作する図形を得る.
@@ -165,10 +163,9 @@ namespace winrt::GraphPaper::implementation
 			return s;
 		}
 		// 図形をデータライターに書き込む.
-		static void undo_write_shape(
-			Shape* const s,	// 書き込まれる図形
-			DataWriter const& dt_writer	// データリーダー
-		)
+		// s	書き込まれる図形
+		// dt_writer	データリーダー
+		static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
 		{
 			// 図形が用紙図形なら, 用紙を意味する添え字を書き込む.
 			if (s == Undo::undo_sheet) {
@@ -416,21 +413,21 @@ namespace winrt::GraphPaper::implementation
 		UndoTextSelect(Shape* const s, const int start, const int end, const bool is_trail) :
 			Undo(s)
 		{
-			m_start = undo_sheet->m_select_start;
-			m_end = undo_sheet->m_select_end;
-			m_is_trail = undo_sheet->m_select_trail;
-			undo_sheet->m_select_start = start;
-			undo_sheet->m_select_end = end;
-			undo_sheet->m_select_trail = is_trail;
+			m_start = undo_sheet->m_core_text_range.m_start;
+			m_end = undo_sheet->m_core_text_range.m_end;
+			m_is_trail = undo_sheet->m_core_text_range.m_trail;
+			undo_sheet->m_core_text_range.m_start = start;
+			undo_sheet->m_core_text_range.m_end = end;
+			undo_sheet->m_core_text_range.m_trail = is_trail;
 		}
 		virtual void exec(void) noexcept final override
 		{
-			const auto start = undo_sheet->m_select_start;
-			const auto end = undo_sheet->m_select_end;
-			const auto is_trail = undo_sheet->m_select_trail;
-			undo_sheet->m_select_start = m_start;
-			undo_sheet->m_select_end = m_end;
-			undo_sheet->m_select_trail = m_is_trail;
+			const auto start = undo_sheet->m_core_text_range.m_start;
+			const auto end = undo_sheet->m_core_text_range.m_end;
+			const auto is_trail = undo_sheet->m_core_text_range.m_trail;
+			undo_sheet->m_core_text_range.m_start = m_start;
+			undo_sheet->m_core_text_range.m_end = m_end;
+			undo_sheet->m_core_text_range.m_trail = m_is_trail;
 			m_start = start;
 			m_end = end;
 			m_is_trail = is_trail;
@@ -465,9 +462,9 @@ namespace winrt::GraphPaper::implementation
 			const auto old_len = wchar_len(old_text);
 
 			// 選択範囲と削除する文字列を保存する.
-			m_start = undo_sheet->m_select_start;
-			m_end = undo_sheet->m_select_end;
-			m_trail = undo_sheet->m_select_trail;
+			m_start = undo_sheet->m_core_text_range.m_start;
+			m_end = undo_sheet->m_core_text_range.m_end;
+			m_trail = undo_sheet->m_core_text_range.m_trail;
 			const auto end = min(m_trail ? m_end + 1 : m_end, old_len);
 			const auto start = min(m_start, old_len);
 			const auto m = min(start, end);
@@ -523,9 +520,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeText*>(s)->m_text_len = new_len;
 
 			// 編集後の選択範囲は, 挿入された文字列になる.
-			undo_sheet->m_select_start = m;
-			undo_sheet->m_select_end = m + ins_len;
-			undo_sheet->m_select_trail = false;
+			undo_sheet->m_core_text_range.m_start = m;
+			undo_sheet->m_core_text_range.m_end = m + ins_len;
+			undo_sheet->m_core_text_range.m_trail = false;
 			static_cast<ShapeText*>(s)->m_dwrite_text_layout = nullptr;
 		}
 		// 図形の文字列を編集する.
