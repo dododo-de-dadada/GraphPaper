@@ -1268,9 +1268,13 @@ namespace winrt::GraphPaper::implementation
 
 		recent_file_add(nullptr);
 		file_finish_reading();
+
+		m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
+		m_event_shape_pressed = nullptr;
+		m_event_shape_last = nullptr;
+
 		menu_is_enable();
 		main_sheet_draw();
-
 	}
 
 	//-------------------------------

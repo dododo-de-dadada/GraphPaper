@@ -256,30 +256,31 @@ namespace winrt::GraphPaper::implementation
 		if (m_core_text_focused != nullptr) {
 			m_core_text.NotifyFocusLeave();
 		}
+
+		// 折り返し検索を有効にする.
+		const auto wrap_around = m_find_wrap_around;
+		m_find_wrap_around = true;
+
 		undo_push_null();
+		bool found = false;
 		if (find_next()) {
 			do {
 				replace_text();
 			} while (find_next());
-			if (m_core_text_focused != nullptr) {
-				m_core_text.NotifyFocusEnter();
-			}
 		}
 		else {
-			while (m_undo_stack.size() > 0) {
-				auto u = m_undo_stack.back();
-				if (u != nullptr && typeid(*u) != typeid(UndoTextSelect)) {
-					break;
-				}
+			while (!m_undo_stack.empty() && m_undo_stack.back() == nullptr) {
 				m_undo_stack.pop_back();
-				if (u == nullptr) {
-					break;
-				}
-				u->exec();
-				delete u;
 			}
-			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+			message_show(ICON_INFO, NOT_FOUND, find_what().Text());
 			status_bar_set_pointer();
+		}
+		// 折り返し検索を元に戻す.
+		m_find_wrap_around = wrap_around;
+
+		// 見つからなければ, m_core_text_focused は最後に見つかった文字列.
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusEnter();
 		}
 		main_sheet_draw();
 	}
@@ -301,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 				m_undo_stack.push_back(new UndoText2(m_core_text_focused, m_repl_text));
 				const auto repl_len = wchar_len(m_repl_text);
 				undo_push_text_select(m_core_text_focused, s + repl_len, s + repl_len, false);
-				m_core_text_focused->create_text_layout();	// DWRITE 文字列レイアウトを更新する必要もある.
+				m_core_text_focused->create_text_layout();
 				return true;
 			}
 		}
@@ -319,40 +320,43 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		if (m_core_text_focused != nullptr) {
+		auto focused = m_core_text_focused;
+		if (focused != nullptr) {
 			m_core_text.NotifyFocusLeave();
 		}
 
 		// 選択範囲があれば置換する.
+		undo_push_null();
+		bool replaced = false;
 		if (m_core_text_focused != nullptr) {
 			const auto end = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
 			if (m_main_sheet.m_core_text_range.m_start != end) {
-				undo_push_null();
-				replace_text();
+				replaced = replace_text();
 			}
 		}
 
 		// 次の文字列を検索する.
 		const bool found = find_next();
-
-
-		if (found) {
+		if (!found) {
+			message_show(ICON_INFO, NOT_FOUND, find_what().Text());
+			status_bar_set_pointer();
+		}
+		if (m_core_text_focused != nullptr) {
+			m_core_text.NotifyFocusEnter();
+		}
+		if (found || replaced) {
 			scroll_to(m_core_text_focused);
 			menu_is_enable();
 			main_sheet_draw();
 		}
-		else {
-			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
-			status_bar_set_pointer();
-		}
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::find_text_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::find_and_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルが表示されているか判定する.
-		if (sp_find_text_panel().Visibility() == Visibility::Visible) {
-			sp_find_text_panel().Visibility(Visibility::Collapsed);
+		if (find_and_replace_panel().Visibility() == Visibility::Visible) {
+			find_and_replace_panel().Visibility(Visibility::Collapsed);
 			find_text_preserve();
 		}
 		else {
@@ -374,26 +378,28 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
 			}
-			tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
-			tx_find_replace_with().Text({ m_repl_text == nullptr ? L"" : m_repl_text });
-			ck_find_text_case().IsChecked(m_find_text_case);
-			ck_find_text_wrap().IsChecked(m_find_text_wrap);
-			sp_find_text_panel().Visibility(Visibility::Visible);
+			find_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
+			replace_with().Text({ m_repl_text == nullptr ? L"" : m_repl_text });
+			find_case_sensitive().IsChecked(m_find_case_sensitive);
+			find_wrap_around().IsChecked(m_find_wrap_around);
+			find_and_replace_panel().Visibility(Visibility::Visible);
 		}
 		status_bar_set_pointer();
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
-	void MainPage::find_text_close_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::find_and_replace_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
-		sp_find_text_panel().Visibility(Visibility::Collapsed);
+		find_and_replace_panel().Visibility(Visibility::Collapsed);
 		status_bar_set_pointer();
 	}
 
 	// 文字列を検索する.
+	// 見つかったら入力中の文字列に格納される.
 	bool MainPage::find_next(void)
 	{
+		//ShapeText* focused = m_core_text_focused;
 		const auto find_len = wchar_len(m_find_text);
 		// 最後面から最前面の各文字列図形について.
 		for (auto it = m_main_sheet.m_shape_list.begin(); it != m_main_sheet.m_shape_list.end(); it++) {
@@ -419,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 				const auto text_len = t->get_text_len();
 				const auto end = min(m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end, text_len);
 				for (uint32_t i = end; i + find_len <= text_len; i++) {
-					const int cmp = m_find_text_case ? wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
+					const int cmp = m_find_case_sensitive ? wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						m_core_text_focused = static_cast<ShapeText*>(*it);
 						select_shape(m_core_text_focused);
@@ -431,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 回り込み検索でなければ中断する.
-			if (!m_find_text_wrap) {
+			if (!m_find_wrap_around) {
 				break;
 			}
 			// 最後面の図形に戻って, 検索を始めた図形 s の直前までの各図形について,
@@ -444,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 				const auto text_len = t->get_text_len();
 				for (uint32_t i = 0; i + find_len <= text_len; i++) {
 					// 一致する文字列があれば,
-					const int cmp = m_find_text_case ?
+					const int cmp = m_find_case_sensitive ?
 						wcsncmp(t->m_text + i, m_find_text, find_len) : _wcsnicmp(t->m_text + i, m_find_text, find_len);
 					if (cmp == 0) {
 						m_core_text_focused = static_cast<ShapeText*>(*it);
@@ -461,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 			const auto end = m_main_sheet.m_core_text_range.m_trail ? m_main_sheet.m_core_text_range.m_end + 1 : m_main_sheet.m_core_text_range.m_end;
 			const auto e = min(m_main_sheet.m_core_text_range.m_start, end);
 			for (uint32_t i = 0; i + find_len <= e; i++) {
-				const int cmp = m_find_text_case ?
+				const int cmp = m_find_case_sensitive ?
 					wcsncmp(t->m_text + i, m_find_text, find_len) :
 					_wcsnicmp(t->m_text + i, m_find_text, find_len);
 				if (cmp == 0) {
@@ -500,7 +506,7 @@ namespace winrt::GraphPaper::implementation
 		main_sheet_draw();
 		if (!found) {
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
-			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+			message_show(ICON_INFO, NOT_FOUND, find_what().Text());
 			status_bar_set_pointer();
 		}
 	}
@@ -511,21 +517,22 @@ namespace winrt::GraphPaper::implementation
 		if (m_find_text != nullptr) {
 			delete[] m_find_text;
 		}
-		m_find_text = find_wchar_cpy(tx_find_text_what().Text().c_str());
+		m_find_text = find_wchar_cpy(find_what().Text().c_str());
 
 		if (m_repl_text != nullptr) {
 			delete[] m_repl_text;
 		}
-		m_repl_text = find_wchar_cpy(tx_find_replace_with().Text().c_str());
+		m_repl_text = find_wchar_cpy(replace_with().Text().c_str());
 
-		m_find_text_case = ck_find_text_case().IsChecked().GetBoolean();
-		m_find_text_wrap = ck_find_text_wrap().IsChecked().GetBoolean();
+		m_find_case_sensitive = find_case_sensitive().IsChecked().GetBoolean();
+		m_find_wrap_around = find_wrap_around().IsChecked().GetBoolean();
+		m_find_use_escseq = find_use_escseq().IsChecked().GetBoolean();
 	}
 
 	// 検索文字列が変更された.
 	void MainPage::find_text_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
-		const auto not_empty = !tx_find_text_what().Text().empty();
+		const auto not_empty = !find_what().Text().empty();
 		btn_find_next().IsEnabled(not_empty);
 		btn_find_replace().IsEnabled(not_empty);
 		btn_find_replace_all().IsEnabled(not_empty);

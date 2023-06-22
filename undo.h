@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作をデータライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
-
+	/*
 	struct UndoTextSelect : Undo {
 		int m_start;
 		int m_end;
@@ -435,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 		UndoTextSelect(DataReader const& dt_reader);
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
-
+	*/
 	struct UndoText2 : Undo {
 		uint32_t m_start = 0;
 		uint32_t m_end = 0;

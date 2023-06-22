@@ -939,6 +939,7 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape, dt_writer);
 	}
 
+	/*
 	UndoTextSelect::UndoTextSelect(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{
@@ -955,7 +956,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteInt32(static_cast<int32_t>(m_end));
 		dt_writer.WriteBoolean(m_is_trail);
 	}
-
+	*/
 	UndoText2::UndoText2(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{

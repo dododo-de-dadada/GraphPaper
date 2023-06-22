@@ -303,8 +303,8 @@ namespace winrt::GraphPaper::implementation
 		menu_open_polygon().IsEnabled(exists_selected_polygon);
 		popup_close_polyline().IsEnabled(exists_selected_polyline);
 		menu_close_polyline().IsEnabled(exists_selected_polyline);
-		popup_find_text().IsEnabled(exists_text);
-		menu_find_text().IsEnabled(exists_text);
+		popup_find_and_replace().IsEnabled(exists_text);
+		menu_find_and_replace().IsEnabled(exists_text);
 		popup_revert_image().IsEnabled(exists_selected_image);
 		menu_revert_image().IsEnabled(exists_selected_image);
 

@@ -237,9 +237,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 検索パネルが表示されてるか判定する.
-			if (sp_find_text_panel().Visibility() == Visibility::Visible) {
+			if (find_and_replace_panel().Visibility() == Visibility::Visible) {
 				// 検索パネルを非表示にする.
-				find_text_click(nullptr, nullptr);
+				find_and_replace_click(nullptr, nullptr);
 			}
 			// リソースから図形の一覧パネルを見つける.
 			auto _{ FindName(L"gd_summary_panel") };

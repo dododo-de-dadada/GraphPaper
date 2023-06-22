@@ -134,8 +134,8 @@
 				</MenuFlyoutItem>
 				<!-- ================ -->
 				<MenuFlyoutSeparator/>
-				<!-- 文字列の検索/置換 -->
-				<MenuFlyoutItem x:Name="popup_find_text" x:Uid="menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+				<!-- 文字列の検索と置換 -->
+				<MenuFlyoutItem x:Name="popup_find_and_replace" x:Uid="menu_find_and_replace" Click="find_and_replace_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
 						<KeyboardAccelerator Key="F" Modifiers="Control"/>
@@ -143,6 +143,7 @@
 				</MenuFlyoutItem>
 				<!-- ================ -->
                 <MenuFlyoutSeparator/>
+                <!-- 図形の編集 -->
                 <MenuFlyoutSubItem x:Name="popup_edit_shape" x:Uid="menu_edit_shape" Text="Edit Shape">
 					<!-- パスの方向を反転 -->
 					<MenuFlyoutItem x:Name="popup_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
@@ -788,7 +789,7 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 文字列の検索/置換 -->
-				<MenuFlyoutItem x:Name="menu_find_text" x:Uid="menu_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
+				<MenuFlyoutItem x:Name="menu_find_and_replace" x:Uid="menu_find_and_replace" Click="find_and_replace_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text">
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<!--<KeyboardAccelerator Key="F" Modifiers="Control" Invoked="find_text_invoked"/>-->
 						<KeyboardAccelerator Key="F" Modifiers="Control"/>
@@ -798,7 +799,6 @@
 				<MenuFlyoutSeparator />
                 <!-- 図形の編集 -->
                 <MenuFlyoutSubItem x:Name="menu_edit_shape" x:Uid="menu_edit_shape" Text="Edit Shape">
-
                     <!-- パスの方向を反転 -->
                     <MenuFlyoutItem x:Name="menu_reverse_path" x:Uid="menu_reverse_path" Click="reverse_path_click" Icon="Switch" Text="Reverse Path Direction" />
                     <!-- 反時計周りに円弧を描く -->
@@ -1244,10 +1244,17 @@
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!-- 文字列の余白 -->
-				<MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." />
-				<!-- 文字列の折り返し -->
+                <MenuFlyoutItem x:Uid="mfi_menu_text_pad" Click="text_pad_click_async" Text="Text Padding..." >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_text_padding}" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <!-- 文字列の折り返し -->
 				<MenuFlyoutSubItem x:Uid="mfsi_menu_text_wrap" Text="Word Wrap">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Word Wrap" />
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_enter}" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap" x:Uid="rmfi_menu_text_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Word Wrap" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_no_wrap" x:Uid="rmfi_menu_text_no_wrap" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="No Wrap" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_text_wrap_char" x:Uid="rmfi_menu_text_wrap_char" Click="text_word_wrap_click" GroupName="gn_menu_text_wrap" Text="Wrap Between Any" />
 				</MenuFlyoutSubItem>
@@ -1411,9 +1418,9 @@
 				<MenuFlyoutItem x:Uid="mfi_menu_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
 			</muxc:MenuBarItem>
 		</muxc:MenuBar>
-		<!-- 文字列検索パネル -->
-		<StackPanel x:Name="sp_find_text_panel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
-			<Button Click="find_text_close_click" Background="White" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
+		<!-- 文字列の検索と置換パネル -->
+		<StackPanel x:Name="find_and_replace_panel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
+			<Button Click="find_and_replace_close_click" Background="White" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
 			<StackPanel Padding="8,8,8,8">
 				<StackPanel.Resources>
 					<Style TargetType="Button">
@@ -1430,14 +1437,23 @@
 					</Style>
 				</StackPanel.Resources>
                 <!-- GettingFocus と LosingFocus は同期的 -->
-				<TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" GettingFocus="ui_elem_getting_focus" Header="Find what" LosingFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
-                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" GettingFocus="ui_elem_getting_focus" Header="Replace width" LosingFocus="ui_elem_lost_focus"/>
-				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." />
-				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." />
-				<Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />
-				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_text_click" Content="Replace" />
-				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_all_click" Content="Replace All" />
-				<Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close"  Margin="0,0" />
+                <!-- 検索する文字列 -->
+				<TextBox x:Name="find_what" x:Uid="find_what" GettingFocus="ui_elem_getting_focus" Header="Find what" LosingFocus="ui_elem_lost_focus" TextChanged="find_text_what_changed" />
+                <!-- 置換後の文字列 -->
+                <TextBox x:Name="replace_with" x:Uid="replace_with" GettingFocus="ui_elem_getting_focus" Header="Replace width" LosingFocus="ui_elem_lost_focus"/>
+                <!-- 大文字と小文字を区別する -->
+                <CheckBox x:Name="find_case_sensitive" x:Uid="find_case_sensitive" Content="Case sensitive." />
+                <!-- 折り返しあり -->
+                <CheckBox x:Name="find_wrap_around" x:Uid="find_wrap_around" Content="Wrap around." />
+                <!-- エスケープ文字列を使用する -->
+                <CheckBox x:Name="find_use_escseq" x:Uid="find_use_escseq" Content="Use escape sequence." />
+                <!-- 次を検索 -->
+                <Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="find_next_click" Content="Find Next" />
+                <!-- 置換 -->
+                <Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="replace_text_click" Content="Replace" />
+                <!-- すべて置換 -->
+                <Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="replace_all_click" Content="Replace All" />
+				<Button x:Uid="find_and_replace_close" Click="find_and_replace_close_click" Content="Close"  Margin="0,0" />
 			</StackPanel>
 		</StackPanel>
 		<!-- 図形一覧パネル -->

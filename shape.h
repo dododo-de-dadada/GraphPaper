@@ -2458,7 +2458,7 @@ namespace winrt::GraphPaper::implementation
 	// •¶š”ÍˆÍ‚ª“¯‚¶‚©”»’è‚·‚é.
 	inline bool equal(const CORE_TEXT_RANGE& a, const CORE_TEXT_RANGE& b) noexcept
 	{
-		return a.m_end == b.m_end || a.m_start == b.m_start || a.m_trail == b.m_trail;
+		return a.m_end == b.m_end && a.m_start == b.m_start && a.m_trail == b.m_trail;
 	}
 
 	// –î‚¶‚è‚Ì•Ô‚µ‚Ì“_‚ğ‹‚ß‚é.

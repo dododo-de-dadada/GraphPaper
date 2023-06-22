@@ -241,8 +241,9 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の検索と置換
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_repl_text = nullptr;	// 検索の置換文字列
-		bool m_find_text_case = false;	// 英文字の区別
-		bool m_find_text_wrap = false;	// 回り込み検索
+		bool m_find_case_sensitive = false;	// 大文字と小文字を区別する.
+		bool m_find_wrap_around = false;	// 折り返しあり
+		bool m_find_use_escseq = false;	// エスケープ文字列を使用
 
 		// 文字列の編集
 		// trail = false    trail = true
@@ -672,13 +673,13 @@ namespace winrt::GraphPaper::implementation
 		bool find_next(void);
 		//bool find_next(ShapeText* edit_text_shape, uint32_t edit_text_end, ShapeText*& fint_text_shape, uint32_t& find_text_start, uint32_t& find_text_end, bool& find_text_trail);
 		// 編集メニューの「文字列の検索/置換」が選択された.
-		void find_text_click(IInspectable const&, RoutedEventArgs const&);
+		void find_and_replace_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の検索/置換」のショートカットが押された.
 		/*
 		void find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
 			bool exist_find = false;
-			if (sp_find_text_panel().Visibility() == Visibility::Visible) {
+			if (find_and_replace_panel().Visibility() == Visibility::Visible) {
 				exist_find = true;
 			}
 			else {
@@ -690,12 +691,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (exist_find) {
-				find_text_click(menu_find_text(), nullptr);
+				find_and_replace_click(menu_find_and_replace(), nullptr);
 			}
 		}
 		*/
 		// 文字列検索パネルの「閉じる」ボタンが押された.
-		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
+		void find_and_replace_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
 		void find_next_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの値を保存する.
@@ -1247,12 +1248,13 @@ namespace winrt::GraphPaper::implementation
 			undo_push_text_select(s, start, m_main_sheet.m_core_text_range.m_end, m_main_sheet.m_core_text_range.m_trail);
 		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
-		void undo_push_text_select(Shape* s, const int start, const int end, const bool trail)
+		void undo_push_text_select(Shape* s, const uint32_t start, const uint32_t end, const bool trail)
 		{
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
 			// 図形の文字列の選択を直接上書きする. スタックに操作を積まない.
-			for (auto u = m_undo_stack.rbegin(); u != m_undo_stack.rend() && *u != nullptr && typeid(*u) == typeid(UndoTextSelect); u++) {
+			for (auto u = m_undo_stack.rbegin(); u != m_undo_stack.rend() && *u != nullptr && typeid(*u) == typeid(UndoValue<UNDO_T::CORE_TEXT_RANGE>); u++) {
+			//for (auto u = m_undo_stack.rbegin(); u != m_undo_stack.rend() && *u != nullptr && typeid(*u) == typeid(UndoTextSelect); u++) {
 				if ((*u)->m_shape != s) {
 					continue;
 				}
@@ -1263,7 +1265,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// そうでなければ, スタックに操作を積む.
 			//m_undo_stack.push_back(new UndoTextSelect(s, start, end, trail));
-			m_undo_stack.push_back(new UndoTextSelect(s, start, end, trail));
+			m_undo_stack.push_back(new UndoValue<UNDO_T::CORE_TEXT_RANGE>(&m_main_sheet, { start, end, trail }));
 		}
 		// データリーダーから操作スタックを読み込む.
 		void undo_read_stack(DataReader const& dt_reader);
@@ -1278,7 +1280,7 @@ namespace winrt::GraphPaper::implementation
 		// UI 要素がフォーカスを得る.
 		// スワップチェーンパネル以外の UI 要素, たとえばテキストボックスがフォーカスを獲得するときに呼び出されて,
 		// 用紙のフォーカスフラグを下す. 
-		void ui_elem_getting_focus(UIElement const&, GettingFocusEventArgs const&)
+		void ui_elem_getting_focus(UIElement const& sender, GettingFocusEventArgs const&)
 		{
 			// テキストブロックがサポートするコマンドは以下の通り.
 			// Copy

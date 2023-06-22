@@ -215,8 +215,8 @@ namespace winrt::GraphPaper::implementation
 		if (!m_main_sheet_focused) {
 			return;
 		}
-		if (tx_find_text_what().FocusState() != FocusState::Unfocused ||
-			tx_find_replace_with().FocusState() != FocusState::Unfocused) {
+		if (find_what().FocusState() != FocusState::Unfocused ||
+			replace_with().FocusState() != FocusState::Unfocused) {
 			return;
 		}
 		// Clipboard::GetContent() ‚Í, 
