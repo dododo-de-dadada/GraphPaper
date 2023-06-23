@@ -54,9 +54,9 @@ namespace winrt::GraphPaper::implementation
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_lineto.size();	// 差分の数
-		if (loc >= LOC_TYPE::LOC_P0 && loc <= LOC_TYPE::LOC_P0 + d_cnt) {
+		if (loc >= LOCUS_TYPE::LOCUS_P0 && loc <= LOCUS_TYPE::LOCUS_P0 + d_cnt) {
 			D2D1_POINT_2F p[N_GON_MAX];	// 頂点の位置
-			const size_t l_cnt = loc - LOC_TYPE::LOC_P0;	// 変更する点の添え字
+			const size_t l_cnt = loc - LOCUS_TYPE::LOCUS_P0;	// 変更する点の添え字
 			// 変更する頂点までの, 各頂点の位置を得る.
 			p[0] = m_start;
 			for (size_t i = 0; i < l_cnt; i++) {
@@ -199,11 +199,11 @@ namespace winrt::GraphPaper::implementation
 	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「始点」ならば, 始点を得る.
-		if (loc == LOC_TYPE::LOC_SHEET || loc == LOC_TYPE::LOC_P0) {
+		if (loc == LOCUS_TYPE::LOCUS_SHEET || loc == LOCUS_TYPE::LOCUS_P0) {
 			val = m_start;
 		}
-		else if (loc > LOC_TYPE::LOC_P0) {
-			const size_t  l_cnt = loc - LOC_TYPE::LOC_P0;
+		else if (loc > LOCUS_TYPE::LOCUS_P0) {
+			const size_t  l_cnt = loc - LOCUS_TYPE::LOCUS_P0;
 			if (l_cnt < m_lineto.size() + 1) {
 				val = m_start;
 				for (size_t i = 0; i < l_cnt; i++) {

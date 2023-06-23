@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 		const auto& dp_view = Clipboard::GetContent();
 		const bool exists_data = (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) || dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 		const bool exists_fill = m_undo_select_cnt > selected_line + selected_image + selected_group;
-		const bool exists_stroke = m_undo_select_cnt > selected_group + selected_image + selected_ruler;
+		//const bool exists_stroke = m_undo_select_cnt > selected_group + selected_image + selected_ruler;
 
 		// 元に戻すメニューの可否を設定する.
 		popup_undo().IsEnabled(m_undo_stack.size() > 0);
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形編集メニューの可否を設定する.
 		//popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
-		if (m_event_shape_pressed != nullptr && m_event_loc_pressed != LOC_TYPE::LOC_SHEET && 
+		if (m_event_shape_pressed != nullptr && m_event_locus_pressed != LOCUS_TYPE::LOCUS_SHEET && 
 			(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image)) {
 			popup_edit_shape().Visibility(Visibility::Visible);
 		}
@@ -355,7 +355,7 @@ namespace winrt::GraphPaper::implementation
 
 		// レイアウトメニューの可否を設定する.
 		//popup_layout().IsEnabled(!exists_selected);
-		if (m_event_shape_pressed == nullptr || m_event_loc_pressed == LOC_TYPE::LOC_SHEET) {
+		if (m_event_shape_pressed == nullptr || m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
 			popup_layout().Visibility(Visibility::Visible);
 		}
 		else {
@@ -623,29 +623,29 @@ namespace winrt::GraphPaper::implementation
 
 		// 矩形選択している状態なら, 作図ツールに応じた補助線を表示する.
 		if (m_event_state == EVENT_STATE::PRESS_RECT) {
-			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
-				m_drawing_tool == DRAWING_TOOL::RECT ||
-				m_drawing_tool == DRAWING_TOOL::TEXT ||
-				m_drawing_tool == DRAWING_TOOL::RULER) {
-				m_main_sheet.auxiliary_draw_rect(m_event_pos_pressed, m_event_pos_curr);
+			if (m_tool == DRAWING_TOOL::SELECT ||
+				m_tool == DRAWING_TOOL::RECT ||
+				m_tool == DRAWING_TOOL::TEXT ||
+				m_tool == DRAWING_TOOL::RULER) {
+				m_main_sheet.auxiliary_draw_rect(m_event_point_pressed, m_event_point_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
-				m_main_sheet.auxiliary_draw_bezi(m_event_pos_pressed, m_event_pos_curr);
+			else if (m_tool == DRAWING_TOOL::BEZIER) {
+				m_main_sheet.auxiliary_draw_bezi(m_event_point_pressed, m_event_point_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
-				m_main_sheet.auxiliary_draw_elli(m_event_pos_pressed, m_event_pos_curr);
+			else if (m_tool == DRAWING_TOOL::ELLIPSE) {
+				m_main_sheet.auxiliary_draw_elli(m_event_point_pressed, m_event_point_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::LINE || m_drawing_tool == DRAWING_TOOL::POINTER) {
-				m_main_sheet.auxiliary_draw_line(m_event_pos_pressed, m_event_pos_curr);
+			else if (m_tool == DRAWING_TOOL::LINE || m_tool == DRAWING_TOOL::POINTER) {
+				m_main_sheet.auxiliary_draw_line(m_event_point_pressed, m_event_point_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
-				m_main_sheet.auxiliary_draw_rrect(m_event_pos_pressed, m_event_pos_curr);
+			else if (m_tool == DRAWING_TOOL::RRECT) {
+				m_main_sheet.auxiliary_draw_rrect(m_event_point_pressed, m_event_point_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				m_main_sheet.auxiliary_draw_poly(m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+			else if (m_tool == DRAWING_TOOL::POLY) {
+				m_main_sheet.auxiliary_draw_poly(m_event_point_pressed, m_event_point_curr, m_tool_polygon);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
-				m_main_sheet.auxiliary_draw_arc(m_event_pos_pressed, m_event_pos_curr);
+			else if (m_tool == DRAWING_TOOL::ARC) {
+				m_main_sheet.auxiliary_draw_arc(m_event_point_pressed, m_event_point_curr);
 			}
 		}
 
@@ -693,7 +693,7 @@ namespace winrt::GraphPaper::implementation
 }
 
 
-void winrt::GraphPaper::implementation::MainPage::menu_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args)
+void winrt::GraphPaper::implementation::MainPage::menu_getting_focus(UIElement const& sender, GettingFocusEventArgs const&)
 {
 		if (m_core_text_focused != nullptr && m_core_text_comp) {
 			m_core_text.NotifyFocusLeave();

@@ -360,34 +360,34 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F& val	// “¾‚ç‚ê‚½’l
 	) const noexcept
 	{
-		if (loc == LOC_TYPE::LOC_NW) {
+		if (loc == LOCUS_TYPE::LOCUS_NW) {
 			val = m_start;
 		}
-		else if (loc == LOC_TYPE::LOC_NORTH) {
+		else if (loc == LOCUS_TYPE::LOCUS_NORTH) {
 			val.x = m_start.x + m_view.width * 0.5f;
 			val.y = m_start.y;
 		}
-		else if (loc == LOC_TYPE::LOC_NE) {
+		else if (loc == LOCUS_TYPE::LOCUS_NE) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y;
 		}
-		else if (loc == LOC_TYPE::LOC_EAST) {
+		else if (loc == LOCUS_TYPE::LOCUS_EAST) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y + m_view.height * 0.5f;
 		}
-		else if (loc == LOC_TYPE::LOC_SE) {
+		else if (loc == LOCUS_TYPE::LOCUS_SE) {
 			val.x = m_start.x + m_view.width;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (loc == LOC_TYPE::LOC_SOUTH) {
+		else if (loc == LOCUS_TYPE::LOCUS_SOUTH) {
 			val.x = m_start.x + m_view.width * 0.5f;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (loc == LOC_TYPE::LOC_SW) {
+		else if (loc == LOCUS_TYPE::LOCUS_SW) {
 			val.x = m_start.x;
 			val.y = m_start.y + m_view.height;
 		}
-		else if (loc == LOC_TYPE::LOC_WEST) {
+		else if (loc == LOCUS_TYPE::LOCUS_WEST) {
 			val.x = m_start.x;
 			val.y = m_start.y + m_view.height * 0.5f;
 		}
@@ -457,16 +457,16 @@ namespace winrt::GraphPaper::implementation
 		// 3---2
 		get_verts(p);
 		if (loc_hit_test(test_pt, p[2], m_loc_width)) {
-			return LOC_TYPE::LOC_SE;
+			return LOCUS_TYPE::LOCUS_SE;
 		}
 		else if (loc_hit_test(test_pt, p[3], m_loc_width)) {
-			return LOC_TYPE::LOC_SW;
+			return LOCUS_TYPE::LOCUS_SW;
 		}
 		else if (loc_hit_test(test_pt, p[1], m_loc_width)) {
-			return LOC_TYPE::LOC_NE;
+			return LOCUS_TYPE::LOCUS_NE;
 		}
 		else if (loc_hit_test(test_pt, p[0], m_loc_width)) {
-			return LOC_TYPE::LOC_NW;
+			return LOCUS_TYPE::LOCUS_NW;
 		}
 		else {
 			const auto e_width = m_loc_width * 0.5;
@@ -476,28 +476,28 @@ namespace winrt::GraphPaper::implementation
 			e[1].x = p[1].x;
 			e[1].y = static_cast<FLOAT>(p[1].y + e_width);
 			if (pt_in_rect(test_pt, e[0], e[1])) {
-				return LOC_TYPE::LOC_NORTH;
+				return LOCUS_TYPE::LOCUS_NORTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[1].x - e_width);
 			e[0].y = p[1].y;
 			e[1].x = static_cast<FLOAT>(p[2].x + e_width);
 			e[1].y = p[2].y;
 			if (pt_in_rect(test_pt, e[0], e[1])) {
-				return LOC_TYPE::LOC_EAST;
+				return LOCUS_TYPE::LOCUS_EAST;
 			}
 			e[0].x = p[3].x;
 			e[0].y = static_cast<FLOAT>(p[3].y - e_width);
 			e[1].x = p[2].x;
 			e[1].y = static_cast<FLOAT>(p[2].y + e_width);
 			if (pt_in_rect(test_pt, e[0], e[1])) {
-				return LOC_TYPE::LOC_SOUTH;
+				return LOCUS_TYPE::LOCUS_SOUTH;
 			}
 			e[0].x = static_cast<FLOAT>(p[0].x - e_width);
 			e[0].y = p[0].y;
 			e[1].x = static_cast<FLOAT>(p[3].x + e_width);
 			e[1].y = p[3].y;
 			if (pt_in_rect(test_pt, e[0], e[1])) {
-				return LOC_TYPE::LOC_WEST;
+				return LOCUS_TYPE::LOCUS_WEST;
 			}
 		}
 		if (p[0].x > p[2].x) {
@@ -512,9 +512,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (p[0].x <= test_pt.x && test_pt.x <= p[2].x &&
 			p[0].y <= test_pt.y && test_pt.y <= p[2].y) {
-			return LOC_TYPE::LOC_FILL;
+			return LOCUS_TYPE::LOCUS_FILL;
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// ‹éŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
@@ -575,7 +575,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F new_p;
 		pt_round(val, PT_ROUND, new_p);
 
-		if (loc == LOC_TYPE::LOC_NW) {
+		if (loc == LOCUS_TYPE::LOCUS_NW) {
 			const auto new_w = m_start.x + m_view.width - new_p.x;
 			const auto new_h = m_start.y + m_view.height - new_p.y;
 			if (new_w > 0.0f && new_h > 0.0f) {
@@ -619,7 +619,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_SE) {
+		else if (loc == LOCUS_TYPE::LOCUS_SE) {
 			const auto new_w = new_p.x - m_start.x;
 			const auto new_h = new_p.y - m_start.y;
 			if (new_w > 0.0f && new_h > 0.0f) {
@@ -658,7 +658,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_SW) {
+		else if (loc == LOCUS_TYPE::LOCUS_SW) {
 			const auto new_w = m_start.x + m_view.width - new_p.x;
 			const auto new_h = new_p.y - m_start.y;
 			if (new_w > 0.0f && new_h > 0.0f) {
@@ -700,7 +700,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_NE) {
+		else if (loc == LOCUS_TYPE::LOCUS_NE) {
 			const auto new_w = new_p.x - m_start.x;
 			const auto new_h = m_start.y + m_view.height - new_p.y;
 			if (new_w > 0.0f && new_h > 0.0f) {
@@ -742,7 +742,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_WEST) {
+		else if (loc == LOCUS_TYPE::LOCUS_WEST) {
 			auto new_w = m_start.x + m_view.width - new_p.x;
 			if (new_w > 0.0) {
 				if (keep_aspect) {
@@ -768,7 +768,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_NORTH) {
+		else if (loc == LOCUS_TYPE::LOCUS_NORTH) {
 			auto new_h = m_start.y + m_view.height - new_p.y;
 			if (new_h > 0.0) {
 				if (keep_aspect) {
@@ -794,7 +794,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_SOUTH) {
+		else if (loc == LOCUS_TYPE::LOCUS_SOUTH) {
 			auto new_h = new_p.y - m_start.y;
 			if (new_h > 0.0) {
 				if (keep_aspect) {
@@ -820,7 +820,7 @@ namespace winrt::GraphPaper::implementation
 			//	}
 			//}
 		}
-		else if (loc == LOC_TYPE::LOC_EAST) {
+		else if (loc == LOCUS_TYPE::LOCUS_EAST) {
 			auto new_w = new_p.x - m_start.x;
 			if (new_w > 0.0) {
 				if (keep_aspect) {

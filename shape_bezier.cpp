@@ -430,20 +430,20 @@ namespace winrt::GraphPaper::implementation
 		bool fill_test = false;	// 位置が塗りつぶしに含まれるか判定
 		if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 			if (pt_in_circle(test_pt, bezi_pt[0], ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 			if (pt_in_circle(test_pt, bezi_pt[3], ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(test_pt, bezi_pt, bezi_to, ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(test_pt, bezi_pt, bezi_to, ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -531,14 +531,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -574,9 +574,9 @@ namespace winrt::GraphPaper::implementation
 			s_cnt += 6;
 		}
 		if (fill_opa && fill_test) {
-			return LOC_TYPE::LOC_FILL;
+			return LOCUS_TYPE::LOCUS_FILL;
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 
 	}
 
@@ -606,33 +606,33 @@ namespace winrt::GraphPaper::implementation
 		//cp[3].x = cp[2].x + m_lineto[2].x;
 		//cp[3].y = cp[2].y + m_lineto[2].y;
 		if (loc_hit_test(t_pt, cp[3], m_loc_width)) {
-			return LOC_TYPE::LOC_P0 + 3;
+			return LOCUS_TYPE::LOCUS_P0 + 3;
 		}
 		if (loc_hit_test(t_pt, cp[2], m_loc_width)) {
-			return LOC_TYPE::LOC_P0 + 2;
+			return LOCUS_TYPE::LOCUS_P0 + 2;
 		}
 		if (loc_hit_test(t_pt, cp[1], m_loc_width)) {
-			return LOC_TYPE::LOC_P0 + 1;
+			return LOCUS_TYPE::LOCUS_P0 + 1;
 		}
 		if (loc_hit_test(t_pt, cp[0], m_loc_width)) {
-			return LOC_TYPE::LOC_P0 + 0;
+			return LOCUS_TYPE::LOCUS_P0 + 0;
 		}
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 			if (pt_in_circle(t_pt.x, t_pt.y, ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 			if (pt_in_circle(t_pt, cp[3], ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(t_pt, cp, m_lineto.data(), ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(t_pt, cp, m_lineto.data(), ew)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -720,14 +720,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -763,9 +763,9 @@ namespace winrt::GraphPaper::implementation
 			s_cnt += 6;
 		}
 		if (fill_opa && fill_test) {
-			return LOC_TYPE::LOC_FILL;
+			return LOCUS_TYPE::LOCUS_FILL;
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	//------------------------------

@@ -318,8 +318,8 @@ namespace winrt::GraphPaper::implementation
 			const double offs_y = m_grid_offset.y;
 			const auto emph_2 = m_grid_emph.m_gauge_2;
 			const auto emph_1 = m_grid_emph.m_gauge_1;
-			v_end.y = draw_h - 1.0f;
-			h_end.x = draw_w - 1.0f;
+			v_end.y = static_cast<float>(draw_h - 1.0);
+			h_end.x = static_cast<float>(draw_w - 1.0);
 
 			// ‚’¼‚È•ûŠá‚ğ•\¦‚·‚é.
 			double w;
@@ -546,9 +546,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// •¶š—ñ‚Ì—]”’‚ğ“¾‚é.
-	bool ShapeSheet::get_text_pad(D2D1_SIZE_F& val) const noexcept
+	bool ShapeSheet::get_text_padding(D2D1_SIZE_F& val) const noexcept
 	{
-		val = m_text_pad;
+		val = m_text_padding;
 		return true;
 	}
 
@@ -821,7 +821,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		if (t_pad.width >= 0.0 && t_pad.width <= 127.5 &&
 			t_pad.height >= 0.0 && t_pad.height <= 127.5) {
-			m_text_pad = t_pad;
+			m_text_padding = t_pad;
 		}
 		// ‰æ‘œ‚Ì•s“§–¾—¦
 		const float i_opac = dt_reader.ReadSingle();
@@ -877,18 +877,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
-
-	// ’l‚ğŠpŠÛ”¼Œa‚ÉŠi”[‚·‚é.
-	/*
-	bool ShapeSheet::set_corner_radius(const D2D1_POINT_2F& val) noexcept
-	{
-		if (!equal(m_corner_radius, val)) {
-			m_corner_radius = val;
-			return true;
-		}
-		return false;
-	}
-	*/
 
 	// ’l‚ğ“h‚è‚Â‚Ô‚µF‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_fill_color(const D2D1_COLOR_F& val) noexcept
@@ -1120,10 +1108,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_text_pad(const D2D1_SIZE_F val) noexcept
+	bool ShapeSheet::set_text_padding(const D2D1_SIZE_F val) noexcept
 	{
-		if (!equal(m_text_pad, val)) {
-			m_text_pad = val;
+		if (!equal(m_text_padding, val)) {
+			m_text_padding = val;
 			return true;
 		}
 		return false;
@@ -1162,7 +1150,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_text_align_horz(m_text_align_horz);
 			s->get_text_align_vert(m_text_align_vert);
 			s->get_text_line_sp(m_text_line_sp);
-			s->get_text_pad(m_text_pad);
+			s->get_text_padding(m_text_padding);
 			s->get_text_wrap(m_text_word_wrap);
 		}
 	}
@@ -1265,8 +1253,8 @@ namespace winrt::GraphPaper::implementation
 		// sŠÔ
 		dt_writer.WriteSingle(m_text_line_sp);
 		// •¶š—ñ‚Ì—]”’
-		dt_writer.WriteSingle(m_text_pad.width);
-		dt_writer.WriteSingle(m_text_pad.height);
+		dt_writer.WriteSingle(m_text_padding.width);
+		dt_writer.WriteSingle(m_text_padding.height);
 		// ‰æ‘œ‚Ì•s“§–¾—¦
 		dt_writer.WriteSingle(m_image_opac);
 	}

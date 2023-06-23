@@ -845,9 +845,9 @@
                 </MenuFlyoutSubItem>
             </muxc:MenuBarItem>
 			<!-- 作図メニュー -->
-			<muxc:MenuBarItem x:Name="mbi_menu_drawing" x:Uid="mbi_menu_drawing" AccessKey="D" Title="Drawing">
+			<muxc:MenuBarItem x:Name="menu_tool" x:Uid="menu_tool" AccessKey="T" Title="Tool">
 				<!-- 選択ツール -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_selection_tool" x:Uid="rmfi_menu_selection_tool" GroupName="gn_drawing_tool" Click="drawing_tool_click" IsChecked="True" Text="Selection Tool">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_selection" x:Uid="menu_tool_selection" GroupName="gn_drawing_tool" Click="drawing_tool_click" IsChecked="True" Text="Selection Tool">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Escape" />
 					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -857,55 +857,55 @@
 				</muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<!-- 方形 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_rect" x:Uid="rmfi_menu_drawing_rect" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_rect" x:Uid="menu_tool_rect" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_rect}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 角丸方形 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_rrect" x:Uid="rmfi_menu_drawing_rrect" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Rounded Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_rrect" x:Uid="menu_tool_rrect" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Rounded Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_rrect}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 多角形 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly" x:Uid="rmfi_menu_drawing_poly" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Quadrangle">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon" x:Uid="menu_tool_polygon" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_polygon}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- だ円 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_ellipse" x:Uid="rmfi_menu_drawing_ellipse" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Ellipse">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_ellipse" x:Uid="menu_tool_ellipse" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ellipse}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 円弧 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_arc" x:Uid="rmfi_menu_drawing_arc" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Arc">
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_arc" x:Uid="menu_tool_arc" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Arc">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_arc}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 直線 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_line" x:Uid="rmfi_menu_drawing_line" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Line" >
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_line" x:Uid="menu_tool_line" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Line" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_line}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 曲線 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_bezier" x:Uid="rmfi_menu_drawing_bezier" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Curve" >
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_bezier" x:Uid="menu_tool_bezier" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Curve" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_bezier}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 文字列 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_text" x:Uid="rmfi_menu_drawing_text" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Text" >
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_text" x:Uid="menu_tool_text" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Text" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_text}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 定規 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_ruler" x:Uid="rmfi_menu_drawing_ruler" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Ruler" >
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_ruler" x:Uid="menu_tool_ruler" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Ruler" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ruler}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
@@ -913,33 +913,35 @@
 				<!-- ================ -->
 				<MenuFlyoutSeparator />
 				<!-- 色の抽出 -->
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_eyedropper" x:Uid="rmfi_menu_eyedropper" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Eyedropper" >
+				<muxc:RadioMenuFlyoutItem x:Name="menu_tool_eyedropper" x:Uid="menu_tool_eyedropper" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Eyedropper" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_eyedropper}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<!-- 点の抽出 -->
+				<!--
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_pointer" x:Uid="rmfi_menu_pointer" GroupName="gn_drawing_tool" Click="drawing_tool_click" Text="Map Pointer" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_map_pin}" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
+                -->
 				<!-- 多角形の作成 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_menu_drawing_poly" Text="Polygon Type">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon Glyph="{StaticResource glyph_draw}"/>
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_di" x:Uid="rmfi_menu_drawing_poly_di" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Digon (2)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_tri" x:Uid="rmfi_menu_drawing_poly_tri" GroupName="gn_poly_type" Click="drawing_tool_click" IsChecked="True" Text="Triangle (3)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_quad" x:Uid="rmfi_menu_drawing_poly_quad" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Quadrilateral (4)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_pent" x:Uid="rmfi_menu_drawing_poly_pent" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Pentagon (5)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_hexa" x:Uid="rmfi_menu_drawing_poly_hexa" GroupName="gn_poly_type"  Click="drawing_tool_click" Text="Hexagon (6)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_hept" x:Uid="rmfi_menu_drawing_poly_hept" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Heptagon (7)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_octa" x:Uid="rmfi_menu_drawing_poly_octa" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Octagon (8)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_nona" x:Uid="rmfi_menu_drawing_poly_nona" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Nonagon (9)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_deca" x:Uid="rmfi_menu_drawing_poly_deca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Decagon (10)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_hendeca" x:Uid="rmfi_menu_drawing_poly_hendeca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Hendecagon (11)" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_menu_drawing_poly_dodeca" x:Uid="rmfi_menu_drawing_poly_dodeca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Dedecagon (12)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_di" x:Uid="menu_tool_polygon_di" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Digon (2)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_tri" x:Uid="menu_tool_polygon_tri" GroupName="gn_poly_type" Click="drawing_tool_click" IsChecked="True" Text="Triangle (3)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_quad" x:Uid="menu_tool_polygon_quad" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Quadrilateral (4)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_pent" x:Uid="menu_tool_polygon_pent" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Pentagon (5)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_hexa" x:Uid="menu_tool_polygon_hexa" GroupName="gn_poly_type"  Click="drawing_tool_click" Text="Hexagon (6)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_hept" x:Uid="menu_tool_polygon_hept" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Heptagon (7)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_octa" x:Uid="menu_tool_polygon_octa" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Octagon (8)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_nona" x:Uid="menu_tool_polygon_nona" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Nonagon (9)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_deca" x:Uid="menu_tool_polygon_deca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Decagon (10)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_hendeca" x:Uid="menu_tool_polygon_hendeca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Hendecagon (11)" />
+					<muxc:RadioMenuFlyoutItem x:Name="menu_tool_polygon_dodeca" x:Uid="menu_tool_polygon_dodeca" GroupName="gn_poly_type" Click="drawing_tool_click" Text="Dedecagon (12)" />
 					<!-- ================ -->
 					<MenuFlyoutSeparator/>
 					<!-- 正多角形を作成 -->
@@ -1163,7 +1165,7 @@
 				</MenuFlyoutItem>
 			</muxc:MenuBarItem>
 			<!-- 書体メニュー -->
-			<muxc:MenuBarItem x:Name="mbi_menu_font" x:Uid="mbi_menu_font" AccessKey="T" Title="Font">
+			<muxc:MenuBarItem x:Name="mbi_menu_font" x:Uid="mbi_menu_font" AccessKey="O" Title="Font">
 				<!-- 書体名 -->
 				<MenuFlyoutItem x:Name="mfi_menu_font_family" x:Uid="mfi_menu_font_family" Click="font_family_click_async" Icon="Font" Text="Font Family..." />
 				<!-- 書体の大きさ -->
@@ -1575,25 +1577,26 @@
 				</MenuFlyout>
 			</StackPanel.ContextFlyout>
 			<!-- ContextFlyout を処理するため event_released を設定 -->
-			<StackPanel x:Name="status_bar_drawing_tool" Margin="0,0,12,0" Orientation="Horizontal" >
-				<PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<StackPanel x:Name="status_bar_tool_panel" Margin="0,0,12,0" Orientation="Horizontal" >
+				<PathIcon x:Name="status_bar_tool_icon" Data="M0,0" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
 					<PathIcon.RenderTransform>
 						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
 					</PathIcon.RenderTransform>
 				</PathIcon>
 				<TextBlock Text=":"/>
-				<Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
-				<TextBlock x:Name="tb_map_pointer" Width="Auto" IsTextSelectionEnabled="True" Text="- -" />
+				<Rectangle x:Name="status_bar_tool_color" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
+                <!-- ツールの値 (RGBA や点) -->
+				<TextBlock x:Name="status_bar_tool_value" Width="Auto" IsTextSelectionEnabled="True" Text="- -" />
 			</StackPanel>
-			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
+			<StackPanel x:Name="status_bar_unit_panel" Margin="0,0,12,0" Orientation="Horizontal">
 				<FontIcon Glyph="{StaticResource glyph_unit}" FontSize="14"/>
 				<TextBlock Text=":"/>
-				<TextBlock x:Name="tk_status_bar_unit" Text="0"/>
+				<TextBlock x:Name="status_bar_unit_value" Text="0"/>
 			</StackPanel>
-			<StackPanel x:Name="sp_status_bar_pointer" Margin="0,0,12,0" Orientation="Horizontal">
+			<StackPanel x:Name="status_bar_pointer_panel" Margin="0,0,12,0" Orientation="Horizontal">
 				<FontIcon Glyph="{StaticResource glyph_mouse}" FontSize="14"/>
 				<TextBlock Text=":" />
-				<TextBlock x:Name="tk_status_bar_pointer" Text="0"/>
+				<TextBlock x:Name="status_bar_pointer_value" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_grid" Margin="0,0,12,0" Orientation="Horizontal">
 				<PathIcon Data="{StaticResource data_grid}" Height="16"  Width="16" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -1620,7 +1623,7 @@
 					</SymbolIcon.RenderTransform>
 				</SymbolIcon>
 				<TextBlock Text=":"/>
-				<TextBlock x:Name="tk_status_bar_zoom" Text="0"/>
+				<TextBlock x:Name="status_bar_zoom_value" Text="0"/>
 			</StackPanel>
 			<TextBlock x:Name="status_bar_debug" />
 		</StackPanel>

@@ -460,7 +460,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_T::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
 	{
-		s->set_text_pad(val);
+		s->set_text_padding(val);
 	}
 
 	void UndoValue<UNDO_T::TEXT_WRAP>::SET(Shape* const s, const DWRITE_WORD_WRAPPING& val) noexcept
@@ -665,7 +665,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_T::TEXT_PAD>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
 	{
-		return s->get_text_pad(val);
+		return s->get_text_padding(val);
 	}
 
 	bool UndoValue<UNDO_T::TEXT_WRAP>::GET(const Shape* s, DWRITE_WORD_WRAPPING& val) noexcept

@@ -237,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから操作を読み込む.
 		UndoDeform(DataReader const& dt_reader) :
 			Undo(undo_read_shape(dt_reader)),
-			m_loc(static_cast<LOC_TYPE>(dt_reader.ReadUInt32())),
+			m_loc(static_cast<LOCUS_TYPE>(dt_reader.ReadUInt32())),
 			m_pt(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle()})
 		{}
 

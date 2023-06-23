@@ -33,16 +33,16 @@ namespace winrt::GraphPaper::implementation
 	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_range_brush{ nullptr };	// 選択された文字色のブラシ (ターゲット依存)
 	winrt::com_ptr<ID2D1BitmapBrush> Shape::m_d2d_bitmap_brush{ nullptr };	// 背景の画像ブラシ (ターゲット依存)
 	winrt::com_ptr<IDWriteFactory> Shape::m_dwrite_factory{ create_dwrite_factory() };
-	constexpr double LOC_LEN = 6.0;
+	constexpr double LOCUS_LEN = 6.0;
 	float Shape::m_aux_width = 1.0f;	// 補助線の太さ
 	bool Shape::m_loc_show = true;	// 部位の表示/非表示.
-	float Shape::m_loc_width = LOC_LEN;	// 部位の大きさ
-	float Shape::m_loc_square_inner = static_cast<float>(0.5 * LOC_LEN);	// 部位 (正方形) の内側の辺の半分の長さ
-	float Shape::m_loc_square_outer = static_cast<float>(0.5 * (LOC_LEN + 4.0));	// 部位 (正方形) の外側の辺の半分の長さ
-	float Shape::m_loc_circle_inner = static_cast<float>(sqrt(LOC_LEN * LOC_LEN / M_PI));	// 部位 (円形) の内側の半径
-	float Shape::m_loc_circle_outer = static_cast<float>(sqrt(LOC_LEN * LOC_LEN / M_PI) + 2.0);	// 部位 (円形) の外側の半径
-	float Shape::m_loc_rhombus_inner = static_cast<float>(sqrt(LOC_LEN * LOC_LEN * 0.5) * 0.5);	// 部位 (ひし型) の中心から内側の頂点までの半分の長さ
-	float Shape::m_loc_rhombus_outer = static_cast<float>(sqrt((LOC_LEN + 4.0) * (LOC_LEN + 4.0) * 0.5) * 0.5);	// 部位 (ひし型) の中心から外側の頂点までの半分の長さ
+	float Shape::m_loc_width = LOCUS_LEN;	// 部位の大きさ
+	float Shape::m_loc_square_inner = static_cast<float>(0.5 * LOCUS_LEN);	// 部位 (正方形) の内側の辺の半分の長さ
+	float Shape::m_loc_square_outer = static_cast<float>(0.5 * (LOCUS_LEN + 4.0));	// 部位 (正方形) の外側の辺の半分の長さ
+	float Shape::m_loc_circle_inner = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN / M_PI));	// 部位 (円形) の内側の半径
+	float Shape::m_loc_circle_outer = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN / M_PI) + 2.0);	// 部位 (円形) の外側の半径
+	float Shape::m_loc_rhombus_inner = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN * 0.5) * 0.5);	// 部位 (ひし型) の中心から内側の頂点までの半分の長さ
+	float Shape::m_loc_rhombus_outer = static_cast<float>(sqrt((LOCUS_LEN + 4.0) * (LOCUS_LEN + 4.0) * 0.5) * 0.5);	// 部位 (ひし型) の中心から外側の頂点までの半分の長さ
 
 	// 描画前に必要な変数を格納する.
 	void Shape::begin_draw(
@@ -111,12 +111,12 @@ namespace winrt::GraphPaper::implementation
 		if (hr == S_OK) {
 			m_loc_show = located;
 			m_aux_width = static_cast<float>(1.0 / scale);
-			const double a_inner = LOC_LEN / scale;
-			const double a_outer = (LOC_LEN + 4.0) / scale;
-			m_loc_width = static_cast<float>(LOC_LEN / scale);
+			const double a_inner = LOCUS_LEN / scale;
+			const double a_outer = (LOCUS_LEN + 4.0) / scale;
+			m_loc_width = static_cast<float>(LOCUS_LEN / scale);
 			m_loc_square_inner = static_cast<float>(0.5 * a_inner);
 			m_loc_square_outer = static_cast<float>(0.5 * a_outer);
-			const auto r = sqrt(LOC_LEN * LOC_LEN / M_PI);
+			const auto r = sqrt(LOCUS_LEN * LOCUS_LEN / M_PI);
 			m_loc_circle_inner = static_cast<float>(r / scale);
 			m_loc_circle_outer = static_cast<float>((r + 2.0) / scale);
 			m_loc_rhombus_inner = static_cast<float>(sqrt(a_inner * a_inner * 0.5) * 0.5);

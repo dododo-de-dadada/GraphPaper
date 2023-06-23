@@ -111,31 +111,31 @@ namespace winrt::GraphPaper::implementation
 	//   @----@----@
 	//  SW    S    SE
 	//
-	enum LOC_TYPE : uint32_t {
-		LOC_SHEET,		// 図形の外部 (矢印カーソル)
-		LOC_FILL,		// 図形の内部 (移動カーソル)
-		LOC_STROKE,	// 線枠 (移動カーソル)
-		LOC_TEXT,		// 文字列 (移動カーソル)
-		LOC_NW,		// 方形の左上の頂点 (北西南東カーソル)
-		LOC_SE,		// 方形の右下の頂点 (北西南東カーソル)
-		LOC_NE,		// 方形の右上の頂点 (北東南西カーソル)
-		LOC_SW,		// 方形の左下の頂点 (北東南西カーソル)
-		LOC_NORTH,		// 方形の上辺の中点 (上下カーソル)
-		LOC_SOUTH,		// 方形の下辺の中点 (上下カーソル)
-		LOC_EAST,		// 方形の左辺の中点 (左右カーソル)
-		LOC_WEST,		// 方形の右辺の中点 (左右カーソル)
-		LOC_R_NW,		// 左上の角丸の中心点 (十字カーソル)
-		LOC_R_NE,		// 右上の角丸の中心点 (十字カーソル)
-		LOC_R_SE,		// 右下の角丸の中心点 (十字カーソル)
-		LOC_R_SW,		// 左下の角丸の中心点 (十字カーソル)
-		LOC_A_CENTER,	// 円弧の中心点
-		LOC_A_START,	// 円弧の始点
-		LOC_A_END,	// 円弧の終点
-		LOC_A_AXIS_X,	// 円弧 (標準形での) 水平軸
-		LOC_A_AXIS_Y,	// 円弧 (標準形での) 垂直軸
-		LOC_START,	// 線分の始点
-		LOC_END,	// 線分の終点
-		LOC_P0,	// パスの始点 (十字カーソル)
+	enum LOCUS_TYPE : uint32_t {
+		LOCUS_SHEET,		// 図形の外部 (矢印カーソル)
+		LOCUS_FILL,		// 図形の内部 (移動カーソル)
+		LOCUS_STROKE,	// 線枠 (移動カーソル)
+		LOCUS_TEXT,		// 文字列 (移動カーソル)
+		LOCUS_NW,		// 方形の左上の頂点 (北西南東カーソル)
+		LOCUS_SE,		// 方形の右下の頂点 (北西南東カーソル)
+		LOCUS_NE,		// 方形の右上の頂点 (北東南西カーソル)
+		LOCUS_SW,		// 方形の左下の頂点 (北東南西カーソル)
+		LOCUS_NORTH,		// 方形の上辺の中点 (上下カーソル)
+		LOCUS_SOUTH,		// 方形の下辺の中点 (上下カーソル)
+		LOCUS_EAST,		// 方形の左辺の中点 (左右カーソル)
+		LOCUS_WEST,		// 方形の右辺の中点 (左右カーソル)
+		LOCUS_R_NW,		// 左上の角丸の中心点 (十字カーソル)
+		LOCUS_R_NE,		// 右上の角丸の中心点 (十字カーソル)
+		LOCUS_R_SE,		// 右下の角丸の中心点 (十字カーソル)
+		LOCUS_R_SW,		// 左下の角丸の中心点 (十字カーソル)
+		LOCUS_A_CENTER,	// 円弧の中心点
+		LOCUS_A_START,	// 円弧の始点
+		LOCUS_A_END,	// 円弧の終点
+		LOCUS_A_AXIS_X,	// 円弧 (標準形での) 水平軸
+		LOCUS_A_AXIS_Y,	// 円弧 (標準形での) 垂直軸
+		LOCUS_START,	// 線分の始点
+		LOCUS_END,	// 線分の終点
+		LOCUS_P0,	// パスの始点 (十字カーソル)
 	};
 
 	// 矢じるしの大きさ
@@ -195,9 +195,17 @@ namespace winrt::GraphPaper::implementation
 		bool m_end_closed;	// 辺を閉じて作図する.
 		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
-	constexpr POLY_OPTION POLY_OPTION_DEFVAL{ 3, true, true, true, true };	// 多角形の作成方法の既定値
+	constexpr POLY_OPTION TOOL_POLYGON_DEFVAL{ 3, true, true, true, true };	// 多角形の作成方法の既定値
 
 	// 文字列の範囲
+	// trail = false    trail = true
+	//   start  end        start end
+	//     |     |           |   |
+	// 0 1 2 3 4 5 6     0 1 2 3 4 5 6
+	//    +-----+           +-----+
+	// a b|c d e|f g     a b|c d e|f g
+	//    +-----+           +-----+
+	// trail は, 文字列が複数行あるとき, キャレットが行末か, それとも次の行頭か, 区別するためのフラグ.
 	struct CORE_TEXT_RANGE {
 		uint32_t m_start;
 		uint32_t m_end;
@@ -494,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		virtual bool get_text_line_sp(float&/*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_pad(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
+		virtual bool get_text_padding(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字列の折り返しを得る.
 		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING&/*val*/) const noexcept { return false; }
 		// 文字列の範囲を得る.
@@ -502,7 +510,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 図形が点を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool/*ctrl_key = false*/) const noexcept { return LOC_TYPE::LOC_SHEET; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*pt*/, const bool/*ctrl_key = false*/) const noexcept { return LOCUS_TYPE::LOCUS_SHEET; }
 		// 矩形に含まれるか判定する.
 		virtual bool is_inside(const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -598,7 +606,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		virtual bool set_text_line_sp(const float/*val*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
-		virtual bool set_text_pad(const D2D1_SIZE_F/*val*/) noexcept { return false; }
+		virtual bool set_text_padding(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字列の折り返しに格納する.
 		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING/*val*/) noexcept { return false; }
 		// 値を文字列の範囲に格納する.
@@ -785,22 +793,9 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR; 	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING; 	// 文字列の揃え
-		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の左右と上下の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_PAD_DEFVAL };	// 文字列の左右と上下の余白
 		DWRITE_WORD_WRAPPING m_text_word_wrap = DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP;	// 文字列の折り返し (自動改行)
-
-		// 選択された文字範囲
-// trail = false    trail = true
-//   start  end        start end
-//     |     |           |   |
-// 0 1 2 3 4 5 6     0 1 2 3 4 5 6
-//    +-----+           +-----+
-// a b|c d e|f g     a b|c d e|f g
-//    +-----+           +-----+
-// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
-		CORE_TEXT_RANGE m_core_text_range{ 0, 0, false };
-		//uint32_t m_core_text_range.m_start = 0;	// 選択範囲の開始位置
-		//uint32_t m_core_text_range.m_end = 0;	// 選択範囲の終了位置 (キャレットの位置)
-		//bool m_core_text_range.m_trail = false;	// キャレットの前後判定 (終了位置の前なら false, 後ろなら true)
+		CORE_TEXT_RANGE m_core_text_range{ 0, 0, false };	// 入力中の文字列範囲
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
@@ -813,8 +808,8 @@ namespace winrt::GraphPaper::implementation
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 
 		// 用紙
-		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色
-		D2D1_SIZE_F	m_sheet_size{ SHEET_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 用紙の色
+		D2D1_SIZE_F	m_sheet_size{ SHEET_SIZE_DEFVAL };	// 用紙の大きさ (MainPage のコンストラクタで設定)
 		D2D1_RECT_F m_sheet_padding{ 0.0f, 0.0f, 0.0f, 0.0f };	// 用紙の内余白
 
 		// 図形リストの最後の図形を得る.
@@ -934,7 +929,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		virtual bool get_text_line_sp(float& val) const noexcept final override;
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
+		virtual bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
 		// 文字列の折り返しを得る.
 		virtual bool get_text_wrap(DWRITE_WORD_WRAPPING& val) const noexcept final override
 		{
@@ -1027,7 +1022,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		virtual bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
-		virtual bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
+		virtual bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 		// 図形をデータライターに PDF として書き込む.
@@ -1971,7 +1966,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
-		D2D1_SIZE_F m_text_pad{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_WORD_WRAPPING m_text_word_wrap = DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP;	// 文字列の折り返し (自動改行)
 
 		// trail = false    trail = true
@@ -2060,7 +2055,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		bool get_text_line_sp(float& val) const noexcept final override;
 		// 文字列の余白を得る.
-		bool get_text_pad(D2D1_SIZE_F& val) const noexcept final override;
+		bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
 		// 文字列の長さを得る.
 		uint32_t get_text_len(void) const noexcept
 		{
@@ -2073,13 +2068,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		void get_text_caret(const uint32_t text_pos, const uint32_t text_row, const bool is_trailing, D2D1_POINT_2F& caret) const noexcept
 		{
-			// 文字列れアウトの左上点を得る.
-			const float tx = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_pad.width;
-			const float ty = (m_lineto.y >= 0.0f ? m_start.y : m_start.y + m_lineto.y) + m_text_pad.height;
+			// 文字列枠の左上点を得る.
+			const float frame_x = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_padding.width;
+			const float frame_y = (m_lineto.y >= 0.0f ? m_start.y : m_start.y + m_lineto.y) + m_text_padding.height;
 			// 文字列が空なら左上点をキャレット点の格納する.
 			if (m_dwrite_test_cnt == 0) {
-				caret.x = tx;
-				caret.y = ty;
+				caret.x = frame_x;
+				caret.y = frame_y;
 				return;
 			}
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
@@ -2094,14 +2089,14 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_HIT_TEST_METRICS tm{};
 					FLOAT x, y;
 					m_dwrite_text_layout->HitTestTextPosition(text_pos, is_trailing, &x, &y, &tm);
-					caret.x = tx + x;
-					caret.y = ty + tt + bl + descent - m_font_size;
+					caret.x = frame_x + x;
+					caret.y = frame_y + tt + bl + descent - m_font_size;
 					return;
 				}
 				const auto tl = m_dwrite_test_metrics[text_row].left;
 				const auto tw = m_dwrite_test_metrics[text_row].width;
-				caret.x = tx + tl + tw;
-				caret.y = ty + tt + bl + descent - m_font_size;
+				caret.x = frame_x + tl + tw;
+				caret.y = frame_y + tt + bl + descent - m_font_size;
 			}
 			else {
 				// テキスト矩形の上辺の位置決め.
@@ -2110,7 +2105,7 @@ namespace winrt::GraphPaper::implementation
 					tt = m_dwrite_test_metrics[m_dwrite_test_cnt - 1].top;
 				}
 				else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR) {
-					tt = (m_lineto.y >= 0.0f ? m_start.y + m_lineto.y : m_start.y) - m_text_pad.height - m_font_size;
+					tt = (m_lineto.y >= 0.0f ? m_start.y + m_lineto.y : m_start.y) - m_text_padding.height - m_font_size;
 				}
 				else if (m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER) {
 					tt = m_start.y + 0.5f * m_lineto.y - 0.5f * m_font_size;
@@ -2122,17 +2117,17 @@ namespace winrt::GraphPaper::implementation
 					tt += m_dwrite_line_metrics[i].height;
 				}
 				const auto bl = m_dwrite_line_metrics[text_row].baseline;
-				caret.y = ty + tt + bl + descent - m_font_size;
+				caret.y = frame_y + tt + bl + descent - m_font_size;
 
 				if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING) {
-					caret.x = (m_lineto.x >= 0.0f ? m_start.x + m_lineto.x : m_start.x) - m_text_pad.width;
+					caret.x = (m_lineto.x >= 0.0f ? m_start.x + m_lineto.x : m_start.x) - m_text_padding.width;
 				}
 				else if (m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
 					DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED) {
 					caret.x = m_start.x + 0.5f * m_lineto.x;
 				}
 				else {
-					caret.x = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_pad.width;
+					caret.x = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_padding.width;
 				}
 			}
 		}
@@ -2163,8 +2158,8 @@ namespace winrt::GraphPaper::implementation
 				return get_text_len();
 			}
 			// 図形の開始点を原点とする.
-			const float tx = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_pad.width;
-			const float ty = (m_lineto.y >= 0.0f ? m_start.y : m_start.y + m_lineto.y) + m_text_pad.height;
+			const float tx = (m_lineto.x >= 0.0f ? m_start.x : m_start.x + m_lineto.x) + m_text_padding.width;
+			const float ty = (m_lineto.y >= 0.0f ? m_start.y : m_start.y + m_lineto.y) + m_text_padding.height;
 			const float px = pt.x - tx;
 			const float py = pt.y - ty;
 			if (py < m_dwrite_test_metrics[0].top) {
@@ -2270,7 +2265,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		bool set_text_line_sp(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
-		bool set_text_pad(const D2D1_SIZE_F val) noexcept final override;
+		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 文字列の折り返しを得る.
 		virtual bool set_text_wrap(const DWRITE_WORD_WRAPPING val) noexcept final override
 		{

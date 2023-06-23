@@ -519,37 +519,37 @@ namespace winrt::GraphPaper::implementation
 	// val	得られた値
 	void ShapeArc::get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept
 	{
-		if (loc == LOC_TYPE::LOC_P0) {
+		if (loc == LOCUS_TYPE::LOCUS_P0) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[AXIS_Y];
 		}
-		else if (loc == LOC_TYPE::LOC_P0 + 1) {
+		else if (loc == LOCUS_TYPE::LOCUS_P0 + 1) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[AXIS_X];
 		}
-		else if (loc == LOC_TYPE::LOC_A_START) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_START) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[START];
 		}
-		else if (loc == LOC_TYPE::LOC_A_END) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_END) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[END];
 		}
-		else if (loc == LOC_TYPE::LOC_A_CENTER) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_CENTER) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[CENTER];
 		}
-		else if (loc == LOC_TYPE::LOC_A_AXIS_X) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_AXIS_X) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[AXIS_X];
 		}
-		else if (loc == LOC_TYPE::LOC_A_AXIS_Y) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_AXIS_Y) {
 			D2D1_POINT_2F p[5];
 			get_verts(p);
 			val = p[AXIS_Y];
@@ -575,7 +575,7 @@ namespace winrt::GraphPaper::implementation
 		const double t_min = 0.0 + m_angle_start / 90.0;
 		const double t_max = 1.0 + m_angle_end / 90.0;
 		const bool clockwise = (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
-		const double rot = M_PI * m_angle_rot / 180.0;
+		//const double rot = M_PI * m_angle_rot / 180.0;
 		//const double c = cos(rot);
 		//const double s = sin(rot);
 		D2D1_POINT_2F b_start;
@@ -717,7 +717,7 @@ namespace winrt::GraphPaper::implementation
 	// keep_aspect	画像の縦横比の維持/可変
 	bool ShapeArc::set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool keep_aspect) noexcept
 	{
-		if (loc == LOC_TYPE::LOC_A_AXIS_Y) {
+		if (loc == LOCUS_TYPE::LOCUS_A_AXIS_Y) {
 			const double a = M_PI * m_angle_rot / 180.0;
 			const double c = cos(a);
 			const double s = sin(a);
@@ -738,13 +738,13 @@ namespace winrt::GraphPaper::implementation
 						get_arc_rot(old_rot);
 						const double new_rot = old_rot + 90.0 - acos((px * ax + py * ay) / (ad * pd)) * 180.0 / M_PI;
 						if (fabs(new_rot) < 45.0) {
-							set_arc_rot(new_rot);
+							set_arc_rot(static_cast<float>(new_rot));
 						}
 					}
 				}
 			}
 		}
-		else if (loc == LOC_TYPE::LOC_A_AXIS_X) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_AXIS_X) {
 			const double a = M_PI * m_angle_rot / 180.0;
 			const double c = cos(a);
 			const double s = sin(a);
@@ -765,13 +765,13 @@ namespace winrt::GraphPaper::implementation
 						get_arc_rot(old_rot);
 						const double new_rot = old_rot - 90.0 + acos((px * ax + py * ay) / (ad * pd)) * 180.0 / M_PI;
 						if (fabs(new_rot) < 45.0) {
-							set_arc_rot(new_rot);
+							set_arc_rot(static_cast<float>(new_rot));
 						}
 					}
 				}
 			}
 		}
-		else if (loc == LOC_TYPE::LOC_A_START) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_START) {
 			const double a = M_PI * m_angle_rot / 180.0;
 			const double c = cos(a);
 			const double s = sin(a);
@@ -842,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (loc == LOC_TYPE::LOC_A_END) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_END) {
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
@@ -913,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (loc == LOC_TYPE::LOC_A_CENTER) {
+		else if (loc == LOCUS_TYPE::LOCUS_A_CENTER) {
 			const double rot = M_PI * m_angle_rot / 180.0;
 			const double c = cos(rot);
 			const double s = sin(rot);
@@ -998,25 +998,25 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F p[5];
 		get_verts(p);
 		if (ctrl_key && loc_hit_test(test_pt, p[END], m_loc_width)) {
-			return LOC_TYPE::LOC_A_END;
+			return LOCUS_TYPE::LOCUS_A_END;
 		}
 		else if (ctrl_key && loc_hit_test(test_pt, p[START], m_loc_width)) {
-			return LOC_TYPE::LOC_A_START;
+			return LOCUS_TYPE::LOCUS_A_START;
 		}
 		else if (loc_hit_test(test_pt, p[AXIS_X], m_loc_width)) {
-			return ctrl_key ? LOC_TYPE::LOC_A_AXIS_X : LOC_TYPE::LOC_P0 + 1;
+			return ctrl_key ? LOCUS_TYPE::LOCUS_A_AXIS_X : LOCUS_TYPE::LOCUS_P0 + 1;
 		}
 		else if (loc_hit_test(test_pt, p[AXIS_Y], m_loc_width)) {
-			return ctrl_key ? LOC_TYPE::LOC_A_AXIS_Y : LOC_TYPE::LOC_P0;
+			return ctrl_key ? LOCUS_TYPE::LOCUS_A_AXIS_Y : LOCUS_TYPE::LOCUS_P0;
 		}
 		else if (!ctrl_key && loc_hit_test(test_pt, p[END], m_loc_width)) {
-			return LOC_TYPE::LOC_A_END;
+			return LOCUS_TYPE::LOCUS_A_END;
 		}
 		else if (!ctrl_key && loc_hit_test(test_pt, p[START], m_loc_width)) {
-			return LOC_TYPE::LOC_A_START;
+			return LOCUS_TYPE::LOCUS_A_START;
 		}
 		else if (loc_hit_test(test_pt, p[CENTER], m_loc_width)) {
-			return LOC_TYPE::LOC_FILL;
+			return LOCUS_TYPE::LOCUS_FILL;
 		}
 		D2D1_POINT_2F b_start;
 		D2D1_BEZIER_SEGMENT b_seg;
@@ -1034,13 +1034,13 @@ namespace winrt::GraphPaper::implementation
 		};
 		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);
 		const auto loc = ShapeBezier::hit_test({ test_pt.x - b_start.x, test_pt.y - b_start.y }, b_pt, b_to, m_stroke_cap, true, ew);
-		if (loc == LOC_TYPE::LOC_STROKE) {
-			return LOC_TYPE::LOC_STROKE;
+		if (loc == LOCUS_TYPE::LOCUS_STROKE) {
+			return LOCUS_TYPE::LOCUS_STROKE;
 		}
 		else if (is_opaque(m_fill_color)) {
-			if (loc == LOC_TYPE::LOC_FILL) {
+			if (loc == LOCUS_TYPE::LOCUS_FILL) {
 				if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-					return LOC_TYPE::LOC_FILL;
+					return LOCUS_TYPE::LOCUS_FILL;
 				}
 			}
 			else {
@@ -1048,11 +1048,11 @@ namespace winrt::GraphPaper::implementation
 					p[CENTER], p[START], p[END]
 				};
 				if (pt_in_poly(test_pt, 3, tri)) {
-					return LOC_TYPE::LOC_FILL;
+					return LOCUS_TYPE::LOCUS_FILL;
 				}
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// 円弧をベジェ曲線で近似する.

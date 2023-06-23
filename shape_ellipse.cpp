@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const auto loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc != LOC_TYPE::LOC_SHEET) {
+		if (loc != LOCUS_TYPE::LOCUS_SHEET) {
 			return loc;
 		}
 
@@ -79,24 +79,24 @@ namespace winrt::GraphPaper::implementation
 			const double ox = rx + s_width * 0.5;
 			const double oy = ry + s_width * 0.5;
 			if (!pt_in_ellipse(test_pt, c, ox, oy)) {
-				// 外側なら LOC_SHEET を返す.
-				return LOC_TYPE::LOC_SHEET;
+				// 外側なら LOCUS_SHEET を返す.
+				return LOCUS_TYPE::LOCUS_SHEET;
 			}
 			// だ円の内径に対し, 点の内外を判定する.
 			const double ix = ox - s_width;
 			const double iy = oy - s_width;
 			if (ix <= 0.0 || iy <= 0.0 || !pt_in_ellipse(test_pt, c, ix, iy)) {
-				// 内径が負数, 、または点が外側なら LOC_STROKE を返す.
-				return LOC_TYPE::LOC_STROKE;
+				// 内径が負数, 、または点が外側なら LOCUS_STROKE を返す.
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// だ円に点が含まれるか判定する.
 			if (pt_in_ellipse(test_pt, c, rx, ry)) {
-				return LOC_TYPE::LOC_FILL;
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 }

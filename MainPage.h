@@ -262,19 +262,19 @@ namespace winrt::GraphPaper::implementation
 		//bool m_core_text_trail = false;	// 入力変換開始時のキャレット前後判定
 
 		// ポインターイベント
-		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
-		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
-		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された点
+		D2D1_POINT_2F m_event_point_curr{ 0.0F, 0.0F };	// ポインターの現在点
+		D2D1_POINT_2F m_event_point_prev{ 0.0F, 0.0F };	// ポインターの前回点
+		D2D1_POINT_2F m_event_point_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
-		uint32_t m_event_loc_pressed = LOC_TYPE::LOC_SHEET;	// ポインターが押された部位
+		uint32_t m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;	// ポインターが押された部位
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
 
 		// 作図ツール
-		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
-		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の作成方法
+		DRAWING_TOOL m_tool = DRAWING_TOOL::SELECT;	// 作図ツール
+		POLY_OPTION m_tool_polygon{ TOOL_POLYGON_DEFVAL };	// 多角形ツール
 		bool m_eyedropper_filled = false;	// 抽出されたか判定
 		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			if constexpr (SHIFT_KEY) {
 				bool trail;
-				const auto end = m_core_text_focused->get_text_pos(m_event_pos_curr, trail);
+				const auto end = m_core_text_focused->get_text_pos(m_event_point_curr, trail);
 				const auto start = m_main_sheet.m_core_text_range.m_start;
 				undo_push_text_select(m_core_text_focused, start, end, trail);
 				main_sheet_draw();
@@ -556,6 +556,16 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
+		// ポインターの現在点に, イベント引数の値を格納する.
+		void event_set_position(PointerRoutedEventArgs const& args) noexcept
+		{
+			// 引数として渡された点に, 拡大率の逆数を乗じ, 表示されている左上点とスクロールバーの値を加える.
+			// 得られた値を, ポインターの現在点に格納する.
+			const auto p{ args.GetCurrentPoint(scp_main_panel()).Position() };
+			m_event_point_curr.x = static_cast<FLOAT>(sb_horz().Value() + p.X / m_main_scale + m_main_bbox_lt.x);
+			m_event_point_curr.y = static_cast<FLOAT>(sb_vert().Value() + p.Y / m_main_scale + m_main_bbox_lt.y);
+		}
+
 		// ポインターのボタンが上げられた.
 		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがスワップチェーンパネルの中に入った.
@@ -580,8 +590,6 @@ namespace winrt::GraphPaper::implementation
 		void event_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターの形状を設定する.
 		void event_set_cursor(void);
-		// ポインターの現在位置に, イベント引数の値を格納する.
-		void event_set_position(PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// 文字列編集ダイアログを表示する.
@@ -789,8 +797,8 @@ namespace winrt::GraphPaper::implementation
 
 		void MainPage::kacc_escape_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 		{
-			rmfi_menu_selection_tool().IsChecked(true);
-			drawing_tool_click(rmfi_menu_selection_tool(), nullptr);
+			menu_tool_selection().IsChecked(true);
+			drawing_tool_click(menu_tool_selection(), nullptr);
 		}
 
 		void MainPage::kacc_left_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const& args)
@@ -969,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 
 		// レイアウトメニューの「ステータスバー」が選択された.
 		void status_bar_click(IInspectable const&, RoutedEventArgs const&);
-		// ポインターの位置をステータスバーに格納する.
+		// ポインターの座標値をステータスバーに格納する.
 		void status_bar_set_pointer(void);
 		// 作図ツールをステータスバーに格納する.
 		void status_bar_set_drawing_tool(void);
@@ -1280,7 +1288,7 @@ namespace winrt::GraphPaper::implementation
 		// UI 要素がフォーカスを得る.
 		// スワップチェーンパネル以外の UI 要素, たとえばテキストボックスがフォーカスを獲得するときに呼び出されて,
 		// 用紙のフォーカスフラグを下す. 
-		void ui_elem_getting_focus(UIElement const& sender, GettingFocusEventArgs const&)
+		void ui_elem_getting_focus(UIElement const&, GettingFocusEventArgs const&)
 		{
 			// テキストブロックがサポートするコマンドは以下の通り.
 			// Copy

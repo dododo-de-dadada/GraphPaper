@@ -350,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 頂点が見つかったか判定する.
 		if (k != -1) {
-			return LOC_TYPE::LOC_P0 + static_cast<uint32_t>(k);
+			return LOCUS_TYPE::LOCUS_P0 + static_cast<uint32_t>(k);
 		}
 		// 線が不透明か判定する.
 		if (stroke_opa) {
@@ -360,9 +360,9 @@ namespace winrt::GraphPaper::implementation
 			if (n_cnt == 0) {
 				// ゼロならば, 判定される点が, 拡張する幅を半径とする円に含まれるか判定する.
 				if (pt_in_circle(test_pt.x, test_pt.y, e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
-				return LOC_TYPE::LOC_SHEET;
+				return LOCUS_TYPE::LOCUS_SHEET;
 			}
 			// 辺が閉じているか判定する.
 			if (end_closed) {
@@ -373,19 +373,19 @@ namespace winrt::GraphPaper::implementation
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 				if (pt_in_circle(test_pt.x, test_pt.y, e_width) ||
 					pt_in_circle(test_pt, pt[to_cnt], e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 				if (poly_test_cap_square(test_pt, pt[to_cnt], to_cnt, to, side_len, e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 				if (poly_test_cap_triangle(test_pt, pt[to_cnt], to_cnt, to, side_len, e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			D2D1_POINT_2F s[N_GON_MAX][4 + 1];	// 太さ分拡張された辺 (+頂点)
@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 調べる位置が, 拡張された辺に含まれるか判定する.
 				if (pt_in_poly(test_pt, 4, s[s_cnt++])) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
@@ -498,32 +498,32 @@ namespace winrt::GraphPaper::implementation
 				s[s_cnt][4] = pt[to_cnt];
 				// 判定される点が拡張された辺に含まれるか判定する.
 				if (pt_in_poly(test_pt, 4, s[s_cnt++])) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 				if (poly_test_join_bevel(test_pt, s_cnt, end_closed, s)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 				if (poly_test_join_miter(test_pt, s_cnt, end_closed, e_width, s, miter_limit, s_join)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 				if (poly_test_join_round(test_pt, to_cnt + 1, pt, e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 		}
 		if (fill_opa) {
 			if (pt_in_poly(test_pt, to_cnt + 1, pt)) {
-				return LOC_TYPE::LOC_FILL;
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// 矢じりの返しと先端の位置を得る.

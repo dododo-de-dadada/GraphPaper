@@ -135,11 +135,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(test_pt, false) != LOC_TYPE::LOC_SHEET) {
-				return LOC_TYPE::LOC_FILL;
+			if (s->hit_test(test_pt, false) != LOCUS_TYPE::LOCUS_SHEET) {
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	//------------------------------

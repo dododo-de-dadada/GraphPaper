@@ -437,9 +437,9 @@ namespace winrt::GraphPaper::implementation
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
 		s->set_select(true);
-		s->set_pos_loc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, LOC_TYPE::LOC_P0, m_snap_point, false);
-		s->set_pos_loc(D2D1_POINT_2F{ samp_x, samp_y }, LOC_TYPE::LOC_P0 + 1, m_snap_point, false);
-		s->set_pos_loc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, LOC_TYPE::LOC_P0 + 2, m_snap_point, false);
+		s->set_pos_loc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, LOCUS_TYPE::LOCUS_P0, m_snap_point, false);
+		s->set_pos_loc(D2D1_POINT_2F{ samp_x, samp_y }, LOCUS_TYPE::LOCUS_P0 + 1, m_snap_point, false);
+		s->set_pos_loc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, LOCUS_TYPE::LOCUS_P0 + 2, m_snap_point, false);
 		m_dialog_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;

@@ -450,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto TICK_FREQ = 0.5;
 		m_dialog_sheet.set_attr_to(&m_main_sheet);
 		D2D1_SIZE_F pad;
-		m_dialog_sheet.get_text_pad(pad);
+		m_dialog_sheet.get_text_padding(pad);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
@@ -490,9 +490,9 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_horz + buf));
 					D2D1_SIZE_F pad;
-					m_dialog_sheet.slist_back()->get_text_pad(pad);
+					m_dialog_sheet.slist_back()->get_text_padding(pad);
 					pad.width = static_cast<FLOAT>(val);
-					if (m_dialog_sheet.slist_back()->set_text_pad(pad)) {
+					if (m_dialog_sheet.slist_back()->set_text_padding(pad)) {
 						dialog_draw();
 					}
 				})
@@ -508,16 +508,16 @@ namespace winrt::GraphPaper::implementation
 					conv_len_to_str<LEN_UNIT_NAME_APPEND>(unit, val, dpi, g_len, buf);
 					dialog_slider_0().Header(box_value(str_text_pad_vert + buf));
 					D2D1_SIZE_F pad;
-					m_dialog_sheet.slist_back()->get_text_pad(pad);
+					m_dialog_sheet.slist_back()->get_text_padding(pad);
 					pad.height = static_cast<FLOAT>(val);
-					if (m_dialog_sheet.slist_back()->set_text_pad(pad)) {
+					if (m_dialog_sheet.slist_back()->set_text_padding(pad)) {
 						dialog_draw();
 					}
 				})
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				D2D1_SIZE_F samp_val;
-				m_dialog_sheet.slist_back()->get_text_pad(samp_val);
+				m_dialog_sheet.slist_back()->get_text_padding(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_PAD>(samp_val)) {
 					main_sheet_draw();

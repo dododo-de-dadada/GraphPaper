@@ -750,7 +750,7 @@ namespace winrt::GraphPaper::implementation
 				mfi_menu_stroke_dash_pat().IsEnabled(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::STROKE_WIDTH || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::STROKE_WIDTH || U == UNDO_T::NIL) {
 			if (equal(m_main_sheet.m_stroke_width, 0.0f)) {
 				rmfi_popup_stroke_width_0px().IsChecked(true);
 				rmfi_menu_stroke_width_0px().IsChecked(true);
@@ -788,7 +788,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_stroke_width_other().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::STROKE_CAP || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::STROKE_CAP || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_stroke_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
 				rmfi_popup_stroke_cap_flat().IsChecked(true);
 				rmfi_menu_stroke_cap_flat().IsChecked(true);
@@ -806,7 +806,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_stroke_cap_triangle().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::ARROW_STYLE || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::ARROW_STYLE || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_arrow_style == ARROW_STYLE::ARROW_NONE) {
 				rmfi_popup_stroke_arrow_none().IsChecked(true);
 				rmfi_menu_stroke_arrow_none().IsChecked(true);
@@ -826,7 +826,7 @@ namespace winrt::GraphPaper::implementation
 				mfi_menu_stroke_arrow_size().IsEnabled(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::JOIN_STYLE || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::JOIN_STYLE || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 				rmfi_popup_stroke_join_bevel().IsChecked(true);
 				rmfi_menu_stroke_join_bevel().IsChecked(true);
@@ -844,7 +844,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_stroke_join_round().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::FONT_STRETCH || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::FONT_STRETCH || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_font_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED) {
 				rmfi_popup_font_stretch_ultra_condensed().IsChecked(true);
 				rmfi_menu_font_stretch_ultra_condensed().IsChecked(true);
@@ -882,7 +882,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_font_stretch_ultra_expanded().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::FONT_STYLE || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::FONT_STYLE || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC) {
 				rmfi_popup_font_style_italic().IsChecked(true);
 				rmfi_menu_font_style_italic().IsChecked(true);
@@ -896,7 +896,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_font_style_oblique().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::FONT_WEIGHT || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::FONT_WEIGHT || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_font_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN) {
 				rmfi_popup_font_weight_thin().IsChecked(true);
 				rmfi_menu_font_weight_thin().IsChecked(true);
@@ -938,7 +938,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_font_weight_extra_black().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::TEXT_ALIGN_T || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::TEXT_ALIGN_T || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_text_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING) {
 				rmfi_popup_text_align_left().IsChecked(true);
 				rmfi_menu_text_align_left().IsChecked(true);
@@ -956,7 +956,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_text_align_just().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::TEXT_ALIGN_P || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::TEXT_ALIGN_P || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
 				rmfi_popup_text_align_top().IsChecked(true);
 				rmfi_menu_text_align_top().IsChecked(true);
@@ -970,7 +970,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_text_align_mid().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::TEXT_WRAP || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::TEXT_WRAP || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_text_word_wrap == DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP) {
 				rmfi_popup_text_wrap().IsChecked(true);
 				rmfi_menu_text_wrap().IsChecked(true);
@@ -984,7 +984,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_text_wrap_char().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::GRID_EMPH || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::GRID_EMPH || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_grid_emph.m_gauge_1 == 0 && m_main_sheet.m_grid_emph.m_gauge_2 == 0) {
 				rmfi_popup_grid_emph_1().IsChecked(true);
 				rmfi_menu_grid_emph_1().IsChecked(true);
@@ -998,7 +998,7 @@ namespace winrt::GraphPaper::implementation
 				rmfi_menu_grid_emph_3().IsChecked(true);
 			}
 		}
-		else if constexpr (U == UNDO_T::GRID_SHOW || U == UNDO_T::NIL) {
+		if constexpr (U == UNDO_T::GRID_SHOW || U == UNDO_T::NIL) {
 			if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
 				rmfi_popup_grid_show_back().IsChecked(true);
 				rmfi_menu_grid_show_back().IsChecked(true);

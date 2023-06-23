@@ -102,48 +102,48 @@ namespace winrt::GraphPaper::implementation
 			start.x + end_to.x, start.y + end_to.y
 		};
 		if (loc_hit_test(test_pt, se_pt, a_len)) {
-			return LOC_TYPE::LOC_SE;
+			return LOCUS_TYPE::LOCUS_SE;
 		}
 		const D2D1_POINT_2F ne_pt{
 			se_pt.x, start.y
 		};
 		if (loc_hit_test(test_pt, ne_pt, a_len)) {
-			return LOC_TYPE::LOC_NE;
+			return LOCUS_TYPE::LOCUS_NE;
 		}
 		const D2D1_POINT_2F sw_pt{
 			start.x, se_pt.y
 		};
 		if (loc_hit_test(test_pt, sw_pt, a_len)) {
-			return LOC_TYPE::LOC_SW;
+			return LOCUS_TYPE::LOCUS_SW;
 		}
 		if (loc_hit_test(test_pt, start, a_len)) {
-			return LOC_TYPE::LOC_NW;
+			return LOCUS_TYPE::LOCUS_NW;
 		}
 		const D2D1_POINT_2F s_pt{
 			static_cast<FLOAT>(start.x + end_to.x * 0.5), se_pt.y
 		};
 		if (loc_hit_test(test_pt, s_pt, a_len)) {
-			return LOC_TYPE::LOC_SOUTH;
+			return LOCUS_TYPE::LOCUS_SOUTH;
 		}
 		const D2D1_POINT_2F e_pt{
 			se_pt.x, static_cast<FLOAT>(start.y + end_to.y * 0.5)
 		};
 		if (loc_hit_test(test_pt, e_pt, a_len)) {
-			return LOC_TYPE::LOC_EAST;
+			return LOCUS_TYPE::LOCUS_EAST;
 		}
 		const D2D1_POINT_2F w_pt{
 			start.x, e_pt.y
 		};
 		if (loc_hit_test(test_pt, w_pt, a_len)) {
-			return LOC_TYPE::LOC_WEST;
+			return LOCUS_TYPE::LOCUS_WEST;
 		}
 		const D2D1_POINT_2F n_pt{
 			s_pt.x, start.y
 		};
 		if (loc_hit_test(test_pt, n_pt, a_len)) {
-			return LOC_TYPE::LOC_NORTH;
+			return LOCUS_TYPE::LOCUS_NORTH;
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// ê}å`Ç™ì_Çä‹ÇﬁÇ©îªíËÇ∑ÇÈ.
@@ -156,42 +156,42 @@ namespace winrt::GraphPaper::implementation
 		p[2].x = m_start.x + m_lineto.x;
 		p[2].y = m_start.y + m_lineto.y;
 		if (loc_hit_test(test_pt, p[2], m_loc_width)) {
-			return LOC_TYPE::LOC_SE;
+			return LOCUS_TYPE::LOCUS_SE;
 		}
 		p[3].x = m_start.x;
 		p[3].y = m_start.y + m_lineto.y;
 		if (loc_hit_test(test_pt, p[3], m_loc_width)) {
-			return LOC_TYPE::LOC_SW;
+			return LOCUS_TYPE::LOCUS_SW;
 		}
 		p[1].x = m_start.x + m_lineto.x;
 		p[1].y = m_start.y;
 		if (loc_hit_test(test_pt, p[1], m_loc_width)) {
-			return LOC_TYPE::LOC_NE;
+			return LOCUS_TYPE::LOCUS_NE;
 		}
 		if (loc_hit_test(test_pt, p[0], m_loc_width)) {
-			return LOC_TYPE::LOC_NW;
+			return LOCUS_TYPE::LOCUS_NW;
 		}
 
 		// äeï”ÇÃíÜì_ÇÃïîà Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
 		D2D1_POINT_2F bottom;
 		pt_avg(p[2], p[3], bottom);
 		if (loc_hit_test(test_pt, bottom, m_loc_width)) {
-			return LOC_TYPE::LOC_SOUTH;
+			return LOCUS_TYPE::LOCUS_SOUTH;
 		}
 		D2D1_POINT_2F right;
 		pt_avg(p[1], p[2], right);
 		if (loc_hit_test(test_pt, right, m_loc_width)) {
-			return LOC_TYPE::LOC_EAST;
+			return LOCUS_TYPE::LOCUS_EAST;
 		}
 		D2D1_POINT_2F left;
 		pt_avg(p[0], p[3], left);
 		if (loc_hit_test(test_pt, left, m_loc_width)) {
-			return LOC_TYPE::LOC_WEST;
+			return LOCUS_TYPE::LOCUS_WEST;
 		}
 		D2D1_POINT_2F top;
 		pt_avg(p[0], p[1], top);
 		if (loc_hit_test(test_pt, top, m_loc_width)) {
-			return LOC_TYPE::LOC_NORTH;
+			return LOCUS_TYPE::LOCUS_NORTH;
 		}
 
 		// ëŒäpÇ…Ç†ÇÈí∏ì_ÇÇ‡Ç∆Ç…, ï˚å`ÇìæÇÈ.
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			if (is_opaque(m_fill_color) && pt_in_rect2(test_pt, r_lt, r_rb)) {
-				return LOC_TYPE::LOC_FILL;
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
 		else {
@@ -243,14 +243,14 @@ namespace winrt::GraphPaper::implementation
 				// èkè¨ÇµÇΩï˚å`Ç…ä‹Ç‹ÇÍÇÈ (ï”Ç…ä‹Ç‹ÇÍÇ»Ç¢) Ç©îªíËÇ∑ÇÈ.
 				if (pt_in_rect2(test_pt, s_lb, s_rb)) {
 					if (is_opaque(m_fill_color)) {
-						return LOC_TYPE::LOC_FILL;
+						return LOCUS_TYPE::LOCUS_FILL;
 					}
 				}
 				// èkè¨ÇµÇΩï˚å`Ç™îΩì]Ç∑ÇÈ (ògÇ™ëæÇ∑Ç¨Çƒê}å`Çï¢Ç§),
 				// Ç‹ÇΩÇÕ, ï˚å`ÇÃäpÇ…ä‹Ç‹ÇÍÇƒÇ»Ç¢ (ï”Ç…ä‹Ç‹ÇÍÇÈ) Ç©îªíËÇ∑ÇÈ.
 				else if (s_rb.x <= s_lb.x || s_rb.y <= s_lb.y ||
 					r_lt.x <= test_pt.x && test_pt.x <= r_rb.x || r_lt.y <= test_pt.y && test_pt.y <= r_rb.y) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 				// ê¸ògÇÃåãçáÇ™ä€ÇﬂÇ©îªíËÇ∑ÇÈ.
 				else if (m_stroke_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 						pt_in_circle(test_pt, p[1], e_thick) ||
 						pt_in_circle(test_pt, p[2], e_thick) ||
 						pt_in_circle(test_pt, p[3], e_thick)) {
-						return LOC_TYPE::LOC_STROKE;
+						return LOCUS_TYPE::LOCUS_STROKE;
 					}
 				}
 				// ê¸ògÇÃåãçáÇ™ñ éÊÇË, Ç‹ÇΩÇÕ, êÎÇËÅEñ éÊÇËÇ≈Ç©Ç¬êÎÇËêßå¿Ç™Å„2 ñ¢ñûÇ©îªíËÇ∑ÇÈ.
@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[1].x, test_pt.y - p[1].y }, 4, q) ||
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[2].x, test_pt.y - p[2].y }, 4, q) ||
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[3].x, test_pt.y - p[3].y }, 4, q)) {
-						return LOC_TYPE::LOC_STROKE;
+						return LOCUS_TYPE::LOCUS_STROKE;
 					}
 				}
 				// ê¸ògÇÃåãçáÇ™êÎÇË, Ç‹ÇΩÇÕ, êÎÇË/ñ éÊÇËÇ≈Ç©Ç¬êÎÇËêßå¿Ç™Å„2 à»è„Ç©îªíËÇ∑ÇÈ.
@@ -289,12 +289,12 @@ namespace winrt::GraphPaper::implementation
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[1].x, test_pt.y - p[1].y }, 4, q) ||
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[2].x, test_pt.y - p[2].y }, 4, q) ||
 						pt_in_poly(D2D1_POINT_2F{ test_pt.x - p[3].x, test_pt.y - p[3].y }, 4, q)) {
-						return LOC_TYPE::LOC_STROKE;
+						return LOCUS_TYPE::LOCUS_STROKE;
 					}
 				}
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// ã´äEãÈå`ÇìæÇÈ.
@@ -354,31 +354,31 @@ namespace winrt::GraphPaper::implementation
 	void ShapeOblong::get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept
 	{
 		switch (loc) {
-		case LOC_TYPE::LOC_NORTH:
+		case LOCUS_TYPE::LOCUS_NORTH:
 			val.x = m_start.x + m_lineto.x * 0.5f;
 			val.y = m_start.y;
 			break;
-		case LOC_TYPE::LOC_NE:
+		case LOCUS_TYPE::LOCUS_NE:
 			val.x = m_start.x + m_lineto.x;
 			val.y = m_start.y;
 			break;
-		case LOC_TYPE::LOC_WEST:
+		case LOCUS_TYPE::LOCUS_WEST:
 			val.x = m_start.x;
 			val.y = m_start.y + m_lineto.y * 0.5f;
 			break;
-		case LOC_TYPE::LOC_EAST:
+		case LOCUS_TYPE::LOCUS_EAST:
 			val.x = m_start.x + m_lineto.x;
 			val.y = m_start.y + m_lineto.y * 0.5f;
 			break;
-		case LOC_TYPE::LOC_SW:
+		case LOCUS_TYPE::LOCUS_SW:
 			val.x = m_start.x;
 			val.y = m_start.y + m_lineto.y;
 			break;
-		case LOC_TYPE::LOC_SOUTH:
+		case LOCUS_TYPE::LOCUS_SOUTH:
 			val.x = m_start.x + m_lineto.x * 0.5f;
 			val.y = m_start.y + m_lineto.y;
 			break;
-		case LOC_TYPE::LOC_SE:
+		case LOCUS_TYPE::LOCUS_SE:
 			val.x = m_start.x + m_lineto.x;
 			val.y = m_start.y + m_lineto.y;
 			break;
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		switch (loc) {
-		case LOC_TYPE::LOC_SHEET:
+		case LOCUS_TYPE::LOCUS_SHEET:
 		{
 			D2D1_POINT_2F pt;
 			pt_round(val, PT_ROUND, pt);
@@ -449,7 +449,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_NW:
+		case LOCUS_TYPE::LOCUS_NW:
 		{
 			D2D1_POINT_2F pt;
 			pt_round(val, PT_ROUND, pt);
@@ -462,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_SE:
+		case LOCUS_TYPE::LOCUS_SE:
 		{
 			D2D1_POINT_2F pt;
 			pt_round(val, PT_ROUND, pt);
@@ -474,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_NE:
+		case LOCUS_TYPE::LOCUS_NE:
 		{
 			D2D1_POINT_2F pt;
 			pt_round(val, PT_ROUND, pt);
@@ -487,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_SW:
+		case LOCUS_TYPE::LOCUS_SW:
 		{
 			D2D1_POINT_2F pt;
 			pt_round(val, PT_ROUND, pt);
@@ -500,7 +500,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_WEST:
+		case LOCUS_TYPE::LOCUS_WEST:
 		{
 			const double to_x = std::round((static_cast<double>(val.x) - m_start.x) / PT_ROUND) * PT_ROUND;
 			if (to_x <= -FLT_MIN || to_x >= FLT_MIN) {
@@ -510,7 +510,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_EAST:
+		case LOCUS_TYPE::LOCUS_EAST:
 		{
 			const double to_x = std::round((static_cast<double>(val.x) - m_start.x - m_lineto.x) / PT_ROUND) * PT_ROUND;
 			if (to_x <= -FLT_MIN || to_x >= FLT_MIN) {
@@ -519,7 +519,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_NORTH:
+		case LOCUS_TYPE::LOCUS_NORTH:
 		{
 			const double to_y = std::round((static_cast<double>(val.y) - m_start.y) / PT_ROUND) * PT_ROUND;
 			if (to_y <= -FLT_MIN || to_y >= FLT_MIN) {
@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case LOC_TYPE::LOC_SOUTH:
+		case LOCUS_TYPE::LOCUS_SOUTH:
 		{
 			const double to_y = std::round(
 				(static_cast<double>(val.y) - m_start.y - m_lineto.y) / PT_ROUND) * PT_ROUND;
@@ -545,14 +545,14 @@ namespace winrt::GraphPaper::implementation
 		if (snap_point >= FLT_MIN) {
 			// èIì_Ç÷ÇÃç∑ï™ÇÃ x ílÇ™, å¿äEãóó£ñ¢ñûÇ©îªíËÇ∑ÇÈ.
 			if (m_lineto.x > -snap_point && m_lineto.x < snap_point) {
-				if (loc == LOC_TYPE::LOC_NE) {
+				if (loc == LOCUS_TYPE::LOCUS_NE) {
 					m_start.x += m_lineto.x;
 				}
 				m_lineto.x = 0.0f;
 				done = true;
 			}
 			if (m_lineto.y > -snap_point && m_lineto.y < snap_point) {
-				if (loc == LOC_TYPE::LOC_NE) {
+				if (loc == LOCUS_TYPE::LOCUS_NE) {
 					m_start.y += m_lineto.y;
 				}
 				m_lineto.y = 0.0f;

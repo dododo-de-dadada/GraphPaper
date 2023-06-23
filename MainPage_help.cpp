@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F pos{
 			static_cast<FLOAT>(samp_w - 2.0 * mar), static_cast<FLOAT>(samp_h - 2.0 * mar)
 		};
-		POLY_OPTION p_opt{ m_drawing_poly_opt };
+		POLY_OPTION p_opt{ m_tool_polygon };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
 		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_dialog_sheet, p_opt);
 		D2D1_POINT_2F b_lt;

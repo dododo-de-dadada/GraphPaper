@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
 		const uint32_t loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc != LOC_TYPE::LOC_SHEET) {
+		if (loc != LOCUS_TYPE::LOCUS_SHEET) {
 			return loc;
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 						static_cast<FLOAT>(p0.x + m_loc_width * 0.5f), max(p0.y, p1.y)
 					};
 					if (pt_in_rect(test_pt, p_min, p_max)) {
-						return LOC_TYPE::LOC_STROKE;
+						return LOCUS_TYPE::LOCUS_STROKE;
 					}
 				}
 				else {
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_loc_width * 0.5)
 					};
 					if (pt_in_rect(test_pt, p_min, p_max)) {
-						return LOC_TYPE::LOC_STROKE;
+						return LOCUS_TYPE::LOCUS_STROKE;
 					}
 				}
 				// ñ⁄ê∑ÇËÇÃílÇï\é¶Ç∑ÇÈ.
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				*/
 				if (pt_in_rect(test_pt, r_lt, r_rb)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 		}
@@ -98,10 +98,10 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F end_pt;
 			pt_add(m_start, m_lineto, end_pt);
 			if (pt_in_rect(test_pt, m_start, end_pt)) {
-				return LOC_TYPE::LOC_FILL;
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	HRESULT ShapeRuler::create_text_format(void) noexcept

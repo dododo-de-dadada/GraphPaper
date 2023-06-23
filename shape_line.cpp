@@ -147,10 +147,10 @@ namespace winrt::GraphPaper::implementation
 	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「開始点」ならば, 始点を得る.
-		if (loc == LOC_TYPE::LOC_START) {
+		if (loc == LOCUS_TYPE::LOCUS_START) {
 			val = m_start;
 		}
-		else if (loc == LOC_TYPE::LOC_END) {
+		else if (loc == LOCUS_TYPE::LOCUS_END) {
 			val.x = m_start.x + m_lineto.x;
 			val.y = m_start.y + m_lineto.y;
 		}
@@ -219,10 +219,10 @@ namespace winrt::GraphPaper::implementation
 			m_start.y + m_lineto.y
 		};
 		if (loc_hit_test(test_pt, end_pt, m_loc_width)) {
-			return LOC_TYPE::LOC_END;
+			return LOCUS_TYPE::LOCUS_END;
 		}
 		if (loc_hit_test(test_pt, m_start, m_loc_width)) {
-			return LOC_TYPE::LOC_START;
+			return LOCUS_TYPE::LOCUS_START;
 		}
 		const double e_width = 0.5 * max(m_stroke_width, m_loc_width);
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end_pt, dx - ox, dy - oy, q[2]);
 			pt_add(end_pt, dx + ox, dy + oy, q[3]);
 			if (pt_in_poly(test_pt, 4, q)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
@@ -264,13 +264,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end_pt, dx, dy, h[4]);
 			pt_add(end_pt, ox, oy, h[5]);
 			if (pt_in_poly(test_pt, 6, h)) {
-				return LOC_TYPE::LOC_STROKE;
+				return LOCUS_TYPE::LOCUS_STROKE;
 			}
 		}
 		else {
 			if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 				if (pt_in_circle(test_pt, m_start, e_width) || pt_in_circle(test_pt, end_pt, e_width)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 			D2D1_POINT_2F p{ m_lineto };
@@ -285,11 +285,11 @@ namespace winrt::GraphPaper::implementation
 				pt_add(end_pt, -ox, -oy, q[2]);
 				pt_add(end_pt, ox, oy, q[3]);
 				if (pt_in_poly(test_pt, 4, q)) {
-					return LOC_TYPE::LOC_STROKE;
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// 矩形に含まれるか判定する.
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeLine::set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		bool flag = false;
-		if (loc == LOC_TYPE::LOC_START) {
+		if (loc == LOCUS_TYPE::LOCUS_START) {
 			if (!equal(m_start, val)) {
 				const D2D1_POINT_2F end{
 					m_start.x + m_lineto.x, m_start.y + m_lineto.y
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 		}
-		else if (loc == LOC_TYPE::LOC_END) {
+		else if (loc == LOCUS_TYPE::LOCUS_END) {
 			const D2D1_POINT_2F end_pt{
 				m_start.x + m_lineto.x, m_start.y + m_lineto.y
 			};
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag) {
 			const double ss = static_cast<double>(snap_point) * static_cast<double>(snap_point);
 			if (ss > FLT_MIN && pt_abs2(m_lineto) <= ss) {
-				if (loc == LOC_TYPE::LOC_START) {
+				if (loc == LOCUS_TYPE::LOCUS_START) {
 					m_start.x = m_start.x + m_lineto.x;
 					m_start.y = m_start.y + m_lineto.y;
 				}

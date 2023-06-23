@@ -446,95 +446,95 @@ namespace winrt::GraphPaper::implementation
 			tmfi_menu_status_bar_zoom().IsChecked(false);
 		}
 
-		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-			rmfi_menu_selection_tool().IsChecked(true);
+		if (m_tool == DRAWING_TOOL::SELECT) {
+			menu_tool_selection().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::RECT) {
-			rmfi_menu_drawing_rect().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::RECT) {
+			menu_tool_rect().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
-			rmfi_menu_drawing_rrect().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::RRECT) {
+			menu_tool_rrect().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-			rmfi_menu_drawing_poly().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::POLY) {
+			menu_tool_polygon().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
-			rmfi_menu_drawing_ellipse().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::ELLIPSE) {
+			menu_tool_ellipse().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::ARC) {
-			rmfi_menu_drawing_arc().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::ARC) {
+			menu_tool_arc().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::LINE) {
-			rmfi_menu_drawing_line().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::LINE) {
+			menu_tool_line().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
-			rmfi_menu_drawing_bezier().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::BEZIER) {
+			menu_tool_bezier().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
-			rmfi_menu_drawing_text().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::TEXT) {
+			menu_tool_text().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::RULER) {
-			rmfi_menu_drawing_ruler().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::RULER) {
+			menu_tool_ruler().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-			rmfi_menu_eyedropper().IsChecked(true);
+		else if (m_tool == DRAWING_TOOL::EYEDROPPER) {
+			menu_tool_eyedropper().IsChecked(true);
 		}
-		else if (m_drawing_tool == DRAWING_TOOL::POINTER) {
-			rmfi_menu_pointer().IsChecked(true);
-		}
+		//else if (m_tool == DRAWING_TOOL::POINTER) {
+		//	rmfi_menu_pointer().IsChecked(true);
+		//}
 
-		if (m_drawing_poly_opt.m_vertex_cnt == 2) {
-			rmfi_menu_drawing_poly_di().IsChecked(true);
+		if (m_tool_polygon.m_vertex_cnt == 2) {
+			menu_tool_polygon_di().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 3) {
-			rmfi_menu_drawing_poly_tri().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 3) {
+			menu_tool_polygon_tri().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 4) {
-			rmfi_menu_drawing_poly_quad().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 4) {
+			menu_tool_polygon_quad().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 5) {
-			rmfi_menu_drawing_poly_pent().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 5) {
+			menu_tool_polygon_pent().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 6) {
-			rmfi_menu_drawing_poly_hexa().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 6) {
+			menu_tool_polygon_hexa().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 7) {
-			rmfi_menu_drawing_poly_hept().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 7) {
+			menu_tool_polygon_hept().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 8) {
-			rmfi_menu_drawing_poly_octa().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 8) {
+			menu_tool_polygon_octa().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 9) {
-			rmfi_menu_drawing_poly_nona().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 9) {
+			menu_tool_polygon_nona().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 10) {
-			rmfi_menu_drawing_poly_deca().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 10) {
+			menu_tool_polygon_deca().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 11) {
-			rmfi_menu_drawing_poly_hendeca().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 11) {
+			menu_tool_polygon_hendeca().IsChecked(true);
 		}
-		else if (m_drawing_poly_opt.m_vertex_cnt == 12) {
-			rmfi_menu_drawing_poly_dodeca().IsChecked(true);
+		else if (m_tool_polygon.m_vertex_cnt == 12) {
+			menu_tool_polygon_dodeca().IsChecked(true);
 		}
-		if (m_drawing_poly_opt.m_regular) {
+		if (m_tool_polygon.m_regular) {
 			tmfi_tool_poly_regular().IsChecked(true);
 		}
 		else {
 			tmfi_tool_poly_regular().IsChecked(false);
 		}
-		if (m_drawing_poly_opt.m_vertex_up) {
+		if (m_tool_polygon.m_vertex_up) {
 			tmfi_tool_poly_vertex_up().IsChecked(true);
 		}
 		else {
 			tmfi_tool_poly_vertex_up().IsChecked(false);
 		}
-		if (m_drawing_poly_opt.m_end_closed) {
+		if (m_tool_polygon.m_end_closed) {
 			tmfi_tool_poly_end_close().IsChecked(true);
 		}
 		else {
 			tmfi_tool_poly_end_close().IsChecked(false);
 		}
-		if (m_drawing_poly_opt.m_clockwise) {
+		if (m_tool_polygon.m_clockwise) {
 			tmfi_tool_poly_clockwise().IsChecked(true);
 		}
 		else {
@@ -704,15 +704,15 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			// メインページの作図の属性を読み込む.
-			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());
-			m_drawing_poly_opt.m_vertex_cnt = dt_reader.ReadUInt32();
-			if (m_drawing_poly_opt.m_vertex_cnt < 2 || m_drawing_poly_opt.m_vertex_cnt > 12) {
-				m_drawing_poly_opt.m_vertex_cnt = 3;
+			m_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());
+			m_tool_polygon.m_vertex_cnt = dt_reader.ReadUInt32();
+			if (m_tool_polygon.m_vertex_cnt < 2 || m_tool_polygon.m_vertex_cnt > 12) {
+				m_tool_polygon.m_vertex_cnt = 3;
 			}
-			m_drawing_poly_opt.m_regular = dt_reader.ReadBoolean();
-			m_drawing_poly_opt.m_vertex_up = dt_reader.ReadBoolean();
-			m_drawing_poly_opt.m_end_closed = dt_reader.ReadBoolean();
-			m_drawing_poly_opt.m_clockwise = dt_reader.ReadBoolean();
+			m_tool_polygon.m_regular = dt_reader.ReadBoolean();
+			m_tool_polygon.m_vertex_up = dt_reader.ReadBoolean();
+			m_tool_polygon.m_end_closed = dt_reader.ReadBoolean();
+			m_tool_polygon.m_clockwise = dt_reader.ReadBoolean();
 
 			// メインページの検索文字列を読み込む.
 			const size_t find_text_len = dt_reader.ReadUInt32();	// 文字数
@@ -1072,12 +1072,12 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(ra_stream.GetOutputStreamAt(0))
 			};
 			// 作図
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_tool));
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_poly_opt.m_vertex_cnt));
-			dt_writer.WriteBoolean(m_drawing_poly_opt.m_regular);
-			dt_writer.WriteBoolean(m_drawing_poly_opt.m_vertex_up);
-			dt_writer.WriteBoolean(m_drawing_poly_opt.m_end_closed);
-			dt_writer.WriteBoolean(m_drawing_poly_opt.m_clockwise);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_polygon.m_vertex_cnt));
+			dt_writer.WriteBoolean(m_tool_polygon.m_regular);
+			dt_writer.WriteBoolean(m_tool_polygon.m_vertex_up);
+			dt_writer.WriteBoolean(m_tool_polygon.m_end_closed);
+			dt_writer.WriteBoolean(m_tool_polygon.m_clockwise);
 			// 検索文字列
 			const uint32_t find_text_len = wchar_len(m_find_text);
 			dt_writer.WriteUInt32(find_text_len);
@@ -1269,11 +1269,12 @@ namespace winrt::GraphPaper::implementation
 		recent_file_add(nullptr);
 		file_finish_reading();
 
-		m_event_loc_pressed = LOC_TYPE::LOC_SHEET;
+		m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
 		m_event_shape_pressed = nullptr;
 		m_event_shape_last = nullptr;
 
 		menu_is_enable();
+		menu_is_checked<UNDO_T::NIL>();
 		main_sheet_draw();
 	}
 

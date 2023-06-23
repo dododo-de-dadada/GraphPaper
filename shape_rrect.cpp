@@ -136,19 +136,19 @@ namespace winrt::GraphPaper::implementation
 		const double ry = fabs(my) < fabs(m_corner_radius.y) ? my : m_corner_radius.y;	// äpä€ y
 
 		switch (loc) {
-		case LOC_TYPE::LOC_R_NW:
+		case LOCUS_TYPE::LOCUS_R_NW:
 			// ç∂è„ÇÃäpä€íÜêSì_ÇãÅÇﬂÇÈ
 			pt_add(m_start, rx, ry, val);
 			break;
-		case LOC_TYPE::LOC_R_NE:
+		case LOCUS_TYPE::LOCUS_R_NE:
 			// âEè„ÇÃäpä€íÜêSì_ÇãÅÇﬂÇÈ
 			pt_add(m_start, dx - rx, ry, val);
 			break;
-		case LOC_TYPE::LOC_R_SE:
+		case LOCUS_TYPE::LOCUS_R_SE:
 			// âEâ∫ÇÃäpä€íÜêSì_ÇãÅÇﬂÇÈ
 			pt_add(m_start, dx - rx, dy - ry, val);
 			break;
-		case LOC_TYPE::LOC_R_SW:
+		case LOCUS_TYPE::LOCUS_R_SW:
 			// ç∂â∫ÇÃäpä€íÜêSì_ÇãÅÇﬂÇÈ
 			pt_add(m_start, rx, dy - ry, val);
 			break;
@@ -236,33 +236,33 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F loc_r_ne{ loc_r_se.x, loc_r_nw.y };
 		const D2D1_POINT_2F loc_r_sw{ loc_r_nw.x, loc_r_se.y };
 		if (loc_hit_test(test_pt, loc_r_se, m_loc_width)) {
-			loc_r = LOC_TYPE::LOC_R_SE;
+			loc_r = LOCUS_TYPE::LOCUS_R_SE;
 		}
 		else if (loc_hit_test(test_pt, loc_r_nw, m_loc_width)) {
-			loc_r = LOC_TYPE::LOC_R_NW;
+			loc_r = LOCUS_TYPE::LOCUS_R_NW;
 		}
 		else if (loc_hit_test(test_pt, loc_r_sw, m_loc_width)) {
-			loc_r = LOC_TYPE::LOC_R_SW;
+			loc_r = LOCUS_TYPE::LOCUS_R_SW;
 		}
 		else if (loc_hit_test(test_pt, loc_r_ne, m_loc_width)) {
-			loc_r = LOC_TYPE::LOC_R_NE;
+			loc_r = LOCUS_TYPE::LOCUS_R_NE;
 		}
 		else {
-			loc_r = LOC_TYPE::LOC_SHEET;
+			loc_r = LOCUS_TYPE::LOCUS_SHEET;
 		}
 
 		// äpä€ÇÃÇ¢Ç∏ÇÍÇ©ÇÃíÜêSì_Ç…ä‹Ç‹ÇÍÇÈ,
-		if (loc_r != LOC_TYPE::LOC_SHEET &&
+		if (loc_r != LOCUS_TYPE::LOCUS_SHEET &&
 			// Ç©Ç¬, ï˚å`ÇÃëÂÇ´Ç≥Ç™ê}å`ÇÃïîà ÇÃî{ÇÃëÂÇ´Ç≥ÇÊÇËëÂÇ´Ç¢Ç©îªíËÇ∑ÇÈ.
 			fabs(m_lineto.x) > m_loc_width && fabs(m_lineto.y) > 2.0f * m_loc_width) {
 			return loc_r;
 		}
 		const uint32_t loc_v = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc_v != LOC_TYPE::LOC_SHEET) {
+		if (loc_v != LOCUS_TYPE::LOCUS_SHEET) {
 			return loc_v;
 		}
 		// í∏ì_Ç…ä‹Ç‹ÇÍÇ∏, äpä€ÇÃâ~å ÇÃíÜêSì_Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
-		else if (loc_r != LOC_TYPE::LOC_SHEET) {
+		else if (loc_r != LOCUS_TYPE::LOCUS_SHEET) {
 			return loc_r;
 		}
 
@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// ìhÇËÇ¬Ç‘ÇµêFÇ™ïsìßñæ, Ç©Ç¬äpä€ï˚å`ÇªÇÃÇ‡ÇÃÇ…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
 			if (is_opaque(m_fill_color) && pt_in_rrect(test_pt, r_lt, r_rb, r_rad)) {
-				return LOC_TYPE::LOC_FILL;
+				return LOCUS_TYPE::LOCUS_FILL;
 			}
 		}
 		// ê¸ògÇÃêFÇ™ïsìßñæ, Ç©Ç¬ëæÇ≥Ç™ 0 ÇÊÇËëÂÇ´Ç¢.
@@ -310,18 +310,18 @@ namespace winrt::GraphPaper::implementation
 				pt_add(e_rb, -ew, s_rb);
 				pt_add(e_rad, -ew, s_rad);
 				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(test_pt, s_lt, s_rb, s_rad)) {
-					// ìhÇËÇ¬Ç‘ÇµêFÇ™ïsìßñæÇ»ÇÁ, LOC_FILL Çï‘Ç∑.
+					// ìhÇËÇ¬Ç‘ÇµêFÇ™ïsìßñæÇ»ÇÁ, LOCUS_FILL Çï‘Ç∑.
 					if (is_opaque(m_fill_color)) {
-						return LOC_TYPE::LOC_FILL;
+						return LOCUS_TYPE::LOCUS_FILL;
 					}
 				}
 				else {
-					// ägëÂÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍ, èkè¨ÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍÇ»Ç¢Ç»ÇÁ LOC_STROKE Çï‘Ç∑.
-					return LOC_TYPE::LOC_STROKE;
+					// ägëÂÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍ, èkè¨ÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍÇ»Ç¢Ç»ÇÁ LOCUS_STROKE Çï‘Ç∑.
+					return LOCUS_TYPE::LOCUS_STROKE;
 				}
 			}
 		}
-		return LOC_TYPE::LOC_SHEET;
+		return LOCUS_TYPE::LOCUS_SHEET;
 	}
 
 	// ílÇ, éwíËÇµÇΩïîà ÇÃì_Ç…äiî[Ç∑ÇÈ.
@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F q;	// êVÇµÇ¢ì_
 
 		switch (loc) {
-		case LOC_TYPE::LOC_R_NW:
+		case LOCUS_TYPE::LOCUS_R_NW:
 			ShapeRRect::get_pos_loc(loc, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_corner_radius, p, r);
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOC_TYPE::LOC_R_NE:
+		case LOCUS_TYPE::LOCUS_R_NE:
 			ShapeRRect::get_pos_loc(loc, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 			r.y = m_corner_radius.y + p.y;
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOC_TYPE::LOC_R_SE:
+		case LOCUS_TYPE::LOCUS_R_SE:
 			ShapeRRect::get_pos_loc(loc, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
@@ -368,7 +368,7 @@ namespace winrt::GraphPaper::implementation
 			r.y = m_corner_radius.y - p.y;
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOC_TYPE::LOC_R_SW:
+		case LOCUS_TYPE::LOCUS_R_SW:
 			ShapeRRect::get_pos_loc(loc, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);

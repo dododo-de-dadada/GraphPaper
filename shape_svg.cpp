@@ -665,7 +665,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列を表示する左上点に余白を加える.
 		D2D1_POINT_2F lt_pt{};	// 左上点
-		pt_add(m_start, m_text_pad.width, m_text_pad.height, lt_pt);
+		pt_add(m_start, m_text_padding.width, m_text_padding.height, lt_pt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;

@@ -318,7 +318,7 @@
 	<comment>MenuBarItem</comment>
   </data>
   <data name="mbi_menu_font.Title" xml:space="preserve">
-	<value>書体(T)</value>
+	<value>書体(O)</value>
 	<comment>MenuBarItem</comment>
   </data>
   <data name="mbi_menu_layout.Title" xml:space="preserve">
@@ -337,8 +337,8 @@
 	<value>塗り(I)</value>
 	<comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_drawing.Title" xml:space="preserve">
-	<value>作図(D)</value>
+  <data name="menu_tool.Title" xml:space="preserve">
+	<value>ツール(T)</value>
 	<comment>MenuBarItem</comment>
   </data>
   <data name="mfi_menu_about_this.Text" xml:space="preserve">
@@ -669,43 +669,43 @@
 	<value>上よせ</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_bezier.Text" xml:space="preserve">
+  <data name="menu_tool_bezier.Text" xml:space="preserve">
 	<value>曲線</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_ellipse.Text" xml:space="preserve">
+  <data name="menu_tool_ellipse.Text" xml:space="preserve">
 	<value>だ円形</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_line.Text" xml:space="preserve">
+  <data name="menu_tool_line.Text" xml:space="preserve">
 	<value>直線</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly.Text" xml:space="preserve">
+  <data name="menu_tool_polygon.Text" xml:space="preserve">
 	<value>多角形</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_arc.Text" xml:space="preserve">
+  <data name="menu_tool_arc.Text" xml:space="preserve">
 	<value>円弧</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_rect.Text" xml:space="preserve">
+  <data name="menu_tool_rect.Text" xml:space="preserve">
 	<value>方形</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_rrect.Text" xml:space="preserve">
+  <data name="menu_tool_rrect.Text" xml:space="preserve">
 	<value>角丸方形</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_ruler.Text" xml:space="preserve">
+  <data name="menu_tool_ruler.Text" xml:space="preserve">
 	<value>定規</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_eyedropper.Text" xml:space="preserve">
+  <data name="menu_tool_eyedropper.Text" xml:space="preserve">
 	<value>色の抽出</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_selection_tool.Text" xml:space="preserve">
+  <data name="menu_tool_selection.Text" xml:space="preserve">
 	<value>選択</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -1058,7 +1058,7 @@
 	<value>並び替え</value>
 	<comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_text.Text" xml:space="preserve">
+  <data name="menu_tool_text.Text" xml:space="preserve">
 	<value>文字列</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -1066,47 +1066,47 @@
 	<value>枠を文字列に合わせる</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_deca.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_deca.Text" xml:space="preserve">
 	<value>十角形 (10)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_hendeca.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_hendeca.Text" xml:space="preserve">
 	<value>十一角形 (11)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_dodeca.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_dodeca.Text" xml:space="preserve">
 	<value>十二角形 (12)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_di.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_di.Text" xml:space="preserve">
 	<value>二角形 (2)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_hept.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_hept.Text" xml:space="preserve">
 	<value>七角形 (7)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_hexa.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_hexa.Text" xml:space="preserve">
 	<value>六角形 (6)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_nona.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_nona.Text" xml:space="preserve">
 	<value>九角形 (9)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_octa.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_octa.Text" xml:space="preserve">
 	<value>八角形 (8)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_pent.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_pent.Text" xml:space="preserve">
 	<value>五角形 (5)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_quad.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_quad.Text" xml:space="preserve">
 	<value>四辺形 (4)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_menu_drawing_poly_tri.Text" xml:space="preserve">
+  <data name="menu_tool_polygon_tri.Text" xml:space="preserve">
 	<value>三角形 (3)</value>
 	<comment>RadioMenuFlyoutItem</comment>
   </data>
