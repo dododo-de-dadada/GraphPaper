@@ -539,9 +539,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 行間を得る.
-	bool ShapeSheet::get_text_line_sp(float& val) const noexcept
+	bool ShapeSheet::get_text_line_space(float& val) const noexcept
 	{
-		val = m_text_line_sp;
+		val = m_text_line_space;
 		return true;
 	}
 
@@ -812,7 +812,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間
 		const float t_line_sp = dt_reader.ReadSingle();
 		if (t_line_sp >= 0.0f && t_line_sp <= 127.5f) {
-			m_text_line_sp = t_line_sp;
+			m_text_line_space = t_line_sp;
 		}
 		// 文字列の余白
 		const D2D1_SIZE_F t_pad{
@@ -1098,10 +1098,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を行間に格納する.
-	bool ShapeSheet::set_text_line_sp(const float val) noexcept
+	bool ShapeSheet::set_text_line_space(const float val) noexcept
 	{
-		if (!equal(m_text_line_sp, val)) {
-			m_text_line_sp = val;
+		if (!equal(m_text_line_space, val)) {
+			m_text_line_space = val;
 			return true;
 		}
 		return false;
@@ -1149,7 +1149,7 @@ namespace winrt::GraphPaper::implementation
 			s->get_stroke_width(m_stroke_width);
 			s->get_text_align_horz(m_text_align_horz);
 			s->get_text_align_vert(m_text_align_vert);
-			s->get_text_line_sp(m_text_line_sp);
+			s->get_text_line_space(m_text_line_space);
 			s->get_text_padding(m_text_padding);
 			s->get_text_wrap(m_text_word_wrap);
 		}
@@ -1251,7 +1251,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列のそろえ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_horz));
 		// 行間
-		dt_writer.WriteSingle(m_text_line_sp);
+		dt_writer.WriteSingle(m_text_line_space);
 		// 文字列の余白
 		dt_writer.WriteSingle(m_text_padding.width);
 		dt_writer.WriteSingle(m_text_padding.height);

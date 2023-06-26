@@ -497,7 +497,7 @@
 	<value>一覧を表示</value>
 	<comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_menu_text_line_sp.Text" xml:space="preserve">
+  <data name="menu_text_line_space.Text" xml:space="preserve">
 	<value>行間...</value>
 	<comment>MenuFlyoutItem</comment>
   </data>

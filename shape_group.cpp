@@ -7,9 +7,6 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	//------------------------------
 	// 図形を表示する.
 	//------------------------------
@@ -30,8 +27,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			ID2D1RenderTarget* const target = Shape::m_d2d_target;
 			ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
-			target->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush,
-				m_aux_width, m_aux_style.get());
+			target->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush, m_aux_width, m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
@@ -44,12 +40,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 境界矩形を得る.
-	void ShapeGroup::get_bbox(
-		const D2D1_POINT_2F a_lt,	// 元の矩形の左上位置.
-		const D2D1_POINT_2F a_rb,	// 元の矩形の右下位置.
-		D2D1_POINT_2F& b_lt,	// 得られた矩形の左上位置.
-		D2D1_POINT_2F& b_rb	// 得られた矩形の右下位置.
-	) const noexcept
+	// a_lt	元の矩形の左上位置.
+	// a_rb	元の矩形の右下位置.
+	// b_lt	得られた矩形の左上位置.
+	// b_rb	得られた矩形の右下位置.
+	void ShapeGroup::get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
 		b_lt = a_lt;
 		b_rb = a_rb;

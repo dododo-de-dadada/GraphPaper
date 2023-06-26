@@ -255,7 +255,7 @@
     <ClCompile Include="shape_ellipse.cpp" />
     <ClCompile Include="shape_group.cpp" />
     <ClCompile Include="shape_line.cpp" />
-    <ClCompile Include="shape_pdf.cpp" />
+    <ClCompile Include="shape_export_pdf.cpp" />
     <ClCompile Include="shape_slist.cpp" />
     <ClCompile Include="shape_path.cpp" />
     <ClCompile Include="shape_page.cpp" />
@@ -264,7 +264,7 @@
     <ClCompile Include="shape_rrect.cpp" />
     <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="shape_stroke.cpp" />
-    <ClCompile Include="shape_svg.cpp" />
+    <ClCompile Include="shape_export_svg.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="zlib.cpp">

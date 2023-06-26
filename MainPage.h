@@ -19,7 +19,7 @@
 // MainPage_color.cpp	色 (線枠, 塗りつぶし, 書体, 方眼, 用紙), 画像の不透明度
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
-// MainPage_edit.cpp	円弧や文字列の編集
+// MainPage_edit.cpp	図形の編集
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_find.cpp	文字列の編集, 検索と置換
@@ -56,6 +56,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Core::CoreCursor;
+	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
@@ -78,9 +79,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 	using winrt::Windows::UI::Xaml::UIElement;
 	using winrt::Windows::UI::Xaml::Input::GettingFocusEventArgs;
+	using winrt::Windows::UI::Xaml::Window;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
-	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
@@ -208,13 +209,24 @@ namespace winrt::GraphPaper::implementation
 	constexpr STATUS_BAR STATUS_BAR_DEF_VAL = static_cast<STATUS_BAR>(static_cast<uint32_t>(STATUS_BAR::DRAW) | static_cast<uint32_t>(STATUS_BAR::POS) | static_cast<uint32_t>(STATUS_BAR::ZOOM));
 
 	// 列挙型を AND 演算する.
+	// 戻り値	a & b
 	inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b)
 	{
 		return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 	}
 
-	// 待機カーソルを表示, 表示する前のカーソルを得る.
-	const CoreCursor wait_cursor_show(void);
+	// 待機カーソルを表示する.
+	// 戻り値	それまで表示されていたカーソル.
+	inline const CoreCursor wait_cursor_show(void)
+	{
+		const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
+		const auto& core_win = Window::Current().CoreWindow();
+		const auto& prev_cur = core_win.PointerCursor();
+		if (prev_cur.Type() != CURS_WAIT.Type()) {
+			core_win.PointerCursor(CURS_WAIT);
+		}
+		return prev_cur;
+	}
 
 	//-------------------------------
 	// メインページ
@@ -245,21 +257,10 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_wrap_around = false;	// 折り返しあり
 		bool m_find_use_escseq = false;	// エスケープ文字列を使用
 
-		// 文字列の編集
-		// trail = false    trail = true
-		//   start  end        start end
-		//     |     |           |   |
-		// 0 1 2 3 4 5 6     0 1 2 3 4 5 6
-		//    +-----+           +-----+
-		// a b|c d e|f g     a b|c d e|f g
-		//    +-----+           +-----+
-		// 複数行あるとき, キャレットが行末にあるか, それとも次の行頭にあるか, 区別するため.
 		CoreTextEditContext m_core_text{ CoreTextServicesManager::GetForCurrentView().CreateEditContext() };	// 編集コンテキスト (状態)
 		ShapeText* m_core_text_focused = nullptr;	// 編集中の文字列図形
 		bool m_core_text_comp = false;	// 入力変換フラグ. 変換中なら true, それ以外なら false.
 		uint32_t m_core_text_comp_start = 0;	// 入力変換開始時の開始位置
-		//uint32_t m_core_text_end = 0;	// 入力変換開始時の終了位置
-		//bool m_core_text_trail = false;	// 入力変換開始時のキャレット前後判定
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_point_curr{ 0.0F, 0.0F };	// ポインターの現在点
@@ -300,6 +301,7 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_undo_stack;	// 元に戻す操作スタック
 		uint32_t m_undo_select_cnt = 0;	// 選択された図形の数
 		uint32_t m_undo_undeleted_cnt = 0;	// 削除されていない図形の数
+		bool m_undo_is_updated = false;
 
 #ifdef _DEBUG
 		void debug_cnt(void) {
@@ -565,7 +567,6 @@ namespace winrt::GraphPaper::implementation
 			m_event_point_curr.x = static_cast<FLOAT>(sb_horz().Value() + p.X / m_main_scale + m_main_bbox_lt.x);
 			m_event_point_curr.y = static_cast<FLOAT>(sb_vert().Value() + p.Y / m_main_scale + m_main_bbox_lt.y);
 		}
-
 		// ポインターのボタンが上げられた.
 		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがスワップチェーンパネルの中に入った.
@@ -594,11 +595,6 @@ namespace winrt::GraphPaper::implementation
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// 文字列編集ダイアログを表示する.
 		IAsyncAction event_edit_text_async(void);
-
-		//-------------------------------
-		// MainPage_edit.cpp
-		// 文字列の編集
-		//-------------------------------
 
 		//-------------------------------
 		// MainPage_file.cpp
@@ -665,12 +661,31 @@ namespace winrt::GraphPaper::implementation
 		// 多角形の終端, 文字列の編集, 円弧の傾きの編集
 		//-------------------------------
 
-		// 編集メニューの「円弧の傾きの編集」が選択された.
-		//void meth_arc_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「文字列の編集」が選択された.
-		//void meth_text_edit_click(IInspectable const&, RoutedEventArgs const&);
-		//IAsyncAction edit_text_async(ShapeText* s);
-		//IAsyncAction edit_arc_async(ShapeArc* s);
+		// 操作メニューの「原画像に戻す」が選択された.
+		void revert_image_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 「パスの方向を反転」がクリックされた.
+		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
+		{
+			bool changed = false;
+			for (Shape* s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted() || !s->is_selected() || dynamic_cast<ShapeArrow*>(s) == nullptr) {
+					continue;
+				}
+				if (!changed) {
+					changed = true;
+					undo_push_null();
+				}
+				m_undo_stack.push_back(new UndoReverse(s));
+			}
+			if (changed) {
+				menu_is_enable();
+				main_sheet_draw();
+				status_bar_set_pointer();
+			}
+		}
+		// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された
+		void draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/);
+		void open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -679,30 +694,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 次を検索する.
 		bool find_next(void);
-		//bool find_next(ShapeText* edit_text_shape, uint32_t edit_text_end, ShapeText*& fint_text_shape, uint32_t& find_text_start, uint32_t& find_text_end, bool& find_text_trail);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_and_replace_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「文字列の検索/置換」のショートカットが押された.
-		/*
-		void find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			bool exist_find = false;
-			if (find_and_replace_panel().Visibility() == Visibility::Visible) {
-				exist_find = true;
-			}
-			else {
-				for (const auto s : m_main_sheet.m_shape_list) {
-					if (!s->is_deleted() && typeid(*s) == typeid(ShapeText)) {
-						exist_find = true;
-						break;
-					}
-				}
-			}
-			if (exist_find) {
-				find_and_replace_click(menu_find_and_replace(), nullptr);
-			}
-		}
-		*/
 		// 文字列検索パネルの「閉じる」ボタンが押された.
 		void find_and_replace_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
@@ -838,16 +831,6 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		//-----------------------------
-		// MainPage_image.cpp
-		// 画像
-		//-----------------------------
-
-		// 操作メニューの「画像の縦横比を維持」が選択された.
-		//void image_keep_asp_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 操作メニューの「原画像に戻す」が選択された.
-		void revert_image_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-
-		//-----------------------------
 		// MainPage_help.cpp
 		// ヘルプ
 		// 長さの単位, 色の基数, バージョン情報
@@ -904,26 +887,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューの「すべて選択」のショートカットが押された.
-		/*
-		void select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			bool exist_unselect = false;
-			if (core_text_len() - core_text_selected_len() > 0) {
-				exist_unselect = true;
-			}
-			for (const auto s : m_main_sheet.m_shape_list) {
-				if (!s->is_deleted() && !s->is_selected()) {
-					exist_unselect = true;
-					break;
-				}
-			}
-			if (exist_unselect) {
-				menu_select_all().IsEnabled(true);
-				popup_select_all().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -932,7 +895,6 @@ namespace winrt::GraphPaper::implementation
 		bool toggle_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
 		bool unselect_all_shape(void);
-		//bool unselect_all_shape(const bool t_range_only = false);
 		// 図形を選択して, それ以外の図形の選択をはずす.
 		bool select_shape(Shape* const s);
 
@@ -1114,50 +1076,24 @@ namespace winrt::GraphPaper::implementation
 		// MainPage_undo.cpp
 		// 元に戻すとやり直し操作
 		//-----------------------------
+
+		// メニューを設定する.
 		void menu_is_enable(void) noexcept;
-
-		//template<bool I> void undo_selected_cnt(Shape* s);
-
+		// メニューを設定する.
 		template<UNDO_T U> void menu_is_checked(void);
-		// 編集メニューの「やり直し」が選択された.
-		//void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「やり直し」が選択された.
 		void redo_click(IInspectable const&, RoutedEventArgs const&)
 		{
 			undo_exec(m_redo_stack, m_undo_stack);
 		}
-		// 編集メニューの「やり直し」のショートカットが押された.
-		/*
-		void redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			if (!m_redo_stack.empty()) {
-				menu_redo().IsEnabled(true);
-				popup_redo().Visibility(Visibility::Visible);
-			}
-		}
-		*/
-		// 編集メニューの「元に戻す」が選択された.
-		//void undo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
 		void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 		{
 			undo_exec(m_undo_stack, m_redo_stack);
 		}
-		// 編集メニューの「元に戻す」のショートカットが押された.
-		/*
-		void undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-		{
-			if (!m_undo_stack.empty()) {
-				menu_undo().IsEnabled(true);
-				popup_undo().Visibility(Visibility::Visible);
-			}
-		}
-		*/
 		void undo_exec(UNDO_STACK& undo_stack, UNDO_STACK& redo_stack);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
-		// 操作を実行する.
-		//void undo_exec(Undo* u);
 		// 無効な操作をポップする.
 		bool undo_pop_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
@@ -1322,29 +1258,6 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_text(void);
 		// 貼り付ける点を得る
 		void xcvd_paste_pos(D2D1_POINT_2F& paste_pt, const D2D1_POINT_2F src_pt) const noexcept;
-		// 「パスの方向を反転」がクリックされた.
-		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
-		{
-			bool changed = false;
-			for (Shape* s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || !s->is_selected() || dynamic_cast<ShapeArrow*>(s) == nullptr) {
-					continue;
-				}
-				if (!changed) {
-					changed = true;
-					undo_push_null();
-				}
-				m_undo_stack.push_back(new UndoReverse(s));
-			}
-			if (changed) {
-				menu_is_enable();
-				main_sheet_draw();
-				status_bar_set_pointer();
-			}
-		}
-		// 「反時計周りに円弧を描く」/「時計周りに円弧を描く」が選択された
-		void draw_arc_direction_click(const IInspectable& sender, const RoutedEventArgs& /*args*/);
-		void open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&);
 
 		void Page_Loaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{

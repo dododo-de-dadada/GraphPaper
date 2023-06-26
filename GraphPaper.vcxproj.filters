@@ -56,9 +56,9 @@
     <ClCompile Include="shape_path.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="MainPage_image.cpp" />
-    <ClCompile Include="shape_svg.cpp" />
+    <ClCompile Include="shape_export_svg.cpp" />
     <ClCompile Include="MainPage_export.cpp" />
-    <ClCompile Include="shape_pdf.cpp" />
+    <ClCompile Include="shape_export_pdf.cpp" />
     <ClCompile Include="zlib.cpp" />
     <ClCompile Include="MainPage_CMap.cpp" />
     <ClCompile Include="shape_arc.cpp" />

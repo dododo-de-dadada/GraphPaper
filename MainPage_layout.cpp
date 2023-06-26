@@ -471,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_stroke_width(1.0);
 			m_main_sheet.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_sheet.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-			m_main_sheet.set_text_line_sp(0.0);
+			m_main_sheet.set_text_line_space(0.0);
 			m_main_sheet.set_text_padding(TEXT_PAD_DEFVAL);
 		}
 		//m_image_keep_aspect = true;

@@ -23,18 +23,18 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// バッファに矢じりを SVG タグとして書き込む.
+	// buf	出力先バッファ
+	// len	バッファの長さ
+	// arrow	矢じるしの形式
+	// width	線・枠の太さ	
+	// color	線・枠の色
+	// cap	線分の端点の形式
+	// join	線分の連結の形式
+	// miter_limit	尖り制限
+	// barbs[]	矢じりの両端の位置
+	// tip_pt	矢じりの先端の位置
 	//------------------------------
-	static void export_svg_arrow(
-		wchar_t* buf,	// 出力先バッファ
-		const size_t len,	// バッファの長さ
-		const ARROW_STYLE arrow,	// 矢じるしの形式
-		const float width,	// 線・枠の太さ	
-		const D2D1_COLOR_F& color,	// 線・枠の色
-		const D2D1_CAP_STYLE& cap,	// 線分の端点の形式
-		const D2D1_LINE_JOIN join,	// 線分の連結の形式
-		const float miter_limit,	// 尖り制限
-		const D2D1_POINT_2F barbs[],	// 矢じりの両端の位置
-		const D2D1_POINT_2F tip_pt)	// 矢じりの先端の位置
+	static void export_svg_arrow(wchar_t* buf, const size_t len, const ARROW_STYLE arrow, const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_LINE_JOIN join, const float miter_limit, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pt)	// 矢じりの先端の位置
 	{
 		if (arrow == ARROW_STYLE::ARROW_FILLED) {
 			swprintf_s(buf, len,

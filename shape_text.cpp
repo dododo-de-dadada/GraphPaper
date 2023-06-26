@@ -251,15 +251,15 @@ namespace winrt::GraphPaper::implementation
 				hr = text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 			}
 			// 行間がゼロより大きいなら, その値を設定する.
-			if (m_text_line_sp >= FLT_MIN) {
+			if (m_text_line_space >= FLT_MIN) {
 				new_sp.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				new_sp.height = m_font_size + m_text_line_sp;
+				new_sp.height = m_font_size + m_text_line_space;
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					new_sp.baseline = m_font_size + m_text_line_sp;
+					new_sp.baseline = m_font_size + m_text_line_space;
 				}
 				else {
 					const float descent = m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm;
-					new_sp.baseline = m_font_size + m_text_line_sp - descent;
+					new_sp.baseline = m_font_size + m_text_line_space - descent;
 				}
 			}
 			// 行間がゼロなら, 既定値を設定する.
@@ -406,18 +406,18 @@ namespace winrt::GraphPaper::implementation
 			new_sp.leadingBefore = 0.0f;
 			new_sp.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
 			// 行間がゼロより大きいなら,　その値を設定する.
-			if (m_text_line_sp >= FLT_MIN) {
+			if (m_text_line_space >= FLT_MIN) {
 				if (hr == S_OK && m_dwrite_font_metrics.designUnitsPerEm == 0) {
 					hr = text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 				}
 				new_sp.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				new_sp.height = m_font_size + m_text_line_sp;
+				new_sp.height = m_font_size + m_text_line_space;
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					new_sp.baseline = m_font_size + m_text_line_sp;
+					new_sp.baseline = m_font_size + m_text_line_space;
 				}
 				else {
 					const float descent = m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm;
-					new_sp.baseline = m_font_size + m_text_line_sp - descent;
+					new_sp.baseline = m_font_size + m_text_line_space - descent;
 				}
 			}
 			// 行間がゼロなら, 既定値を設定する.
@@ -797,9 +797,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 行間を得る.
-	bool ShapeText::get_text_line_sp(float& val) const noexcept
+	bool ShapeText::get_text_line_space(float& val) const noexcept
 	{
-		val = m_text_line_sp;
+		val = m_text_line_space;
 		return true;
 	}
 
@@ -1114,10 +1114,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を行間に格納する.
-	bool ShapeText::set_text_line_sp(const float val) noexcept
+	bool ShapeText::set_text_line_space(const float val) noexcept
 	{
-		if (!equal(m_text_line_sp, val)) {
-			m_text_line_sp = val;
+		if (!equal(m_text_line_space, val)) {
+			m_text_line_space = val;
 			return true;
 		}
 		return false;
@@ -1157,7 +1157,7 @@ namespace winrt::GraphPaper::implementation
 		prop->get_font_stretch(m_font_stretch);
 		prop->get_font_style(m_font_style);
 		prop->get_font_weight(m_font_weight);
-		prop->get_text_line_sp(m_text_line_sp);
+		prop->get_text_line_space(m_text_line_space);
 		prop->get_text_padding(m_text_padding),
 		prop->get_text_align_horz(m_text_align_horz);
 		prop->get_text_align_vert(m_text_align_vert);
@@ -1213,7 +1213,7 @@ namespace winrt::GraphPaper::implementation
 		}(dt_reader, m_text_len)),
 		m_text_align_vert(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32())),
 		m_text_align_horz(static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32())),
-		m_text_line_sp(dt_reader.ReadSingle()),
+		m_text_line_space(dt_reader.ReadSingle()),
 		m_text_padding(D2D1_SIZE_F{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
@@ -1278,8 +1278,8 @@ namespace winrt::GraphPaper::implementation
 			m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
 		}
 		// 行間
-		if (m_text_line_sp < 0.0f || m_text_line_sp > 127.5f) {
-			m_text_line_sp = 0.0f;
+		if (m_text_line_space < 0.0f || m_text_line_space > 127.5f) {
+			m_text_line_space = 0.0f;
 		}
 		// 文字列の余白
 		if (m_text_padding.width < 0.0f || m_text_padding.width > 127.5 ||
@@ -1316,7 +1316,7 @@ namespace winrt::GraphPaper::implementation
 
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_vert));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_horz));
-		dt_writer.WriteSingle(m_text_line_sp);
+		dt_writer.WriteSingle(m_text_line_space);
 		dt_writer.WriteSingle(m_text_padding.width);
 		dt_writer.WriteSingle(m_text_padding.height);
 	}

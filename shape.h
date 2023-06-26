@@ -4,11 +4,12 @@
 // shape.cpp	図形のひな型
 // shape_bezier.cpp	ベジェ曲線
 // shape_ellipse.cpp	だ円
+// shape_export_svg.cpp	SVG への書き込み
+// shape_export_pdf.cpp	PDF への書き込み
 // shape_group.cpp	グループ
 // shape_image.cpp	画像
 // shape_line.cpp	直線 (矢じるしつき)
 // shape_path.cpp	折れ線のひな型
-// shape_pdf.cpp	PDF への書き込み
 // shape_poly.cpp	多角形
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
@@ -16,7 +17,6 @@
 // shape_sheet.cpp	用紙
 // shape_slist.cpp	図形リスト
 // shape_stroke.cpp	線枠のひな型
-// shape_svg.cpp	SVG への書き込み
 // shape_text.cpp	文字列
 //------------------------------
 #include <list>
@@ -34,7 +34,7 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapeSelect*| | ShapeGroup  | | ShapeSheet   |
+// | ShapeSelect*| | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+
 //        |
 //        +---------------+
@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 		//          width
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から返しまでの長さ
-		float m_offset;		// 先端の位置
+		float m_offset;		// 先端からのずれ
 	};
 	constexpr ARROW_SIZE ARROW_SIZE_DEFVAL{ 7.0, 16.0, 0.0 };	// 矢じるしの大きさの既定値
 	constexpr float ARROW_SIZE_MAX = 512.0f;	// 矢じるしの各大きさの最大値
@@ -207,9 +207,9 @@ namespace winrt::GraphPaper::implementation
 	//    +-----+           +-----+
 	// trail は, 文字列が複数行あるとき, キャレットが行末か, それとも次の行頭か, 区別するためのフラグ.
 	struct CORE_TEXT_RANGE {
-		uint32_t m_start;
-		uint32_t m_end;
-		bool m_trail;
+		uint32_t m_start;	// 選択範囲の開始位置
+		uint32_t m_end;	// 選択範囲の終了位置 = キャレット位置
+		bool m_trail;	// キャレットが終了位置の前なら false, 後ろなら true
 	};
 
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
@@ -500,7 +500,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列を得る.
 		virtual bool get_text_content(wchar_t*&/*val*/) const noexcept { return false; }
 		// 行間を得る.
-		virtual bool get_text_line_sp(float&/*val*/) const noexcept { return false; }
+		virtual bool get_text_line_space(float&/*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_padding(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字列の折り返しを得る.
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列に格納する.
 		virtual bool set_text_content(wchar_t* const/*val*/) noexcept { return false; }
 		// 値を行間に格納する.
-		virtual bool set_text_line_sp(const float/*val*/) noexcept { return false; }
+		virtual bool set_text_line_space(const float/*val*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_padding(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字列の折り返しに格納する.
@@ -755,7 +755,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 用紙図形
+	// 用紙
 	//------------------------------
 	struct ShapeSheet : Shape {
 		SHAPE_LIST m_shape_list{};	// 図形リスト
@@ -790,7 +790,7 @@ namespace winrt::GraphPaper::implementation
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 
 		// 文字列
-		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_space = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR; 	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING; 	// 文字列の揃え
 		D2D1_SIZE_F m_text_padding{ TEXT_PAD_DEFVAL };	// 文字列の左右と上下の余白
@@ -927,7 +927,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列のそろえを得る.
 		virtual bool get_text_align_horz(DWRITE_TEXT_ALIGNMENT& val) const noexcept final override;
 		// 行間を得る.
-		virtual bool get_text_line_sp(float& val) const noexcept final override;
+		virtual bool get_text_line_space(float& val) const noexcept final override;
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
 		// 文字列の折り返しを得る.
@@ -1020,7 +1020,7 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		// 値を行間に格納する.
-		virtual bool set_text_line_sp(const float val) noexcept final override;
+		virtual bool set_text_line_space(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
@@ -1965,7 +1965,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_text = nullptr;	// 文字列
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
-		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_space = 0.0f;	// 行間 (DIPs 96dpi固定)
 		D2D1_SIZE_F m_text_padding{ TEXT_PAD_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_WORD_WRAPPING m_text_word_wrap = DWRITE_WORD_WRAPPING::DWRITE_WORD_WRAPPING_WRAP;	// 文字列の折り返し (自動改行)
 
@@ -2053,7 +2053,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列を得る.
 		bool get_text_content(wchar_t*& val) const noexcept final override;
 		// 行間を得る.
-		bool get_text_line_sp(float& val) const noexcept final override;
+		bool get_text_line_space(float& val) const noexcept final override;
 		// 文字列の余白を得る.
 		bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
 		// 文字列の長さを得る.
@@ -2263,7 +2263,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列に格納する.
 		bool set_text_content(wchar_t* const val) noexcept final override;
 		// 値を行間に格納する.
-		bool set_text_line_sp(const float val) noexcept final override;
+		bool set_text_line_space(const float val) noexcept final override;
 		// 値を文字列の余白に格納する.
 		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 文字列の折り返しを得る.

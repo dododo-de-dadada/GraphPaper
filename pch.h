@@ -39,6 +39,7 @@
 #include <winrt/Windows.UI.Xaml.Input.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
 #include <winrt/Windows.UI.Xaml.Shapes.h>
+
 // 文字列
 #include <winrt/Windows.UI.Text.h>
 #include <winrt/Windows.UI.Text.Core.h>

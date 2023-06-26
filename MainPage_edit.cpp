@@ -52,6 +52,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+
 	void MainPage::open_or_close_poly_end_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		const D2D1_FIGURE_END END = (sender == menu_open_polygon() || sender == popup_open_polygon() ? D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN : D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);

@@ -13,11 +13,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::UI::Xaml::Controls::Control;
-	using winrt::Windows::UI::Xaml::Window;
 
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
@@ -31,19 +29,6 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3lf";	// 方眼単位の書式
 	constexpr auto FMT_GRID_UNIT = L"%.3lf grid";	// 方眼単位の書式
-	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
-
-	// 待機カーソルを表示する.
-	// 戻り値	それまで表示されていたカーソル.
-	const CoreCursor wait_cursor_show(void)
-	{
-		const CoreWindow& core_win = Window::Current().CoreWindow();
-		const CoreCursor& prev_cur = core_win.PointerCursor();
-		if (prev_cur.Type() != CURS_WAIT.Type()) {
-			core_win.PointerCursor(CURS_WAIT);
-		}
-		return prev_cur;
-	}
 
 	// 色成分を文字列に変換する.
 	// col_code	色成分の記法
@@ -283,16 +268,17 @@ namespace winrt::GraphPaper::implementation
 		popup_ungroup().IsEnabled(exists_selected_group);
 		menu_ungroup().IsEnabled(exists_selected_group);
 
+		popup_find_and_replace().IsEnabled(exists_text);
+		menu_find_and_replace().IsEnabled(exists_text);
+
 		// 図形編集メニューの可否を設定する.
-		//popup_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 		if (m_event_shape_pressed != nullptr && m_event_locus_pressed != LOCUS_TYPE::LOCUS_SHEET && 
-			(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image)) {
+			(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_selected_image)) {
 			popup_edit_shape().Visibility(Visibility::Visible);
 		}
 		else {
 			popup_edit_shape().Visibility(Visibility::Collapsed);
 		}
-		menu_edit_shape().IsEnabled(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_text || exists_selected_image);
 		popup_reverse_path().IsEnabled(exists_selected_cap);
 		menu_reverse_path().IsEnabled(exists_selected_cap);
 		popup_draw_arc_cw().IsEnabled(exists_selected_counter_clockwise);
@@ -303,13 +289,10 @@ namespace winrt::GraphPaper::implementation
 		menu_open_polygon().IsEnabled(exists_selected_polygon);
 		popup_close_polyline().IsEnabled(exists_selected_polyline);
 		menu_close_polyline().IsEnabled(exists_selected_polyline);
-		popup_find_and_replace().IsEnabled(exists_text);
-		menu_find_and_replace().IsEnabled(exists_text);
 		popup_revert_image().IsEnabled(exists_selected_image);
 		menu_revert_image().IsEnabled(exists_selected_image);
 
 		// 線枠メニューの可否を設定する.
-		//popup_stroke().IsEnabled(exists_stroke || exists_selected_cap);
 		if (m_event_shape_pressed != nullptr && (m_event_shape_pressed->exist_cap() || m_event_shape_pressed->exist_join())) {
 			popup_stroke().Visibility(Visibility::Visible);
 		}
@@ -322,7 +305,6 @@ namespace winrt::GraphPaper::implementation
 		mfi_menu_stroke_arrow_size().IsEnabled(m_main_sheet.m_arrow_style != ARROW_STYLE::ARROW_NONE);
 
 		// 塗りメニューの可否を設定する.
-		//popup_fill().IsEnabled(exists_fill || exists_selected_image);
 		if (m_event_shape_pressed != nullptr && m_event_shape_pressed->exist_fill()) {
 			popup_fill().Visibility(Visibility::Visible);
 		}
@@ -333,8 +315,6 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_image_opacity().IsEnabled(exists_selected_image);
 
 		// 書体メニューの可否を設定する.
-		
-		//popup_font().IsEnabled(exists_selected_text || exists_selected_ruler);
 		if (m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 			popup_font().Visibility(Visibility::Visible);
 		}
@@ -348,13 +328,12 @@ namespace winrt::GraphPaper::implementation
 		mfsi_popup_font_style().IsEnabled(exists_selected_text || exists_selected_ruler);
 		mfsi_popup_text_align_horz().IsEnabled(exists_selected_text);
 		mfsi_popup_text_align_vert().IsEnabled(exists_selected_text);
-		mfi_popup_text_line_sp().IsEnabled(exists_selected_text);
+		popup_text_line_space().IsEnabled(exists_selected_text);
 		mfi_popup_text_pad().IsEnabled(exists_selected_text);
 		mfsi_popup_text_wrap().IsEnabled(exists_selected_text);
 		mfi_popup_font_color().IsEnabled(exists_selected_text);
 
 		// レイアウトメニューの可否を設定する.
-		//popup_layout().IsEnabled(!exists_selected);
 		if (m_event_shape_pressed == nullptr || m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
 			popup_layout().Visibility(Visibility::Visible);
 		}

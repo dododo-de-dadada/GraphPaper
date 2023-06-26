@@ -20,7 +20,7 @@ namespace winrt::GraphPaper::implementation
 	// ストロークをデータライターに PDF として書き込む.
 	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join, const float miter_limit, const DataWriter& dt_writer);
 	// PDF のパス描画命令を得る.
-	template <bool C> static bool export_pdf_path_cmd(const float width, const D2D1_COLOR_F& stroke,	const D2D1_COLOR_F& fill, wchar_t*& cmd);
+	template <bool C> static bool export_pdf_path_cmd(const float width, const D2D1_COLOR_F& stroke,	const D2D1_COLOR_F& fill, wchar_t cmd[4]);
 
 	// 矢じるしをデータライターに PDF として書き込む.
 	// width	線・枠の太さ
@@ -75,47 +75,49 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// PDF のパス描画命令を得る.
+	// C	パスを閉じるなら true, 開いたままなら false
+	// width	線枠の太さ
+	// stroke	線枠の色
+	// fill	塗りつぶし色
+	// cmd[4]	パス描画命令
 	// 戻り値	命令が得られたなら true, なければ false
 	template <bool C>	// パスを閉じるなら true, 開いたままなら false
-	static bool export_pdf_path_cmd(
-		const float width,	// 線・枠の太さ
-		const D2D1_COLOR_F& stroke,	// 線・枠の色
-		const D2D1_COLOR_F& fill,	// 塗りつぶし色
-		wchar_t*& cmd	// パス描画命令
+	static bool export_pdf_path_cmd(const float width, const D2D1_COLOR_F& stroke, const D2D1_COLOR_F& fill, wchar_t cmd[4])
+	{
 		// パス描画命令
 		// B* = パスを塗りつぶして、ストロークも描画する (偶奇規則)
 		// b* = B* と同じだが、描画前にパスを閉じる
 		// S = パスをストロークで描画
 		// s = 現在のパスを閉じた後 (開始点までを直線でつなぐ)、ストロークで描画
 		// f* = 偶奇規則を使用してパスを塗りつぶし, パスは自動的に閉じられる.
-	)
-	{
+
+		// 線枠が表示されるなら,
 		if (!equal(width, 0.0f) && is_opaque(stroke)) {
 			if (is_opaque(fill)) {
 				// B* = パスを塗りつぶして、ストロークも描画する (偶奇規則)
 				// b* = B* と同じだが、描画前にパスを閉じる
 				if constexpr (C) {
-					cmd = L"b*\n";
+					memcpy(cmd, L"b*\n", sizeof(L"b*\n"));
 				}
 				else {
-					cmd = L"B*\n";
+					memcpy(cmd, L"B*\n", sizeof(L"B*\n"));
 				}
 			}
 			else {
 				// S = パスをストロークで描画
 				// s = 現在のパスを閉じた後 (開始点までを直線でつなぐ)、ストロークで描画
 				if constexpr (C) {
-					cmd = L"s\n";
+					memcpy(cmd, L"s\n", sizeof(L"s\n"));
 				}
 				else {
-					cmd = L"S\n";
+					memcpy(cmd, L"S\n", sizeof(L"S\n"));
 				}
 			}
 		}
 		else {
 			if (is_opaque(fill)) {
 				// f* = 偶奇規則を使用してパスを塗りつぶし, パスは自動的に閉じられる.
-				cmd = L"f*\n";
+				memcpy(cmd, L"f*\n", sizeof(L"f*\n"));
 			}
 			else {
 				return false;
@@ -125,17 +127,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ストロークをデータライターに PDF として書き込む.
+	// width	線・枠の太さ
+	// color	線・枠の色
+	// cap	端点の形式
+	// dash	破線の形式
+	// patt	破線の配置
+	// join	結合の形式
+	// miter_limit	尖り制限値
+	// dt_writer	データライター
 	// 戻り値	書き込んだバイト数
-	static size_t export_pdf_stroke(
-		const float width,	// 線・枠の太さ
-		const D2D1_COLOR_F& color,	// 線・枠の色
-		const D2D1_CAP_STYLE& cap,	// 端点の形式
-		const D2D1_DASH_STYLE dash,	// 破線の形式
-		const DASH_PAT& patt,	// 破線の配置
-		const D2D1_LINE_JOIN join,	// 結合の形式
-		const float miter_limit,	// 尖り制限値
-		const DataWriter& dt_writer	// データライター
-	)
+	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color, const D2D1_CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PAT& patt, const D2D1_LINE_JOIN join, const float miter_limit, const DataWriter& dt_writer)
 	{
 		size_t len = 0;
 		wchar_t buf[1024];
@@ -235,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeBezier::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
-		wchar_t* cmd;
+		wchar_t cmd[4];
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 			return 0;
 		}
@@ -254,20 +255,22 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		len += export_pdf_stroke(
-			m_stroke_width, m_stroke_color, m_stroke_cap, //m_stroke_cap.m_start,
-			m_stroke_dash, m_dash_pat, m_stroke_join, m_stroke_join_limit, dt_writer);
+		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_stroke_dash, m_dash_pat, m_stroke_join, m_stroke_join_limit, dt_writer);
+		const double sh = sheet_size.height;
 		const double sx = m_start.x;
-		const double sy = -static_cast<double>(m_start.y) + static_cast<double>(sheet_size.height);
+		const double sy = m_start.y;
 		const double b1x = b_seg.point1.x;
-		const double b1y = -static_cast<double>(b_seg.point1.y) + static_cast<double>(sheet_size.height);
+		const double b1y = b_seg.point1.y;
 		const double b2x = b_seg.point2.x;
-		const double b2y = -static_cast<double>(b_seg.point2.y) + static_cast<double>(sheet_size.height);
+		const double b2y = b_seg.point2.y;
 		const double b3x = b_seg.point3.x;
-		const double b3y = -static_cast<double>(b_seg.point3.y) + static_cast<double>(sheet_size.height);
+		const double b3y = b_seg.point3.y;
 		swprintf_s(buf, 
 			L"%f %f m %f %f %f %f %f %f c %s",
-			sx, sy, b1x, b1y, b2x, b2y, b3x, b3y, cmd
+			sx, -sy + sh,
+			b1x, -b1y + sh,
+			b2x, -b2y + sh,
+			b3x, -b3y + sh, cmd
 		);
 		len += dt_writer.WriteString(buf);
 		if (m_arrow_style != ARROW_STYLE::ARROW_NONE) {
@@ -322,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapePoly::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
-		wchar_t* cmd;	// パス描画命令
+		wchar_t cmd[4];
 		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED) {
 			if (!export_pdf_path_cmd<true>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 				return 0;
@@ -375,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	size_t ShapeEllipse::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
-		wchar_t* cmd;	// パス描画命令
+		wchar_t cmd[4];	// パス描画命令
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 			return 0;
 		}
@@ -443,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeOblong::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
-		wchar_t* cmd;
+		wchar_t cmd[4];	// パス描画命令
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 			return 0;
 		}
@@ -478,7 +481,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeRRect::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
-		wchar_t* cmd;
+		wchar_t cmd[4];	// パス描画命令
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 			return 0;
 		}

@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto TICK_FREQ = 0.5;
 		m_dialog_sheet.set_attr_to(&m_main_sheet);
 		float val;
-		m_dialog_sheet.get_text_line_sp(val);
+		m_dialog_sheet.get_text_line_space(val);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 							wcscpy_s(buf, str_def_val.data());
 						}
 						dialog_slider_0().Header(box_value(str_text_line_sp + buf));
-						if (m_dialog_sheet.slist_back()->set_text_line_sp(val)) {
+						if (m_dialog_sheet.slist_back()->set_text_line_space(val)) {
 							dialog_draw();
 						}
 					}
@@ -398,7 +398,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				float samp_val;
-				m_dialog_sheet.slist_back()->get_text_line_sp(samp_val);
+				m_dialog_sheet.slist_back()->get_text_line_space(samp_val);
 				undo_push_null();
 				if (undo_push_set<UNDO_T::TEXT_LINE_SP>(samp_val)) {
 					main_sheet_draw();

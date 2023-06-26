@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::undo_clear(void)
 	{
-		//m_ustack_is_changed = false;
+		m_undo_is_updated = false;
 		undo_clear_stack(m_redo_stack);
 		undo_clear_stack(m_undo_stack);
 	}
@@ -592,7 +592,7 @@ namespace winrt::GraphPaper::implementation
 	// 一連の操作の区切としてヌル操作をスタックに積む.
 	// やり直し操作スタックは消去される.
 	void MainPage::undo_push_null(void)
-	{		
+	{
 		// やり直し操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
 		undo_clear_stack(m_redo_stack);
 		if (m_undo_stack.size() > 0 && m_undo_stack.back() != nullptr) {
@@ -605,19 +605,21 @@ namespace winrt::GraphPaper::implementation
 				m_undo_stack.pop_front();
 				delete u;
 			}
+
 			// 空以外の操作をスタックの先頭から取りのぞいて削除する.
 			Undo* u;
 			while (!m_undo_stack.empty() && (u = m_undo_stack.front()) != nullptr) {
 				m_undo_stack.pop_front();
 				delete u;
 			}
+
 			// 空操作を取り除いて削除する.
 			if (!m_undo_stack.empty()) {
 				m_undo_stack.pop_front();
 			}
 		}
 		// true をスタックが更新されたか判定に格納する.
-		//m_ustack_is_changed = true;
+		m_undo_is_updated = true;
 	}
 
 

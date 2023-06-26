@@ -94,30 +94,29 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Xaml::Visibility;
 
-	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
-	static const IVector<winrt::hstring> TYPE_BMP {
+	static const IVector<winrt::hstring> TYPE_BMP {	// ビットマップのファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".bmp" })
 	};
-	static const IVector<winrt::hstring> TYPE_GIF{
+	static const IVector<winrt::hstring> TYPE_GIF{	// GIF のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".gif" })
 	};
-	static const IVector<winrt::hstring> TYPE_JPG{
+	static const IVector<winrt::hstring> TYPE_JPG{	// JPG のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".jpg", L".jpeg" })
 	};
-	static const IVector<winrt::hstring> TYPE_PNG{
+	static const IVector<winrt::hstring> TYPE_PNG{	// PNG のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".png" })
 	};
-	static const IVector<winrt::hstring> TYPE_TIF{
+	static const IVector<winrt::hstring> TYPE_TIF{	// TIF のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".tif", L".tiff" })
 	};
-	static const IVector<winrt::hstring> TYPE_GPF{
+	static const IVector<winrt::hstring> TYPE_GPF{	// 方眼紙のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".gpf" })
 	};
-	static const IVector<winrt::hstring> TYPE_SVG{
+	static const IVector<winrt::hstring> TYPE_SVG{	// SVG のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".svg" })
 	};
-	static const IVector<winrt::hstring> TYPE_PDF{
+	static const IVector<winrt::hstring> TYPE_PDF{	// PDF のファイル拡張子
 		winrt::single_threaded_vector<winrt::hstring>({ L".pdf" })
 	};
 
@@ -177,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sheet_size_dialog().Hide();
 
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
+		if (m_undo_is_updated && !co_await file_confirm_dialog()) {
 			// 「キャンセル」なら, 排他処理を解除して中断する.
 			recursion.unlock();
 			co_return;
@@ -261,8 +260,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_mutex_event.lock();
 
-		// ResourceLoader::GetForCurrentView はフォアグラウンド.
+		// ResourceLoader::GetForCurrentView はフォアグラウンドで実行する.
 		const ResourceLoader& res_loader = ResourceLoader::GetForCurrentView();
+
+		// リソースから各画像ファイルの説明を得る.
 		const winrt::hstring desc_bmp{ res_loader.GetString(L"str_desc_bmp") };
 		const winrt::hstring desc_gif{ res_loader.GetString(L"str_desc_gif") };
 		const winrt::hstring desc_jpg{ res_loader.GetString(L"str_desc_jpg") };
@@ -271,73 +272,75 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring desc_svg{ res_loader.GetString(L"str_desc_svg") };
 		const winrt::hstring desc_tif{ res_loader.GetString(L"str_desc_tif") };
 
-		FileSavePicker image_picker{ 
+		// ファイル保存ピッカーに説明を格納する.
+		FileSavePicker save_picker{	// ファイル保存ピッカー
 			FileSavePicker()
 		};
-		image_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
-		image_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
-		image_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
-		image_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
-		image_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
-		image_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
-		image_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
+		save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
+		save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
+		save_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
+		save_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
+		save_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
+		save_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
+		save_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
 
 		// 画像ライブラリーを保管場所に設定する.
-		const PickerLocationId loc_id = PickerLocationId::PicturesLibrary;
-		image_picker.SuggestedStartLocation(loc_id);
+		save_picker.SuggestedStartLocation(PickerLocationId::PicturesLibrary);
 
 		// 最近使ったファイルのトークンからストレージファイルを得る.
 		StorageFile recent_file{
 			co_await recent_file_token_async(m_file_token_mru)
 		};
-		// ストレージファイルを得たなら,
+
+		// 最近使ったファイルを得た,
 		if (recent_file != nullptr) {
 			// かつ, それが方眼紙ファイルなら,
 			if (recent_file.FileType() == L".gpf") {
 				// ファイル名を, 提案するファイル名に格納する.
 				auto sug_name = recent_file.DisplayName();
-				image_picker.SuggestedFileName(sug_name);
+				save_picker.SuggestedFileName(sug_name);
 			}
+			// 最近使ったを解放する.
 			recent_file = nullptr;
 		}
 
 		// ピッカーを表示しストレージファイルを得る.
-		StorageFile image_file{
-			co_await image_picker.PickSaveFileAsync()
+		StorageFile save_file{
+			co_await save_picker.PickSaveFileAsync()
 		};
 
-		if (image_file != nullptr) {
+		if (save_file != nullptr) {
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = wait_cursor_show();
 			HRESULT hres;
 			// ファイル更新の遅延を設定する.
-			CachedFileManager::DeferUpdates(image_file);
+			CachedFileManager::DeferUpdates(save_file);
 
 			// SVG ファイル
-			if (image_file.ContentType() == L"image/svg+xml") {
-				hres = co_await export_as_svg_async(image_file);
+			if (save_file.ContentType() == L"image/svg+xml") {
+				hres = co_await export_as_svg_async(save_file);
 			}
 			// PDF ファイル
-			else if (image_file.ContentType() == L"application/pdf") {
-				hres = co_await export_as_pdf_async(image_file);
+			else if (save_file.ContentType() == L"application/pdf") {
+				hres = co_await export_as_pdf_async(save_file);
 			}
 			// ラスター画像ファイル
 			else {
-				hres = co_await export_as_raster_async(image_file);
+				hres = co_await export_as_raster_async(save_file);
 			}
 			// 遅延させたファイル更新を完了し, 結果を判定する.
-			if (co_await CachedFileManager::CompleteUpdatesAsync(image_file) != 
-				FileUpdateStatus::Complete) {
+			if (co_await CachedFileManager::CompleteUpdatesAsync(save_file) != FileUpdateStatus::Complete) {
 				// 完了しなかったなら E_FAIL.
 				hres = E_FAIL;
 			}
 
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
+
 			// 結果が S_OK 以外か判定する.
 			if (hres != S_OK) {
 				// 「ファイルの書き込みに失敗しました」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, L"str_err_write", image_file.Path());
+				message_show(ICON_ALERT, L"str_err_write", save_file.Path());
 			}
 
 		}
@@ -373,6 +376,12 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
+
+		m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
+		m_event_shape_last = nullptr;
+		m_event_shape_pressed = nullptr;
+		m_event_state = EVENT_STATE::BEGIN;
+
 		m_undo_select_cnt = 0;
 		m_undo_undeleted_cnt = 0;
 		//m_undo_undeleted_text = 0;
@@ -619,7 +628,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
+		if (m_undo_is_updated && !co_await file_confirm_dialog()) {
 			co_return;
 		}
 		// ダブルクリックでファイルが選択された場合,
@@ -875,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 			mru_entries.GetMany(recent_num, item);
 
 			// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
-			if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
+			if (m_undo_is_updated && !co_await file_confirm_dialog()) {
 				co_return;
 			}
 
@@ -1199,7 +1208,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// スタックが更新されたなら確認ダイアログを表示して, 
 		// ダイアログの応答が「キャンセル」か判定する.
-		if (!m_undo_stack.empty() && !co_await file_confirm_dialog()) {
+		if (m_undo_is_updated && !co_await file_confirm_dialog()) {
 			co_return;
 		}
 		// 一覧が表示されてるか判定する.
@@ -1268,10 +1277,6 @@ namespace winrt::GraphPaper::implementation
 
 		recent_file_add(nullptr);
 		file_finish_reading();
-
-		m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
-		m_event_shape_pressed = nullptr;
-		m_event_shape_last = nullptr;
 
 		menu_is_enable();
 		menu_is_checked<UNDO_T::NIL>();

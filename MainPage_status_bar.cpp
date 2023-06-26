@@ -254,11 +254,6 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(c_buf, m_color_code != COLOR_CODE::HEX ? L"%s,%s,%s,%s" : L"#%s%s%s%s", r_buf, g_buf, b_buf, a_buf);
 				status_bar_tool_value().Text(c_buf);
 			}
-			else if (m_tool == DRAWING_TOOL::POINTER) {
-				status_bar_tool_icon().Data(nullptr);
-				status_bar_tool_icon().Data(Summary::Geom(unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_map_pin")))));
-				status_bar_tool_color().Visibility(Visibility::Collapsed);
-			}
 			else {
 #ifdef _DEBUG
 				__debugbreak();
