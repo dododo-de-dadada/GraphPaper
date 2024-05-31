@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 	// s_from	範囲の最初
 	// s_to	範囲の最後
 	// 戻り値	選択が変更された true
-	bool MainPage::select_range_shape(Shape* const s_from, Shape* const s_to)
+	bool MainPage::select_range_shape(SHAPE* const s_from, SHAPE* const s_to)
 	{
 		auto changed = false;
 		if (m_core_text_focused != nullptr) {
@@ -114,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr int NEXT = 1;
 		constexpr int END = 2;
 		auto st = BEGIN;	// 状態
-		auto s_end = static_cast<Shape*>(nullptr);
+		auto s_end = static_cast<SHAPE*>(nullptr);
 		auto i = 0u;
 		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
@@ -219,7 +219,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を選択して, それ以外の図形の選択をはずす.
-	bool MainPage::select_shape(Shape* const s)
+	bool MainPage::select_shape(SHAPE* const s)
 	{
 		bool changed = false;
 		if (m_core_text_focused != nullptr) {

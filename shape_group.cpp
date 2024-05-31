@@ -10,10 +10,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形を表示する.
 	//------------------------------
-	void ShapeGroup::draw(void) noexcept
+	void SHAPE_GROUP::draw(void) noexcept
 	{
 		// 選択フラグが立ってるか判定する.
-		if (m_loc_show && is_selected()) {
+		if (m_hit_show && is_selected()) {
 			D2D1_POINT_2F b_lt { FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
@@ -25,8 +25,8 @@ namespace winrt::GraphPaper::implementation
 				s->draw();
 				s->get_bbox(b_lt, b_rb, b_lt, b_rb);
 			}
-			ID2D1RenderTarget* const target = Shape::m_d2d_target;
-			ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+			ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+			ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 			target->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush, m_aux_width, m_aux_style.get());
 		}
 		else {
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	// a_rb	元の矩形の右下位置.
 	// b_lt	得られた矩形の左上位置.
 	// b_rb	得られた矩形の右下位置.
-	void ShapeGroup::get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
+	void SHAPE_GROUP::get_bbox(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
 		b_lt = a_lt;
 		b_rb = a_rb;
@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 境界矩形の左上点を得る.
-	void ShapeGroup::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
+	void SHAPE_GROUP::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		get_pos_start(val);
 	}
@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 	// val	始点
 	// グループ図形の場合, 始点は図形を囲む矩形の左上点.
 	//------------------------------
-	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& val) const noexcept
+	bool SHAPE_GROUP::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
 		auto flag = false;
 		for (const auto s : m_list_grouped) {
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 文字列図形を含むか判定する.
 	//------------------------------
-	bool ShapeGroup::has_text(void) noexcept
+	bool SHAPE_GROUP::has_text(void) noexcept
 	{
 		std::list<SHAPE_LIST::iterator> stack;
 		stack.push_back(m_list_grouped.begin());
@@ -109,11 +109,11 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeText)) {
 					return true;
 				}
-				else if (typeid(*s) == typeid(ShapeGroup)) {
+				else if (typeid(*s) == typeid(SHAPE_GROUP)) {
 					stack.push_back(i);
 					stack.push_back(j);
-					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
-					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
+					i = static_cast<SHAPE_GROUP*>(s)->m_list_grouped.begin();
+					j = static_cast<SHAPE_GROUP*>(s)->m_list_grouped.end();
 					continue;
 				}
 			}
@@ -124,17 +124,17 @@ namespace winrt::GraphPaper::implementation
 	// 図形が点を含むか判定する.
 	// test_pt	判定される点
 	// 戻り値	点を含む部位
-	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
+	uint32_t SHAPE_GROUP::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		for (const Shape* s : m_list_grouped) {
+		for (const SHAPE* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(test_pt, false) != LOCUS_TYPE::LOCUS_SHEET) {
-				return LOCUS_TYPE::LOCUS_FILL;
+			if (s->hit_test(test_pt, false) != HIT_TYPE::HIT_SHEET) {
+				return HIT_TYPE::HIT_FILL;
 			}
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 	//------------------------------
@@ -144,9 +144,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
 	//------------------------------
-	bool ShapeGroup::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool SHAPE_GROUP::is_inside(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
-		for (const Shape* s : m_list_grouped) {
+		for (const SHAPE* s : m_list_grouped) {
 			if (!s->is_inside(lt, rb)) {
 				return false;
 			}
@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置を移動する.
 	// to	移動先へのベクトル
 	//------------------------------
-	bool ShapeGroup::move(const D2D1_POINT_2F to) noexcept
+	bool SHAPE_GROUP::move(const D2D1_POINT_2F to) noexcept
 	{
 		return slist_move_selected(m_list_grouped, to);
 	}
@@ -168,10 +168,10 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	// 戻り値	変更されたなら true
 	//------------------------------
-	bool ShapeGroup::set_delete(const bool val) noexcept
+	bool SHAPE_GROUP::set_delete(const bool val) noexcept
 	{
 		bool flag = false;
-		for (Shape* s : m_list_grouped) {
+		for (SHAPE* s : m_list_grouped) {
 			if (s->set_delete(val) && !flag) {
 				flag = true;
 			}
@@ -184,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	// 戻り値	変更されたなら true
 	//------------------------------
-	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F val) noexcept
+	bool SHAPE_GROUP::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F old_val;
 		if (get_pos_start(old_val) && !equal(val, old_val)) {
@@ -201,10 +201,10 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	// 戻り値	変更されたなら true
 	//------------------------------
-	bool ShapeGroup::set_select(const bool val) noexcept
+	bool SHAPE_GROUP::set_select(const bool val) noexcept
 	{
 		bool flag = false;
-		for (Shape* s : m_list_grouped) {
+		for (SHAPE* s : m_list_grouped) {
 			if (s->set_select(val) && !flag) {
 				flag = true;
 			}
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形をデータリーダーから読み込む.
 	//------------------------------
-	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
+	SHAPE_GROUP::SHAPE_GROUP(DataReader const& dt_reader)
 	{
 		slist_read(m_list_grouped, dt_reader);
 	}
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形をデータライターに書き込む.
 	//------------------------------
-	void ShapeGroup::write(DataWriter const& dt_writer) const
+	void SHAPE_GROUP::write(DataWriter const& dt_writer) const
 	{
 		constexpr bool REDUCED = true;
 		slist_write<!REDUCED>(m_list_grouped, dt_writer);

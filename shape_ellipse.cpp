@@ -12,8 +12,8 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ð•\Ž¦‚·‚é.
 	void ShapeEllipse::draw(void) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_d2d_stroke_style == nullptr) {
 			ID2D1Factory* factory;
@@ -41,15 +41,15 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(m_stroke_color);
 			target->DrawEllipse(elli, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
-		if (m_loc_show && is_selected()) {
+		if (m_hit_show && is_selected()) {
 			// •â•ü‚ð•`‚­
-			if (m_stroke_width >= Shape::m_loc_square_inner) {
+			if (m_stroke_width >= SHAPE::m_hit_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawEllipse(elli, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawEllipse(elli, brush, m_aux_width, m_aux_style.get());
 			}
-			draw_loc();
+			draw_hit();
 		}
 	}
 
@@ -58,9 +58,9 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	“_‚ðŠÜ‚Þ•”ˆÊ
 	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const auto loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc != LOCUS_TYPE::LOCUS_SHEET) {
-			return loc;
+		const auto hit = rect_hit_test(m_start, m_lineto, test_pt, m_hit_width);
+		if (hit != HIT_TYPE::HIT_SHEET) {
+			return hit;
 		}
 
 		// ”¼Œa‚ð“¾‚é.
@@ -75,28 +75,28 @@ namespace winrt::GraphPaper::implementation
 		ry = abs(ry);
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			// ‚¾‰~‚ÌŠOŒa‚É‘Î‚µ, “_‚Ì“àŠO‚ð”»’è‚·‚é.
-			const double s_width = static_cast<double>(max(m_stroke_width, m_loc_width));
+			const double s_width = static_cast<double>(max(m_stroke_width, m_hit_width));
 			const double ox = rx + s_width * 0.5;
 			const double oy = ry + s_width * 0.5;
 			if (!pt_in_ellipse(test_pt, c, ox, oy)) {
-				// ŠO‘¤‚È‚ç LOCUS_SHEET ‚ð•Ô‚·.
-				return LOCUS_TYPE::LOCUS_SHEET;
+				// ŠO‘¤‚È‚ç HIT_SHEET ‚ð•Ô‚·.
+				return HIT_TYPE::HIT_SHEET;
 			}
 			// ‚¾‰~‚Ì“àŒa‚É‘Î‚µ, “_‚Ì“àŠO‚ð”»’è‚·‚é.
 			const double ix = ox - s_width;
 			const double iy = oy - s_width;
 			if (ix <= 0.0 || iy <= 0.0 || !pt_in_ellipse(test_pt, c, ix, iy)) {
-				// “àŒa‚ª•‰”, A‚Ü‚½‚Í“_‚ªŠO‘¤‚È‚ç LOCUS_STROKE ‚ð•Ô‚·.
-				return LOCUS_TYPE::LOCUS_STROKE;
+				// “àŒa‚ª•‰”, A‚Ü‚½‚Í“_‚ªŠO‘¤‚È‚ç HIT_STROKE ‚ð•Ô‚·.
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ‚¾‰~‚É“_‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 			if (pt_in_ellipse(test_pt, c, rx, ry)) {
-				return LOCUS_TYPE::LOCUS_FILL;
+				return HIT_TYPE::HIT_FILL;
 			}
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 }

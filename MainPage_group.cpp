@@ -18,8 +18,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		SHAPE_LIST slist;
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
-		ShapeGroup* g = new ShapeGroup();
+		slist_get_selected<SHAPE>(m_main_sheet.m_shape_list, slist);
+		SHAPE_GROUP* g = new SHAPE_GROUP();
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択されたグループ図形のリストを得て, リストが空か判定する.
 		SHAPE_LIST group_list;
-		slist_get_selected<ShapeGroup>(m_main_sheet.m_shape_list, group_list);
+		slist_get_selected<SHAPE_GROUP>(m_main_sheet.m_shape_list, group_list);
 		if (group_list.empty()) {
 			return;
 		}
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		unselect_all_shape();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : group_list) {
-			auto g = static_cast<ShapeGroup*>(t);
+			auto g = static_cast<SHAPE_GROUP*>(t);
 			uint32_t i = 0;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {

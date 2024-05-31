@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 			bezi_tvec_by_param(c, t, v);
 
 			// 矢じるしの返しの位置を計算する
-			get_pos_barbs(-v, sqrt(v * v), a_size.m_width, a_size.m_length, arrow);
+			get_barbs(-v, sqrt(v * v), a_size.m_width, a_size.m_length, arrow);
 
 			// 助変数で曲線上の位置を得る.
 			POINT_2D tip;	// 終点を原点とする, 矢じるしの先端の位置
@@ -312,8 +312,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeBezier::draw(void) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		m_d2d_target->GetFactory(&factory);
 		bool b_flag = false;
@@ -384,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
 		}
-		if (m_loc_show && is_selected()) {
+		if (m_hit_show && is_selected()) {
 			if (!b_flag) {
 				b_seg.point1.x = m_start.x + m_lineto[0].x;
 				b_seg.point1.y = m_start.y + m_lineto[0].y;
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 				b_flag = true;
 			}
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_loc_square_inner) {
+			if (m_stroke_width >= SHAPE::m_hit_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
@@ -415,10 +415,10 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(b_seg.point2, b_seg.point3, brush, m_aux_width, m_aux_style.get());
 			// 図形の部位を描く.
-			loc_draw_circle(b_seg.point2, target, brush);
-			loc_draw_circle(b_seg.point1, target, brush);
-			loc_draw_square(m_start, target, brush);
-			loc_draw_square(b_seg.point3, target, brush);
+			hit_draw_circle(b_seg.point2, target, brush);
+			hit_draw_circle(b_seg.point1, target, brush);
+			hit_draw_square(m_start, target, brush);
+			hit_draw_square(b_seg.point3, target, brush);
 		}
 	}
 
@@ -430,20 +430,20 @@ namespace winrt::GraphPaper::implementation
 		bool fill_test = false;	// 位置が塗りつぶしに含まれるか判定
 		if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 			if (pt_in_circle(test_pt, bezi_pt[0], ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 			if (pt_in_circle(test_pt, bezi_pt[3], ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(test_pt, bezi_pt, bezi_to, ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else if (equal(stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(test_pt, bezi_pt, bezi_to, ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -531,14 +531,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -574,9 +574,9 @@ namespace winrt::GraphPaper::implementation
 			s_cnt += 6;
 		}
 		if (fill_opa && fill_test) {
-			return LOCUS_TYPE::LOCUS_FILL;
+			return HIT_TYPE::HIT_FILL;
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 
 	}
 
@@ -586,7 +586,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto fill_opa = is_opaque(m_fill_color);
 		bool fill_test = false;	// 位置が塗りつぶしに含まれるか判定
-		const auto ew = max(max(static_cast<double>(m_stroke_width), m_loc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto ew = max(max(static_cast<double>(m_stroke_width), m_hit_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		const D2D1_POINT_2F t_pt{
 			test_pt.x - m_start.x, test_pt.y - m_start.y
 		};
@@ -605,34 +605,34 @@ namespace winrt::GraphPaper::implementation
 		//cp[2].y = cp[1].y + m_lineto[1].y;
 		//cp[3].x = cp[2].x + m_lineto[2].x;
 		//cp[3].y = cp[2].y + m_lineto[2].y;
-		if (loc_hit_test(t_pt, cp[3], m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_P0 + 3;
+		if (hit_text_pt(t_pt, cp[3], m_hit_width)) {
+			return HIT_TYPE::HIT_P0 + 3;
 		}
-		if (loc_hit_test(t_pt, cp[2], m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_P0 + 2;
+		if (hit_text_pt(t_pt, cp[2], m_hit_width)) {
+			return HIT_TYPE::HIT_P0 + 2;
 		}
-		if (loc_hit_test(t_pt, cp[1], m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_P0 + 1;
+		if (hit_text_pt(t_pt, cp[1], m_hit_width)) {
+			return HIT_TYPE::HIT_P0 + 1;
 		}
-		if (loc_hit_test(t_pt, cp[0], m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_P0 + 0;
+		if (hit_text_pt(t_pt, cp[0], m_hit_width)) {
+			return HIT_TYPE::HIT_P0 + 0;
 		}
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 			if (pt_in_circle(t_pt.x, t_pt.y, ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 			if (pt_in_circle(t_pt, cp[3], ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(t_pt, cp, m_lineto.data(), ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(t_pt, cp, m_lineto.data(), ew)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -720,14 +720,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定される点を含んでいるので, 図形の部位を返す.
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定される点を含んでいるので, 図形の部位を返す.
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -763,9 +763,9 @@ namespace winrt::GraphPaper::implementation
 			s_cnt += 6;
 		}
 		if (fill_opa && fill_test) {
-			return LOCUS_TYPE::LOCUS_FILL;
+			return HIT_TYPE::HIT_FILL;
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 	//------------------------------
@@ -870,7 +870,7 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// end_to	終点への位置ベクトル
 	// prop	属性
-	ShapeBezier::ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const Shape* prop) :
+	ShapeBezier::ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const SHAPE* prop) :
 		ShapePath::ShapePath(prop, false)
 	{
 		m_start = start;

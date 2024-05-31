@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_lineto)) {
 			D2D1_POINT_2F se;
 			pt_add(m_start, t_box, se);
-			set_pos_loc(se, LOCUS_TYPE::LOCUS_SE, 0.0f, false);
+			set_pt_hit(se, HIT_TYPE::HIT_SE, 0.0f, false);
 			return true;
 		}
 		return false;
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeText::create_text_layout(void) noexcept
 	{
-		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
+		IDWriteFactory* const dwrite_factory = SHAPE::m_dwrite_factory.get();
 		HRESULT hr = S_OK;
 		bool updated = false;	// 文字列レイアウトが作成または変更
 
@@ -562,9 +562,9 @@ namespace winrt::GraphPaper::implementation
 	// 選択範囲された文字列を表示する.
 	void ShapeText::draw_selection(const uint32_t sele_start, const uint32_t sele_end, const bool sele_trailing) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const color_brush = Shape::m_d2d_color_brush.get();
-		ID2D1SolidColorBrush* const range_brush = Shape::m_d2d_range_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const color_brush = SHAPE::m_d2d_color_brush.get();
+		ID2D1SolidColorBrush* const range_brush = SHAPE::m_d2d_range_brush.get();
 
 		// 余白分をくわえた, 文字列の左上位置を計算する.
 		const auto h = min(m_text_padding.width, fabs(m_lineto.x) * 0.5f);
@@ -649,9 +649,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeText::draw(void) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const color_brush = Shape::m_d2d_color_brush.get();
-		//ID2D1SolidColorBrush* const range_brush = Shape::m_d2d_range_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const color_brush = SHAPE::m_d2d_color_brush.get();
+		//ID2D1SolidColorBrush* const range_brush = SHAPE::m_d2d_range_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
@@ -675,14 +675,14 @@ namespace winrt::GraphPaper::implementation
 		target->DrawTextLayout(t_lt, m_dwrite_text_layout.get(), color_brush);
 
 		// 図形が選択されているなら, 文字列の補助線を表示する
-		if (m_loc_show && is_selected()) {
-			const uint32_t d_cnt = Shape::m_aux_style->GetDashesCount();
+		if (m_hit_show && is_selected()) {
+			const uint32_t d_cnt = SHAPE::m_aux_style->GetDashesCount();
 			if (d_cnt <= 0 || d_cnt > 6) {
 				return;
 			}
 
 			FLOAT d_arr[6];
-			Shape::m_aux_style->GetDashes(d_arr, d_cnt);
+			SHAPE::m_aux_style->GetDashes(d_arr, d_cnt);
 			double mod = d_arr[0];
 			for (uint32_t i = 1; i < d_cnt; i++) {
 				mod += d_arr[i];
@@ -713,20 +713,20 @@ namespace winrt::GraphPaper::implementation
 					};
 
 					color_brush->SetColor(ShapeText::s_text_selected_foreground);
-					target->DrawRectangle(r, color_brush, Shape::m_aux_width, nullptr);
+					target->DrawRectangle(r, color_brush, SHAPE::m_aux_width, nullptr);
 					color_brush->SetColor(ShapeText::s_text_selected_background);
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 					winrt::com_ptr<ID2D1StrokeStyle1> selected_style;
 					static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt,
 						selected_style.put());
-					target->DrawLine(p[0], p[1], color_brush, Shape::m_aux_width, selected_style.get());
-					target->DrawLine(p[3], p[2], color_brush, Shape::m_aux_width, selected_style.get());
+					target->DrawLine(p[0], p[1], color_brush, SHAPE::m_aux_width, selected_style.get());
+					target->DrawLine(p[3], p[2], color_brush, SHAPE::m_aux_width, selected_style.get());
 					selected_style = nullptr;
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
 					static_cast<ID2D1Factory1*>(factory)->CreateStrokeStyle(&s_prop, d_arr, d_cnt,
 						selected_style.put());
-					target->DrawLine(p[1], p[2], color_brush, Shape::m_aux_width, selected_style.get());
-					target->DrawLine(p[0], p[3], color_brush, Shape::m_aux_width, selected_style.get());
+					target->DrawLine(p[1], p[2], color_brush, SHAPE::m_aux_width, selected_style.get());
+					target->DrawLine(p[0], p[3], color_brush, SHAPE::m_aux_width, selected_style.get());
 					selected_style = nullptr;
 				}
 			}
@@ -822,9 +822,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	点を含む部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc != LOCUS_TYPE::LOCUS_SHEET) {
-			return loc;
+		const uint32_t hit = rect_hit_test(m_start, m_lineto, test_pt, m_hit_width);
+		if (hit != HIT_TYPE::HIT_SHEET) {
+			return hit;
 		}
 		const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ?
 			0.0f : 
@@ -851,7 +851,7 @@ namespace winrt::GraphPaper::implementation
 				max(right, left + tl + tw + f), top + tt + bl + descent
 			};
 			if (pt_in_rect(test_pt, line_lt, line_rb)) {
-				return LOCUS_TYPE::LOCUS_TEXT;
+				return HIT_TYPE::HIT_TEXT;
 			}
 		}
 		return ShapeRect::hit_test(test_pt);
@@ -948,7 +948,7 @@ namespace winrt::GraphPaper::implementation
 		// システムが持つフォント集合を DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
 
-		hr = Shape::m_dwrite_factory->GetSystemFontCollection(collection.put());
+		hr = SHAPE::m_dwrite_factory->GetSystemFontCollection(collection.put());
 
 		// フォント集合の要素数を得る.
 		const uint32_t f_cnt = collection->GetFontFamilyCount();
@@ -1148,7 +1148,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	終点への位置ベクトル
 	// text	文字列
 	// prop	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* prop) :
+	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const SHAPE* prop) :
 		ShapeRect::ShapeRect(start, pos, prop)
 	{
 		prop->get_font_color(m_font_color);

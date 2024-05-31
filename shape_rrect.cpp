@@ -50,8 +50,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeRRect::draw(void) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 
 		if (m_d2d_stroke_style == nullptr) {
 			ID2D1Factory* factory;
@@ -92,13 +92,13 @@ namespace winrt::GraphPaper::implementation
 			target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
 
-		if (m_loc_show && is_selected()) {
+		if (m_hit_show && is_selected()) {
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_loc_square_inner) {
+			if (m_stroke_width >= SHAPE::m_hit_square_inner) {
 				brush->SetColor(COLOR_WHITE);
-				target->DrawRoundedRectangle(r_rec, brush, 2.0f * Shape::m_aux_width, nullptr);
+				target->DrawRoundedRectangle(r_rec, brush, 2.0f * SHAPE::m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
-				target->DrawRoundedRectangle(r_rec, brush, Shape::m_aux_width, m_aux_style.get());
+				target->DrawRoundedRectangle(r_rec, brush, SHAPE::m_aux_width, m_aux_style.get());
 			}
 			// 角丸の中心点を描く.
 			D2D1_POINT_2F circle[4]{	// 円上の点
@@ -107,12 +107,12 @@ namespace winrt::GraphPaper::implementation
 				{ r_lt.x + tx - rx, r_lt.y + ty - ry },
 				{ r_lt.x + rx, r_lt.y + ty - ry }
 			};
-			loc_draw_circle(circle[2], target, brush);
-			loc_draw_circle(circle[3], target, brush);
-			loc_draw_circle(circle[1], target, brush);
-			loc_draw_circle(circle[0], target, brush);
+			hit_draw_circle(circle[2], target, brush);
+			hit_draw_circle(circle[3], target, brush);
+			hit_draw_circle(circle[1], target, brush);
+			hit_draw_circle(circle[0], target, brush);
 			// 図形の部位を描く.
-			draw_loc();
+			draw_hit();
 		}
 	}
 
@@ -123,10 +123,10 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 指定した部位の点を得る.
-	// loc	部位
+	// 指定した判定部位の座標を得る.
+	// hit	判定部位
 	// val	得られた値
-	void ShapeRRect::get_pos_loc(const uint32_t loc, D2D1_POINT_2F& val) const noexcept
+	void ShapeRRect::get_pt_hit(const uint32_t hit, D2D1_POINT_2F& val) const noexcept
 	{
 		const double dx = m_lineto.x;	// 差分 x
 		const double dy = m_lineto.y;	// 差分 y
@@ -135,25 +135,25 @@ namespace winrt::GraphPaper::implementation
 		const double rx = fabs(mx) < fabs(m_corner_radius.x) ? mx : m_corner_radius.x;	// 角丸 x
 		const double ry = fabs(my) < fabs(m_corner_radius.y) ? my : m_corner_radius.y;	// 角丸 y
 
-		switch (loc) {
-		case LOCUS_TYPE::LOCUS_R_NW:
+		switch (hit) {
+		case HIT_TYPE::HIT_R_NW:
 			// 左上の角丸中心点を求める
 			pt_add(m_start, rx, ry, val);
 			break;
-		case LOCUS_TYPE::LOCUS_R_NE:
+		case HIT_TYPE::HIT_R_NE:
 			// 右上の角丸中心点を求める
 			pt_add(m_start, dx - rx, ry, val);
 			break;
-		case LOCUS_TYPE::LOCUS_R_SE:
+		case HIT_TYPE::HIT_R_SE:
 			// 右下の角丸中心点を求める
 			pt_add(m_start, dx - rx, dy - ry, val);
 			break;
-		case LOCUS_TYPE::LOCUS_R_SW:
+		case HIT_TYPE::HIT_R_SW:
 			// 左下の角丸中心点を求める
 			pt_add(m_start, rx, dy - ry, val);
 			break;
 		default:
-			ShapeOblong::get_pos_loc(loc, val);
+			SHAPE_CLOSED::get_pt_hit(hit, val);
 			break;
 		}
 	}
@@ -220,50 +220,50 @@ namespace winrt::GraphPaper::implementation
 		// |         |
 		// | 3     1 |
 		// +---------+
-		uint32_t loc_r;
+		uint32_t hit;
 		const double mx = m_lineto.x * 0.5;	// 中間点
 		const double my = m_lineto.y * 0.5;	// 中間点
 		const double rx = fabs(mx) < fabs(m_corner_radius.x) ? mx : m_corner_radius.x;	// 角丸
 		const double ry = fabs(my) < fabs(m_corner_radius.y) ? my : m_corner_radius.y;	// 角丸
-		const D2D1_POINT_2F loc_r_nw{
+		const D2D1_POINT_2F r_nw{
 			static_cast<FLOAT>(m_start.x + rx), 
 			static_cast<FLOAT>(m_start.y + ry)
 		};
-		const D2D1_POINT_2F loc_r_se{
+		const D2D1_POINT_2F r_se{
 			static_cast<FLOAT>(m_start.x + m_lineto.x - rx),
 			static_cast<FLOAT>(m_start.y + m_lineto.y - ry)
 		};
-		const D2D1_POINT_2F loc_r_ne{ loc_r_se.x, loc_r_nw.y };
-		const D2D1_POINT_2F loc_r_sw{ loc_r_nw.x, loc_r_se.y };
-		if (loc_hit_test(test_pt, loc_r_se, m_loc_width)) {
-			loc_r = LOCUS_TYPE::LOCUS_R_SE;
+		const D2D1_POINT_2F r_ne{ r_se.x, r_nw.y };
+		const D2D1_POINT_2F r_sw{ r_nw.x, r_se.y };
+		if (hit_text_pt(test_pt, r_se, m_hit_width)) {
+			hit = HIT_TYPE::HIT_R_SE;
 		}
-		else if (loc_hit_test(test_pt, loc_r_nw, m_loc_width)) {
-			loc_r = LOCUS_TYPE::LOCUS_R_NW;
+		else if (hit_text_pt(test_pt, r_nw, m_hit_width)) {
+			hit = HIT_TYPE::HIT_R_NW;
 		}
-		else if (loc_hit_test(test_pt, loc_r_sw, m_loc_width)) {
-			loc_r = LOCUS_TYPE::LOCUS_R_SW;
+		else if (hit_text_pt(test_pt, r_sw, m_hit_width)) {
+			hit = HIT_TYPE::HIT_R_SW;
 		}
-		else if (loc_hit_test(test_pt, loc_r_ne, m_loc_width)) {
-			loc_r = LOCUS_TYPE::LOCUS_R_NE;
+		else if (hit_text_pt(test_pt, r_ne, m_hit_width)) {
+			hit = HIT_TYPE::HIT_R_NE;
 		}
 		else {
-			loc_r = LOCUS_TYPE::LOCUS_SHEET;
+			hit = HIT_TYPE::HIT_SHEET;
 		}
 
 		// 角丸のいずれかの中心点に含まれる,
-		if (loc_r != LOCUS_TYPE::LOCUS_SHEET &&
+		if (hit != HIT_TYPE::HIT_SHEET &&
 			// かつ, 方形の大きさが図形の部位の倍の大きさより大きいか判定する.
-			fabs(m_lineto.x) > m_loc_width && fabs(m_lineto.y) > 2.0f * m_loc_width) {
-			return loc_r;
+			fabs(m_lineto.x) > m_hit_width && fabs(m_lineto.y) > 2.0f * m_hit_width) {
+			return hit;
 		}
-		const uint32_t loc_v = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc_v != LOCUS_TYPE::LOCUS_SHEET) {
-			return loc_v;
+		const uint32_t hit_rect = rect_hit_test(m_start, m_lineto, test_pt, m_hit_width);
+		if (hit_rect != HIT_TYPE::HIT_SHEET) {
+			return hit_rect;
 		}
 		// 頂点に含まれず, 角丸の円弧の中心点に含まれるか判定する.
-		else if (loc_r != LOCUS_TYPE::LOCUS_SHEET) {
-			return loc_r;
+		else if (hit != HIT_TYPE::HIT_SHEET) {
+			return hit;
 		}
 
 		D2D1_POINT_2F r_lt;	// 左上位置
@@ -292,13 +292,13 @@ namespace winrt::GraphPaper::implementation
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// 塗りつぶし色が不透明, かつ角丸方形そのものに含まれるか判定する.
 			if (is_opaque(m_fill_color) && pt_in_rrect(test_pt, r_lt, r_rb, r_rad)) {
-				return LOCUS_TYPE::LOCUS_FILL;
+				return HIT_TYPE::HIT_FILL;
 			}
 		}
 		// 線枠の色が不透明, かつ太さが 0 より大きい.
 		else {
 			// 拡大した角丸方形に含まれるか判定
-			const double ew = max(m_stroke_width, m_loc_width);
+			const double ew = max(m_stroke_width, m_hit_width);
 			D2D1_POINT_2F e_lt, e_rb, e_rad;	// 拡大した角丸方形
 			pt_add(r_lt, -ew * 0.5, e_lt);
 			pt_add(r_rb, ew * 0.5, e_rb);
@@ -310,34 +310,34 @@ namespace winrt::GraphPaper::implementation
 				pt_add(e_rb, -ew, s_rb);
 				pt_add(e_rad, -ew, s_rad);
 				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(test_pt, s_lt, s_rb, s_rad)) {
-					// 塗りつぶし色が不透明なら, LOCUS_FILL を返す.
+					// 塗りつぶし色が不透明なら, HIT_FILL を返す.
 					if (is_opaque(m_fill_color)) {
-						return LOCUS_TYPE::LOCUS_FILL;
+						return HIT_TYPE::HIT_FILL;
 					}
 				}
 				else {
-					// 拡大した角丸方形に含まれ, 縮小した角丸方形に含まれないなら LOCUS_STROKE を返す.
-					return LOCUS_TYPE::LOCUS_STROKE;
+					// 拡大した角丸方形に含まれ, 縮小した角丸方形に含まれないなら HIT_STROKE を返す.
+					return HIT_TYPE::HIT_STROKE;
 				}
 			}
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
-	// 値を, 指定した部位の点に格納する.
+	// 値を, 指定した判定部位の座標に格納する.
 	// val	値
-	// loc	部位
+	// hit	判定部位
 	// snap_point	他の点との間隔 (この値より離れた点は無視する)
-	bool ShapeRRect::set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool /*keep_aspect*/) noexcept
+	bool ShapeRRect::set_pt_hit(const D2D1_POINT_2F val, const uint32_t hit, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		D2D1_POINT_2F a;	// 図形の部位の位置
 		D2D1_POINT_2F p;	// 位置ベクトル
 		D2D1_POINT_2F r;	// 角丸半径
 		D2D1_POINT_2F q;	// 新しい点
 
-		switch (loc) {
-		case LOCUS_TYPE::LOCUS_R_NW:
-			ShapeRRect::get_pos_loc(loc, a);
+		switch (hit) {
+		case HIT_TYPE::HIT_R_NW:
+			ShapeRRect::get_pt_hit(hit, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
 			if (pt_abs2(p) < FLT_MIN) {
@@ -346,8 +346,8 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_corner_radius, p, r);
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOCUS_TYPE::LOCUS_R_NE:
-			ShapeRRect::get_pos_loc(loc, a);
+		case HIT_TYPE::HIT_R_NE:
+			ShapeRRect::get_pt_hit(hit, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
 			if (pt_abs2(p) < FLT_MIN) {
@@ -357,8 +357,8 @@ namespace winrt::GraphPaper::implementation
 			r.y = m_corner_radius.y + p.y;
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOCUS_TYPE::LOCUS_R_SE:
-			ShapeRRect::get_pos_loc(loc, a);
+		case HIT_TYPE::HIT_R_SE:
+			ShapeRRect::get_pt_hit(hit, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
 			if (pt_abs2(p) < FLT_MIN) {
@@ -368,8 +368,8 @@ namespace winrt::GraphPaper::implementation
 			r.y = m_corner_radius.y - p.y;
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
-		case LOCUS_TYPE::LOCUS_R_SW:
-			ShapeRRect::get_pos_loc(loc, a);
+		case HIT_TYPE::HIT_R_SW:
+			ShapeRRect::get_pt_hit(hit, a);
 			pt_round(val, PT_ROUND, q);
 			pt_sub(q, a, p);
 			if (pt_abs2(p) < FLT_MIN) {
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			rrect_corner_radius(m_lineto, r, m_corner_radius);
 			break;
 		default:
-			if (!ShapeOblong::set_pos_loc(val, loc, snap_point, false)) {
+			if (!SHAPE_CLOSED::set_pt_hit(val, hit, snap_point, false)) {
 				return false;
 			}
 			if (m_lineto.x * m_corner_radius.x < 0.0f) {
@@ -401,9 +401,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// start	始点
 	// end_to	対角点への位置ベクトル
-	// page	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const Shape* prop) :
-		ShapeOblong::ShapeOblong(start, end_to, prop)
+	// prop	属性
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const SHAPE* prop) :
+		SHAPE_CLOSED::SHAPE_CLOSED(start, end_to, prop)
 	{
 		float g_base;
 		prop->get_grid_base(g_base);
@@ -412,7 +412,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
-		ShapeOblong::ShapeOblong(dt_reader)
+		SHAPE_CLOSED::SHAPE_CLOSED(dt_reader)
 	{
 		m_corner_radius = D2D1_POINT_2F{
 			dt_reader.ReadSingle(),
@@ -429,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeRRect::write(DataWriter const& dt_writer) const
 	{
-		ShapeOblong::write(dt_writer);
+		SHAPE_CLOSED::write(dt_writer);
 		dt_writer.WriteSingle(m_corner_radius.x);
 		dt_writer.WriteSingle(m_corner_radius.y);
 	}

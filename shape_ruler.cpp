@@ -13,9 +13,9 @@ namespace winrt::GraphPaper::implementation
 	// test_pt	判定される点
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F test_pt, const bool/*ctrl_key*/) const noexcept
 	{
-		const uint32_t loc = rect_loc_hit_test(m_start, m_lineto, test_pt, m_loc_width);
-		if (loc != LOCUS_TYPE::LOCUS_SHEET) {
-			return loc;
+		const uint32_t hit = rect_hit_test(m_start, m_lineto, test_pt, m_hit_width);
+		if (hit != HIT_TYPE::HIT_SHEET) {
+			return hit;
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
@@ -45,24 +45,24 @@ namespace winrt::GraphPaper::implementation
 				};
 				if (x_ge_y) {
 					const D2D1_POINT_2F p_min{
-						static_cast<FLOAT>(p0.x - m_loc_width * 0.5), min(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x - m_hit_width * 0.5), min(p0.y, p1.y)
 					};
 					const D2D1_POINT_2F p_max{
-						static_cast<FLOAT>(p0.x + m_loc_width * 0.5f), max(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x + m_hit_width * 0.5f), max(p0.y, p1.y)
 					};
 					if (pt_in_rect(test_pt, p_min, p_max)) {
-						return LOCUS_TYPE::LOCUS_STROKE;
+						return HIT_TYPE::HIT_STROKE;
 					}
 				}
 				else {
 					const D2D1_POINT_2F p_min{
-						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - m_loc_width * 0.5)
+						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - m_hit_width * 0.5)
 					};
 					const D2D1_POINT_2F p_max{
-						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_loc_width * 0.5)
+						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_hit_width * 0.5)
 					};
 					if (pt_in_rect(test_pt, p_min, p_max)) {
-						return LOCUS_TYPE::LOCUS_STROKE;
+						return HIT_TYPE::HIT_STROKE;
 					}
 				}
 				// 目盛りの値を表示する.
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				*/
 				if (pt_in_rect(test_pt, r_lt, r_rb)) {
-					return LOCUS_TYPE::LOCUS_STROKE;
+					return HIT_TYPE::HIT_STROKE;
 				}
 			}
 		}
@@ -98,15 +98,15 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F end_pt;
 			pt_add(m_start, m_lineto, end_pt);
 			if (pt_in_rect(test_pt, m_start, end_pt)) {
-				return LOCUS_TYPE::LOCUS_FILL;
+				return HIT_TYPE::HIT_FILL;
 			}
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 	HRESULT ShapeRuler::create_text_format(void) noexcept
 	{
-		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
+		IDWriteFactory* const dwrite_factory = SHAPE::m_dwrite_factory.get();
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 
@@ -134,8 +134,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRuler::draw(void) noexcept
 	{
 		HRESULT hr = S_OK;
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 		const bool exist_stroke = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color));
 
 		if (exist_stroke && m_d2d_stroke_style == nullptr) {
@@ -220,8 +220,8 @@ namespace winrt::GraphPaper::implementation
 				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), r, brush);
 			}
 		}
-		if (m_loc_show && is_selected()) {
-			draw_loc();
+		if (m_hit_show && is_selected()) {
+			draw_hit();
 		}
 	}
 
@@ -266,8 +266,8 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// end_to	終点への位置ベクトル
 	// prop	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const Shape* prop) :
-		ShapeOblong::ShapeOblong(start, end_to, prop)
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const SHAPE* prop) :
+		SHAPE_CLOSED::SHAPE_CLOSED(start, end_to, prop)
 	{
 		ShapeText::is_available_font(m_font_family);
 		prop->get_grid_base(m_grid_base);
@@ -296,7 +296,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
-		ShapeOblong::ShapeOblong(dt_reader),
+		SHAPE_CLOSED::SHAPE_CLOSED(dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
 		m_font_family(dt_read_name(dt_reader)),
 		m_font_size(dt_reader.ReadSingle())
@@ -313,7 +313,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeRuler::write(DataWriter const& dt_writer) const
 	{
-		ShapeOblong::write(dt_writer);
+		SHAPE_CLOSED::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
 		const uint32_t f_len = wchar_len(m_font_family);
 		dt_writer.WriteUInt32(f_len);

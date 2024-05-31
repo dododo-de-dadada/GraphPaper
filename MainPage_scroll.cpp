@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が表示されるよう表示をスクロールする.
 	// s	表示される図形
-	bool MainPage::scroll_to(const Shape* const s)
+	bool MainPage::scroll_to(const SHAPE* const s)
 	{
 		// スクロールビューアのビューポートの座標を, 表示座標で求める.
 		const double ox = m_main_bbox_lt.x;	// 原点 x

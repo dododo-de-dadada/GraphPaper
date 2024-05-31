@@ -16,8 +16,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::revert_image_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		bool push_null = false;
-		for (Shape* const s : m_main_sheet.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
+		for (SHAPE* const s : m_main_sheet.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(SHAPE_IMAGE)) {
 				continue;
 			}
 			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 				push_null = true;
 			}
 			undo_push_image(s);
-			static_cast<ShapeImage*>(s)->revert();
+			static_cast<SHAPE_IMAGE*>(s)->revert();
 		}
 		main_panel_size();
 		main_sheet_draw();
@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const D2D1_FIGURE_END END = (sender == menu_open_polygon() || sender == popup_open_polygon() ? D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN : D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
 		bool push_null = false;
-		for (Shape* s : m_main_sheet.m_shape_list) {
+		for (SHAPE* s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	/*
-	IAsyncAction MainPage::edit_arc_async(ShapeArc* t)
+	IAsyncAction MainPage::edit_arc_async(SHAPE_ARC* t)
 	{
 		const auto str_arc_start{
 			ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": "
@@ -128,7 +128,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F pos{
 			static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 		};
-		Shape* s = new ShapeArc(start, pos, t);
+		SHAPE* s = new SHAPE_ARC(start, pos, t);
 		s->set_select(true);
 		m_dialog_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
@@ -287,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (co_await cd_dialog_prop().ShowAsync() == ContentDialogResult::Primary) {
 				undo_push_null();
-				Shape* s = m_dialog_sheet.slist_back();
+				SHAPE* s = m_dialog_sheet.slist_back();
 				// 注意: 順番が OK かどうか.
 				D2D1_SWEEP_DIRECTION new_dir;
 				s->get_arc_dir(new_dir);

@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 
 			// 選択された図形のリストを得る.
 			SHAPE_LIST selected_list;
-			slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
+			slist_get_selected<SHAPE>(m_main_sheet.m_shape_list, selected_list);
 
 			// リストから降順に, 最初に見つかった文字列とビットマップを得る.
 			wchar_t* text_ptr = nullptr;
@@ -65,11 +65,11 @@ namespace winrt::GraphPaper::implementation
 					(*it)->get_text_content(text_ptr);
 				}
 				// 最初に見つかったビットマップをメモリランダムアクセスストリームに格納し, その参照を得る.
-				if (image_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
+				if (image_ref == nullptr && typeid(*it) == typeid(SHAPE_IMAGE)) {
 					InMemoryRandomAccessStream image_stream{
 						InMemoryRandomAccessStream()
 					};
-					if (co_await static_cast<ShapeImage*>(*it)->copy<false>(BitmapEncoder::BmpEncoderId(), image_stream) && image_stream.Size() > 0) {
+					if (co_await static_cast<SHAPE_IMAGE*>(*it)->copy<false>(BitmapEncoder::BmpEncoderId(), image_stream) && image_stream.Size() > 0) {
 						image_ref = RandomAccessStreamReference::CreateFromStream(image_stream);
 					}
 				}
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				// 選択された図形のリストを得る.
 				SHAPE_LIST selected_list;
-				slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
+				slist_get_selected<SHAPE>(m_main_sheet.m_shape_list, selected_list);
 				// リストの各図形について以下を繰り返す.
 				m_mutex_draw.lock();
 				for (auto s : selected_list) {
@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 		};
 
 		// ビットマップから図形を作成する.
-		ShapeImage* s = new ShapeImage(lt, D2D1_SIZE_F{ img_w, img_h }, bmp, 1.0f);
+		SHAPE_IMAGE* s = new SHAPE_IMAGE(lt, D2D1_SIZE_F{ img_w, img_h }, bmp, 1.0f);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -300,6 +300,7 @@ namespace winrt::GraphPaper::implementation
 		stream.Close();
 		stream = nullptr;
 		reference = nullptr;
+		co_await winrt::resume_foreground(Dispatcher());
 
 		const double g_len = (m_snap_grid ? m_main_sheet.m_grid_base + 1.0 : 0.0);
 		xcvd_get_paste_pos(lt , /*<---*/lt, m_main_sheet.m_shape_list, g_len, m_snap_point / m_main_scale);
@@ -314,7 +315,6 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 		}
 
-		co_await winrt::resume_foreground(Dispatcher());
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(s);

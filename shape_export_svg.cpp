@@ -252,19 +252,19 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// データライターに SVG として書き込む.
 	//------------------------------
-	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_as_svg_async(const DataWriter& dt_writer)
+	winrt::Windows::Foundation::IAsyncAction SHAPE_GROUP::export_as_svg_async(const DataWriter& dt_writer)
 	{
 		dt_writer.WriteString(L"<!-- Group -->\n");
 		dt_writer.WriteString(L"<g>\n");
-		for (Shape* s : m_list_grouped) {
+		for (SHAPE* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (typeid(*s) == typeid(ShapeImage)) {
-				co_await static_cast<ShapeImage*>(s)->export_as_svg_async(dt_writer);
+			if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+				co_await static_cast<SHAPE_IMAGE*>(s)->export_as_svg_async(dt_writer);
 			}
-			else if (typeid(*s) == typeid(ShapeGroup)) {
-				co_await static_cast<ShapeGroup*>(s)->export_as_svg_async(dt_writer);
+			else if (typeid(*s) == typeid(SHAPE_GROUP)) {
+				co_await static_cast<SHAPE_GROUP*>(s)->export_as_svg_async(dt_writer);
 			}
 			else {
 				s->export_svg(dt_writer);
@@ -275,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データライターに SVG として書き込む.
 	// dt_write		データライター
-	winrt::Windows::Foundation::IAsyncAction ShapeImage::export_as_svg_async(const DataWriter& dt_writer)
+	winrt::Windows::Foundation::IAsyncAction SHAPE_IMAGE::export_as_svg_async(const DataWriter& dt_writer)
 	{
 		InMemoryRandomAccessStream image_stream{};	// メモリのランダムアクセスストリーム
 		co_await copy<true>(BitmapEncoder::PngEncoderId(), image_stream);
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeOblong::export_svg(DataWriter const& dt_writer) noexcept
+	void SHAPE_CLOSED::export_svg(DataWriter const& dt_writer) noexcept
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && 
@@ -701,7 +701,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼を表示する.
-	void ShapeSheet::export_svg(const DataWriter& dt_writer) noexcept
+	void SHAPE_SHEET::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		//const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (用紙から内余白を除いた分)
 		//	m_sheet_size.width - (m_sheet_padding.left + m_sheet_padding.right),
@@ -778,7 +778,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに SVG として書き込む.
-	void ShapeArc::export_svg(const DataWriter& dt_writer) noexcept
+	void SHAPE_ARC::export_svg(const DataWriter& dt_writer) noexcept
 	{
 		wchar_t buf[1024];
 		D2D1_POINT_2F p[5]{};

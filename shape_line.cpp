@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_dir));	// 矢軸の長さ
 		if (a_len >= FLT_MIN) {
-			get_pos_barbs(a_dir, a_len, a_size.m_width, a_size.m_length, barb);
+			get_barbs(a_dir, a_len, a_size.m_width, a_size.m_length, barb);
 			if (a_size.m_offset >= a_len) {
 				// 矢じるしの先端
 				tip = a_end;
@@ -92,8 +92,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeLine::draw(void) noexcept
 	{
-		ID2D1RenderTarget* const target = Shape::m_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1RenderTarget* const target = SHAPE::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = SHAPE::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
@@ -123,9 +123,9 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_stroke.get());
 			}
 		}
-		if (m_loc_show && is_selected()) {
+		if (m_hit_show && is_selected()) {
 			// 補助線を描く
-			if (m_stroke_width >= Shape::m_loc_square_inner) {
+			if (m_stroke_width >= SHAPE::m_hit_square_inner) {
 				brush->SetColor(COLOR_WHITE);
 				target->DrawLine(m_start, end_pt, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
@@ -134,23 +134,23 @@ namespace winrt::GraphPaper::implementation
 			// 図形の部位を描く.
 			D2D1_POINT_2F mid_pt;	// 中点
 			pt_mul_add(m_lineto, 0.5, m_start, mid_pt);
-			loc_draw_rhombus(mid_pt, target, brush);
-			loc_draw_square(m_start, target, brush);
-			loc_draw_square(end_pt, target, brush);
+			hit_draw_rhombus(mid_pt, target, brush);
+			hit_draw_square(m_start, target, brush);
+			hit_draw_square(end_pt, target, brush);
 		}
 	}
 
-	// 指定した部位の点を得る.
-	void ShapeLine::get_pos_loc(
-		const uint32_t loc,	// 部位
+	// 指定した判定部位の座標を得る.
+	void ShapeLine::get_pt_hit(
+		const uint32_t hit,	// 判定部位
 		D2D1_POINT_2F& val	// 得られた点
 	) const noexcept
 	{
 		// 図形の部位が「図形の外部」または「開始点」ならば, 始点を得る.
-		if (loc == LOCUS_TYPE::LOCUS_START) {
+		if (hit == HIT_TYPE::HIT_START) {
 			val = m_start;
 		}
-		else if (loc == LOCUS_TYPE::LOCUS_END) {
+		else if (hit == HIT_TYPE::HIT_END) {
 			val.x = m_start.x + m_lineto.x;
 			val.y = m_start.y + m_lineto.y;
 		}
@@ -218,13 +218,13 @@ namespace winrt::GraphPaper::implementation
 			m_start.x + m_lineto.x,
 			m_start.y + m_lineto.y
 		};
-		if (loc_hit_test(test_pt, end_pt, m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_END;
+		if (hit_text_pt(test_pt, end_pt, m_hit_width)) {
+			return HIT_TYPE::HIT_END;
 		}
-		if (loc_hit_test(test_pt, m_start, m_loc_width)) {
-			return LOCUS_TYPE::LOCUS_START;
+		if (hit_text_pt(test_pt, m_start, m_hit_width)) {
+			return HIT_TYPE::HIT_START;
 		}
-		const double e_width = 0.5 * max(m_stroke_width, m_loc_width);
+		const double e_width = 0.5 * max(m_stroke_width, m_hit_width);
 		if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE)) {
 			D2D1_POINT_2F to{ m_lineto };
 			const double abs2 = pt_abs2(to);
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end_pt, dx - ox, dy - oy, q[2]);
 			pt_add(end_pt, dx + ox, dy + oy, q[3]);
 			if (pt_in_poly(test_pt, 4, q)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE)) {
@@ -264,13 +264,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(end_pt, dx, dy, h[4]);
 			pt_add(end_pt, ox, oy, h[5]);
 			if (pt_in_poly(test_pt, 6, h)) {
-				return LOCUS_TYPE::LOCUS_STROKE;
+				return HIT_TYPE::HIT_STROKE;
 			}
 		}
 		else {
 			if (equal(m_stroke_cap, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND)) {
 				if (pt_in_circle(test_pt, m_start, e_width) || pt_in_circle(test_pt, end_pt, e_width)) {
-					return LOCUS_TYPE::LOCUS_STROKE;
+					return HIT_TYPE::HIT_STROKE;
 				}
 			}
 			D2D1_POINT_2F p{ m_lineto };
@@ -285,11 +285,11 @@ namespace winrt::GraphPaper::implementation
 				pt_add(end_pt, -ox, -oy, q[2]);
 				pt_add(end_pt, ox, oy, q[3]);
 				if (pt_in_poly(test_pt, 4, q)) {
-					return LOCUS_TYPE::LOCUS_STROKE;
+					return HIT_TYPE::HIT_STROKE;
 				}
 			}
 		}
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 	// 矩形に含まれるか判定する.
@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を線分の結合の尖り制限に格納する.
 	bool ShapeLine::set_stroke_join_limit(const float& val) noexcept
 	{
-		if (ShapeStroke::set_stroke_join_limit(val)) {
+		if (SHAPE_STROKE::set_stroke_join_limit(val)) {
 			m_d2d_arrow_stroke = nullptr;
 			return true;
 		}
@@ -320,22 +320,22 @@ namespace winrt::GraphPaper::implementation
 	// 値を線分の結合に格納する.
 	bool ShapeLine::set_stroke_join(const D2D1_LINE_JOIN& val) noexcept
 	{
-		if (ShapeStroke::set_stroke_join(val)) {
+		if (SHAPE_STROKE::set_stroke_join(val)) {
 			m_d2d_arrow_stroke = nullptr;
 			return true;
 		}
 		return false;
 	}
 
-	// 値を, 指定した部位の点に格納する.
+	// 値を, 指定した判定部位の座標に格納する.
 	// val	値
-	// loc	部位
+	// hit	判定部位
 	// snap_point	点を点にくっつけるしきい値
 	// /*keep_aspect*/
-	bool ShapeLine::set_pos_loc(const D2D1_POINT_2F val, const uint32_t loc, const float snap_point, const bool /*keep_aspect*/) noexcept
+	bool ShapeLine::set_pt_hit(const D2D1_POINT_2F val, const uint32_t hit, const float snap_point, const bool /*keep_aspect*/) noexcept
 	{
 		bool flag = false;
-		if (loc == LOCUS_TYPE::LOCUS_START) {
+		if (hit == HIT_TYPE::HIT_START) {
 			if (!equal(m_start, val)) {
 				const D2D1_POINT_2F end{
 					m_start.x + m_lineto.x, m_start.y + m_lineto.y
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 		}
-		else if (loc == LOCUS_TYPE::LOCUS_END) {
+		else if (hit == HIT_TYPE::HIT_END) {
 			const D2D1_POINT_2F end_pt{
 				m_start.x + m_lineto.x, m_start.y + m_lineto.y
 			};
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag) {
 			const double ss = static_cast<double>(snap_point) * static_cast<double>(snap_point);
 			if (ss > FLT_MIN && pt_abs2(m_lineto) <= ss) {
-				if (loc == LOCUS_TYPE::LOCUS_START) {
+				if (hit == HIT_TYPE::HIT_START) {
 					m_start.x = m_start.x + m_lineto.x;
 					m_start.y = m_start.y + m_lineto.y;
 				}
@@ -388,7 +388,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeLine::set_stroke_cap(const D2D1_CAP_STYLE& val) noexcept
 	//bool ShapeLine::set_stroke_cap(const CAP_STYLE& val) noexcept
 	{
-		if (ShapeStroke::set_stroke_cap(val)) {
+		if (SHAPE_STROKE::set_stroke_cap(val)) {
 			m_d2d_arrow_stroke = nullptr;
 			return true;
 		}
@@ -413,8 +413,8 @@ namespace winrt::GraphPaper::implementation
 	// start	始点
 	// lineto	終点への位置ベクトル
 	// prop	属性
-	ShapeLine::ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto, const Shape* prop) :
-		ShapeArrow::ShapeArrow(prop)
+	ShapeLine::ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto, const SHAPE* prop) :
+		SHAPE_OPEN::SHAPE_OPEN(prop)
 	{
 		m_start = start;
 		m_lineto = lineto;
@@ -427,7 +427,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
 	ShapeLine::ShapeLine(DataReader const& dt_reader) :
-		ShapeArrow::ShapeArrow(dt_reader)
+		SHAPE_OPEN::SHAPE_OPEN(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
@@ -438,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeLine::write(DataWriter const& dt_writer) const
 	{
-		ShapeArrow::write(dt_writer);
+		SHAPE_OPEN::write(dt_writer);
 
 		// 始点
 		dt_writer.WriteSingle(m_start.x);

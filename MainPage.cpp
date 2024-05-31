@@ -272,7 +272,7 @@ namespace winrt::GraphPaper::implementation
 		menu_find_and_replace().IsEnabled(exists_text);
 
 		// 図形編集メニューの可否を設定する.
-		if (m_event_shape_pressed != nullptr && m_event_locus_pressed != LOCUS_TYPE::LOCUS_SHEET && 
+		if (m_event_shape_pressed != nullptr && m_event_hit_pressed != HIT_TYPE::HIT_SHEET && 
 			(exists_selected_cap || exists_selected_counter_clockwise || exists_selected_polygon || exists_selected_polyline || exists_selected_image)) {
 			popup_edit_shape().Visibility(Visibility::Visible);
 		}
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_popup_font_color().IsEnabled(exists_selected_text);
 
 		// レイアウトメニューの可否を設定する.
-		if (m_event_shape_pressed == nullptr || m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
+		if (m_event_shape_pressed == nullptr || m_event_hit_pressed == HIT_TYPE::HIT_SHEET) {
 			popup_layout().Visibility(Visibility::Visible);
 		}
 		else {
@@ -578,7 +578,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_sheet.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background_wic.get(), m_main_scale);
 
 		// 描画環境を保存, 描画を開始する.
-		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
+		m_main_d2d.m_d2d_context->SaveDrawingState(SHAPE::m_state_block.get());
 		m_main_d2d.m_d2d_context->BeginDraw();
 		m_main_d2d.m_d2d_context->Clear(m_background_color);
 
@@ -587,7 +587,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_RECT_F w_rect{	// ウィンドウの矩形
 				0, 0, m_main_d2d.m_logical_width, m_main_d2d.m_logical_height
 			};
-			m_main_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+			m_main_d2d.m_d2d_context->FillRectangle(w_rect, SHAPE::m_d2d_bitmap_brush.get());
 		}
 
 		// 変換行列に拡大縮小と平行移動を設定する.
@@ -655,7 +655,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 描画を終了し結果を得る. 保存された描画環境を元に戻す.
 		const HRESULT hres = m_main_d2d.m_d2d_context->EndDraw();
-		m_main_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
+		m_main_d2d.m_d2d_context->RestoreDrawingState(SHAPE::m_state_block.get());
 
 		// 結果が S_OK でない場合,
 		if (hres != S_OK) {

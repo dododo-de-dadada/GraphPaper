@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		POLY_OPTION p_opt{ m_tool_polygon };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
-		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_dialog_sheet, p_opt);
+		SHAPE* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_dialog_sheet, p_opt);
 		D2D1_POINT_2F b_lt;
 		D2D1_POINT_2F b_rb;
 		D2D1_POINT_2F b_pos;

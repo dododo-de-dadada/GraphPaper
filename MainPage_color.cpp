@@ -20,7 +20,7 @@ namespace winrt::GraphPaper::implementation
 	// sheet	—p†}Œ`
 	// color	“¾‚ç‚ê‚½F
 	template<UNDO_T U>
-	static void color_get(const ShapeSheet& sheet, D2D1_COLOR_F& color)
+	static void color_get(const SHAPE_SHEET& sheet, D2D1_COLOR_F& color)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
 			sheet.slist_back()->get_fill_color(color);
@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	template<UNDO_T U>
-	static bool color_set(ShapeSheet& sheet, const D2D1_COLOR_F& color)
+	static bool color_set(SHAPE_SHEET& sheet, const D2D1_COLOR_F& color)
 	{
 		if constexpr (U == UNDO_T::FILL_COLOR) {
 			return sheet.slist_back()->set_fill_color(color);

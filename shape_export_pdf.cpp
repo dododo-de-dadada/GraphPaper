@@ -444,7 +444,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	size_t ShapeOblong::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
+	size_t SHAPE_CLOSED::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
 		wchar_t cmd[4];	// パス描画命令
 		if (!export_pdf_path_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
@@ -571,7 +571,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	size_t ShapeImage::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
+	size_t SHAPE_IMAGE::export_pdf(const D2D1_SIZE_F sheet_size, DataWriter const& dt_writer)
 	{
 		// PDF では表示の大きさの規定値は 1 x 1.
 		// そもままでは, 画像全体が 1 x 1 にマッピングされる.
@@ -645,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	static void export_cmap_table(const void* table_data, const UINT32 table_size, const void* table_context, const size_t offset)
+	static void export_cmap_table(const void* table_data, const UINT32 table_size, const void* table_context, const size_t/*offset*/)
 	{
 		//https://learn.microsoft.com/en-us/typography/opentype/spec/cmap
 		//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
@@ -654,7 +654,7 @@ namespace winrt::GraphPaper::implementation
 		for (uint16_t i = 0; i < numTables; i++) {
 			uint16_t platformID = get_uint16(table_data, 4ull + 8ull * i + 0);
 			uint16_t encodingID = get_uint16(table_data, 4ull + 8ull * i + 2);
-			size_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
+			const size_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
 			if (platformID == 0) {	// Unicode
 				if (encodingID == 3) {	// Unicode 2.0 (BMP のみ)
 					uint16_t format = get_uint16(table_data, offset);
@@ -1061,16 +1061,16 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	size_t ShapeSheet::export_pdf(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
+	size_t SHAPE_SHEET::export_pdf(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
 	{
 		wchar_t buf[1024];	// PDF
 		size_t len = 0;
 
 		// PDF はアルファに対応してないので, 背景色と混ぜて, 用紙を塗りつぶす.
-		const double page_a = m_sheet_color.a;
-		const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
-		const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
-		const double page_b = page_a * m_sheet_color.b + (1.0 - page_a) * background.b;
+		const double sheet_a = m_sheet_color.a;
+		const double sheet_r = sheet_a * m_sheet_color.r + (1.0 - sheet_a) * background.r;
+		const double sheet_g = sheet_a * m_sheet_color.g + (1.0 - sheet_a) * background.g;
+		const double sheet_b = sheet_a * m_sheet_color.b + (1.0 - sheet_a) * background.b;
 		// re = 方形, f = 内部を塗りつぶす.
 		// cm = 変換行列 (用紙の中では内余白の分平行移動)
 		swprintf_s(buf,
@@ -1078,9 +1078,9 @@ namespace winrt::GraphPaper::implementation
 			L"0 0 %f %f re\n"
 			L"f\n"
 			L"1 0 0 1 %f %f cm\n",
-			min(max(page_r, 0.0), 1.0),
-			min(max(page_g, 0.0), 1.0),
-			min(max(page_b, 0.0), 1.0),
+			min(max(sheet_r, 0.0), 1.0),
+			min(max(sheet_g, 0.0), 1.0),
+			min(max(sheet_b, 0.0), 1.0),
 			m_sheet_size.width,
 			m_sheet_size.height,
 			m_sheet_padding.left,
@@ -1103,14 +1103,14 @@ namespace winrt::GraphPaper::implementation
 		if (m_grid_show == GRID_SHOW::FRONT || m_grid_show == GRID_SHOW::BACK) {
 			const float grid_base = m_grid_base;
 			// PDF はアルファに対応してないので, 背景色, 用紙色と混ぜる.
-			const double page_a = m_sheet_color.a;
-			const double page_r = page_a * m_sheet_color.r + (1.0 - page_a) * background.r;
-			const double page_g = page_a * m_sheet_color.g + (1.0 - page_a) * background.g;
-			const double page_b = page_a * m_sheet_color.b + (1.0 - page_a) * background.b;
+			const double sheet_a = m_sheet_color.a;
+			const double sheet_r = sheet_a * m_sheet_color.r + (1.0 - sheet_a) * background.r;
+			const double sheet_g = sheet_a * m_sheet_color.g + (1.0 - sheet_a) * background.g;
+			const double sheet_b = sheet_a * m_sheet_color.b + (1.0 - sheet_a) * background.b;
 			const double grid_a = m_grid_color.a;
-			const double grid_r = grid_a * m_grid_color.r + (1.0f - grid_a) * page_r;
-			const double grid_g = grid_a * m_grid_color.g + (1.0f - grid_a) * page_g;
-			const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * page_b;
+			const double grid_r = grid_a * m_grid_color.r + (1.0f - grid_a) * sheet_r;
+			const double grid_g = grid_a * m_grid_color.g + (1.0f - grid_a) * sheet_g;
+			const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * sheet_b;
 			const GRID_EMPH grid_emph = m_grid_emph;
 			const D2D1_POINT_2F grid_offset = m_grid_offset;
 			// 用紙の大きさから内余白の大きさを除く.
@@ -1203,10 +1203,10 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	size_t ShapeGroup::export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer)
+	size_t SHAPE_GROUP::export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer)
 	{
 		size_t len = 0;
-		for (Shape* s : m_list_grouped) {
+		for (SHAPE* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -1215,7 +1215,7 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	size_t ShapeArc::export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer)
+	size_t SHAPE_ARC::export_pdf(const D2D1_SIZE_F sheet_size, const DataWriter& dt_writer)
 	{
 		if (!is_opaque(m_fill_color) && (equal(m_stroke_width, 0.0f) ||
 			!is_opaque(m_stroke_color))) {
@@ -1228,7 +1228,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F ctr{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::ARROW_NONE) {
-			get_pos_loc(LOCUS_TYPE::LOCUS_A_CENTER, ctr);
+			get_pt_hit(HIT_TYPE::HIT_A_CENTER, ctr);
 		}
 
 		size_t len = 0;

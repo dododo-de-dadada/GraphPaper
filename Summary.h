@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		// s	表示する図形.
 		// r	メインページのリソースディクショナリ.
 		// 図形の名前と, パスアイコンの移動と描画のコマンド文字列を設定する.
-		Summary(Shape* s, const ResourceDictionary& r) :
+		Summary(SHAPE* s, const ResourceDictionary& r) :
 			m_shape(s)
 		{
 			auto const& tid = typeid(*s);
@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ellipse")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"menu_tool_ellipse/Text");
 			}
-			else if (tid == typeid(ShapeGroup)) {
+			else if (tid == typeid(SHAPE_GROUP)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_grouped");
 			}
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"menu_tool_polygon/Text");
 			}
-			else if (tid == typeid(ShapeArc)) {
+			else if (tid == typeid(SHAPE_ARC)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_arc")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"menu_tool_arc/Text");
 			}
@@ -68,11 +68,11 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"menu_tool_text/Text");
 			}
-			else if (tid == typeid(ShapeImage)) {
+			else if (tid == typeid(SHAPE_IMAGE)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_image");
 			}
-			else if (tid == typeid(ShapeArc)) {
+			else if (tid == typeid(SHAPE_ARC)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_arc")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"menu_tool_arc/Text");
 			}
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		Shape* const get_shape(void) const noexcept
+		SHAPE* const get_shape(void) const noexcept
 		{
 			return m_shape;
 		}
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 	private:
-		Shape* m_shape;	// 図形
+		SHAPE* m_shape;	// 図形
 		winrt::hstring m_icon;	// パスアイコンのデータ
 		winrt::hstring m_name;	// 図形の名前
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_changed;

@@ -623,13 +623,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 
-	//template<bool I> void MainPage::undo_selected_cnt(Shape* s)
+	//template<bool I> void MainPage::undo_selected_cnt(SHAPE* s)
 	//{
 	//	if constexpr (I) m_undo_select_cnt++; else m_undo_select_cnt--;
 	//	if (s->exist_cap()) {
 	//		if constexpr (I) m_undo_selected_exist_cap++; else m_undo_selected_exist_cap--;
 	//	}
-	//	if (typeid(*s) == typeid(ShapeGroup)) {
+	//	if (typeid(*s) == typeid(SHAPE_GROUP)) {
 	//		if constexpr (I) m_undo_selected_group++; else m_undo_selected_group--;
 	//	}
 	//	else if (typeid(*s) == typeid(ShapeText)) {
@@ -638,13 +638,13 @@ namespace winrt::GraphPaper::implementation
 	//	else if (typeid(*s) == typeid(ShapeLine)) {
 	//		if constexpr (I) m_undo_selected_line++; else m_undo_selected_line--;
 	//	}
-	//	else if (typeid(*s) == typeid(ShapeImage)) {
+	//	else if (typeid(*s) == typeid(SHAPE_IMAGE)) {
 	//		if constexpr (I) m_undo_selected_image++; else m_undo_selected_image--;
 	//	}
 	//	else if (typeid(*s) == typeid(ShapeRuler)) {
 	//		if constexpr (I) m_undo_selected_ruler++; else m_undo_selected_ruler--;
 	//	}
-	//	else if (typeid(*s) == typeid(ShapeArc)) {
+	//	else if (typeid(*s) == typeid(SHAPE_ARC)) {
 	//		if constexpr (I) m_undo_selected_arc++; else m_undo_selected_arc--;
 	//	}
 	//	else if (typeid(*s) == typeid(ShapePoly)) {
@@ -659,7 +659,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
-	void MainPage::undo_push_toggle(Shape* s)
+	void MainPage::undo_push_toggle(SHAPE* s)
 	{
 		const auto it_end = m_undo_stack.rend();
 		Undo* u;
@@ -705,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 	// T	値の型
 	// s	図形
 	// val	値
-	template <UNDO_T U, typename T> void MainPage::undo_push_set(Shape* const s, T const& val)
+	template <UNDO_T U, typename T> void MainPage::undo_push_set(SHAPE* const s, T const& val)
 	{
 		// 図形がその値を持たない, または同値なら中断する.
 		T old_val;
@@ -1042,7 +1042,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の値の保存し, その操作をスタックに積む.
 	// U	操作の種類.
 	// s	図形
-	template <UNDO_T U> void MainPage::undo_push_set(Shape* const s)
+	template <UNDO_T U> void MainPage::undo_push_set(SHAPE* const s)
 	{
 		m_undo_stack.push_back(new UndoValue<U>(s));
 	}
@@ -1078,17 +1078,17 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::undo_push_set<UNDO_T::TEXT_PAD>(D2D1_SIZE_F const& val);
 	template bool MainPage::undo_push_set<UNDO_T::TEXT_WRAP>(DWRITE_WORD_WRAPPING const& val);
 
-	template void MainPage::undo_push_set<UNDO_T::GRID_BASE>(Shape* const s, float const& val);
-	template void MainPage::undo_push_set<UNDO_T::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
-	template void MainPage::undo_push_set<UNDO_T::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::undo_push_set<UNDO_T::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
-	template void MainPage::undo_push_set<UNDO_T::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::undo_push_set<UNDO_T::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
-	template void MainPage::undo_push_set<UNDO_T::SHEET_PAD>(Shape* const s, D2D1_RECT_F const& val);
-	template void MainPage::undo_push_set<UNDO_T::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
+	template void MainPage::undo_push_set<UNDO_T::GRID_BASE>(SHAPE* const s, float const& val);
+	template void MainPage::undo_push_set<UNDO_T::GRID_EMPH>(SHAPE* const s, GRID_EMPH const& val);
+	template void MainPage::undo_push_set<UNDO_T::GRID_COLOR>(SHAPE* const s, D2D1_COLOR_F const& val);
+	template void MainPage::undo_push_set<UNDO_T::GRID_SHOW>(SHAPE* const s, GRID_SHOW const& val);
+	template void MainPage::undo_push_set<UNDO_T::SHEET_COLOR>(SHAPE* const s, D2D1_COLOR_F const& val);
+	template void MainPage::undo_push_set<UNDO_T::SHEET_SIZE>(SHAPE* const s, D2D1_SIZE_F const& val);
+	template void MainPage::undo_push_set<UNDO_T::SHEET_PAD>(SHAPE* const s, D2D1_RECT_F const& val);
+	template void MainPage::undo_push_set<UNDO_T::TEXT_CONTENT>(SHAPE* const s, wchar_t* const& val);
 
-	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
-	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
+	template void MainPage::undo_push_set<UNDO_T::MOVE>(SHAPE* const s);
+	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(SHAPE* const s);
 
 	// データリーダーから操作スタックを読み込む.
 	// dt_reader	データリーダー

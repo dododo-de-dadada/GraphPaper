@@ -43,10 +43,10 @@ namespace winrt::GraphPaper::implementation
 		return done;
 	}
 
-	// 値を, 指定した部位の点に格納する.
-	bool ShapePath::set_pos_loc(
+	// 値を, 指定した判定部位の座標に格納する.
+	bool ShapePath::set_pt_hit(
 		const D2D1_POINT_2F val,	// 値
-		const uint32_t loc,	// 部位
+		const uint32_t hit,	// 判定部位
 		const float snap_point,	// 
 		const bool /*keep_aspect*/
 	) noexcept
@@ -54,9 +54,9 @@ namespace winrt::GraphPaper::implementation
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_lineto.size();	// 差分の数
-		if (loc >= LOCUS_TYPE::LOCUS_P0 && loc <= LOCUS_TYPE::LOCUS_P0 + d_cnt) {
+		if (hit >= HIT_TYPE::HIT_P0 && hit <= HIT_TYPE::HIT_P0 + d_cnt) {
 			D2D1_POINT_2F p[N_GON_MAX];	// 頂点の位置
-			const size_t l_cnt = loc - LOCUS_TYPE::LOCUS_P0;	// 変更する点の添え字
+			const size_t l_cnt = hit - HIT_TYPE::HIT_P0;	// 変更する点の添え字
 			// 変更する頂点までの, 各頂点の位置を得る.
 			p[0] = m_start;
 			for (size_t i = 0; i < l_cnt; i++) {
@@ -192,18 +192,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 
-	// 指定した部位の点を得る.
-	void ShapePath::get_pos_loc(
-		const uint32_t loc,	// 部位
+	// 指定した判定部位の座標を得る.
+	void ShapePath::get_pt_hit(
+		const uint32_t hit,	// 判定部位
 		D2D1_POINT_2F& val	// 得られた値
 	) const noexcept
 	{
-		// 図形の部位が「図形の外部」または「始点」ならば, 始点を得る.
-		if (loc == LOCUS_TYPE::LOCUS_SHEET || loc == LOCUS_TYPE::LOCUS_P0) {
+		// 図形の判定部位が「図形の外部」または「始点」ならば, 始点を得る.
+		if (hit == HIT_TYPE::HIT_SHEET || hit == HIT_TYPE::HIT_P0) {
 			val = m_start;
 		}
-		else if (loc > LOCUS_TYPE::LOCUS_P0) {
-			const size_t  l_cnt = loc - LOCUS_TYPE::LOCUS_P0;
+		else if (hit > HIT_TYPE::HIT_P0) {
+			const size_t  l_cnt = hit - HIT_TYPE::HIT_P0;
 			if (l_cnt < m_lineto.size() + 1) {
 				val = m_start;
 				for (size_t i = 0; i < l_cnt; i++) {
@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 始点に値を格納する. 他の部位の位置も動く.
+	// 始点に値を格納する. 他の判定部位の位置も動く.
 	// val	格納する値
 	bool ShapePath::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	ShapePath::ShapePath(const DataReader& dt_reader) :
-		ShapeArrow(dt_reader)
+		SHAPE_OPEN(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapePath::write(const DataWriter& dt_writer) const
 	{
-		ShapeArrow::write(dt_writer);
+		SHAPE_OPEN::write(dt_writer);
 		// 始点
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);

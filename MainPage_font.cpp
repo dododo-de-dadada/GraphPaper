@@ -15,13 +15,13 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Visibility;
 
 	// 見本の図形を作成する.
-	static Shape* font_create_sample_shape(const float p_width, const float p_height, const Shape* sheet) noexcept;
+	static SHAPE* font_create_sample_shape(const float p_width, const float p_height, const SHAPE* sheet) noexcept;
 
 	// 見本の図形を作成する.
 	// p_width	見本を表示するパネルの幅
 	// p_height	見本を表示するパネルの高さ
 	// prop	見本を表示する用紙
-	static Shape* font_create_sample_shape(const float p_width, const float p_height, const Shape* sheet) noexcept
+	static SHAPE* font_create_sample_shape(const float p_width, const float p_height, const SHAPE* sheet) noexcept
 	{
 		const auto mar_w = p_width * 0.125;
 		const auto mar_h = p_height * 0.125;
@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pangram.c_str();
 		}
-		Shape* t = new ShapeText(start, pos, wchar_cpy(text), sheet);
+		SHAPE* t = new ShapeText(start, pos, wchar_cpy(text), sheet);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		lv_dialog_list().Visibility(Visibility::Visible);
-		const Shape* prop = m_event_shape_pressed;
+		const SHAPE* prop = m_event_shape_pressed;
 		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
 			prop = &m_dialog_sheet;
 		}
@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		constexpr auto TICK_FREQ = 1.0;
 		m_dialog_sheet.set_attr_to(&m_main_sheet);
-		const Shape* prop = m_event_shape_pressed;
+		const SHAPE* prop = m_event_shape_pressed;
 		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
 			prop = &m_dialog_sheet;
 		}
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Header(box_value(str_text_line_sp + buf));
 		dialog_slider_0().Visibility(Visibility::Visible);
 
-		const Shape* prop = m_event_shape_pressed;
+		const SHAPE* prop = m_event_shape_pressed;
 		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
 			prop = &m_dialog_sheet;
 		}
@@ -469,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
-		const Shape* prop = m_event_shape_pressed;
+		const SHAPE* prop = m_event_shape_pressed;
 		if (prop == nullptr || typeid(*prop) != typeid(ShapeText)) {
 			prop = &m_dialog_sheet;
 		}

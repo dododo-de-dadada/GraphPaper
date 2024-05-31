@@ -52,7 +52,7 @@
     <ClCompile Include="MainPage_dialog.cpp" />
     <ClCompile Include="MainPage_help.cpp" />
     <ClCompile Include="MainPage_status_bar.cpp" />
-    <ClCompile Include="shape_page.cpp" />
+    <ClCompile Include="shape_sheet.cpp" />
     <ClCompile Include="shape_path.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="MainPage_image.cpp" />

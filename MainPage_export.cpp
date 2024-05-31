@@ -516,7 +516,7 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				if (typeid(*s) == typeid(ShapeImage)) {
+				if (typeid(*s) == typeid(SHAPE_IMAGE)) {
 					if (image_cnt == 0) {
 						len += dt_writer.WriteString(
 							L"/XObject <<\n");
@@ -526,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 						image_cnt, 6 + 3 * text_cnt + image_cnt
 					);
 					len += dt_writer.WriteString(buf);
-					static_cast<ShapeImage*>(s)->m_pdf_image_cnt = image_cnt++;
+					static_cast<SHAPE_IMAGE*>(s)->m_pdf_image_cnt = image_cnt++;
 				}
 			}
 			if (image_cnt > 0) {
@@ -647,11 +647,11 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 
-				if (typeid(*s) == typeid(ShapeImage)) {
-					const uint8_t* bgra = static_cast<ShapeImage*>(s)->m_bgra;
-					const size_t w = static_cast<ShapeImage*>(s)->m_orig.width;
-					const size_t h = static_cast<ShapeImage*>(s)->m_orig.height;
-					const auto c = static_cast<ShapeImage*>(s)->m_clip;
+				if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+					const uint8_t* bgra = static_cast<SHAPE_IMAGE*>(s)->m_bgra;
+					const size_t w = static_cast<SHAPE_IMAGE*>(s)->m_orig.width;
+					const size_t h = static_cast<SHAPE_IMAGE*>(s)->m_orig.height;
+					const auto c = static_cast<SHAPE_IMAGE*>(s)->m_clip;
 					len = export_pdf_image(bgra, w, h, c, 6 + 3 * text_cnt + image_cnt, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					image_cnt++;
@@ -799,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 		// WIC ファクトリーで, WIC ビットマップエンコーダーを作成する.
 		winrt::com_ptr<IWICBitmapEncoder> wic_bmp_enc;
 		if (hr == S_OK) {
-			hr = ShapeImage::wic_factory->CreateEncoder(wic_fmt, nullptr, wic_bmp_enc.put());
+			hr = SHAPE_IMAGE::wic_factory->CreateEncoder(wic_fmt, nullptr, wic_bmp_enc.put());
 		}
 		// WIC ビットマップエンコーダー を初期化する.
 		if (hr == S_OK) {
@@ -821,7 +821,7 @@ namespace winrt::GraphPaper::implementation
 		const UINT h = m_main_sheet.m_sheet_size.height;
 		std::vector<uint8_t> mem(4 * w * h);
 		winrt::com_ptr<IWICBitmap> wic_bitmap;
-		ShapeImage::wic_factory->CreateBitmapFromMemory(
+		SHAPE_IMAGE::wic_factory->CreateBitmapFromMemory(
 			w, h,
 			GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, std::data(mem), wic_bitmap.put());
 		D2D1_RENDER_TARGET_PROPERTIES prop{
@@ -836,7 +836,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_FEATURE_LEVEL_DEFAULT
 		};
 		winrt::com_ptr<ID2D1RenderTarget> target;
-		Shape::s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+		SHAPE::s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
 		*/
 
 		// オフスクリーンの D2D を作成する.
@@ -870,23 +870,23 @@ namespace winrt::GraphPaper::implementation
 
 			// ビットマップオブジェクトは, レンダーターゲット依存するため全て消去
 			for (const auto s : m_main_sheet.m_shape_list) {
-				if (typeid(*s) == typeid(ShapeImage)) {
-					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+				if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+					static_cast<SHAPE_IMAGE*>(s)->m_d2d_bitmap = nullptr;
 				}
 			}
 
 			// ビットマップへの描画
 			m_main_sheet.begin_draw(target.get(), false, nullptr, 1.0f);
-			target->SaveDrawingState(Shape::m_state_block.get());
+			target->SaveDrawingState(SHAPE::m_state_block.get());
 			target->BeginDraw();
 			m_main_sheet.draw();
 			hr = target->EndDraw();
-			target->RestoreDrawingState(Shape::m_state_block.get());
+			target->RestoreDrawingState(SHAPE::m_state_block.get());
 
 			// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
 			for (const auto s : m_main_sheet.m_shape_list) {
-				if (typeid(*s) == typeid(ShapeImage)) {
-					static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+				if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+					static_cast<SHAPE_IMAGE*>(s)->m_d2d_bitmap = nullptr;
 				}
 			}
 
@@ -904,7 +904,7 @@ namespace winrt::GraphPaper::implementation
 		if (hr == S_OK) {
 			winrt::com_ptr<ID2D1Device> dev;
 			offscreen.m_d2d_context->GetDevice(dev.put());
-			hr = ShapeImage::wic_factory->CreateImageEncoder(dev.get(), wic_img_enc.put());
+			hr = SHAPE_IMAGE::wic_factory->CreateImageEncoder(dev.get(), wic_img_enc.put());
 		}
 
 		// WIC イメージエンコーダーで, D2D ビットマップを WIC フレームエンコーダーに書き込む.
@@ -1016,12 +1016,12 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
-					co_await static_cast<ShapeGroup*>(s)->export_as_svg_async(dt_writer);
+				if (typeid(*s) == typeid(SHAPE_GROUP)) {
+					co_await static_cast<SHAPE_GROUP*>(s)->export_as_svg_async(dt_writer);
 				}
 				// 図形が画像か判定する.
-				else if (typeid(*s) == typeid(ShapeImage)) {
-					co_await static_cast<ShapeImage*>(s)->export_as_svg_async(dt_writer);
+				else if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+					co_await static_cast<SHAPE_IMAGE*>(s)->export_as_svg_async(dt_writer);
 				}
 				else {
 					s->export_svg(dt_writer);

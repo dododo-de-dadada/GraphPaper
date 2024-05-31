@@ -410,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_core_text_focused != nullptr && m_core_text_focused != *it) {
 				continue;
 			}
-			Shape* s = *it;
+			SHAPE* s = *it;
 			// }Œ` s ‚Æ s ‚æ‚è‘O–Ê‚É‚ ‚éŠe•¶Žš—ñ}Œ` t ‚É‚Â‚¢‚Ä
 			for (; it != m_main_sheet.m_shape_list.end(); it++) {
 				if ((*it)->is_deleted() || typeid(*(*it)) != typeid(ShapeText)) {

@@ -24,10 +24,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		HRESULT hr = S_OK;
 		// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
-		// WIC ファクトリは ShapeImage が確保しているものを使用する.
+		// WIC ファクトリは SHAPE_IMAGE が確保しているものを使用する.
 		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
 		if (hr == S_OK) {
-			hr = ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put());
+			hr = SHAPE_IMAGE::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put());
 		}
 		// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
 		UINT frame_cnt = 0;
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		wic_decoder = nullptr;
 		// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
 		if (hr == S_OK) {
-			hr = ShapeImage::wic_factory->CreateFormatConverter(m_background_wic.put());
+			hr = SHAPE_IMAGE::wic_factory->CreateFormatConverter(m_background_wic.put());
 		}
 		// WIC フォーマットコンバーターに, 得たフレームを格納する.
 		if (hr == S_OK) {

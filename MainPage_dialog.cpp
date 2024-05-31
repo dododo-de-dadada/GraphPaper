@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// •`‰æ‘O‚É•K—v‚È•Ï”‚ðŠi”[‚·‚é.
 		m_dialog_sheet.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_background_wic.get(), 1.0f);
-		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_state_block.get());
+		m_dialog_d2d.m_d2d_context->SaveDrawingState(SHAPE::m_state_block.get());
 		m_dialog_d2d.m_d2d_context->BeginDraw();
 		m_dialog_d2d.m_d2d_context->Clear(m_background_color);
 		const D2D1_RECT_F w_rect{
@@ -67,10 +67,10 @@ namespace winrt::GraphPaper::implementation
 		};
 		if (m_background_show) {
 			// ”wŒiƒpƒ^[ƒ“‚ð•`‰æ‚·‚é,
-			m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+			m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, SHAPE::m_d2d_bitmap_brush.get());
 		}
-		Shape::m_d2d_color_brush->SetColor(m_dialog_sheet.m_sheet_color);
-		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
+		SHAPE::m_d2d_color_brush->SetColor(m_dialog_sheet.m_sheet_color);
+		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, SHAPE::m_d2d_color_brush.get());
 
 		const float offset = static_cast<FLOAT>(std::fmod(m_dialog_sheet.m_sheet_size.width * 0.5, m_dialog_sheet.m_grid_base + 1.0));
 		m_dialog_sheet.m_grid_offset.x = offset;
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			m_dialog_d2d.m_d2d_context->EndDraw()
 		);
-		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_state_block.get());
+		m_dialog_d2d.m_d2d_context->RestoreDrawingState(SHAPE::m_state_block.get());
 		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();
 	}
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_SIZE_F size{
 				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
 			};
-			ShapeImage* s = new ShapeImage(pt, size, bitmap, m_dialog_sheet.m_image_opac);
+			SHAPE_IMAGE* s = new SHAPE_IMAGE(pt, size, bitmap, m_dialog_sheet.m_image_opac);
 			bitmap.Close();
 
 			m_dialog_sheet.m_shape_list.push_back(s);

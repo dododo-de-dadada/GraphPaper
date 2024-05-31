@@ -122,9 +122,9 @@ namespace winrt::GraphPaper::implementation
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
-		static ShapeSheet* undo_sheet;	// 参照する用紙
+		static SHAPE_SHEET* undo_sheet;	// 参照する用紙
 
-		Shape* m_shape;	// 操作する図形
+		SHAPE* m_shape;	// 操作する図形
 
 		// 操作を破棄する.
 		virtual ~Undo() {}
@@ -133,22 +133,22 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		virtual void exec(void) = 0;
 		// 図形を参照しているか判定する.
-		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
+		virtual bool refer_to(const SHAPE* s) const noexcept { return m_shape == s; };
 		// 操作が参照するための図形リストと表示図形を格納する.
-		static void begin(ShapeSheet* page) noexcept
+		static void begin(SHAPE_SHEET* sheet) noexcept
 		{
-			undo_sheet = page;
+			undo_sheet = sheet;
 		}
 		// 操作する図形を得る.
-		Shape* shape(void) const noexcept { return m_shape; }
+		SHAPE* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.
-		Undo(Shape* s) : m_shape(s) {}
+		Undo(SHAPE* s) : m_shape(s) {}
 		// データライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// データリーダーから添え字を読み込んで図形を得る.
-		static Shape* undo_read_shape(DataReader const& dt_reader)
+		static SHAPE* undo_read_shape(DataReader const& dt_reader)
 		{
-			Shape* s = static_cast<Shape*>(nullptr);
+			auto s = static_cast<SHAPE*>(nullptr);
 			const uint32_t i = dt_reader.ReadUInt32();
 			if (i == UNDO_SHAPE_SHEET) {
 				s = Undo::undo_sheet;
@@ -158,14 +158,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				auto& slist = Undo::undo_sheet->m_shape_list;
-				slist_match<const uint32_t, Shape*>(slist, i, s);
+				slist_match<const uint32_t, SHAPE*>(slist, i, s);
 			}
 			return s;
 		}
 		// 図形をデータライターに書き込む.
 		// s	書き込まれる図形
 		// dt_writer	データリーダー
-		static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
+		static void undo_write_shape(SHAPE* const s, DataWriter const& dt_writer)
 		{
 			// 図形が用紙図形なら, 用紙を意味する添え字を書き込む.
 			if (s == Undo::undo_sheet) {
@@ -180,14 +180,14 @@ namespace winrt::GraphPaper::implementation
 			else {
 				uint32_t i = UNDO_SHAPE_NIL;
 				auto& slist = Undo::undo_sheet->m_shape_list;
-				slist_match<Shape* const, uint32_t>(slist, s, i);
+				slist_match<SHAPE* const, uint32_t>(slist, s, i);
 				dt_writer.WriteUInt32(i);
 			}
 		}
 	};
 
 	struct UndoReverse : Undo {
-		UndoReverse(Shape* s) :
+		UndoReverse(SHAPE* s) :
 			Undo(s)
 		{
 			exec();
@@ -215,41 +215,41 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を変形する操作
 	struct UndoDeform : Undo {
-		uint32_t m_loc;	// 変形される部位
-		D2D1_POINT_2F m_pt;	// 変形前の部位の点
+		uint32_t m_hit;	// 変形される判定部位
+		D2D1_POINT_2F m_pt;	// 変形前の判定部位の座標
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept final override
 		{
 			using winrt::GraphPaper::implementation::equal;
 			D2D1_POINT_2F p;
-			m_shape->get_pos_loc(m_loc, p);
+			m_shape->get_pt_hit(m_hit, p);
 			return !equal(p, m_pt);
 		}
 		// 元に戻す操作を実行する.
 		virtual void exec(void) noexcept final override
 		{
 			D2D1_POINT_2F pt;
-			m_shape->get_pos_loc(m_loc, pt);
-			m_shape->set_pos_loc(m_pt, m_loc, 0.0f, false);
+			m_shape->get_pt_hit(m_hit, pt);
+			m_shape->set_pt_hit(m_pt, m_hit, 0.0f, false);
 			m_pt = pt;
 		}
 		// データリーダーから操作を読み込む.
 		UndoDeform(DataReader const& dt_reader) :
 			Undo(undo_read_shape(dt_reader)),
-			m_loc(static_cast<LOCUS_TYPE>(dt_reader.ReadUInt32())),
+			m_hit(static_cast<HIT_TYPE>(dt_reader.ReadUInt32())),
 			m_pt(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle()})
 		{}
 
-		// 指定した部位の点を保存する.
-		UndoDeform::UndoDeform(Shape* const s, const uint32_t loc) :
+		// 指定した判定部位の座標を保存する.
+		UndoDeform::UndoDeform(SHAPE* const s, const uint32_t hit) :
 			Undo(s),
-			m_loc(loc),
-			m_pt([](Shape* const s, const uint32_t loc)->D2D1_POINT_2F {
+			m_hit(hit),
+			m_pt([](SHAPE* const s, const uint32_t hit)->D2D1_POINT_2F {
 				D2D1_POINT_2F pt;
-				s->get_pos_loc(loc, pt);
+				s->get_pt_hit(hit, pt);
 				return pt;
-			}(s, loc))
+			}(s, hit))
 		{}
 
 		// 図形の形の操作をデータライターに書き込む.
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_T::DEFORM));
 			undo_write_shape(m_shape, dt_writer);
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_loc));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_hit));
 			dt_writer.WriteSingle(m_pt.x);
 			dt_writer.WriteSingle(m_pt.y);
 		}
@@ -268,18 +268,18 @@ namespace winrt::GraphPaper::implementation
 	// 図形の順番を入れ替える操作
 	//------------------------------
 	struct UndoOrder : Undo {
-		Shape* m_dst_shape;	// 入れ替え先の図形
+		SHAPE* m_dst_shape;	// 入れ替え先の図形
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept final override { return m_shape != m_dst_shape; }
 		// 入れ替える先の図形を得る.
-		Shape* const dest(void) const noexcept { return m_dst_shape; }
+		SHAPE* const dest(void) const noexcept { return m_dst_shape; }
 		// 操作を実行する.
 		virtual void exec(void) noexcept override;
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept final override { return Undo::refer_to(s) || m_dst_shape == s; };
+		bool refer_to(const SHAPE* s) const noexcept final override { return Undo::refer_to(s) || m_dst_shape == s; };
 		// 図形の順番を入れ替える.
-		UndoOrder(Shape* const s, Shape* const t) : Undo(s), m_dst_shape(t) { UndoOrder::exec(); }
+		UndoOrder(SHAPE* const s, SHAPE* const t) : Undo(s), m_dst_shape(t) { UndoOrder::exec(); }
 		// データリーダーから操作を読み込む.
 		UndoOrder(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -304,15 +304,15 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		virtual void exec(void) noexcept final override;
 		// 値を図形から得る.
-		static bool GET(const Shape* s, U_TYPE<U>::type& val) noexcept;
+		static bool GET(const SHAPE* s, U_TYPE<U>::type& val) noexcept;
 		// 値を図形に格納する.
-		static void SET(Shape* const s, const U_TYPE<U>::type& val) noexcept;
+		static void SET(SHAPE* const s, const U_TYPE<U>::type& val) noexcept;
 		// データリーダーから操作を読み込む.
 		UndoValue(DataReader const& dt_reader);
 		// 図形の値を保存する.
-		UndoValue(Shape* s) : Undo(s) { GET(m_shape, m_value); }
+		UndoValue(SHAPE* s) : Undo(s) { GET(m_shape, m_value); }
 		// 図形の値を保存して変更する.
-		UndoValue(Shape* s, const U_TYPE<U>::type& val) : UndoValue(s) { SET(m_shape, val); }
+		UndoValue(SHAPE* s, const U_TYPE<U>::type& val) : UndoValue(s) { SET(m_shape, val); }
 		// データライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
@@ -332,8 +332,8 @@ namespace winrt::GraphPaper::implementation
 		virtual void exec(void) noexcept final override;
 		// データリーダーから操作を読み込む.
 		UndoImage(DataReader const& dt_reader);
-		// 図形の部位を保存する.
-		UndoImage(ShapeImage* const s);
+		// 図形の判定部位を保存する.
+		UndoImage(SHAPE_IMAGE* const s);
 		// データライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
@@ -343,7 +343,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct UndoList : Undo {
 		bool m_insert;	// 挿入フラグ
-		Shape* m_shape_at;	// 変更前に, 操作される位置にあった図形
+		SHAPE* m_shape_at;	// 変更前に, 操作される位置にあった図形
 
 		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept override { return true; }
@@ -352,23 +352,23 @@ namespace winrt::GraphPaper::implementation
 		// 操作が挿入か判定する.
 		bool is_insert(void) const noexcept { return m_insert; }
 		// 図形を参照しているか判定する.
-		virtual bool refer_to(const Shape* s) const noexcept override { return Undo::refer_to(s) || m_shape_at == s; };
+		virtual bool refer_to(const SHAPE* s) const noexcept override { return Undo::refer_to(s) || m_shape_at == s; };
 		// 操作される位置にあった図形を得る.
-		Shape* const shape_at(void) const noexcept { return m_shape_at; }
+		SHAPE* const shape_at(void) const noexcept { return m_shape_at; }
 		// データリーダーから操作を読み込む.
 		UndoList(DataReader const& dt_reader);
 		// 図形をリストから削除する.
-		UndoList::UndoList(Shape* const s, const bool dont_exec) :
+		UndoList::UndoList(SHAPE* const s, const bool dont_exec) :
 			Undo(s),
 			m_insert(false),
-			m_shape_at(static_cast<Shape*>(nullptr))
+			m_shape_at(static_cast<SHAPE*>(nullptr))
 		{
 			if (!dont_exec) {
 				exec();
 			}
 		}
 		// 図形をリストに挿入する
-		UndoList::UndoList(Shape* const s, Shape* const t, const bool dont_exec) :
+		UndoList::UndoList(SHAPE* const s, SHAPE* const t, const bool dont_exec) :
 			Undo(s),
 			m_insert(true),
 			m_shape_at(t)
@@ -385,18 +385,18 @@ namespace winrt::GraphPaper::implementation
 	// 図形をグループに追加または削除する操作.
 	//------------------------------
 	struct UndoGroup : UndoList {
-		ShapeGroup* m_shape_group;	// 操作するグループ
+		SHAPE_GROUP* m_shape_group;	// 操作するグループ
 
 		// 操作を実行する.
 		virtual void exec(void) noexcept final override;
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept final override { return UndoList::refer_to(s) || m_shape_group == s; };
+		bool refer_to(const SHAPE* s) const noexcept final override { return UndoList::refer_to(s) || m_shape_group == s; };
 		// データリーダーから操作を読み込む.
 		UndoGroup(DataReader const& dt_reader);
 		// 図形をグループから削除する.
-		UndoGroup(ShapeGroup* const g, Shape* const s) : UndoList(s, true), m_shape_group(g) { exec(); }
+		UndoGroup(SHAPE_GROUP* const g, SHAPE* const s) : UndoList(s, true), m_shape_group(g) { exec(); }
 		// 図形をグループに追加する.
-		UndoGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos) : UndoList(s, s_pos, true), m_shape_group(g) { exec(); }
+		UndoGroup(SHAPE_GROUP* const g, SHAPE* const s, SHAPE* const s_pos) : UndoList(s, s_pos, true), m_shape_group(g) { exec(); }
 		// 操作をデータライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
@@ -410,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			return true;
 		}
-		UndoTextSelect(Shape* const s, const int start, const int end, const bool is_trail) :
+		UndoTextSelect(SHAPE* const s, const int start, const int end, const bool is_trail) :
 			Undo(s)
 		{
 			m_start = undo_sheet->m_core_text_range.m_start;
@@ -456,7 +456,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 文字列の選択範囲を削除し, そこに指定した文字列を挿入する.
-		void edit(Shape* s, const wchar_t* ins_text) noexcept
+		void edit(SHAPE* s, const wchar_t* ins_text) noexcept
 		{
 			wchar_t* old_text = static_cast<ShapeText*>(s)->m_text;
 			const auto old_len = wchar_len(old_text);
@@ -526,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeText*>(s)->m_dwrite_text_layout = nullptr;
 		}
 		// 図形の文字列を編集する.
-		UndoText2(Shape* s, const wchar_t* ins_text) :
+		UndoText2(SHAPE* s, const wchar_t* ins_text) :
 			Undo(s)
 		{
 			edit(s, ins_text);
@@ -554,7 +554,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転する.
 		UndoSelect(DataReader const& dt_reader);
 		// 図形の選択を反転する.
-		UndoSelect(Shape* const s) : Undo(s) { exec(); }
+		UndoSelect(SHAPE* const s) : Undo(s) { exec(); }
 		// データライターに書き込む.
 		virtual void write(DataWriter const& dt_writer) const final override;
 	};
@@ -569,13 +569,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をグループに追加する.
-#define UndoAppendG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
+#define UndoAppendG(g, s)	UndoGroup(static_cast<SHAPE_GROUP* const>(g), static_cast<SHAPE* const>(s), static_cast<SHAPE* const>(nullptr))
 // 図形をリストに追加する.
-#define UndoAppend(s)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr), false)
+#define UndoAppend(s)	UndoList(static_cast<SHAPE* const>(s), static_cast<SHAPE* const>(nullptr), false)
 // 図形をリストに挿入する.
-#define UndoInsert(s, p)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(p), false)
+#define UndoInsert(s, p)	UndoList(static_cast<SHAPE* const>(s), static_cast<SHAPE* const>(p), false)
 // 図形をグループから削除する.
-#define UndoRemoveG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s))
+#define UndoRemoveG(g, s)	UndoGroup(static_cast<SHAPE_GROUP* const>(g), static_cast<SHAPE* const>(s))
 // 図形をリストから削除する.
-#define UndoRemove(s)	UndoList(static_cast<Shape* const>(s), false)
+#define UndoRemove(s)	UndoList(static_cast<SHAPE* const>(s), false)
 }

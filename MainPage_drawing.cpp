@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			m_tool = DRAWING_TOOL::SELECT;
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
-			m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
+			m_event_hit_pressed = HIT_TYPE::HIT_SHEET;
 			unselect_all_shape();
 			main_sheet_draw();
 		}

@@ -17,7 +17,7 @@
 	<x:String x:Key="glyph_close">&#xE894;</x:String>
 	<x:String x:Key="glyph_italic">&#xE8DB;</x:String>
 	<x:String x:Key="glyph_ibeam">&#xE933;</x:String>
-	<x:String x:Key="glyph_fit_page">&#xE9A6;</x:String>
+	<x:String x:Key="glyph_fit_sheet">&#xE9A6;</x:String>
 	<x:String x:Key="glyph_draw">&#xEC87;</x:String>
 	<x:String x:Key="glyph_photo2">&#xEB9F;</x:String>
 	<x:String x:Key="glyph_unit">&#xECC6;</x:String>
@@ -32,12 +32,29 @@
 	<!-- 移動と描画のコマンド構文 -->
 	<!-- https://learn.microsoft.com/ja-jp/windows/uwp/xaml-platform/move-draw-commands-syntax -->
     <x:String x:Key="data_align_mid">
-        M 0 4.5 h 16 v 1 h -16 ZM 0 7.5 h 16 v 1 h -16 ZM 0 10.5 h 16 v 1 h -16 ZM 3.75 0L 5.187 0 L 7.5 2.25L 7.5 0 L 8.5 0 L 8.5 2.25L 10.791 0 L 12.187 0L 8 4.208 ZM 3.75 16 L 8 11.791L 12.25 16 L 10.771 16L 8.5 13.708 L 8.5 16
+        M 0 4.5 h 16 v 1 h -16 Z
+M 0 7.5 h 16 v 1 h -16 Z
+M 0 10.5 h 16 v 1 h -16 Z
+M 3.75 0
+L 5.187 0 L 7.5 2.25
+L 7.5 0 L 8.5 0 L 8.5 2.25
+L 10.791 0 L 12.187 0
+L 8 4.208 Z
+M 3.75 16 L 8 11.791
+L 12.25 16 L 10.771 16
+L 8.5 13.708 L 8.5 16
 L 7.5 16 L 7.5 13.708
         L 5.187 16 Z
     </x:String>
     <x:String x:Key="data_align_bot">
-        M 0 9 h 16 v 1 h -16 ZM 0 12 h 16 v 1 h -16 ZM 0 15 h 16 v 1 h -16 ZM 7.5 0L 8.5 0 L 8.5 6.031L 11.640 2.885 L 12.338 3.594L 8 7.948 L 3.648 3.594L 4.348 2.885 L 7.5 6.031 Z
+        M 0 9 h 16 v 1 h -16 Z
+M 0 12 h 16 v 1 h -16 Z
+M 0 15 h 16 v 1 h -16 Z
+M 7.5 0
+L 8.5 0 L 8.5 6.031
+L 11.640 2.885 L 12.338 3.594
+L 8 7.948 L 3.648 3.594
+L 4.348 2.885 L 7.5 6.031 Z
     </x:String>
     <x:String x:Key="data_align_top">
         M 0 0 h 16 v 1 h -16 Z

@@ -223,17 +223,17 @@ namespace winrt::GraphPaper::implementation
 			// winrt::com_ptr で確保されたオブジェクトは Release するとエラーになる.
 			// 例えば, m_main_sheet.m_state_block->Release();
 			m_mutex_draw.lock();
-			if (Shape::m_state_block != nullptr) {
-				Shape::m_state_block = nullptr;
+			if (SHAPE::m_state_block != nullptr) {
+				SHAPE::m_state_block = nullptr;
 			}
-			if (Shape::m_d2d_color_brush != nullptr) {
-				Shape::m_d2d_color_brush = nullptr;
+			if (SHAPE::m_d2d_color_brush != nullptr) {
+				SHAPE::m_d2d_color_brush = nullptr;
 			}
-			if (Shape::m_d2d_range_brush != nullptr) {
-				Shape::m_d2d_range_brush = nullptr;
+			if (SHAPE::m_d2d_range_brush != nullptr) {
+				SHAPE::m_d2d_range_brush = nullptr;
 			}
-			if (Shape::m_d2d_bitmap_brush != nullptr) {
-				Shape::m_d2d_bitmap_brush = nullptr;
+			if (SHAPE::m_d2d_bitmap_brush != nullptr) {
+				SHAPE::m_d2d_bitmap_brush = nullptr;
 			}
 			m_main_d2d.Trim();
 			m_dialog_d2d.Trim();
@@ -377,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
+		m_event_hit_pressed = HIT_TYPE::HIT_SHEET;
 		m_event_shape_last = nullptr;
 		m_event_shape_pressed = nullptr;
 		m_event_state = EVENT_STATE::BEGIN;
@@ -1229,7 +1229,7 @@ namespace winrt::GraphPaper::implementation
 
 		ShapeText::set_available_fonts();
 
-		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
+		// 背景色, 前景色, 選択された文字範囲の背景色と文字色をリソースから得る.
 		{
 			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
@@ -1339,7 +1339,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_SIZE_F i_size{
 				static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h)
 			};
-			ShapeImage* s = new ShapeImage(w_ctr, i_size, bitmap, 1.0);
+			SHAPE_IMAGE* s = new SHAPE_IMAGE(w_ctr, i_size, bitmap, 1.0);
 			D2D1_POINT_2F start;
 			s->get_pos_start(start);
 			xcvd_paste_pos(start, start);

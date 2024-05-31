@@ -6,26 +6,26 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	//SHAPE_LIST* Undo::undo_slist = nullptr;	// 操作が参照する図形リスト
-	ShapeSheet* Undo::undo_sheet = nullptr;	// 操作が参照する用紙
+	SHAPE_SHEET* Undo::undo_sheet = nullptr;	// 操作が参照する用紙
 
-	// 指定した部位の点を得る.
-	static D2D1_POINT_2F undo_get_pos_loc(const Shape* s, const uint32_t loc) noexcept;
+	// 指定した判定部位の座標を得る.
+	static D2D1_POINT_2F undo_get_pt_hit(const SHAPE* s, const uint32_t hit) noexcept;
 	// データリーダーから添え字を読み込んで図形を得る.
-	static Shape* undo_read_shape(DataReader const& dt_reader);
+	static SHAPE* undo_read_shape(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
 	//static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
-	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer);
+	static void undo_write_shape(SHAPE* const s, DataWriter const& dt_writer);
 
-	// 指定した部位の点を得る.
-	static D2D1_POINT_2F undo_get_pos_loc(
-		const Shape* s,	// 図形
-		const uint32_t loc	// 部位
+	// 指定した判定部位の座標を得る.
+	static D2D1_POINT_2F undo_get_pt_hit(
+		const SHAPE* s,	// 図形
+		const uint32_t hit	// 判定部位
 	) noexcept
 	{
-		D2D1_POINT_2F pos;
-		s->get_pos_loc(loc, pos);
-		return pos;
+		D2D1_POINT_2F pt;
+		s->get_pt_hit(hit, pt);
+		return pt;
 	}
 
 	// 操作を実行する.
@@ -74,46 +74,46 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	template UndoValue<UNDO_T::ARC_DIR>::UndoValue(Shape* s, const D2D1_SWEEP_DIRECTION& val);
-	template UndoValue<UNDO_T::ARC_END>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::ARC_ROT>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::ARC_START>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::ARROW_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
-	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(Shape* s, const D2D1_LINE_JOIN& val);
-	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(Shape* s, const ARROW_SIZE& val);
-	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(Shape* s, const ARROW_STYLE& val);
-	//template UndoValue<UNDO_T::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
-	template UndoValue<UNDO_T::DASH_PAT>::UndoValue(Shape* s, const DASH_PAT& val);
-	template UndoValue<UNDO_T::DASH_STYLE>::UndoValue(Shape* s, const D2D1_DASH_STYLE& val);
-	template UndoValue<UNDO_T::FILL_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_T::FONT_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_T::FONT_FAMILY>::UndoValue(Shape* s, wchar_t* const& val);
-	template UndoValue<UNDO_T::FONT_SIZE>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::FONT_STRETCH>::UndoValue(Shape* s, const DWRITE_FONT_STRETCH& val);
-	template UndoValue<UNDO_T::FONT_STYLE>::UndoValue(Shape* s, const DWRITE_FONT_STYLE& val);
-	template UndoValue<UNDO_T::FONT_WEIGHT>::UndoValue(Shape* s, const DWRITE_FONT_WEIGHT& val);
-	template UndoValue<UNDO_T::GRID_BASE>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::GRID_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_T::GRID_EMPH>::UndoValue(Shape* s, const GRID_EMPH& val);
-	template UndoValue<UNDO_T::GRID_SHOW>::UndoValue(Shape* s, const GRID_SHOW& val);
-	template UndoValue<UNDO_T::IMAGE_OPAC>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::JOIN_LIMIT>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::JOIN_STYLE>::UndoValue(Shape* s, const D2D1_LINE_JOIN& val);
-	template UndoValue<UNDO_T::MOVE>::UndoValue(Shape* s, const D2D1_POINT_2F& val);
-	template UndoValue<UNDO_T::SHEET_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_T::SHEET_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
-	template UndoValue<UNDO_T::SHEET_PAD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
-	template UndoValue<UNDO_T::POLY_END>::UndoValue(Shape* s, const D2D1_FIGURE_END& val);
-	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
-	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::TEXT_ALIGN_P>::UndoValue(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& val);
-	template UndoValue<UNDO_T::TEXT_ALIGN_T>::UndoValue(Shape* s, const DWRITE_TEXT_ALIGNMENT& val);
-	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(Shape* s, wchar_t* const& val);
-	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
-	template UndoValue<UNDO_T::TEXT_WRAP>::UndoValue(Shape* s, const DWRITE_WORD_WRAPPING& val);
-	template UndoValue<UNDO_T::CORE_TEXT_RANGE>::UndoValue(Shape* s, const CORE_TEXT_RANGE& val);
+	template UndoValue<UNDO_T::ARC_DIR>::UndoValue(SHAPE* s, const D2D1_SWEEP_DIRECTION& val);
+	template UndoValue<UNDO_T::ARC_END>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::ARC_ROT>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::ARC_START>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::ARROW_CAP>::UndoValue(SHAPE* s, const D2D1_CAP_STYLE& val);
+	template UndoValue<UNDO_T::ARROW_JOIN>::UndoValue(SHAPE* s, const D2D1_LINE_JOIN& val);
+	template UndoValue<UNDO_T::ARROW_SIZE>::UndoValue(SHAPE* s, const ARROW_SIZE& val);
+	template UndoValue<UNDO_T::ARROW_STYLE>::UndoValue(SHAPE* s, const ARROW_STYLE& val);
+	//template UndoValue<UNDO_T::DASH_CAP>::UndoValue(SHAPE* s, const D2D1_CAP_STYLE& val);
+	template UndoValue<UNDO_T::DASH_PAT>::UndoValue(SHAPE* s, const DASH_PAT& val);
+	template UndoValue<UNDO_T::DASH_STYLE>::UndoValue(SHAPE* s, const D2D1_DASH_STYLE& val);
+	template UndoValue<UNDO_T::FILL_COLOR>::UndoValue(SHAPE* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_T::FONT_COLOR>::UndoValue(SHAPE* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_T::FONT_FAMILY>::UndoValue(SHAPE* s, wchar_t* const& val);
+	template UndoValue<UNDO_T::FONT_SIZE>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::FONT_STRETCH>::UndoValue(SHAPE* s, const DWRITE_FONT_STRETCH& val);
+	template UndoValue<UNDO_T::FONT_STYLE>::UndoValue(SHAPE* s, const DWRITE_FONT_STYLE& val);
+	template UndoValue<UNDO_T::FONT_WEIGHT>::UndoValue(SHAPE* s, const DWRITE_FONT_WEIGHT& val);
+	template UndoValue<UNDO_T::GRID_BASE>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::GRID_COLOR>::UndoValue(SHAPE* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_T::GRID_EMPH>::UndoValue(SHAPE* s, const GRID_EMPH& val);
+	template UndoValue<UNDO_T::GRID_SHOW>::UndoValue(SHAPE* s, const GRID_SHOW& val);
+	template UndoValue<UNDO_T::IMAGE_OPAC>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::JOIN_LIMIT>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::JOIN_STYLE>::UndoValue(SHAPE* s, const D2D1_LINE_JOIN& val);
+	template UndoValue<UNDO_T::MOVE>::UndoValue(SHAPE* s, const D2D1_POINT_2F& val);
+	template UndoValue<UNDO_T::SHEET_COLOR>::UndoValue(SHAPE* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_T::SHEET_SIZE>::UndoValue(SHAPE* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_T::SHEET_PAD>::UndoValue(SHAPE* s, const D2D1_RECT_F& val);
+	template UndoValue<UNDO_T::POLY_END>::UndoValue(SHAPE* s, const D2D1_FIGURE_END& val);
+	template UndoValue<UNDO_T::STROKE_CAP>::UndoValue(SHAPE* s, const D2D1_CAP_STYLE& val);
+	template UndoValue<UNDO_T::STROKE_COLOR>::UndoValue(SHAPE* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_T::STROKE_WIDTH>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::TEXT_ALIGN_P>::UndoValue(SHAPE* s, const DWRITE_PARAGRAPH_ALIGNMENT& val);
+	template UndoValue<UNDO_T::TEXT_ALIGN_T>::UndoValue(SHAPE* s, const DWRITE_TEXT_ALIGNMENT& val);
+	template UndoValue<UNDO_T::TEXT_CONTENT>::UndoValue(SHAPE* s, wchar_t* const& val);
+	template UndoValue<UNDO_T::TEXT_LINE_SP>::UndoValue(SHAPE* s, const float& val);
+	template UndoValue<UNDO_T::TEXT_PAD>::UndoValue(SHAPE* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_T::TEXT_WRAP>::UndoValue(SHAPE* s, const DWRITE_WORD_WRAPPING& val);
+	template UndoValue<UNDO_T::CORE_TEXT_RANGE>::UndoValue(SHAPE* s, const CORE_TEXT_RANGE& val);
 
 	template <UNDO_T U> 
 	UndoValue<U>::UndoValue(DataReader const& dt_reader) :
@@ -269,411 +269,411 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_T::CORE_TEXT_RANGE>::UndoValue(DataReader const& dt_reader);
 
 	// 図形の属性値に値を格納する.
-	template <UNDO_T U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val) noexcept
+	template <UNDO_T U> void UndoValue<U>::SET(SHAPE* const s, const U_TYPE<U>::type& val) noexcept
 	{
 		throw winrt::hresult_not_implemented();
 	}
 
-	void UndoValue<UNDO_T::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val) noexcept
+	void UndoValue<UNDO_T::ARC_DIR>::SET(SHAPE* const s, const D2D1_SWEEP_DIRECTION& val) noexcept
 	{
 		s->set_arc_dir(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_END>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::ARC_END>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_arc_end(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_ROT>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::ARC_ROT>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_arc_rot(val);
 	}
 
-	void UndoValue<UNDO_T::ARC_START>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::ARC_START>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_arc_start(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
+	void UndoValue<UNDO_T::ARROW_CAP>::SET(SHAPE* const s, const D2D1_CAP_STYLE& val) noexcept
 	{
 		s->set_arrow_cap(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_JOIN>::SET(Shape* const s, const D2D1_LINE_JOIN& val) noexcept
+	void UndoValue<UNDO_T::ARROW_JOIN>::SET(SHAPE* const s, const D2D1_LINE_JOIN& val) noexcept
 	{
 		s->set_arrow_join(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& val) noexcept
+	void UndoValue<UNDO_T::ARROW_SIZE>::SET(SHAPE* const s, const ARROW_SIZE& val) noexcept
 	{
 		s->set_arrow_size(val);
 	}
 
-	void UndoValue<UNDO_T::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& val) noexcept
+	void UndoValue<UNDO_T::ARROW_STYLE>::SET(SHAPE* const s, const ARROW_STYLE& val) noexcept
 	{
 		s->set_arrow_style(val);
 	}
 
-	//void UndoValue<UNDO_T::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
+	//void UndoValue<UNDO_T::DASH_CAP>::SET(SHAPE* const s, const D2D1_CAP_STYLE& val) noexcept
 	//{
 	//	s->set_dash_cap(val);
 	//}
 
-	void UndoValue<UNDO_T::DASH_PAT>::SET(Shape* const s, const DASH_PAT& val) noexcept
+	void UndoValue<UNDO_T::DASH_PAT>::SET(SHAPE* const s, const DASH_PAT& val) noexcept
 	{
 		s->set_stroke_dash_pat(val);
 	}
 
-	void UndoValue<UNDO_T::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& val) noexcept
+	void UndoValue<UNDO_T::DASH_STYLE>::SET(SHAPE* const s, const D2D1_DASH_STYLE& val) noexcept
 	{
 		s->set_stroke_dash(val);
 	}
 
-	void UndoValue<UNDO_T::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
+	void UndoValue<UNDO_T::FILL_COLOR>::SET(SHAPE* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_fill_color(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
+	void UndoValue<UNDO_T::FONT_COLOR>::SET(SHAPE* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_font_color(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_FAMILY>::SET(Shape* const s, wchar_t* const& val) noexcept
+	void UndoValue<UNDO_T::FONT_FAMILY>::SET(SHAPE* const s, wchar_t* const& val) noexcept
 	{
 		s->set_font_family(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_SIZE>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::FONT_SIZE>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_font_size(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_STRETCH>::SET(Shape* const s, const DWRITE_FONT_STRETCH& val) noexcept
+	void UndoValue<UNDO_T::FONT_STRETCH>::SET(SHAPE* const s, const DWRITE_FONT_STRETCH& val) noexcept
 	{
 		s->set_font_stretch(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_STYLE>::SET(Shape* const s, const DWRITE_FONT_STYLE& val) noexcept
+	void UndoValue<UNDO_T::FONT_STYLE>::SET(SHAPE* const s, const DWRITE_FONT_STYLE& val) noexcept
 	{
 		s->set_font_style(val);
 	}
 
-	void UndoValue<UNDO_T::FONT_WEIGHT>::SET(Shape* const s, const DWRITE_FONT_WEIGHT& val) noexcept
+	void UndoValue<UNDO_T::FONT_WEIGHT>::SET(SHAPE* const s, const DWRITE_FONT_WEIGHT& val) noexcept
 	{
 		s->set_font_weight(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_BASE>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::GRID_BASE>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_grid_base(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
+	void UndoValue<UNDO_T::GRID_COLOR>::SET(SHAPE* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_grid_color(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_EMPH>::SET(Shape* const s, const GRID_EMPH& val) noexcept
+	void UndoValue<UNDO_T::GRID_EMPH>::SET(SHAPE* const s, const GRID_EMPH& val) noexcept
 	{
 		s->set_grid_emph(val);
 	}
 
-	void UndoValue<UNDO_T::GRID_SHOW>::SET(Shape* const s, const GRID_SHOW& val) noexcept
+	void UndoValue<UNDO_T::GRID_SHOW>::SET(SHAPE* const s, const GRID_SHOW& val) noexcept
 	{
 		s->set_grid_show(val);
 	}
 
-	void UndoValue<UNDO_T::IMAGE_OPAC>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::IMAGE_OPAC>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_image_opacity(val);
 	}
 
-	void UndoValue<UNDO_T::JOIN_LIMIT>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::JOIN_LIMIT>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_stroke_join_limit(val);
 	}
 
-	void UndoValue<UNDO_T::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& val) noexcept
+	void UndoValue<UNDO_T::JOIN_STYLE>::SET(SHAPE* const s, const D2D1_LINE_JOIN& val) noexcept
 	{
 		s->set_stroke_join(val);
 	}
 
-	void UndoValue<UNDO_T::MOVE>::SET(Shape* const s, const D2D1_POINT_2F& val) noexcept
+	void UndoValue<UNDO_T::MOVE>::SET(SHAPE* const s, const D2D1_POINT_2F& val) noexcept
 	{
 		s->set_pos_start(val);
 	}
 
-	void UndoValue<UNDO_T::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
+	void UndoValue<UNDO_T::SHEET_COLOR>::SET(SHAPE* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_sheet_color(val);
 	}
 
-	void UndoValue<UNDO_T::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
+	void UndoValue<UNDO_T::SHEET_SIZE>::SET(SHAPE* const s, const D2D1_SIZE_F& val) noexcept
 	{
 		s->set_sheet_size(val);
 	}
 
-	void UndoValue<UNDO_T::SHEET_PAD>::SET(Shape* const s, const D2D1_RECT_F& val) noexcept
+	void UndoValue<UNDO_T::SHEET_PAD>::SET(SHAPE* const s, const D2D1_RECT_F& val) noexcept
 	{
 		s->set_sheet_padding(val);
 	}
-	void UndoValue<UNDO_T::POLY_END>::SET(Shape* const s, const D2D1_FIGURE_END& val) noexcept
+	void UndoValue<UNDO_T::POLY_END>::SET(SHAPE* const s, const D2D1_FIGURE_END& val) noexcept
 	{
 		s->set_poly_end(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& val) noexcept
+	void UndoValue<UNDO_T::STROKE_CAP>::SET(SHAPE* const s, const D2D1_CAP_STYLE& val) noexcept
 	{
 		s->set_stroke_cap(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val) noexcept
+	void UndoValue<UNDO_T::STROKE_COLOR>::SET(SHAPE* const s, const D2D1_COLOR_F& val) noexcept
 	{
 		s->set_stroke_color(val);
 	}
 
-	void UndoValue<UNDO_T::STROKE_WIDTH>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::STROKE_WIDTH>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_stroke_width(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
+	void UndoValue<UNDO_T::TEXT_ALIGN_P>::SET(SHAPE* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
 	{
 		s->set_text_align_vert(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& val) noexcept
+	void UndoValue<UNDO_T::TEXT_ALIGN_T>::SET(SHAPE* const s, const DWRITE_TEXT_ALIGNMENT& val) noexcept
 	{
 		s->set_text_align_horz(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& val) noexcept
+	void UndoValue<UNDO_T::TEXT_CONTENT>::SET(SHAPE* const s, wchar_t* const& val) noexcept
 	{
 		s->set_text_content(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_LINE_SP>::SET(Shape* const s, const float& val) noexcept
+	void UndoValue<UNDO_T::TEXT_LINE_SP>::SET(SHAPE* const s, const float& val) noexcept
 	{
 		s->set_text_line_space(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_PAD>::SET(Shape* const s, const D2D1_SIZE_F& val) noexcept
+	void UndoValue<UNDO_T::TEXT_PAD>::SET(SHAPE* const s, const D2D1_SIZE_F& val) noexcept
 	{
 		s->set_text_padding(val);
 	}
 
-	void UndoValue<UNDO_T::TEXT_WRAP>::SET(Shape* const s, const DWRITE_WORD_WRAPPING& val) noexcept
+	void UndoValue<UNDO_T::TEXT_WRAP>::SET(SHAPE* const s, const DWRITE_WORD_WRAPPING& val) noexcept
 	{
 		s->set_text_wrap(val);
 	}
 
-	void UndoValue<UNDO_T::CORE_TEXT_RANGE>::SET(Shape* const s, const CORE_TEXT_RANGE& val) noexcept
+	void UndoValue<UNDO_T::CORE_TEXT_RANGE>::SET(SHAPE* const s, const CORE_TEXT_RANGE& val) noexcept
 	{
 		s->set_core_text_range(val);
 	}
 
-	template <UNDO_T U> bool UndoValue<U>::GET(const Shape* s, U_TYPE<U>::type& val) noexcept
+	template <UNDO_T U> bool UndoValue<U>::GET(const SHAPE* s, U_TYPE<U>::type& val) noexcept
 	{
 		return false;
 	}
 
-	bool UndoValue<UNDO_T::ARROW_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::ARROW_CAP>::GET(const SHAPE* s, D2D1_CAP_STYLE& val) noexcept
 	{
 		return s->get_arrow_cap(val);
 	}
 
-	bool UndoValue<UNDO_T::ARROW_JOIN>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept
+	bool UndoValue<UNDO_T::ARROW_JOIN>::GET(const SHAPE* s, D2D1_LINE_JOIN& val) noexcept
 	{
 		return s->get_arrow_join(val);
 	}
 
-	bool UndoValue<UNDO_T::ARROW_SIZE>::GET(const Shape* s, ARROW_SIZE& val) noexcept
+	bool UndoValue<UNDO_T::ARROW_SIZE>::GET(const SHAPE* s, ARROW_SIZE& val) noexcept
 	{
 		return s->get_arrow_size(val);
 	}
 
-	bool UndoValue<UNDO_T::ARROW_STYLE>::GET(const Shape* s, ARROW_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::ARROW_STYLE>::GET(const SHAPE* s, ARROW_STYLE& val) noexcept
 	{
 		return s->get_arrow_style(val);
 	}
 
-	//bool UndoValue<UNDO_T::DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
+	//bool UndoValue<UNDO_T::DASH_CAP>::GET(const SHAPE* s, D2D1_CAP_STYLE& val) noexcept
 	//{
 	//	return s->get_dash_cap(val);
 	//}
 
-	bool UndoValue<UNDO_T::DASH_PAT>::GET(const Shape* s, DASH_PAT& val) noexcept
+	bool UndoValue<UNDO_T::DASH_PAT>::GET(const SHAPE* s, DASH_PAT& val) noexcept
 	{
 		return s->get_stroke_dash_pat(val);
 	}
 
-	bool UndoValue<UNDO_T::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::DASH_STYLE>::GET(const SHAPE* s, D2D1_DASH_STYLE& val) noexcept
 	{
 		return s->get_stroke_dash(val);
 	}
 
-	bool UndoValue<UNDO_T::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_T::FILL_COLOR>::GET(const SHAPE* s, D2D1_COLOR_F& val) noexcept
 	{
 		return s->get_fill_color(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_T::FONT_COLOR>::GET(const SHAPE* s, D2D1_COLOR_F& val) noexcept
 	{
 		return s->get_font_color(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_FAMILY>::GET(const Shape* s, wchar_t*& val) noexcept
+	bool UndoValue<UNDO_T::FONT_FAMILY>::GET(const SHAPE* s, wchar_t*& val) noexcept
 	{
 		return s->get_font_family(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_SIZE>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::FONT_SIZE>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_font_size(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_STRETCH>::GET(const Shape* s, DWRITE_FONT_STRETCH& val) noexcept
+	bool UndoValue<UNDO_T::FONT_STRETCH>::GET(const SHAPE* s, DWRITE_FONT_STRETCH& val) noexcept
 	{
 		return s->get_font_stretch(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_STYLE>::GET(const Shape* s, DWRITE_FONT_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::FONT_STYLE>::GET(const SHAPE* s, DWRITE_FONT_STYLE& val) noexcept
 	{
 		return s->get_font_style(val);
 	}
 
-	bool UndoValue<UNDO_T::FONT_WEIGHT>::GET(const Shape* s, DWRITE_FONT_WEIGHT& val) noexcept
+	bool UndoValue<UNDO_T::FONT_WEIGHT>::GET(const SHAPE* s, DWRITE_FONT_WEIGHT& val) noexcept
 	{
 		return s->get_font_weight(val);
 	}
 
-	bool UndoValue<UNDO_T::GRID_BASE>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::GRID_BASE>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_grid_base(val);
 	}
 
-	bool UndoValue<UNDO_T::GRID_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_T::GRID_COLOR>::GET(const SHAPE* s, D2D1_COLOR_F& val) noexcept
 	{
 		return s->get_grid_color(val);
 	}
 
-	bool UndoValue<UNDO_T::GRID_EMPH>::GET(const Shape* s, GRID_EMPH& val) noexcept
+	bool UndoValue<UNDO_T::GRID_EMPH>::GET(const SHAPE* s, GRID_EMPH& val) noexcept
 	{
 		return s->get_grid_emph(val);
 	}
 
-	bool UndoValue<UNDO_T::GRID_SHOW>::GET(const Shape* s, GRID_SHOW& val) noexcept
+	bool UndoValue<UNDO_T::GRID_SHOW>::GET(const SHAPE* s, GRID_SHOW& val) noexcept
 	{
 		return s->get_grid_show(val);
 	}
 
-	bool UndoValue<UNDO_T::IMAGE_OPAC>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::IMAGE_OPAC>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_image_opacity(val);
 	}
 
-	bool UndoValue<UNDO_T::JOIN_LIMIT>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::JOIN_LIMIT>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_stroke_join_limit(val);
 	}
 
-	bool UndoValue<UNDO_T::JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept
+	bool UndoValue<UNDO_T::JOIN_STYLE>::GET(const SHAPE* s, D2D1_LINE_JOIN& val) noexcept
 	{
 		return s->get_stroke_join(val);
 	}
 
-	bool UndoValue<UNDO_T::MOVE>::GET(const Shape* s, D2D1_POINT_2F& val) noexcept
+	bool UndoValue<UNDO_T::MOVE>::GET(const SHAPE* s, D2D1_POINT_2F& val) noexcept
 	{
 		return s->get_pos_start(val);
 	}
 
-	bool UndoValue<UNDO_T::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_T::SHEET_COLOR>::GET(const SHAPE* s, D2D1_COLOR_F& val) noexcept
 	{
 		return s->get_sheet_color(val);
 	}
 
-	bool UndoValue<UNDO_T::SHEET_SIZE>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
+	bool UndoValue<UNDO_T::SHEET_SIZE>::GET(const SHAPE* s, D2D1_SIZE_F& val) noexcept
 	{
 		return s->get_sheet_size(val);
 	}
 
-	bool UndoValue<UNDO_T::SHEET_PAD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
+	bool UndoValue<UNDO_T::SHEET_PAD>::GET(const SHAPE* s, D2D1_RECT_F& val) noexcept
 	{
 		return s->get_sheet_padding(val);
 	}
 
-	bool UndoValue<UNDO_T::POLY_END>::GET(const Shape* s, D2D1_FIGURE_END& val) noexcept
+	bool UndoValue<UNDO_T::POLY_END>::GET(const SHAPE* s, D2D1_FIGURE_END& val) noexcept
 	{
 		return s->get_poly_end(val);
 	}
 
-	bool UndoValue<UNDO_T::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
+	bool UndoValue<UNDO_T::ARC_DIR>::GET(const SHAPE* s, D2D1_SWEEP_DIRECTION& val) noexcept
 	{
 		return s->get_arc_dir(val);
 	}
 
-	bool UndoValue<UNDO_T::ARC_END>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::ARC_END>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_arc_end(val);
 	}
 
-	bool UndoValue<UNDO_T::ARC_ROT>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::ARC_ROT>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_arc_rot(val);
 	}
 
-	bool UndoValue<UNDO_T::ARC_START>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::ARC_START>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_arc_start(val);
 	}
 
-	bool UndoValue<UNDO_T::STROKE_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& val) noexcept
+	bool UndoValue<UNDO_T::STROKE_CAP>::GET(const SHAPE* s, D2D1_CAP_STYLE& val) noexcept
 	{
 		return s->get_stroke_cap(val);
 	}
 
-	bool UndoValue<UNDO_T::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_T::STROKE_COLOR>::GET(const SHAPE* s, D2D1_COLOR_F& val) noexcept
 	{
 		return s->get_stroke_color(val);
 	}
 
-	bool UndoValue<UNDO_T::STROKE_WIDTH>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::STROKE_WIDTH>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_stroke_width(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_ALIGN_P>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_ALIGN_P>::GET(const SHAPE* s, DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
 	{
 		return s->get_text_align_vert(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_ALIGN_T>::GET(const Shape* s, DWRITE_TEXT_ALIGNMENT& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_ALIGN_T>::GET(const SHAPE* s, DWRITE_TEXT_ALIGNMENT& val) noexcept
 	{
 		return s->get_text_align_horz(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_CONTENT>::GET(const Shape* s, wchar_t*& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_CONTENT>::GET(const SHAPE* s, wchar_t*& val) noexcept
 	{
 		return s->get_text_content(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_LINE_SP>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_LINE_SP>::GET(const SHAPE* s, float& val) noexcept
 	{
 		return s->get_text_line_space(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_PAD>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_PAD>::GET(const SHAPE* s, D2D1_SIZE_F& val) noexcept
 	{
 		return s->get_text_padding(val);
 	}
 
-	bool UndoValue<UNDO_T::TEXT_WRAP>::GET(const Shape* s, DWRITE_WORD_WRAPPING& val) noexcept
+	bool UndoValue<UNDO_T::TEXT_WRAP>::GET(const SHAPE* s, DWRITE_WORD_WRAPPING& val) noexcept
 	{
 		return s->get_text_wrap(val);
 	}
 
-	bool UndoValue<UNDO_T::CORE_TEXT_RANGE>::GET(const Shape* s, CORE_TEXT_RANGE& val) noexcept
+	bool UndoValue<UNDO_T::CORE_TEXT_RANGE>::GET(const SHAPE* s, CORE_TEXT_RANGE& val) noexcept
 	{
 		return s->get_core_text_range(val);
 	}
@@ -775,7 +775,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行すると値が変わるか判定する.
 	bool UndoImage::changed(void) const noexcept
 	{
-		const ShapeImage* s = static_cast<const ShapeImage*>(m_shape);
+		const SHAPE_IMAGE* s = static_cast<const SHAPE_IMAGE*>(m_shape);
 		const auto pos = s->m_start;
 		const auto view = s->m_view;
 		const auto clip = s->m_clip;
@@ -786,7 +786,7 @@ namespace winrt::GraphPaper::implementation
 	// 元に戻す操作を実行する.
 	void UndoImage::exec(void) noexcept
 	{
-		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
+		SHAPE_IMAGE* s = static_cast<SHAPE_IMAGE*>(m_shape);
 		const auto pos = s->m_start;
 		const auto view = s->m_view;
 		const auto clip = s->m_clip;
@@ -812,7 +812,7 @@ namespace winrt::GraphPaper::implementation
 		m_opac(dt_reader.ReadSingle())
 	{}
 
-	UndoImage::UndoImage(ShapeImage* const s) :
+	UndoImage::UndoImage(SHAPE_IMAGE* const s) :
 		Undo(s),
 		m_start(s->m_start),
 		m_view(s->m_view),
@@ -914,7 +914,7 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから操作を読み込む.
 	UndoGroup::UndoGroup(DataReader const& dt_reader) :
 		UndoList(dt_reader),
-		m_shape_group(static_cast<ShapeGroup*>(undo_read_shape(dt_reader)))
+		m_shape_group(static_cast<SHAPE_GROUP*>(undo_read_shape(dt_reader)))
 	{}
 
 	// グループ操作をデータライターに書き込む.

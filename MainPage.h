@@ -267,9 +267,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_point_prev{ 0.0F, 0.0F };	// ポインターの前回点
 		D2D1_POINT_2F m_event_point_pressed{ 0.0F, 0.0F };	// ポインターが押された点
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターが押された状態
-		uint32_t m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;	// ポインターが押された部位
-		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
-		Shape* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
+		uint32_t m_event_hit_pressed = HIT_TYPE::HIT_SHEET;	// ポインターが押された判定部位
+		SHAPE* m_event_shape_pressed = nullptr;	// ポインターが押された図形
+		SHAPE* m_event_shape_last = nullptr;	// 最後にポインターが押された図形 (シフトキー押下で押した図形は含まない)
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		double m_event_click_dist = CLICK_DIST * DisplayInformation::GetForCurrentView().RawDpiX() / DisplayInformation::GetForCurrentView().LogicalDpi();	// クリックの判定距離 (DIPs)
 
@@ -280,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 
 		// メイン用紙
-		ShapeSheet m_main_sheet;	// 用紙
+		SHAPE_SHEET m_main_sheet;	// 用紙
 		D2D_UI m_main_d2d;	// 描画環境
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの左上点 (方眼の左上点を原点とする)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 用紙と図形, 全体が収まる境界ボックスの右下点 (方眼の左上点を原点とする)
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_background_color{ COLOR_WHITE };	// 背景の色
 
 		// ダイアログで使用する用紙
-		ShapeSheet m_dialog_sheet;	// 用紙
+		SHAPE_SHEET m_dialog_sheet;	// 用紙
 		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 				if (s->exist_cap()) {
 					select_exist_cap++;
 				}
-				if (typeid(*s) == typeid(ShapeGroup)) {
+				if (typeid(*s) == typeid(SHAPE_GROUP)) {
 					select_group++;
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
@@ -345,13 +345,13 @@ namespace winrt::GraphPaper::implementation
 				else if (typeid(*s) == typeid(ShapeLine)) {
 					select_line++;
 				}
-				else if (typeid(*s) == typeid(ShapeImage)) {
+				else if (typeid(*s) == typeid(SHAPE_IMAGE)) {
 					select_image++;
 				}
 				else if (typeid(*s) == typeid(ShapeRuler)) {
 					select_ruler++;
 				}
-				else if (typeid(*s) == typeid(ShapeArc)) {
+				else if (typeid(*s) == typeid(SHAPE_ARC)) {
 					select_arc++;
 				}
 				else if (typeid(*s) == typeid(ShapePoly)) {
@@ -482,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 更新された図形をもとにメインの用紙の境界矩形を更新する.
-		void MainPage::main_bbox_update(const Shape* s) noexcept
+		void MainPage::main_bbox_update(const SHAPE* s) noexcept
 		{
 			s->get_bbox(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 		}
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターがスワップチェーンパネルから出た.
 		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// 指定した部位の色を検出する.
-		void event_eyedropper_detect(const Shape* s, const uint32_t loc);
+		void event_eyedropper_detect(const SHAPE* s, const uint32_t hit);
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to);
 		// 図形の変形を終了する.
@@ -667,8 +667,8 @@ namespace winrt::GraphPaper::implementation
 		void reverse_path_click(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{
 			bool changed = false;
-			for (Shape* s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || !s->is_selected() || dynamic_cast<ShapeArrow*>(s) == nullptr) {
+			for (SHAPE* s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted() || !s->is_selected() || dynamic_cast<SHAPE_OPEN*>(s) == nullptr) {
 					continue;
 				}
 				if (!changed) {
@@ -878,7 +878,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールバーの値を設定する.
 		void scroll_set(const double aw, const double ah);
 		// 図形が表示されるようパネルをスクロールする.
-		bool scroll_to(const Shape* const s);
+		bool scroll_to(const SHAPE* const s);
 
 		//-------------------------------
 		// MainPage_select.cpp
@@ -890,13 +890,13 @@ namespace winrt::GraphPaper::implementation
 		// 矩形に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
-		bool select_range_shape(Shape* const s_from, Shape* const s_to);
+		bool select_range_shape(SHAPE* const s_from, SHAPE* const s_to);
 		// 矩形に含まれる図形の選択を反転する.
 		bool toggle_inside_shape(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
 		bool unselect_all_shape(void);
 		// 図形を選択して, それ以外の図形の選択をはずす.
-		bool select_shape(Shape* const s);
+		bool select_shape(SHAPE* const s);
 
 		//-------------------------------
 		// MainPage_layout.cpp
@@ -982,9 +982,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 図形を一覧に追加する.
-		void summary_append(Shape* const s);
+		void summary_append(SHAPE* const s);
 		// 一覧の中で図形を入れ替える.
-		void summary_order(Shape* const s, Shape* const t);
+		void summary_order(SHAPE* const s, SHAPE* const t);
 		// 一覧を消去する.
 		void summary_clear(void);
 		// 一覧パネルを閉じて消去する.
@@ -992,7 +992,7 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の「閉じる」ボタンが押された.
 		void summary_close_click(IInspectable const&, RoutedEventArgs const&);
 		// 一覧に図形を挿入する.
-		void summary_insert_at(Shape* const s, const uint32_t i);
+		void summary_insert_at(SHAPE* const s, const uint32_t i);
 		// 一覧が表示されてるか判定する.
 		bool summary_is_visible(void) { return m_summary_atomic.load(std::memory_order_acquire); }
 		// 一覧の項目が選択された.
@@ -1006,9 +1006,9 @@ namespace winrt::GraphPaper::implementation
 		// 一覧を作成しなおす.
 		void summary_remake(void);
 		// 一覧から図形を消去する.
-		uint32_t summary_remove(Shape* const s);
+		uint32_t summary_remove(SHAPE* const s);
 		// 一覧の図形を選択する.
-		void summary_select(Shape* const s);
+		void summary_select(SHAPE* const s);
 		// 一覧の項目を全て選択する.
 		void summary_select_all(void);
 		// 一覧の最初の項目を選択する.
@@ -1018,11 +1018,11 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の項目が選択された.
 		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& args);
 		// 一覧の図形を選択解除する.
-		void summary_unselect(Shape* const s);
+		void summary_unselect(SHAPE* const s);
 		// 一覧の項目を全て選択解除する.
 		void summary_unselect_all_shape(void);
 		// 一覧の項目を全て選択解除する.
-		void summary_select_shape(Shape* const s);
+		void summary_select_shape(SHAPE* const s);
 		// 一覧の表示を更新する.
 		void summary_update(void);
 
@@ -1097,7 +1097,7 @@ namespace winrt::GraphPaper::implementation
 		// 無効な操作をポップする.
 		bool undo_pop_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
-		void undo_push_append(Shape* s)
+		void undo_push_append(SHAPE* s)
 		{
 			m_undo_stack.push_back(new UndoAppend(s));
 			if (s->is_selected()) {
@@ -1111,32 +1111,32 @@ namespace winrt::GraphPaper::implementation
 #endif
 		}
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void undo_push_append(ShapeGroup* g, Shape* s)
+		void undo_push_append(SHAPE_GROUP* g, SHAPE* s)
 		{
 			m_undo_stack.push_back(new UndoAppendG(g, s));
 		}
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void undo_push_order(Shape* const s, Shape* const t)
+		void undo_push_order(SHAPE* const s, SHAPE* const t)
 		{
 			m_undo_stack.push_back(new UndoOrder(s, t));
 		}
-		// 指定した部位の点をスタックに保存する.
-		void undo_push_position(Shape* const s, const uint32_t loc)
+		// 指定した判定部位の座標をスタックに保存する.
+		void undo_push_position(SHAPE* const s, const uint32_t hit_type)
 		{
-			if (typeid(*s) == typeid(ShapeImage)) {
-				m_undo_stack.push_back(new UndoImage(static_cast<ShapeImage* const>(s)));
+			if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+				m_undo_stack.push_back(new UndoImage(static_cast<SHAPE_IMAGE* const>(s)));
 			}
 			else {
-				m_undo_stack.push_back(new UndoDeform(s, loc));
+				m_undo_stack.push_back(new UndoDeform(s, hit_type));
 			}
 		}
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
-		void undo_push_image(Shape* const s)
+		void undo_push_image(SHAPE* const s)
 		{
-			m_undo_stack.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
+			m_undo_stack.push_back(new UndoImage(static_cast<SHAPE_IMAGE*>(s)));
 		}
 		// 図形を挿入して, その操作をスタックに積む.
-		void MainPage::undo_push_insert(Shape* s, Shape* s_at)
+		void MainPage::undo_push_insert(SHAPE* s, SHAPE* s_at)
 		{
 			m_undo_stack.push_back(new UndoInsert(s, s_at));
 			if (s->is_selected()) {
@@ -1155,12 +1155,12 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.
-		void undo_push_remove(Shape* g, Shape* s)
+		void undo_push_remove(SHAPE* g, SHAPE* s)
 		{
 			m_undo_stack.push_back(new UndoRemoveG(g, s));
 		}
 		// 図形を取り去り, その操作をスタックに積む.
-		void undo_push_remove(Shape* s)
+		void undo_push_remove(SHAPE* s)
 		{
 			m_undo_stack.push_back(new UndoRemove(s));
 			if (s->is_selected()) {
@@ -1178,13 +1178,13 @@ namespace winrt::GraphPaper::implementation
 #endif
 		}
 		// 図形の選択を反転して, その操作をスタックに積む.
-		void undo_push_toggle(Shape* const s);
+		void undo_push_toggle(SHAPE* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_T U, typename T> void undo_push_set(Shape* const s, T const& val);
+		template <UNDO_T U, typename T> void undo_push_set(SHAPE* const s, T const& val);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
 		template <UNDO_T U, typename T> bool undo_push_set(T const& val);
 		// 図形の値の保存を実行して, その操作をスタックに積む.
-		template <UNDO_T U> void undo_push_set(Shape* const s);
+		template <UNDO_T U> void undo_push_set(SHAPE* const s);
 		// 文字列の選択範囲を解除する. キャレット位置は変わらない.
 		void undo_push_text_unselect(ShapeText* s)
 		{
@@ -1192,7 +1192,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_text_select(s, start, m_main_sheet.m_core_text_range.m_end, m_main_sheet.m_core_text_range.m_trail);
 		}
 		// 文字列の選択を実行して, その操作をスタックに積む.
-		void undo_push_text_select(Shape* s, const uint32_t start, const uint32_t end, const bool trail)
+		void undo_push_text_select(SHAPE* s, const uint32_t start, const uint32_t end, const bool trail)
 		{
 			// 文字列の選択の操作が連続するかぎり,
 			// スタックをさかのぼって, 同じ図形に対する文字列の選択があったなら
@@ -1302,8 +1302,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		void menu_getting_focus(UIElement const& sender, GettingFocusEventArgs const& args);
 };
-	template void MainPage::undo_push_set<UNDO_T::MOVE>(Shape* const s);
-	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(Shape* const s);
+	template void MainPage::undo_push_set<UNDO_T::MOVE>(SHAPE* const s);
+	template void MainPage::undo_push_set<UNDO_T::IMAGE_OPAC>(SHAPE* const s);
 
 
 

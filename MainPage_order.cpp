@@ -28,11 +28,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<SHAPE>(m_main_sheet.m_shape_list, slist);
 		if (slist.size() > 0) {
 			undo_push_null();
 			// 最前面 (リストでは末尾) に移動
-			for (Shape* const s : slist) {
+			for (SHAPE* const s : slist) {
 				if (summary_is_visible()) {
 					summary_remove(s);
 					summary_append(s);
@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			// 消去フラグも選択フラグも立っていないか判定する.
-			const Shape* s = *it_src;
+			const SHAPE* s = *it_src;
 			if (!s->is_deleted() && !s->is_selected()) {
 				break;
 			}
@@ -108,11 +108,11 @@ namespace winrt::GraphPaper::implementation
 				it_src++;
 			}
 			// 次の図形が選択されてない場合,
-			Shape* const s = *it_src;
+			SHAPE* const s = *it_src;
 			if (!s->is_selected()) {
 				continue;
 			}
-			Shape* const t = *it_dst;
+			SHAPE* const t = *it_dst;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_order(s, t);
@@ -135,13 +135,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<SHAPE>(m_main_sheet.m_shape_list, slist);
 		if (slist.size() > 0) {
 			undo_push_null();
 			// 最背面 (リストでは先頭) に移動
 			uint32_t i = 0;
-			Shape* const s = slist_front(m_main_sheet.m_shape_list);
-			for (Shape* const t : slist) {
+			SHAPE* const s = slist_front(m_main_sheet.m_shape_list);
+			for (SHAPE* const t : slist) {
 				if (summary_is_visible()) {
 					summary_remove(t);
 					summary_insert_at(t, i++);

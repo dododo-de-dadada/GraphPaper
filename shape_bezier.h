@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// double 型の値をもつ点
-	// ShapeBase で (ShapeArc でも) 使用する.
+	// ShapeBase で (SHAPE_ARC でも) 使用する.
 	//------------------------------
 	struct POINT_2D {
 		double x;	// X 座標の値

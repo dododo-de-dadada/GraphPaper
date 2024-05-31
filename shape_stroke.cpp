@@ -8,8 +8,8 @@ namespace winrt::GraphPaper::implementation
 	// 端の形式を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	//bool ShapeStroke::get_stroke_cap(CAP_STYLE& val) const noexcept
-	bool ShapeStroke::get_stroke_cap(D2D1_CAP_STYLE& val) const noexcept
+	//bool SHAPE_STROKE::get_stroke_cap(CAP_STYLE& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_cap(D2D1_CAP_STYLE& val) const noexcept
 	{
 		val = m_stroke_cap;
 		return true;
@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 	// 線の結合を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	//bool ShapeStroke::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
+	//bool SHAPE_STROKE::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
 	//{
 	//	val = m_dash_cap;
 	//	return true;
@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 	// 破線の配置を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_dash_pat(DASH_PAT& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_dash_pat(DASH_PAT& val) const noexcept
 	{
 		val = m_dash_pat;
 		return true;
@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠の形式を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_dash(D2D1_DASH_STYLE& val) const noexcept
 	{
 		val = m_stroke_dash;
 		return true;
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	// 線分の結合の尖り制限を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_join_limit(float& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_join_limit(float& val) const noexcept
 	{
 		val = m_stroke_join_limit;
 		return true;
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 	// 線分の結合を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_join(D2D1_LINE_JOIN& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_join(D2D1_LINE_JOIN& val) const noexcept
 	{
 		val = m_stroke_join;
 		return true;
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠の色を得る.
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_stroke_color;
 		return true;
@@ -70,21 +70,21 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠の太さを得る.
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_width(float& val) const noexcept
+	bool SHAPE_STROKE::get_stroke_width(float& val) const noexcept
 	{
 		val = m_stroke_width;
 		return true;
 	}
 
 	// 図形が点を含むか判定する.
-	// 戻り値	つねに LOCUS_SHEET
-	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F/*test_pt*/, const bool/*ctrl_key*/) const noexcept
+	// 戻り値	つねに HIT_SHEET
+	uint32_t SHAPE_STROKE::hit_test(const D2D1_POINT_2F/*test_pt*/, const bool/*ctrl_key*/) const noexcept
 	{
-		return LOCUS_TYPE::LOCUS_SHEET;
+		return HIT_TYPE::HIT_SHEET;
 	}
 
 	// D2D ストロークスタイルを作成する.
-	HRESULT ShapeStroke::create_stroke_style(ID2D1Factory* const factory) noexcept
+	HRESULT SHAPE_STROKE::create_stroke_style(ID2D1Factory* const factory) noexcept
 	{
 		UINT32 d_cnt;	// 破線の配置の要素数
 		FLOAT d_arr[6];	// 破線の配置
@@ -148,8 +148,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を端の形式に格納する.
-	//bool ShapeStroke::set_stroke_cap(const CAP_STYLE& val) noexcept
-	bool ShapeStroke::set_stroke_cap(const D2D1_CAP_STYLE& val) noexcept
+	//bool SHAPE_STROKE::set_stroke_cap(const CAP_STYLE& val) noexcept
+	bool SHAPE_STROKE::set_stroke_cap(const D2D1_CAP_STYLE& val) noexcept
 	{
 		if (!equal(m_stroke_cap, val)) {
 			m_stroke_cap = val;
@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の端の形式に格納する.
-	//bool ShapeStroke::set_dash_cap(const D2D1_CAP_STYLE& val) noexcept
+	//bool SHAPE_STROKE::set_dash_cap(const D2D1_CAP_STYLE& val) noexcept
 	//{
 	//	if (!equal(m_dash_cap, val)) {
 	//		m_dash_cap = val;
@@ -172,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を破線の配置に格納する.
 	// val	格納する値
-	bool ShapeStroke::set_stroke_dash_pat(const DASH_PAT& val) noexcept
+	bool SHAPE_STROKE::set_stroke_dash_pat(const DASH_PAT& val) noexcept
 	{
 		if (!equal(m_dash_pat, val)) {
 			m_dash_pat = val;
@@ -184,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を線枠の形式に格納する.
 	// val	格納する値
-	bool ShapeStroke::set_stroke_dash(const D2D1_DASH_STYLE val) noexcept
+	bool SHAPE_STROKE::set_stroke_dash(const D2D1_DASH_STYLE val) noexcept
 	{
 		if (m_stroke_dash != val) {
 			m_stroke_dash = val;
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を線分の結合の尖り制限に格納する.
 	// val	格納する値
-	bool ShapeStroke::set_stroke_join_limit(const float& val) noexcept
+	bool SHAPE_STROKE::set_stroke_join_limit(const float& val) noexcept
 	{
 		if (!equal(m_stroke_join_limit, val)) {
 			m_stroke_join_limit = val;
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を線分の結合に格納する.
 	// val	格納する値
-	bool ShapeStroke::set_stroke_join(const D2D1_LINE_JOIN& val)  noexcept
+	bool SHAPE_STROKE::set_stroke_join(const D2D1_LINE_JOIN& val)  noexcept
 	{
 		if (m_stroke_join != val) {
 			m_stroke_join = val;
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の色に格納する.
-	bool ShapeStroke::set_stroke_color(const D2D1_COLOR_F& val) noexcept
+	bool SHAPE_STROKE::set_stroke_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_stroke_color, val)) {
 			m_stroke_color = val;
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を線枠の太さに格納する.
 	// val	格納する値
-	bool ShapeStroke::set_stroke_width(const float val) noexcept
+	bool SHAPE_STROKE::set_stroke_width(const float val) noexcept
 	{
 		if (!equal(m_stroke_width, val)) {
 			m_stroke_width = val;
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// prop	設定
-	ShapeStroke::ShapeStroke(const Shape* prop)
+	SHAPE_STROKE::SHAPE_STROKE(const SHAPE* prop)
 	{
 		//prop->get_dash_cap(m_dash_cap);
 		prop->get_stroke_cap(m_stroke_cap);
@@ -264,9 +264,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
+	SHAPE_STROKE::SHAPE_STROKE(DataReader const& dt_reader) :
 		// 読み込む順番は定義された順
-		ShapeSelect(dt_reader),
+		SHAPE_SELECT(dt_reader),
 		//m_stroke_cap(CAP_STYLE{
 		//	static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
 		//	static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
@@ -351,9 +351,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに書き込む.
-	void ShapeStroke::write(DataWriter const& dt_writer) const
+	void SHAPE_STROKE::write(DataWriter const& dt_writer) const
 	{
-		ShapeSelect::write(dt_writer);
+		SHAPE_SELECT::write(dt_writer);
 		// 線の端の形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_cap));
 		// 線・枠の色

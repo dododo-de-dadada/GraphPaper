@@ -26,28 +26,28 @@ namespace winrt::GraphPaper::implementation
 		);
 		return dwrite_factory;
 	};
-	ID2D1RenderTarget* Shape::m_d2d_target = nullptr;	// D2D 描画対象
-	winrt::com_ptr<ID2D1DrawingStateBlock> Shape::m_state_block{ nullptr };	// 描画状態を保持するブロック
-	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style{ nullptr };	// 補助線の形式
-	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_color_brush{ nullptr };	// 色ブラシ (ターゲット依存)
-	winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_d2d_range_brush{ nullptr };	// 選択された文字色のブラシ (ターゲット依存)
-	winrt::com_ptr<ID2D1BitmapBrush> Shape::m_d2d_bitmap_brush{ nullptr };	// 背景の画像ブラシ (ターゲット依存)
-	winrt::com_ptr<IDWriteFactory> Shape::m_dwrite_factory{ create_dwrite_factory() };
-	constexpr double LOCUS_LEN = 6.0;
-	float Shape::m_aux_width = 1.0f;	// 補助線の太さ
-	bool Shape::m_loc_show = true;	// 部位の表示/非表示.
-	float Shape::m_loc_width = LOCUS_LEN;	// 部位の大きさ
-	float Shape::m_loc_square_inner = static_cast<float>(0.5 * LOCUS_LEN);	// 部位 (正方形) の内側の辺の半分の長さ
-	float Shape::m_loc_square_outer = static_cast<float>(0.5 * (LOCUS_LEN + 4.0));	// 部位 (正方形) の外側の辺の半分の長さ
-	float Shape::m_loc_circle_inner = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN / M_PI));	// 部位 (円形) の内側の半径
-	float Shape::m_loc_circle_outer = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN / M_PI) + 2.0);	// 部位 (円形) の外側の半径
-	float Shape::m_loc_rhombus_inner = static_cast<float>(sqrt(LOCUS_LEN * LOCUS_LEN * 0.5) * 0.5);	// 部位 (ひし型) の中心から内側の頂点までの半分の長さ
-	float Shape::m_loc_rhombus_outer = static_cast<float>(sqrt((LOCUS_LEN + 4.0) * (LOCUS_LEN + 4.0) * 0.5) * 0.5);	// 部位 (ひし型) の中心から外側の頂点までの半分の長さ
+	ID2D1RenderTarget* SHAPE::m_d2d_target = nullptr;	// D2D 描画対象
+	winrt::com_ptr<ID2D1DrawingStateBlock> SHAPE::m_state_block{ nullptr };	// 描画状態を保持するブロック
+	winrt::com_ptr<ID2D1StrokeStyle1> SHAPE::m_aux_style{ nullptr };	// 補助線の形式
+	winrt::com_ptr<ID2D1SolidColorBrush> SHAPE::m_d2d_color_brush{ nullptr };	// 色ブラシ (ターゲット依存)
+	winrt::com_ptr<ID2D1SolidColorBrush> SHAPE::m_d2d_range_brush{ nullptr };	// 選択された文字色のブラシ (ターゲット依存)
+	winrt::com_ptr<ID2D1BitmapBrush> SHAPE::m_d2d_bitmap_brush{ nullptr };	// 背景の画像ブラシ (ターゲット依存)
+	winrt::com_ptr<IDWriteFactory> SHAPE::m_dwrite_factory{ create_dwrite_factory() };
+	constexpr double HIT_LEN = 6.0;
+	float SHAPE::m_aux_width = 1.0f;	// 補助線の太さ
+	bool SHAPE::m_hit_show = true;	// 判定部位の表示/非表示.
+	float SHAPE::m_hit_width = HIT_LEN;	// 判定部位の大きさ
+	float SHAPE::m_hit_square_inner = static_cast<float>(0.5 * HIT_LEN);	// 部位 (正方形) の内側の辺の半分の長さ
+	float SHAPE::m_hit_square_outer = static_cast<float>(0.5 * (HIT_LEN + 4.0));	// 部位 (正方形) の外側の辺の半分の長さ
+	float SHAPE::m_hit_circle_inner = static_cast<float>(sqrt(HIT_LEN * HIT_LEN / M_PI));	// 部位 (円形) の内側の半径
+	float SHAPE::m_hit_circle_outer = static_cast<float>(sqrt(HIT_LEN * HIT_LEN / M_PI) + 2.0);	// 部位 (円形) の外側の半径
+	float SHAPE::m_hit_rhombus_inner = static_cast<float>(sqrt(HIT_LEN * HIT_LEN * 0.5) * 0.5);	// 部位 (ひし型) の中心から内側の頂点までの半分の長さ
+	float SHAPE::m_hit_rhombus_outer = static_cast<float>(sqrt((HIT_LEN + 4.0) * (HIT_LEN + 4.0) * 0.5) * 0.5);	// 部位 (ひし型) の中心から外側の頂点までの半分の長さ
 
 	// 描画前に必要な変数を格納する.
-	void Shape::begin_draw(
+	void SHAPE::begin_draw(
 		ID2D1RenderTarget* target,	// D2D 描画対象
-		const bool located,	// 部位の表示/非表示
+		const bool hit_show,	// 判定部位の表示/非表示
 		IWICFormatConverter* const background,	// 背景パターンの画像 
 		const double scale	// 表示倍率
 	) noexcept
@@ -66,12 +66,12 @@ namespace winrt::GraphPaper::implementation
 
 		if (hr == S_OK && m_d2d_color_brush == nullptr) {
 			hr = target->CreateSolidColorBrush({},
-				Shape::m_d2d_color_brush.put());
+				SHAPE::m_d2d_color_brush.put());
 		}
 
 		if (hr == S_OK && m_d2d_range_brush == nullptr) {
 			hr = target->CreateSolidColorBrush({},
-				Shape::m_d2d_range_brush.put());
+				SHAPE::m_d2d_range_brush.put());
 		}
 
 		if (hr == S_OK && background == nullptr && m_d2d_bitmap_brush != nullptr) {
@@ -109,18 +109,18 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (hr == S_OK) {
-			m_loc_show = located;
+			m_hit_show = hit_show;
 			m_aux_width = static_cast<float>(1.0 / scale);
-			const double a_inner = LOCUS_LEN / scale;
-			const double a_outer = (LOCUS_LEN + 4.0) / scale;
-			m_loc_width = static_cast<float>(LOCUS_LEN / scale);
-			m_loc_square_inner = static_cast<float>(0.5 * a_inner);
-			m_loc_square_outer = static_cast<float>(0.5 * a_outer);
-			const auto r = sqrt(LOCUS_LEN * LOCUS_LEN / M_PI);
-			m_loc_circle_inner = static_cast<float>(r / scale);
-			m_loc_circle_outer = static_cast<float>((r + 2.0) / scale);
-			m_loc_rhombus_inner = static_cast<float>(sqrt(a_inner * a_inner * 0.5) * 0.5);
-			m_loc_rhombus_outer = static_cast<float>(sqrt(a_outer * a_outer * 0.5) * 0.5);
+			const double a_inner = HIT_LEN / scale;
+			const double a_outer = (HIT_LEN + 4.0) / scale;
+			m_hit_width = static_cast<float>(HIT_LEN / scale);
+			m_hit_square_inner = static_cast<float>(0.5 * a_inner);
+			m_hit_square_outer = static_cast<float>(0.5 * a_outer);
+			const auto r = sqrt(HIT_LEN * HIT_LEN / M_PI);
+			m_hit_circle_inner = static_cast<float>(r / scale);
+			m_hit_circle_outer = static_cast<float>((r + 2.0) / scale);
+			m_hit_rhombus_inner = static_cast<float>(sqrt(a_inner * a_inner * 0.5) * 0.5);
+			m_hit_rhombus_outer = static_cast<float>(sqrt(a_outer * a_outer * 0.5) * 0.5);
 		}
 	}
 

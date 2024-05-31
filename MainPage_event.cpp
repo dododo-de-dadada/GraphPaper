@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 	// 最も近い点を得る.
 	static bool event_get_nearest_point(const SHAPE_LIST& slist, const double interval, D2D1_POINT_2F& v_pos) noexcept;
 	// 図形が操作スタックに含まれるか判定する.
-	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept;
+	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const SHAPE* s) noexcept;
 	// 図形リストを整理する.
 	static void event_reduce_slist(SHAPE_LIST& slist, const UNDO_STACK& ustack, const UNDO_STACK& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
@@ -296,7 +296,7 @@ namespace winrt::GraphPaper::implementation
 	// ustack	操作スタック
 	// s	図形
 	// 戻り値	含む場合 true.
-	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const Shape* s) noexcept
+	static bool event_undo_contain_shape(const UNDO_STACK& ustack, const SHAPE* s) noexcept
 	{
 		for (const auto u : ustack) {
 			if (u == nullptr) {
@@ -350,19 +350,19 @@ namespace winrt::GraphPaper::implementation
 	// 色を検出する.
 	//------------------------------
 	void MainPage::event_eyedropper_detect(
-		const Shape* s,	// 押された図形
-		const uint32_t loc	// 押された部位
+		const SHAPE* s,	// 押された図形
+		const uint32_t hit	// 押された判定部位
 	)
 	{
-		if (loc == LOCUS_TYPE::LOCUS_SHEET) {
+		if (hit == HIT_TYPE::HIT_SHEET) {
 			m_eyedropper_color = m_main_sheet.m_sheet_color;
 			m_eyedropper_filled = true;
 			Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 		}
 		else if (s != nullptr) {
-			if (loc == LOCUS_TYPE::LOCUS_FILL) {
-				if (typeid(*s) == typeid(ShapeImage)) {
-					if (static_cast<const ShapeImage*>(s)->get_pixcel(m_event_point_pressed, m_eyedropper_color)) {
+			if (hit == HIT_TYPE::HIT_FILL) {
+				if (typeid(*s) == typeid(SHAPE_IMAGE)) {
+					if (static_cast<const SHAPE_IMAGE*>(s)->get_pixcel(m_event_point_pressed, m_eyedropper_color)) {
 						m_main_sheet.m_fill_color = m_eyedropper_color;
 						m_eyedropper_filled = true;
 					}
@@ -374,13 +374,13 @@ namespace winrt::GraphPaper::implementation
 				}
 				Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 			}
-			else if (loc == LOCUS_TYPE::LOCUS_TEXT) {
+			else if (hit == HIT_TYPE::HIT_TEXT) {
 				s->get_font_color(m_eyedropper_color);
 				m_main_sheet.m_font_color = m_eyedropper_color;
 				m_eyedropper_filled = true;
 				Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 			}
-			else if (loc == LOCUS_TYPE::LOCUS_STROKE) {
+			else if (hit == HIT_TYPE::HIT_STROKE) {
 				s->get_stroke_color(m_eyedropper_color);
 				m_main_sheet.m_stroke_color = m_eyedropper_color;
 				m_eyedropper_filled = true;
@@ -397,7 +397,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto)
 	{
 		const auto drawing_tool = m_tool;
-		Shape* s;
+		SHAPE* s;
 		if (drawing_tool == DRAWING_TOOL::RECT) {
 			s = new ShapeRect(start, lineto, &m_main_sheet);
 		}
@@ -421,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRuler(start, lineto, &m_main_sheet);
 		}
 		else if (drawing_tool == DRAWING_TOOL::ARC) {
-			s = new ShapeArc(start, lineto, &m_main_sheet);
+			s = new SHAPE_ARC(start, lineto, &m_main_sheet);
 		}
 		else if (drawing_tool == DRAWING_TOOL::TEXT) {
 			s = new ShapeText(start, lineto, nullptr, &m_main_sheet);
@@ -473,7 +473,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F p{ m_event_point_curr };
 			D2D1_POINT_2F q;
 			D2D1_POINT_2F r;
-			m_event_shape_pressed->get_pos_loc(m_event_locus_pressed, p);
+			m_event_shape_pressed->get_pt_hit(m_event_hit_pressed, p);
 			pt_round(p, m_main_sheet.m_grid_base + 1.0, q);
 			pt_sub(q, p, r);
 			const double s = sqrt(pt_abs2(r));
@@ -485,24 +485,24 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 近傍の頂点によって点が変わらなかったか判定する.
 			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
-			if (!m_event_shape_pressed->set_pos_loc(p, m_event_locus_pressed, static_cast<float>(grid_dist), keep_aspect)) {
+			if (!m_event_shape_pressed->set_pt_hit(p, m_event_hit_pressed, static_cast<float>(grid_dist), keep_aspect)) {
 				// 変わらなかったならば, 方眼に合わせる.
-				m_event_shape_pressed->set_pos_loc(q, m_event_locus_pressed, 0.0f, keep_aspect);
+				m_event_shape_pressed->set_pt_hit(q, m_event_hit_pressed, 0.0f, keep_aspect);
 			}
 		}
 		else if (m_snap_grid) {
 			D2D1_POINT_2F p{ m_event_point_curr };
-			m_event_shape_pressed->get_pos_loc(m_event_locus_pressed, p);
+			m_event_shape_pressed->get_pt_hit(m_event_hit_pressed, p);
 			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 			pt_round(p, m_main_sheet.m_grid_base + 1.0, p);
-			m_event_shape_pressed->set_pos_loc(p, m_event_locus_pressed, 0.0f, keep_aspect);
+			m_event_shape_pressed->set_pt_hit(p, m_event_hit_pressed, 0.0f, keep_aspect);
 		}
 		else if (m_snap_point / m_main_scale >= FLT_MIN) {
 			D2D1_POINT_2F p{ m_event_point_curr };
-			m_event_shape_pressed->get_pos_loc(m_event_locus_pressed, p);
+			m_event_shape_pressed->get_pt_hit(m_event_hit_pressed, p);
 			const auto keep_aspect = ((key_mod & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
 			slist_find_vertex_closest(m_main_sheet.m_shape_list, p, m_snap_point / m_main_scale, p);
-			m_event_shape_pressed->set_pos_loc(p, m_event_locus_pressed, m_snap_point / m_main_scale, keep_aspect);
+			m_event_shape_pressed->set_pt_hit(p, m_event_hit_pressed, m_snap_point / m_main_scale, keep_aspect);
 		}
 	}
 
@@ -648,9 +648,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_DEFORM) {
-			// ポインターの現在位置を, 図形の部位の点に格納する.
+			// ポインターの現在位置を, 図形の判定部位の座標に格納する.
 			const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
-			m_event_shape_pressed->set_pos_loc(m_event_point_curr, m_event_locus_pressed, 0.0f, keep_aspect);
+			m_event_shape_pressed->set_pt_hit(m_event_point_curr, m_event_hit_pressed, 0.0f, keep_aspect);
 			m_event_point_prev = m_event_point_curr;
 			main_sheet_draw();
 		}
@@ -685,25 +685,25 @@ namespace winrt::GraphPaper::implementation
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				}
 				// 選択された図形の数が 1 を超える,
-				// または押された図形の部位が線枠, 内側のときは, 図形を移動している状態に遷移する.
+				// または押された図形の判定部位が線枠, 内側のときは, 図形を移動している状態に遷移する.
 				else if (m_tool == DRAWING_TOOL::SELECT &&
-					(m_event_locus_pressed == LOCUS_TYPE::LOCUS_STROKE || m_event_locus_pressed == LOCUS_TYPE::LOCUS_FILL || m_undo_select_cnt > 1)) {
+					(m_event_hit_pressed == HIT_TYPE::HIT_STROKE || m_event_hit_pressed == HIT_TYPE::HIT_FILL || m_undo_select_cnt > 1)) {
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					m_event_point_prev = m_event_point_curr;
 					undo_push_null();
 					undo_push_move<false>(p);
 					main_sheet_draw();
 				}
-				// 押された図形の部位が文字列なら, 文字列の選択をしている状態に遷移する.
-				else if (m_tool == DRAWING_TOOL::SELECT && m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT) {
+				// 押された図形の判定部位が文字列なら, 文字列の選択をしている状態に遷移する.
+				else if (m_tool == DRAWING_TOOL::SELECT && m_event_hit_pressed == HIT_TYPE::HIT_TEXT) {
 					// 編集中の文字列がない, または押された図形が編集中の文字列以外の場合.
 					if (m_core_text_focused == nullptr || m_core_text_focused != m_event_shape_pressed) {
 						m_event_state = EVENT_STATE::PRESS_MOVE;
 						m_event_point_prev = m_event_point_curr;
 						undo_push_null();
-						undo_push_position(m_event_shape_pressed, m_event_locus_pressed);
+						undo_push_position(m_event_shape_pressed, m_event_hit_pressed);
 						const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
-						m_event_shape_pressed->set_pos_loc(m_event_point_curr, m_event_locus_pressed, 0.0f, keep_aspect);
+						m_event_shape_pressed->set_pt_hit(m_event_point_curr, m_event_hit_pressed, 0.0f, keep_aspect);
 
 						//////
 						if (m_core_text_focused != nullptr) {
@@ -720,14 +720,14 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				// ポインターが押されたのが図形の外部以外なら, 図形を変形している状態に遷移する.
-				else if (m_tool == DRAWING_TOOL::SELECT && m_event_locus_pressed != LOCUS_TYPE::LOCUS_SHEET) {
+				else if (m_tool == DRAWING_TOOL::SELECT && m_event_hit_pressed != HIT_TYPE::HIT_SHEET) {
 					if (m_event_shape_pressed->is_selected()) {
 						m_event_state = EVENT_STATE::PRESS_DEFORM;
 						m_event_point_prev = m_event_point_curr;
 						undo_push_null();
-						undo_push_position(m_event_shape_pressed, m_event_locus_pressed);
+						undo_push_position(m_event_shape_pressed, m_event_hit_pressed);
 						const auto keep_aspect = ((args.KeyModifiers() & VirtualKeyModifiers::Control) != VirtualKeyModifiers::Control);
-						m_event_shape_pressed->set_pos_loc(m_event_point_curr, m_event_locus_pressed, 0.0f, keep_aspect);
+						m_event_shape_pressed->set_pt_hit(m_event_point_curr, m_event_hit_pressed, 0.0f, keep_aspect);
 						main_sheet_draw();
 					}
 				}
@@ -828,12 +828,12 @@ namespace winrt::GraphPaper::implementation
 			if (m_tool == DRAWING_TOOL::SELECT) {
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::Control) {
 					m_event_shape_pressed = nullptr;
-					m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, true, m_event_shape_pressed);
+					m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, true, m_event_shape_pressed);
 					// 制御キー押下では, 押された図形が選択されていたなら外し, 選択されていなかったなら付ける.
-					// ただし, 押された図形の部位が, 枠線や塗り以外の部位だったならば, 変形を行なうため, 選択された状態を変えない.
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
+					// ただし, 押された図形の判定部位が, 枠線や塗り以外の判定部位だったならば, 変形を行なうため, 選択された状態を変えない.
+					if (m_event_hit_pressed == HIT_TYPE::HIT_SHEET) {
 					}
-					else if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_STROKE || m_event_locus_pressed == LOCUS_TYPE::LOCUS_FILL || m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT) {
+					else if (m_event_hit_pressed == HIT_TYPE::HIT_STROKE || m_event_hit_pressed == HIT_TYPE::HIT_FILL || m_event_hit_pressed == HIT_TYPE::HIT_TEXT) {
 						undo_push_toggle(m_event_shape_pressed);
 						if (m_event_shape_pressed->is_selected()) {
 							m_main_sheet.set_attr_to(m_event_shape_pressed);
@@ -849,7 +849,7 @@ namespace winrt::GraphPaper::implementation
 						}
 						changed = true;
 					}
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT && m_undo_select_cnt == 1) {
+					if (m_event_hit_pressed == HIT_TYPE::HIT_TEXT && m_undo_select_cnt == 1) {
 						if (m_core_text_focused != m_event_shape_pressed) {
 							if (m_core_text_focused != nullptr) {
 								m_core_text.NotifyFocusLeave();
@@ -881,8 +881,8 @@ namespace winrt::GraphPaper::implementation
 				// ただし, 編集中の文字列がある場合は, 直前に押されたキャレット位置から, たった今押された位置の間に並んでいる文字列を, 範囲選択する.
 				else if ((args.KeyModifiers() & VirtualKeyModifiers::Shift) == VirtualKeyModifiers::Shift) {
 					m_event_shape_pressed = nullptr;
-					m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
+					m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+					if (m_event_hit_pressed == HIT_TYPE::HIT_SHEET) {
 					}
 					// 最後に押された図形があるなら, 指定した範囲の図形を選択, 範囲外の図形の選択を外す.
 					else {
@@ -893,7 +893,7 @@ namespace winrt::GraphPaper::implementation
 							changed = true;
 						}
 					}
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT && m_undo_select_cnt == 1) {
+					if (m_event_hit_pressed == HIT_TYPE::HIT_TEXT && m_undo_select_cnt == 1) {
 						if (m_core_text_focused != m_event_shape_pressed) {
 							if (m_core_text_focused != nullptr) {
 								m_core_text.NotifyFocusLeave();
@@ -931,9 +931,9 @@ namespace winrt::GraphPaper::implementation
 				// 修飾キーがない. 
 				else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
 					m_event_shape_pressed = nullptr;
-					m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+					m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
 					// 押された図形がない.
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET || m_event_shape_pressed == nullptr) {
+					if (m_event_hit_pressed == HIT_TYPE::HIT_SHEET || m_event_shape_pressed == nullptr) {
 						if (unselect_all_shape()) {
 							m_event_shape_last = nullptr;
 							changed = true;
@@ -952,7 +952,7 @@ namespace winrt::GraphPaper::implementation
 						changed = true;
 					}
 					// 押されたのが文字列で, かつ選択された図形がひとつだけ.
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT && m_undo_select_cnt == 1) {
+					if (m_event_hit_pressed == HIT_TYPE::HIT_TEXT && m_undo_select_cnt == 1) {
 						// 押された図形がフォーカス中の文字列図形でない.
 						if (m_core_text_focused != m_event_shape_pressed) {
 							// 
@@ -986,15 +986,15 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (m_tool == DRAWING_TOOL::POINTER) {
 				m_event_shape_pressed = nullptr;
-				m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+				m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
 			}
 			else if (m_tool == DRAWING_TOOL::EYEDROPPER) {
 				m_event_shape_pressed = nullptr;
-				m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+				m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
 			}
 			else {
 				m_event_shape_pressed = nullptr;
-				m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+				m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
 				if (m_core_text_focused != nullptr) {
 					m_core_text.NotifyFocusLeave();
 					undo_push_text_unselect(m_core_text_focused);
@@ -1005,7 +1005,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 			m_event_shape_pressed = nullptr;
-			m_event_locus_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
+			m_event_hit_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_pressed, false, m_event_shape_pressed);
 			if (m_event_shape_pressed != nullptr && !m_event_shape_pressed->is_selected()) {
 				m_event_shape_last = m_event_shape_pressed;
 				select_shape(m_event_shape_pressed);
@@ -1039,7 +1039,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_T::TEXT_CONTENT>(s, wchar_cpy(tx_edit_text().Text().c_str()));
 			const bool fit_frame = ck_fit_text_frame().IsChecked().GetBoolean();
 			if (fit_frame) {
-				undo_push_position(s, LOCUS_TYPE::LOCUS_SE);
+				undo_push_position(s, HIT_TYPE::HIT_SE);
 				s->fit_frame_to_text(m_snap_grid ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			main_sheet_draw();
@@ -1121,32 +1121,32 @@ namespace winrt::GraphPaper::implementation
 			else if (m_tool == DRAWING_TOOL::EYEDROPPER) {
 				// 修飾キーが押されてないなら吸い上げ.
 				if ((args.KeyModifiers() & VirtualKeyModifiers::Control) == VirtualKeyModifiers::None) {
-					event_eyedropper_detect(m_event_shape_pressed, m_event_locus_pressed);
+					event_eyedropper_detect(m_event_shape_pressed, m_event_hit_pressed);
 					status_bar_set_drawing_tool();
 					//return;
 				}
 				// 制御キー押下なら吐き出し.
 				else {
-					if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_SHEET) {
+					if (m_event_hit_pressed == HIT_TYPE::HIT_SHEET) {
 						undo_push_null();
 						undo_push_set<UNDO_T::SHEET_COLOR>(&m_main_sheet, m_eyedropper_color);
 						menu_is_enable();
 						main_sheet_draw();
 					}
 					else if (m_event_shape_pressed != nullptr) {
-						if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_FILL) {
+						if (m_event_hit_pressed == HIT_TYPE::HIT_FILL) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FILL_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
 							main_sheet_draw();
 						}
-						else if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_TEXT) {
+						else if (m_event_hit_pressed == HIT_TYPE::HIT_TEXT) {
 							undo_push_null();
 							undo_push_set<UNDO_T::FONT_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
 							main_sheet_draw();
 						}
-						else if (m_event_locus_pressed == LOCUS_TYPE::LOCUS_STROKE) {
+						else if (m_event_hit_pressed == HIT_TYPE::HIT_STROKE) {
 							undo_push_null();
 							undo_push_set<UNDO_T::STROKE_COLOR>(m_event_shape_pressed, m_eyedropper_color);
 							menu_is_enable();
@@ -1174,8 +1174,8 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					event_edit_text_async();
 				}
-				//else if (typeid(*m_event_shape_pressed) == typeid(ShapeArc)) {
-					//edit_arc_async(static_cast<ShapeArc*>(m_event_shape_pressed));
+				//else if (typeid(*m_event_shape_pressed) == typeid(SHAPE_ARC)) {
+					//edit_arc_async(static_cast<SHAPE_ARC*>(m_event_shape_pressed));
 				//}
 			}
 		}
@@ -1269,7 +1269,7 @@ namespace winrt::GraphPaper::implementation
 		// 初期状態に戻す.
 		m_event_state = EVENT_STATE::BEGIN;
 		//m_event_shape_pressed = nullptr;
-		//m_event_locus_pressed = LOCUS_TYPE::LOCUS_SHEET;
+		//m_event_hit_pressed = HIT_TYPE::HIT_SHEET;
 		menu_is_enable();
 		main_sheet_draw();
 	}
@@ -1298,52 +1298,52 @@ namespace winrt::GraphPaper::implementation
 		else {
 			// 描画の排他制御をロックできたなら, ただちに解除する.
 			m_mutex_draw.unlock();
-			Shape* s;
-			const auto loc = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_curr, false, s);
-			if (loc == LOCUS_TYPE::LOCUS_SHEET) {
+			SHAPE* s;
+			const auto hit = slist_hit_test(m_main_sheet.m_shape_list, m_event_point_curr, false, s);
+			if (hit == HIT_TYPE::HIT_SHEET) {
 				//Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
 			else if (m_undo_select_cnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 			}
-			else if (loc == LOCUS_TYPE::LOCUS_TEXT) {
+			else if (hit == HIT_TYPE::HIT_TEXT) {
 				Window::Current().CoreWindow().PointerCursor(CURS_IBEAM);
 			}
 			else {
-				switch (loc) {
-				case LOCUS_TYPE::LOCUS_A_START:
-				case LOCUS_TYPE::LOCUS_A_END:
-				case LOCUS_TYPE::LOCUS_A_AXIS_X:
-				case LOCUS_TYPE::LOCUS_A_AXIS_Y:
-				case LOCUS_TYPE::LOCUS_R_NW:
-				case LOCUS_TYPE::LOCUS_R_NE:
-				case LOCUS_TYPE::LOCUS_R_SE:
-				case LOCUS_TYPE::LOCUS_R_SW:
-				case LOCUS_TYPE::LOCUS_START:
-				case LOCUS_TYPE::LOCUS_END:
+				switch (hit) {
+				case HIT_TYPE::HIT_A_START:
+				case HIT_TYPE::HIT_A_END:
+				case HIT_TYPE::HIT_A_AXIS_X:
+				case HIT_TYPE::HIT_A_AXIS_Y:
+				case HIT_TYPE::HIT_R_NW:
+				case HIT_TYPE::HIT_R_NE:
+				case HIT_TYPE::HIT_R_SE:
+				case HIT_TYPE::HIT_R_SW:
+				case HIT_TYPE::HIT_START:
+				case HIT_TYPE::HIT_END:
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 					break;
-				case LOCUS_TYPE::LOCUS_A_CENTER:
-				case LOCUS_TYPE::LOCUS_FILL:
-				case LOCUS_TYPE::LOCUS_STROKE:
-				case LOCUS_TYPE::LOCUS_TEXT:
+				case HIT_TYPE::HIT_A_CENTER:
+				case HIT_TYPE::HIT_FILL:
+				case HIT_TYPE::HIT_STROKE:
+				case HIT_TYPE::HIT_TEXT:
 					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 					break;
-				case LOCUS_TYPE::LOCUS_NE:
-				case LOCUS_TYPE::LOCUS_SW:
+				case HIT_TYPE::HIT_NE:
+				case HIT_TYPE::HIT_SW:
 					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NESW);
 					break;
-				case LOCUS_TYPE::LOCUS_NORTH:
-				case LOCUS_TYPE::LOCUS_SOUTH:
+				case HIT_TYPE::HIT_NORTH:
+				case HIT_TYPE::HIT_SOUTH:
 					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NS);
 					break;
-				case LOCUS_TYPE::LOCUS_NW:
-				case LOCUS_TYPE::LOCUS_SE:
+				case HIT_TYPE::HIT_NW:
+				case HIT_TYPE::HIT_SE:
 					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NWSE);
 					break;
-				case LOCUS_TYPE::LOCUS_WEST:
-				case LOCUS_TYPE::LOCUS_EAST:
+				case HIT_TYPE::HIT_WEST:
+				case HIT_TYPE::HIT_EAST:
 					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_WE);
 					break;
 				default:
@@ -1352,9 +1352,9 @@ namespace winrt::GraphPaper::implementation
 						if (typeid(*s) == typeid(ShapeLine) ||
 							typeid(*s) == typeid(ShapePoly) ||
 							typeid(*s) == typeid(ShapeBezier) ||
-							typeid(*s) == typeid(ShapeArc)) {
-							// 図形の部位が, 頂点の数を超えないか判定する.
-							if (loc >= LOCUS_TYPE::LOCUS_P0 && loc < LOCUS_TYPE::LOCUS_P0 + static_cast<ShapePath*>(s)->m_lineto.size() + 1) {
+							typeid(*s) == typeid(SHAPE_ARC)) {
+							// 図形の判定部位が, 頂点の数を超えないか判定する.
+							if (hit >= HIT_TYPE::HIT_P0 && hit < HIT_TYPE::HIT_P0 + static_cast<ShapePath*>(s)->m_lineto.size() + 1) {
 								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 								break;
 							}
