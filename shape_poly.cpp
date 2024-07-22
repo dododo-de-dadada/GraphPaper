@@ -841,7 +841,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapePoly::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
 		if (m_end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
-			return ShapePath::set_arrow_style(val);
+			return SHAPE_PATH::set_arrow_style(val);
 		}
 		return false;
 	}
@@ -853,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 		const SHAPE* prop,	// 属性
 		const POLY_OPTION& p_opt	// 作成方法
 	) :
-		ShapePath::ShapePath(prop, p_opt.m_end_closed),
+		SHAPE_PATH::SHAPE_PATH(prop, p_opt.m_end_closed),
 		m_end(p_opt.m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN)
 	{
 		D2D1_POINT_2F p[N_GON_MAX];
@@ -871,7 +871,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
 	ShapePoly::ShapePoly(DataReader const& dt_reader) :
-		ShapePath::ShapePath(dt_reader)
+		SHAPE_PATH::SHAPE_PATH(dt_reader)
 	{
 		const auto end = static_cast<D2D1_FIGURE_END>(dt_reader.ReadUInt32());
 		if (end == D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED || end == D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN) {
@@ -882,7 +882,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
-		ShapePath::write(dt_writer);
+		SHAPE_PATH::write(dt_writer);
 		dt_writer.WriteUInt32(m_end);
 	}
 

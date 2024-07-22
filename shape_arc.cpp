@@ -930,14 +930,14 @@ namespace winrt::GraphPaper::implementation
 					static_cast<FLOAT>(m_start.x + val.x - ctr2.x),
 					static_cast<FLOAT>(m_start.y + val.y - ctr2.y)
 				};
-				if (ShapePath::set_pos_start(start)) {
+				if (SHAPE_PATH::set_pos_start(start)) {
 					m_d2d_fill_geom = nullptr;
 					return true;
 				}
 			}
 		}
 		else {
-			if (ShapePath::set_pt_hit(val, hit, snap_point, keep_aspect)) {
+			if (SHAPE_PATH::set_pt_hit(val, hit, snap_point, keep_aspect)) {
 				const double rot = M_PI * m_angle_rot / 180.0;
 				const double c = cos(rot);
 				const double s = sin(rot);
@@ -957,7 +957,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を始点に格納する. 他の部位の位置も動く.
 	bool SHAPE_ARC::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		if (ShapePath::set_pos_start(val)) {
+		if (SHAPE_PATH::set_pos_start(val)) {
 			m_d2d_fill_geom = nullptr;
 			return true;
 		}
@@ -1273,7 +1273,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F end_to,
 		const SHAPE* prop
 	) : 
-		ShapePath(prop, false),
+		SHAPE_PATH(prop, false),
 		m_radius(D2D1_SIZE_F{ fabs(end_to.x), fabs(end_to.y) }),
 		m_angle_rot(0.0f),
 		m_angle_start(0.0f),
@@ -1296,7 +1296,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	SHAPE_ARC::SHAPE_ARC(const DataReader& dt_reader) :
-		ShapePath(dt_reader),
+		SHAPE_PATH(dt_reader),
 		m_radius({ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_angle_rot(dt_reader.ReadSingle()),
 		m_angle_start(dt_reader.ReadSingle()),
@@ -1334,7 +1334,7 @@ namespace winrt::GraphPaper::implementation
 
 	void SHAPE_ARC::write(const DataWriter& dt_writer) const
 	{
-		ShapePath::write(dt_writer);
+		SHAPE_PATH::write(dt_writer);
 		dt_writer.WriteSingle(m_radius.width);
 		dt_writer.WriteSingle(m_radius.height);
 		dt_writer.WriteSingle(m_angle_rot);

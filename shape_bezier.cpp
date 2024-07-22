@@ -871,7 +871,7 @@ namespace winrt::GraphPaper::implementation
 	// end_to	終点への位置ベクトル
 	// prop	属性
 	ShapeBezier::ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F end_to, const SHAPE* prop) :
-		ShapePath::ShapePath(prop, false)
+		SHAPE_PATH::SHAPE_PATH(prop, false)
 	{
 		m_start = start;
 		m_lineto.resize(3);
@@ -886,12 +886,12 @@ namespace winrt::GraphPaper::implementation
 	// dt_reader	データリーダー
 	//------------------------------
 	ShapeBezier::ShapeBezier(DataReader const& dt_reader) :
-		ShapePath::ShapePath(dt_reader)
+		SHAPE_PATH::SHAPE_PATH(dt_reader)
 	{}
 
 	void ShapeBezier::write(const DataWriter& dt_writer) const
 	{
-		ShapePath::write(dt_writer);
+		SHAPE_PATH::write(dt_writer);
 	}
 
 	/*

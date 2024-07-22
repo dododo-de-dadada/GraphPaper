@@ -351,9 +351,9 @@ namespace winrt::GraphPaper::implementation
 		slist.insert(std::find(slist.begin(), slist.end(), s_at), s_ins);
 	}
 
-	// リスト中の図形の順番を得る.
-	// S	探索する型
-	// T	得られた型
+	// リスト中から図形を探索する.
+	// S	探索する図形の型, または図形の添え字
+	// T	得られた図形の添え字, または図形へのポインタ
 	// slist	図形リスト
 	// s	探索する値
 	// t	得られた値

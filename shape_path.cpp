@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
 	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapePath::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
+	bool SHAPE_PATH::get_pos_nearest(const D2D1_POINT_2F p, double& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool done = false;
 		D2D1_POINT_2F r;
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を, 指定した判定部位の座標に格納する.
-	bool ShapePath::set_pt_hit(
+	bool SHAPE_PATH::set_pt_hit(
 		const D2D1_POINT_2F val,	// 値
 		const uint32_t hit,	// 判定部位
 		const float snap_point,	// 
@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 頂点を得る.
-	size_t ShapePath::get_verts(D2D1_POINT_2F p[]) const noexcept
+	size_t SHAPE_PATH::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
 		const size_t p_cnt = m_lineto.size();
 		p[0] = m_start;
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 境界矩形を得る.
-	void ShapePath::get_bbox(
+	void SHAPE_PATH::get_bbox(
 		const D2D1_POINT_2F a_lt,	// a_lt	元の領域の左上位置.
 		const D2D1_POINT_2F a_rb,	// a_rb	元の領域の右下位置.
 		D2D1_POINT_2F& b_lt,	// b_lt	囲む領域の左上位置.
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 境界矩形の左上位置を得る.
-	void ShapePath::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
+	void SHAPE_PATH::get_bbox_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t p_cnt = m_lineto.size();	// 位置の数
 		D2D1_POINT_2F p = m_start;	// 頂点
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 
 
 	// 指定した判定部位の座標を得る.
-	void ShapePath::get_pt_hit(
+	void SHAPE_PATH::get_pt_hit(
 		const uint32_t hit,	// 判定部位
 		D2D1_POINT_2F& val	// 得られた値
 	) const noexcept
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 	// 塗りつぶし色を得る.
 	// val	得られた値
 	// 戻り値	得られたなら true
-	bool ShapePath::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool SHAPE_PATH::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_fill_color;
 		return true;
@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を移動する.
 	// to	移動先へのベクトル
-	bool ShapePath::move(const D2D1_POINT_2F to) noexcept
+	bool SHAPE_PATH::move(const D2D1_POINT_2F to) noexcept
 	{
 		const D2D1_POINT_2F pt{
 			m_start.x + to.x, m_start.y + to.y
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 塗りつぶし色に格納する.
-	bool ShapePath::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	bool SHAPE_PATH::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {
 			m_fill_color = val;
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 始点に値を格納する. 他の判定部位の位置も動く.
 	// val	格納する値
-	bool ShapePath::set_pos_start(const D2D1_POINT_2F val) noexcept
+	bool SHAPE_PATH::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F p;
 		pt_round(val, PT_ROUND, p);
@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	ShapePath::ShapePath(const DataReader& dt_reader) :
+	SHAPE_PATH::SHAPE_PATH(const DataReader& dt_reader) :
 		SHAPE_OPEN(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
@@ -286,7 +286,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに書き込む.
-	void ShapePath::write(const DataWriter& dt_writer) const
+	void SHAPE_PATH::write(const DataWriter& dt_writer) const
 	{
 		SHAPE_OPEN::write(dt_writer);
 		// 始点

@@ -52,7 +52,7 @@
 //        +---------------+                               |
 //        |               |                               |
 // +------+------+ +------+------+                        |
-// | ShapePath*  | | ShapeLine   |                        |
+// | SHAPE_PATH* | | ShapeLine   |                        |
 // +------+------+ +------+------+                        |
 //        |                                               |
 //        +---------------+---------------+               +---------------+---------------+---------------+---------------+
@@ -371,9 +371,9 @@ namespace winrt::GraphPaper::implementation
 	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
 	// 選択された図形のリストを得る.
 	template <typename T> void slist_get_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
-	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.
+	// データライターに図形リストを書き込む. REDUCE なら消去フラグが立つ図形は省く.
 	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
-	// リストの中の図形の順番を得る.
+	// リスト中から図形を探索する.
 	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t);
 	// 選択されてない図形の頂点の中から 指定した点に最も近い点を見つける.
 	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const double d, D2D1_POINT_2F& val) noexcept;
@@ -1668,7 +1668,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	struct ShapePath : SHAPE_OPEN {
+	struct SHAPE_PATH : SHAPE_OPEN {
 		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
 		std::vector<D2D1_POINT_2F> m_lineto{};	// 次の点への位置ベクトル
 		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
@@ -1711,7 +1711,7 @@ namespace winrt::GraphPaper::implementation
 		// 指定した判定部位の座標を得る.
 		virtual void get_pt_hit(const uint32_t /*hit*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
-		ShapePath(const SHAPE* prop, const bool end_closed) :
+		SHAPE_PATH(const SHAPE* prop, const bool end_closed) :
 			SHAPE_OPEN::SHAPE_OPEN(prop)
 		{
 			prop->get_fill_color(m_fill_color);
@@ -1721,12 +1721,12 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 図形を破棄する.
-		virtual ~ShapePath(void)
+		virtual ~SHAPE_PATH(void)
 		{
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
-		}	// ~ShapePath
+		}	// ~SHAPE_PATH
 
 		//------------------------------
 		// shape_path.cpp
@@ -1742,7 +1742,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
 		// 図形をデータリーダーから読み込む.
-		ShapePath(DataReader const& dt_reader);
+		SHAPE_PATH(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1750,7 +1750,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 多角形
 	//------------------------------
-	struct ShapePoly : ShapePath {
+	struct ShapePoly : SHAPE_PATH {
 		D2D1_FIGURE_END m_end = D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED;	// 終端の状態
 		// 線の連結があるか判定する.
 		virtual bool exist_join(void) const noexcept final override
@@ -1814,7 +1814,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 曲線
 	//------------------------------
-	struct ShapeBezier : ShapePath {
+	struct ShapeBezier : SHAPE_PATH {
 
 		//------------------------------
 		// SHAPE_bezier.cpp
@@ -1843,7 +1843,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 円弧
-	struct SHAPE_ARC : ShapePath {
+	struct SHAPE_ARC : SHAPE_PATH {
 		// ラディアンなら精度が不足しそうなので「度」で保持する.
 		D2D1_SIZE_F m_radius{ 0.0f, 0.0f };	// 標準形にしたときの X 軸 Y 軸方向の半径
 		float m_angle_rot = 0.0f;	// 円弧の傾き (度)
@@ -1893,7 +1893,7 @@ namespace winrt::GraphPaper::implementation
 		// 線の方向を反転する.
 		virtual bool reverse_path(void) noexcept final override
 		{
-			ShapePath::reverse_path();
+			SHAPE_PATH::reverse_path();
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE;
 			}

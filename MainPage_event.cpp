@@ -1354,7 +1354,7 @@ namespace winrt::GraphPaper::implementation
 							typeid(*s) == typeid(ShapeBezier) ||
 							typeid(*s) == typeid(SHAPE_ARC)) {
 							// }Œ`‚Ì”»’è•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
-							if (hit >= HIT_TYPE::HIT_P0 && hit < HIT_TYPE::HIT_P0 + static_cast<ShapePath*>(s)->m_lineto.size() + 1) {
+							if (hit >= HIT_TYPE::HIT_P0 && hit < HIT_TYPE::HIT_P0 + static_cast<SHAPE_PATH*>(s)->m_lineto.size() + 1) {
 								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 								break;
 							}
