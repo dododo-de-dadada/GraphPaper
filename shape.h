@@ -46,7 +46,7 @@
 //        +-----------------------------------------------+
 //        |                                               |
 // +------+------+                                 +------+------+
-// |SHAPE_OPEN*  |                                 |SHAPE_CLOSED*|
+// |SHAPE_ARROW* |                                 |SHAPE_CLOSED*|
 // +------+------+                                 +------+------+
 //        |                                               |
 //        +---------------+                               |
@@ -1348,7 +1348,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 矢じるし
 	//------------------------------
-	struct SHAPE_OPEN : SHAPE_STROKE {
+	struct SHAPE_ARROW : SHAPE_STROKE {
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::ARROW_NONE;	// 矢じるしの形式
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 		D2D1_CAP_STYLE m_arrow_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 矢じるしの返しの形式
@@ -1405,7 +1405,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 図形を破棄する.
-		virtual ~SHAPE_OPEN(void)
+		virtual ~SHAPE_ARROW(void)
 		{
 			m_d2d_arrow_geom = nullptr;
 			m_d2d_arrow_stroke = nullptr;
@@ -1456,7 +1456,7 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 
-		SHAPE_OPEN(const SHAPE* prop) :
+		SHAPE_ARROW(const SHAPE* prop) :
 			SHAPE_STROKE(prop),
 			m_arrow_style([prop]() {
 				ARROW_STYLE a_style;
@@ -1480,7 +1480,7 @@ namespace winrt::GraphPaper::implementation
 			}())
 		{}
 
-		SHAPE_OPEN(const DataReader& dt_reader) :
+		SHAPE_ARROW(const DataReader& dt_reader) :
 			SHAPE_STROKE(dt_reader)
 		{
 			const ARROW_STYLE a_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
@@ -1525,7 +1525,7 @@ namespace winrt::GraphPaper::implementation
 
 	};
 
-	struct ShapeLine : SHAPE_OPEN {
+	struct ShapeLine : SHAPE_ARROW {
 		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
 		D2D1_POINT_2F m_lineto{ 0.0f, 0.0f };	// 次の点への位置ベクトル
 
@@ -1668,7 +1668,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	struct SHAPE_PATH : SHAPE_OPEN {
+	struct SHAPE_PATH : SHAPE_ARROW {
 		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
 		std::vector<D2D1_POINT_2F> m_lineto{};	// 次の点への位置ベクトル
 		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
@@ -1712,7 +1712,7 @@ namespace winrt::GraphPaper::implementation
 		virtual void get_pt_hit(const uint32_t /*hit*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
 		SHAPE_PATH(const SHAPE* prop, const bool end_closed) :
-			SHAPE_OPEN::SHAPE_OPEN(prop)
+			SHAPE_ARROW::SHAPE_ARROW(prop)
 		{
 			prop->get_fill_color(m_fill_color);
 			if (end_closed) {

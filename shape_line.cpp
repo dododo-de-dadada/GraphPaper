@@ -414,7 +414,7 @@ namespace winrt::GraphPaper::implementation
 	// lineto	終点への位置ベクトル
 	// prop	属性
 	ShapeLine::ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F lineto, const SHAPE* prop) :
-		SHAPE_OPEN::SHAPE_OPEN(prop)
+		SHAPE_ARROW::SHAPE_ARROW(prop)
 	{
 		m_start = start;
 		m_lineto = lineto;
@@ -427,7 +427,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
 	ShapeLine::ShapeLine(DataReader const& dt_reader) :
-		SHAPE_OPEN::SHAPE_OPEN(dt_reader)
+		SHAPE_ARROW::SHAPE_ARROW(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
@@ -438,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeLine::write(DataWriter const& dt_writer) const
 	{
-		SHAPE_OPEN::write(dt_writer);
+		SHAPE_ARROW::write(dt_writer);
 
 		// 始点
 		dt_writer.WriteSingle(m_start.x);

@@ -668,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			bool changed = false;
 			for (SHAPE* s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || !s->is_selected() || dynamic_cast<SHAPE_OPEN*>(s) == nullptr) {
+				if (s->is_deleted() || !s->is_selected() || dynamic_cast<SHAPE_ARROW*>(s) == nullptr) {
 					continue;
 				}
 				if (!changed) {

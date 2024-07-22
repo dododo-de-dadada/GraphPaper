@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	SHAPE_PATH::SHAPE_PATH(const DataReader& dt_reader) :
-		SHAPE_OPEN(dt_reader)
+		SHAPE_ARROW(dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void SHAPE_PATH::write(const DataWriter& dt_writer) const
 	{
-		SHAPE_OPEN::write(dt_writer);
+		SHAPE_ARROW::write(dt_writer);
 		// 始点
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
